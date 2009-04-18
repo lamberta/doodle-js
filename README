@@ -1,0 +1,15 @@
+--------------------------------------------------
+Doodle.js
+A Javascript sprite library for HTML Canvas
+--------------------------------------------------
+
+For lack of proper documentation, you can check out
+an introduction and code examples at:
+http://www.lamberta.org/blog/doodle
+
+Building is a little primitive at this point:
+cat ./src/* > doodle.js
+
+Then run doodle.js through JSMin* if desired.
+
+*http://www.crockford.com/javascript/jsmin.html
