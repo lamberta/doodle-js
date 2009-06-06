@@ -57,8 +57,8 @@ $doodle.Matrix = {
 	},
 
 	rotate: function (m, angle/*radians*/) {
-		var sin = Math.sin(angle).toFixed(3);
-		var cos = Math.cos(angle).toFixed(3);
+		var sin = Math.sin(angle);
+		var cos = Math.cos(angle);
 		return this.multiply(m, [cos,sin,-sin,cos,0,0]);
 	},
 
