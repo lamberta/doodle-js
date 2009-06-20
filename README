@@ -9,7 +9,4 @@ http://www.lamberta.org/blog/doodle
 
 To build (requires Ruby Rake):
 rake build
-
-Then run doodle.js through JSMin* if desired.
-
-*http://www.crockford.com/javascript/jsmin.html
+rake min

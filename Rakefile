@@ -1,8 +1,11 @@
-Version = "doodle-0.1.js"
+Version = "doodle-0.1"
 
 JsTestDriver = File.path "./build/JsTestDriver-1.0b.jar"
 #conf must be in root dir- filed bug report with js-test-driver
 JsTestDriverConf = File.path "./test-all.yml"
+
+YUICompressor = File.path "./build/yuicompressor-2.4.2.jar"
+
 
 desc "Start JsTestDriver server."
 task :test_server do
@@ -17,18 +20,24 @@ end
 
 desc "Concat Javascript files."
 task :build do
+	outfile = "#{Version}.js"
 	#order does matter
-	sh "cat ./src/compat/* > ./#{Version}"
-	sh "cat ./src/doodle.js >> ./#{Version}"
-	sh "cat ./src/matrix.js >> ./#{Version}"
-	sh "cat ./src/canvas.js >> ./#{Version}"
-	sh "cat ./src/point.js >> ./#{Version}"
-	sh "cat ./src/object.js >> ./#{Version}"
-	sh "cat ./src/sprite.js >> ./#{Version}"
-	sh "cat ./src/group.js >> ./#{Version}"
-	sh "cat ./src/rect.js >> ./#{Version}"
-	sh "cat ./src/circle.js >> ./#{Version}"
-	sh "cat ./src/image.js >> ./#{Version}"
+	sh "cat ./src/compat/* > ./#{outfile}"
+	sh "cat ./src/doodle.js >> ./#{outfile}"
+	sh "cat ./src/matrix.js >> ./#{outfile}"
+	sh "cat ./src/canvas.js >> ./#{outfile}"
+	sh "cat ./src/point.js >> ./#{outfile}"
+	sh "cat ./src/object.js >> ./#{outfile}"
+	sh "cat ./src/sprite.js >> ./#{outfile}"
+	sh "cat ./src/group.js >> ./#{outfile}"
+	sh "cat ./src/rect.js >> ./#{outfile}"
+	sh "cat ./src/circle.js >> ./#{outfile}"
+	sh "cat ./src/image.js >> ./#{outfile}"
+end
+
+desc "Minify Javascript."
+task :min do
+	sh "java -jar #{YUICompressor} #{Version}.js -o #{Version}.min.js"
 end
 
 task :clean do
