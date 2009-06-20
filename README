@@ -7,8 +7,8 @@ For lack of proper documentation, you can check out
 an introduction and code examples at:
 http://www.lamberta.org/blog/doodle
 
-Building is a little primitive at this point:
-cat ./src/* > doodle.js
+To build (requires Ruby Rake):
+rake build
 
 Then run doodle.js through JSMin* if desired.
 
