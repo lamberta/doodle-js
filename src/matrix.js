@@ -5,7 +5,7 @@
  * rather than the typical (0, 0) point.
 **/
 
-var $doodle = {}; //uncomment when jslinting
+//var $doodle = {}; //uncomment when jslinting
 
 //like flash [a, b, c, d, tx, ty]
 $doodle.Matrix = {};
@@ -31,46 +31,39 @@ $doodle.Matrix.nidentity = function (m1)  {
 	return m1;
 };
 
-$doodle.Matrix.create = function (a, b, c, d, tx, ty) {
-	try {
-		var i, m = new Array(6);
-		
-		if (typeof arguments[0] === 'object' && typeof arguments[0].length === 'number') {
-			//given an array
-			i = arguments[0].length;
-			if (i !== 6) {
-				throw new Error();
+$doodle.Matrix.isMatrix = function (m1) {
+	if (Array.isArray(m1) && m1.length === 6) {
+		var i = m1.length;
+		while (--i > -1) {
+			if (typeof m1[i] !== 'number') {
+				return false;
 			}
-			while (--i > -1) {
-				if (typeof arguments[0][i] !== 'number') {
-					throw new Error();
-				}
-				m[i] = arguments[0][i];
-			}
-		} else {
-			//given numbers
-			i = arguments.length;
-			if (i !== 6) {
-				throw new Error();
-			}
-			while (--i > -1) {
-				if (typeof arguments[i] !== 'number') {
-					throw new Error();
-				}
-			}
-
-			m[0] = a;
-			m[1] = b;
-			m[2] = c;
-			m[3] = d;
-			m[4] = tx;
-			m[5] = ty;
 		}
-		return m;
-		
-	}catch (e) {
-		throw new SyntaxError("Matrix.create: A matrix requires 6 numbers.");
+		return m1;
+	} else {
+		return false;
 	}
+};
+
+$doodle.Matrix.create = function (a, b, c, d, tx, ty) {
+	var len = arguments.length,
+		m;
+
+	if (len === 6) {
+		//given 6 numbers
+		m = Array.prototype.slice.call(arguments);
+		if ($doodle.Matrix.isMatrix(m)) {
+			return m;
+		}
+	} else if (len === 1) {
+		//given an array literal
+		m = arguments[0];
+		if ($doodle.Matrix.isMatrix(m)) {
+			return m;
+		}
+	}
+	//otherwise...
+	throw new SyntaxError("Matrix.create: A matrix requires 6 numbers.");
 };
 
 //combine effects of 2 matrices
