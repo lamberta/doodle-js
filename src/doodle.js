@@ -115,4 +115,22 @@ $doodle.animate = function (draw, framerate, clear) {
 	}
 };
 
-
+$doodle.utils.time = function (fn, count, total) {
+	if (typeof count === 'undefined') count = 1000;
+	if (typeof total === 'undefined') total = false;
+	var diff = 0,
+		start = (new Date);
+	
+	for (var n = 0; n < count; n = n + 1) {
+		fn();
+	}
+	diff = (new Date);
+	diff = diff.getTime() - start.getTime();
+	
+	if (total) {
+		console.log("Elapsed time (total): " + diff + " msecs");
+	} else {
+		console.log("Elapsed time (avg): " + (diff / count) + " msecs");
+	}
+	return fn();
+};
