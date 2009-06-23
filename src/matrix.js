@@ -5,10 +5,28 @@
  * rather than the typical (0, 0) point.
 **/
 
-//var $doodle = {}; //uncomment when jslinting
+//namespacing
+if (!$doodle) {
+	var $doodle = {};
+}
+if (!$doodle.Matrix) {
+	$doodle.Matrix = {};
+}
 
-//like flash [a, b, c, d, tx, ty]
-$doodle.Matrix = {};
+//a matrix is an array containing 6 numbers
+$doodle.Matrix.isMatrix = function (m1) {
+	if (Array.isArray(m1) && m1.length === 6) {
+		var i = m1.length;
+		while (--i > -1) {
+			if (typeof m1[i] !== 'number') {
+				return false;
+			}
+		}
+		return true;
+	} else {
+		return false;
+	}
+};
 
 $doodle.Matrix.identity = function () {
 	var m = new Array(6);
@@ -22,27 +40,17 @@ $doodle.Matrix.identity = function () {
 };
 
 $doodle.Matrix.nidentity = function (m1)  {
-	m1[0] = 1;
-	m1[1] = 0;
-	m1[2] = 0;
-	m1[3] = 1;
-	m1[4] = 0;
-	m1[5] = 0;
-	return m1;
-};
-
-$doodle.Matrix.isMatrix = function (m1) {
-	if (Array.isArray(m1) && m1.length === 6) {
-		var i = m1.length;
-		while (--i > -1) {
-			if (typeof m1[i] !== 'number') {
-				return false;
-			}
-		}
+	if ($doodle.Matrix.isMatrix(m1)) {
+		m1[0] = 1;
+		m1[1] = 0;
+		m1[2] = 0;
+		m1[3] = 1;
+		m1[4] = 0;
+		m1[5] = 0;
 		return m1;
-	} else {
-		return false;
 	}
+	//otherwise...
+	throw new TypeError("Matrix.nidentity: argument is not a matrix.");
 };
 
 $doodle.Matrix.create = function (a, b, c, d, tx, ty) {
@@ -56,8 +64,8 @@ $doodle.Matrix.create = function (a, b, c, d, tx, ty) {
 			return m;
 		}
 	} else if (len === 1) {
-		//given an array literal
-		m = arguments[0];
+		//given an array, returns different object
+		m = arguments[0].concat();
 		if ($doodle.Matrix.isMatrix(m)) {
 			return m;
 		}
@@ -66,43 +74,119 @@ $doodle.Matrix.create = function (a, b, c, d, tx, ty) {
 	throw new SyntaxError("Matrix.create: A matrix requires 6 numbers.");
 };
 
-//combine effects of 2 matrices
+//given a literal, reuse
+$doodle.Matrix.ncreate = function (m1) {
+	if ($doodle.Matrix.isMatrix(m1)) {
+		return m1;
+	} else {
+		var m = Array.prototype.slice.call(arguments);
+		$doodle.Matrix.create(m);
+	}
+};
+
+$doodle.Matrix.add = function (m1, m2) {
+	var m = new Array(6);
+	m[0] = m1[0] + m2[0];
+	m[1] = m1[1] + m2[1];
+	m[2] = m1[2] + m2[2];
+	m[3] = m1[3] + m2[3];
+	m[4] = m1[4] + m2[4];
+	m[5] = m1[5] + m2[5];
+	return m;
+};
+
+$doodle.Matrix.nadd = function (m1, m2) {
+	m1[0] = m1[0] + m2[0];
+	m1[1] = m1[1] + m2[1];
+	m1[2] = m1[2] + m2[2];
+	m1[3] = m1[3] + m2[3];
+	m1[4] = m1[4] + m2[4];
+	m1[5] = m1[5] + m2[5];
+	return m1;
+};
+
+/*
+ * m11 m21 dx   m[0], m[2], m[4]
+ * m12 m22 dy   m[1], m[3], m[5]
+ *  0   0  1
+ */
 $doodle.Matrix.multiply = function (m1, m2) {
 	var m = new Array(6);
-	m[0] = m1[0] * m2[0] + m1[1] * m2[2];
-	m[1] = m1[0] * m2[1] + m1[1] * m2[3];
-	m[2] = m1[2] * m2[0] + m1[3] * m2[2];
-	m[3] = m1[2] * m2[1] + m1[3] * m2[3];
-	m[4] = m1[0] * m2[4] + m1[1] * m2[5] + m1[4];
-	m[5] = m1[2] * m2[4] + m1[3] * m2[5] + m1[5];
+	m[0] = m1[0] * m2[0] + m1[2] * m2[1];
+	m[1] = m1[1] * m2[0] + m1[3] * m2[1];
+	m[2] = m1[0] * m2[2] + m1[2] * m2[3];
+	m[3] = m1[1] * m2[2] + m1[3] * m2[3];
+	m[4] = m1[0] * m2[4] + m1[2] * m2[5] + m1[4];
+	m[5] = m1[1] * m2[4] + m1[3] * m2[5] + m1[5];
 	return m;
+};
+
+$doodle.Matrix.nmultiply = function (m1, m2) {
+	var a = m1[0] * m2[0] + m1[2] * m2[1],
+		b = m1[1] * m2[0] + m1[3] * m2[1],
+		c = m1[0] * m2[2] + m1[2] * m2[3],
+		d = m1[1] * m2[2] + m1[3] * m2[3];
+	m1[4] = m1[0] * m2[4] + m1[2] * m2[5] + m1[4];
+	m1[5] = m1[1] * m2[4] + m1[3] * m2[5] + m1[5];
+	m1[0] = a;
+	m1[1] = b;
+	m1[2] = c;
+	m1[3] = d;
+	return m1;
 };
 
 $doodle.Matrix.translate = function (m1, dx, dy) {
 	return $doodle.Matrix.multiply(m1, [1, 0, 0, 1, dx, dy]);
 };
 
-$doodle.Matrix.rotate = function (m1, angle/*radians*/) {
+$doodle.Matrix.ntranslate = function (m1, dx, dy) {
+	return $doodle.Matrix.nmultiply(m1, [1, 0, 0, 1, dx, dy]);
+};
+
+$doodle.Matrix.rotate = function (m1, angle /*radians*/) {
 	var sin = Math.sin(angle),
 		cos = Math.cos(angle);
 	return $doodle.Matrix.multiply(m1, [cos, sin, -sin, cos, 0, 0]);
+};
+
+$doodle.Matrix.nrotate = function (m1, angle /*radians*/) {
+	var sin = Math.sin(angle),
+		cos = Math.cos(angle);
+	return $doodle.Matrix.nmultiply(m1, [cos, sin, -sin, cos, 0, 0]);
 };
 
 $doodle.Matrix.scale = function (m1, sx, sy) {
 	return $doodle.Matrix.multiply(m1, [sx, 0, 0, sy, 0, 0]);
 };
 
-//returns opposite transform of original matrix. to undo a transform
+$doodle.Matrix.nscale = function (m1, sx, sy) {
+	return $doodle.Matrix.nmultiply(m1, [sx, 0, 0, sy, 0, 0]);
+};
+
+$doodle.Matrix.skew = function (m1, sx, sy) {
+	var skewX = Math.tan(sx),
+		skewY = Math.tan(sy);
+	return $doodle.Matrix.multiply(m1, [1, skewY, skewX, 1, 0, 0]);
+};
+
+$doodle.Matrix.nskew = function (m1, sx, sy) {
+	var skewX = Math.tan(sx),
+		skewY = Math.tan(sy);
+	return $doodle.Matrix.nmultiply(m1, [1, skewY, skewX, 1, 0, 0]);
+};
+
+//when a matrix is multiplied by it's inversion matrix
+//it returns an identity matrix.
+//this function doesn't always work
 $doodle.Matrix.invert = function (m1) {
 	var m = new Array(6),
-		d =  m1[0] * m1[3] - m1[1] * m1[2];
-	m[0] =  m1[3] / d;
-	m[1] = -m1[1] / d;
-	m[2] = -m1[2] / d;
-	m[3] =  m1[0] / d;
-	//x,y doesn't seem to be working right
-	m[4] = (m1[1] * m1[5] - m1[3] * m1[4]) / d;
-	m[5] = (m1[2] * m1[4] - m1[0] * m1[5]) / d;
+		det =  m1[0] * m1[3] - m1[1] * m1[2];
+	m[0] =  m1[3] / det;
+	m[1] = -m1[1] / det;
+	m[2] = -m1[2] / det;
+	m[3] =  m1[0] / det;
+	m[4] =  (m1[5] * m1[2] - m1[3] * m1[4]) / det;
+	m[5] = -(m1[5] * m1[0] - m1[1] * m1[4]) / det;
 	return m;
 };
 

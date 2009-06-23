@@ -207,9 +207,9 @@ $doodle.sprite = function (params) {
 	function draw (shape) {
 		self.context.save();
 		
-		self.context.transform(self.matrix[0],self.matrix[2],self.matrix[1],
+		self.context.transform(self.matrix[0],self.matrix[1],self.matrix[2],
 							   self.matrix[3],self.matrix[4],self.matrix[5]);
-
+		
 		self.context.fillStyle = self.fill; //set shape fill
 
 		if(self.alpha > 1) {

@@ -81,3 +81,21 @@ ArrayTest.prototype.test_reduceRight = function() {
 	var total = a.reduceRight(function(x, y){ return x + y; }, 0);
 	assertEquals(total, 60);
 };
+
+ArrayTest.prototype.test_isArray = function() {
+	expectAsserts(7);
+	var a = [1, 2, 3],
+		b = new Array(1);
+	
+	assertTrue(Array.isArray(a));
+	assertTrue(Array.isArray(b));
+	assertFalse(Array.isArray({a: 1, b: 2}));
+	assertFalse(Array.isArray("test"));
+	assertFalse(Array.isArray(1));
+
+	(function () {
+		assertFalse(Array.isArray(arguments));
+		var a = Array.prototype.slice.call(arguments);
+		assertTrue(Array.isArray(a));
+	})();
+};
