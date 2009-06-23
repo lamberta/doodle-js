@@ -195,8 +195,12 @@ if (!Array.prototype.reduceRight) {
 	};
 }
 
-if ( typeof Array.isArray !== "function" ) {
+if (typeof Array.isArray !== "function") {
 	Array.isArray = function( array ) {
 		return Object.prototype.toString.call( array ) === "[object Array]";
 	};
+	//alias
+	if (typeof Array.arrayp !== "function") {
+		Array.arrayp = Array.isArray;
+	}
 }

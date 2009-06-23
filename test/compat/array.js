@@ -99,3 +99,21 @@ ArrayTest.prototype.test_isArray = function() {
 		assertTrue(Array.isArray(a));
 	})();
 };
+
+ArrayTest.prototype.test_arrayp = function() {
+	expectAsserts(7);
+	var a = [1, 2, 3],
+		b = new Array(1);
+	
+	assertTrue(Array.arrayp(a));
+	assertTrue(Array.arrayp(b));
+	assertFalse(Array.arrayp({a: 1, b: 2}));
+	assertFalse(Array.arrayp("test"));
+	assertFalse(Array.arrayp(1));
+
+	(function () {
+		assertFalse(Array.arrayp(arguments));
+		var a = Array.prototype.slice.call(arguments);
+		assertTrue(Array.arrayp(a));
+	})();
+};
