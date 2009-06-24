@@ -1,8 +1,6 @@
 /**
- * contains methods for modifying individual properties of a transformation matrix:
- * horizontal and vertical scale, horizontal and vertical skew, and rotation.
- * This class also has methods for rotating around a given transformation point
- * rather than the typical (0, 0) point.
+ * The n-functions are short for "non-concating". These do not create
+ * new array objects, but overwrite the first array values.
 **/
 
 //namespacing
@@ -27,6 +25,8 @@ $doodle.Matrix.isMatrix = function (m1) {
 		return false;
 	}
 };
+//alias
+$doodle.matrixp = $doodle.Matrix.isMatrix;
 
 $doodle.Matrix.identity = function () {
 	var m = new Array(6);
@@ -155,6 +155,11 @@ $doodle.Matrix.nrotate = function (m1, angle /*radians*/) {
 	return $doodle.Matrix.nmultiply(m1, [cos, sin, -sin, cos, 0, 0]);
 };
 
+//get angle in radians of rotation in a matrix
+$doodle.Matrix.rotation = function (m1) {
+	return Math.atan2(m1[1], m1[0]);
+};
+
 $doodle.Matrix.scale = function (m1, sx, sy) {
 	return $doodle.Matrix.multiply(m1, [sx, 0, 0, sy, 0, 0]);
 };
@@ -190,33 +195,85 @@ $doodle.Matrix.invert = function (m1) {
 	return m;
 };
 
-$doodle.Matrix.transformPoint = function (m1, x, y) {
+$doodle.Matrix.transformPoint = function (m1, p) {
 	return {
-		x: m1[0] * x + m1[1] * y + m1[4],
-		y: m1[2] * x + m1[3] * y + m1[5]
+		x: p.x * m1[0] + p.y * m1[1] + m1[4],
+		y: p.x * m1[2] + p.y * m1[3] + m1[5]
 	};
 };
 
+$doodle.Matrix.ntransformPoint = function (m1, p) {
+	var x = p.x * m1[0] + p.y * m1[1] + m1[4],
+		y = p.x * m1[2] + p.y * m1[3] + m1[5];
+	p.x = x;
+	p.y = y;
+	return p;
+};
+
 //same as transformPoint, except matrix translate has no effect
-$doodle.Matrix.deltaTransformPoint = function (m1, x, y) {
-	var point = new Array(2);
-	point[0] = x * m1[0] + y * m1[2]; //x
-	point[1] = x * m1[1] + y * m1[3]; //y
-	return point; //[x,y]
+$doodle.Matrix.deltaTransformPoint = function (m1, p) {
+	return {
+		x: p.x * m1[0] + p.y * m1[1],
+		y: p.x * m1[2] + p.y * m1[3]
+	};
 };
 
-$doodle.Matrix.rotateAroundInternalPoint = function (m1, x, y, angle) {
+$doodle.Matrix.ndeltaTransformPoint = function (m1, p) {
+	var x = p.x * m1[0] + p.y * m1[1],
+		y = p.x * m1[2] + p.y * m1[3];
+	p.x = x;
+	p.y = y;
+	return p;
+};
+
+
+
+$doodle.Matrix.rotateAroundExternalPoint = function (m1, x, y, angle /*degrees*/) {
 	var m = $doodle.Matrix.translate(m1, x, y);
-	m = $doodle.Matrix.rotate(m, angle * Math.PI / 180);
-	m = $doodle.Matrix.translate(m, -x, -y);
+	$doodle.Matrix.nrotate(m, angle * Math.PI / 180);
+	m[4] -= x;
+	m[5] -= y;
 	return m;
 };
 
-$doodle.Matrix.rotateAroundExternalPoint = function (m1, x, y, angle) {
-	var m = m1.concat();
-	
-	m = $doodle.Matrix.translate(m, x, y);
-	m = $doodle.Matrix.rotate(m, angle * Math.PI / 180);
-	m = $doodle.Matrix.translate(m, -x, -y);
+$doodle.Matrix.nrotateAroundExternalPoint = function (m1, x, y, angle /*degrees*/) {
+	m1[4] += x;
+	m1[5] += y;
+	$doodle.Matrix.nrotate(m1, angle * Math.PI / 180);
+	m1[4] -= x;
+	m1[5] -= y;
+	return m1;
+};
+
+$doodle.Matrix.rotateAroundInternalPoint = function (m1, x, y, angle /*degrees*/) {
+	var p = $doodle.Matrix.transformPoint(m1, {x: x, y: y}),
+		m = $doodle.Matrix.rotateAroundExternalPoint(m1, p.x, p.y, angle);
 	return m;
+};
+
+$doodle.Matrix.nrotateAroundInternalPoint = function (m1, x, y, angle /*degrees*/) {
+	var p = $doodle.Matrix.transformPoint(m1, {x: x, y: y});
+	$doodle.Matrix.nrotateAroundExternalPoint(m1, p.x, p.y, angle);
+	return m1;
+};
+
+/**
+ * Moves a matrix to align an internal point with an external point.
+ * Can be used to match a point in a transformed sprite with one in its parent.
+ */
+$doodle.Matrix.matchInternalPointWithExternal = function (m1, int_point, ext_point) {
+	var int_p_trans = $doodle.Matrix.transformPoint(m1, int_point),
+		dx = ext_point.x - int_p_trans.x,
+		dy = ext_point.y - int_p_trans.y,
+		m = $doodle.Matrix.translate(m1, dx, dy);
+	return m;
+};
+
+$doodle.Matrix.nmatchInternalPointWithExternal = function (m1, int_point, ext_point) {
+	var int_p_trans = $doodle.Matrix.transformPoint(m1, int_point),
+		dx = ext_point.x - int_p_trans.x,
+		dy = ext_point.y - int_p_trans.y;
+	m1[4] += dx;
+	m1[5] += dy;
+	return m1;
 };

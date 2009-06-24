@@ -5,12 +5,23 @@ MatrixTest.prototype.test_isMatrix = function() {
 		b = [1, 0, 0, 1, 0, 0, 0],
 		c = [1, 0, 0, 1, 0],
 		d = [1, 0, 0, "1", 0, 0];
-
 	assertTrue($doodle.Matrix.isMatrix(a));
 	assertFalse($doodle.Matrix.isMatrix(b));
 	assertFalse($doodle.Matrix.isMatrix(c));
 	assertFalse($doodle.Matrix.isMatrix(d));
 	assertFalse($doodle.Matrix.isMatrix(1, 0, 0, 1, 0, 0));
+};
+//alias for isMatrix
+MatrixTest.prototype.test_matrixp = function() {
+	var a = [1, 0, 0, 1, 0, 0],
+		b = [1, 0, 0, 1, 0, 0, 0],
+		c = [1, 0, 0, 1, 0],
+		d = [1, 0, 0, "1", 0, 0];
+	assertTrue($doodle.matrixp(a));
+	assertFalse($doodle.matrixp(b));
+	assertFalse($doodle.matrixp(c));
+	assertFalse($doodle.matrixp(d));
+	assertFalse($doodle.matrixp(1, 0, 0, 1, 0, 0));
 };
 
 MatrixTest.prototype.test_identity = function() {
@@ -263,6 +274,16 @@ MatrixTest.prototype.test_nrotate = function() {
 	assertSame(a, b);
 };
 
+MatrixTest.prototype.test_rotation = function() {
+	var a = [1, 0, 0, 1, 0, 0],
+		deg = 45,
+		rad = deg * Math.PI / 180,
+		b = $doodle.Matrix.rotate(a, rad);
+
+	assertEquals($doodle.Matrix.rotation(b), rad);
+	assertNotSame(a, b);
+};
+
 MatrixTest.prototype.test_scale = function() {
 	var a = [1, 0, 0, 1, 0, 0],
 		b = $doodle.Matrix.scale(a, 1.5, 3);
@@ -358,4 +379,150 @@ MatrixTest.prototype.test_invert = function() {
 	assertEquals(c[4], 0);
 	assertEquals(c[5], 0);
 	assertNotSame(a, b);
+};
+
+MatrixTest.prototype.test_transformPoint = function() {
+	var a = $doodle.Matrix.identity(),
+		b = [1, 0, 0, 1, 50, 75],
+		c = [2, 0, 0, 2, 0, 0],
+		d = [2, 0, 0, 2, 25, 35],
+		p1 = {x: 30, y: 12},
+		p2;
+
+	p2 = $doodle.Matrix.transformPoint(a, p1);
+	//identity keeps it the same
+	assertEquals(30, p2.x);
+	assertEquals(12, p2.y);
+	//p1 is still the same...
+	assertEquals(30, p1.x);
+	assertEquals(12, p1.y);
+	assertNotSame(p1, p2);
+	//apply translation matrix
+	p2 = $doodle.Matrix.transformPoint(b, p1);
+	assertEquals(80, p2.x);
+	assertEquals(87, p2.y);
+	//apply x2 scaling matrix
+	p2 = $doodle.Matrix.transformPoint(c, p1);
+	assertEquals(60, p2.x);
+	assertEquals(24, p2.y);
+	//apply scaling/translation matrix
+	p2 = $doodle.Matrix.transformPoint(d, p1);
+	assertEquals(85, p2.x);
+	assertEquals(59, p2.y);
+	//p1 is still the same...
+	assertEquals(30, p1.x);
+	assertEquals(12, p1.y);
+	assertNotSame(p1, p2);
+};
+
+MatrixTest.prototype.test_ntransformPoint = function() {
+	var a = $doodle.Matrix.identity(),
+		b = [1, 0, 0, 1, 50, 75],
+		c = [2, 0, 0, 2, 0, 0],
+		d = [2, 0, 0, 2, 25, 35],
+		p1 = {x: 30, y: 12},
+		p2;
+
+	p2 = $doodle.Matrix.ntransformPoint(a, p1);
+	//identity keeps it the same
+	assertEquals(30, p2.x);
+	assertEquals(12, p2.y);
+	//p1 is still the same...
+	assertEquals(30, p1.x);
+	assertEquals(12, p1.y);
+	assertSame(p1, p2);
+	//apply translation matrix
+	p2 = $doodle.Matrix.ntransformPoint(b, p1);
+	assertEquals(80, p2.x);
+	assertEquals(87, p2.y);
+	//p1 has been modified..
+	assertEquals(80, p1.x);
+	assertEquals(87, p1.y);
+	assertSame(p1, p2);
+	//apply x2 scaling matrix
+	p1 = {x: 30, y: 12}; //reset
+	p2 = $doodle.Matrix.ntransformPoint(c, p1);
+	assertEquals(60, p2.x);
+	assertEquals(24, p2.y);
+	assertSame(p1, p2);
+	//apply scaling/translation matrix
+	p1 = {x: 30, y: 12}; //reset
+	p2 = $doodle.Matrix.ntransformPoint(d, p1);
+	assertEquals(85, p2.x);
+	assertEquals(59, p2.y);
+	//p1 has been modified..
+	assertEquals(85, p1.x);
+	assertEquals(59, p1.y);
+	assertSame(p1, p2);
+};
+
+MatrixTest.prototype.test_deltaTransformPoint = function() {
+	var a = $doodle.Matrix.identity(),
+		b = [1, 0, 0, 1, 50, 75],
+		c = [2, 0, 0, 2, 0, 0],
+		d = [2, 0, 0, 2, 25, 35],
+		p1 = {x: 30, y: 12},
+		p2;
+
+	p2 = $doodle.Matrix.deltaTransformPoint(a, p1);
+	//identity keeps it the same
+	assertEquals(30, p2.x);
+	assertEquals(12, p2.y);
+	//p1 is still the same...
+	assertEquals(30, p1.x);
+	assertEquals(12, p1.y);
+	assertNotSame(p1, p2);
+	//apply translation matrix, no effect
+	p2 = $doodle.Matrix.deltaTransformPoint(b, p1);
+	assertEquals(30, p2.x);
+	assertEquals(12, p2.y);
+	//apply x2 scaling matrix
+	p2 = $doodle.Matrix.deltaTransformPoint(c, p1);
+	assertEquals(60, p2.x);
+	assertEquals(24, p2.y);
+	//apply scaling/translation matrix
+	p2 = $doodle.Matrix.deltaTransformPoint(d, p1);
+	assertEquals(60, p2.x);
+	assertEquals(24, p2.y);
+	//p1 is still the same...
+	assertEquals(30, p1.x);
+	assertEquals(12, p1.y);
+	assertNotSame(p1, p2);
+};
+
+MatrixTest.prototype.test_rotateAroundInternalPoint = function() {
+	fail();
+	var a = $doodle.Matrix.identity(),
+		x = 50,
+		y = 50,
+		m;
+
+	m = $doodle.Matrix.rotateAroundInternalPoint(a, x, y, 45);
+	assertEquals( 0.7071067811865476, m[0]);
+	assertEquals( 0.7071067811865475, m[1]);
+	assertEquals(-0.7071067811865475, m[2]);
+	assertEquals( 0.7071067811865476, m[3]);
+	assertEquals( 49.99999999999999,  m[4]);
+	assertEquals(-20.710678118654755, m[5]);
+	
+};
+
+MatrixTest.prototype.test_nrotateAroundInternalPoint = function() {
+	fail();
+};
+
+MatrixTest.prototype.test_rotateAroundExternalPoint = function() {
+	fail();
+};
+
+MatrixTest.prototype.test_nrotateAroundExternalPoint = function() {
+	fail();
+};
+
+MatrixTest.prototype.test_matchInternalPointWithExternal = function() {
+	fail();
+};
+
+MatrixTest.prototype.test_nmatchInternalPointWithExternal = function() {
+	fail();
 };
