@@ -1,4 +1,5 @@
-Version = "doodle-0.1"
+Version = "doodle-0.1.1"
+Buildfile = File.path "./#{Version}.js"
 
 JsLint = File.path "./build/jslint.js"
 Rhino = File.path "./build/js.jar"
@@ -31,20 +32,19 @@ task :jslint do
 end
 
 desc "Concat Javascript files."
-task :build do
-	outfile = "#{Version}.js"
+task :build => Buildfile do
 	#order does matter
-	sh "cat ./src/compat/* > ./#{outfile}"
-	sh "cat ./src/doodle.js >> ./#{outfile}"
-	sh "cat ./src/matrix.js >> ./#{outfile}"
-	sh "cat ./src/canvas.js >> ./#{outfile}"
-	sh "cat ./src/point.js >> ./#{outfile}"
-	sh "cat ./src/object.js >> ./#{outfile}"
-	sh "cat ./src/sprite.js >> ./#{outfile}"
-	sh "cat ./src/group.js >> ./#{outfile}"
-	sh "cat ./src/rect.js >> ./#{outfile}"
-	sh "cat ./src/circle.js >> ./#{outfile}"
-	sh "cat ./src/image.js >> ./#{outfile}"
+	sh "cat ./src/compat/* >> #{Buildfile}"
+	sh "cat ./src/doodle.js >> #{Buildfile}"
+	sh "cat ./src/matrix.js >> #{Buildfile}"
+	sh "cat ./src/canvas.js >> #{Buildfile}"
+	sh "cat ./src/point.js >> #{Buildfile}"
+	sh "cat ./src/object.js >> #{Buildfile}"
+	sh "cat ./src/sprite.js >> #{Buildfile}"
+	sh "cat ./src/group.js >> #{Buildfile}"
+	sh "cat ./src/rect.js >> #{Buildfile}"
+	sh "cat ./src/circle.js >> #{Buildfile}"
+	sh "cat ./src/image.js >> #{Buildfile}"
 end
 
 desc "Minify Javascript."
@@ -55,4 +55,14 @@ end
 desc "Remove built files."
 task :clean do
 	sh "rm ./doodle*.js"
+end
+
+#header
+file Buildfile do
+	begin
+		f = File.open(Buildfile, "w")
+		f.puts "/* #{Version} - http://www.lamberta.org/blog/doodle */"
+	ensure
+		f.close if f
+	end
 end
