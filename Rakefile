@@ -1,5 +1,4 @@
-Version = "doodle-0.1.1"
-Buildfile = File.path "./#{Version}.js"
+Version = "0.1.1"
 
 JsLint = File.path "./build/jslint.js"
 Rhino = File.path "./build/js.jar"
@@ -10,6 +9,7 @@ JsTestDriverConf = File.path "./test-all.yml"
 
 YUICompressor = File.path "./build/yuicompressor-2.4.2.jar"
 
+Header = File.path "./build/header"
 
 task :help do
 	sh "rake -T"
@@ -32,36 +32,44 @@ task :jslint do
 end
 
 desc "Concat Javascript files."
-task :build => Buildfile do
+task :build => Header do
+	buildfile = File.path "./doodle-#{Version}.js"
 	#order does matter
-	sh "cat ./src/compat/* >> #{Buildfile}"
-	sh "cat ./src/doodle.js >> #{Buildfile}"
-	sh "cat ./src/matrix.js >> #{Buildfile}"
-	sh "cat ./src/canvas.js >> #{Buildfile}"
-	sh "cat ./src/point.js >> #{Buildfile}"
-	sh "cat ./src/object.js >> #{Buildfile}"
-	sh "cat ./src/sprite.js >> #{Buildfile}"
-	sh "cat ./src/group.js >> #{Buildfile}"
-	sh "cat ./src/rect.js >> #{Buildfile}"
-	sh "cat ./src/circle.js >> #{Buildfile}"
-	sh "cat ./src/image.js >> #{Buildfile}"
+	sh "cat #{Header} > #{buildfile}"
+	sh "cat ./src/compat/* >> #{buildfile}"
+	sh "cat ./src/doodle.js >> #{buildfile}"
+	sh "cat ./src/matrix.js >> #{buildfile}"
+	sh "cat ./src/canvas.js >> #{buildfile}"
+	sh "cat ./src/point.js >> #{buildfile}"
+	sh "cat ./src/object.js >> #{buildfile}"
+	sh "cat ./src/sprite.js >> #{buildfile}"
+	sh "cat ./src/group.js >> #{buildfile}"
+	sh "cat ./src/rect.js >> #{buildfile}"
+	sh "cat ./src/circle.js >> #{buildfile}"
+	sh "cat ./src/image.js >> #{buildfile}"
 end
 
 desc "Minify Javascript."
 task :min do
-	sh "java -jar #{YUICompressor} #{Version}.js -o #{Version}.min.js"
+	buildfile = File.path "./doodle-#{Version}.js"
+	temp = File.path "./build/temp"
+	outfile = File.path "./doodle-#{Version}.min.js"
+	sh "java -jar #{YUICompressor} #{buildfile} -o #{temp}"
+	sh "cat #{Header} > #{outfile}"
+	sh "cat #{temp} >> #{outfile}"
+	rm temp
 end
 
 desc "Remove built files."
 task :clean do
-	sh "rm ./doodle*.js"
+	sh "rm ./doodle*.js #{Header}"
 end
 
-#header
-file Buildfile do
+file Header do
 	begin
-		f = File.open(Buildfile, "w")
-		f.puts "/* #{Version} - http://www.lamberta.org/blog/doodle */"
+		f = File.open(Header, "w")
+		f.puts "/* doodle.js v#{Version}, http://www.lamberta.org/blog/doodle"
+		f.puts " */"
 	ensure
 		f.close if f
 	end
