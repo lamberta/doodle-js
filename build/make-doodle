@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_HOME="$HOME/projects/doodle"
+PROJECT_HOME="$HOME/projects/doodle-js"
 OUT_FILE="$PROJECT_HOME/build/doodle.js"
 
 cd "$PROJECT_HOME"
