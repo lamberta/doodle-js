@@ -1,0 +1,22 @@
+#!/bin/bash
+
+PROJECT_HOME="$HOME/projects/doodle"
+OUT_FILE="$PROJECT_HOME/build/doodle.js"
+
+cd "$PROJECT_HOME"
+
+
+cat ./build/prologue.js > "$OUT_FILE"
+cat ./src/utils.js >> "$OUT_FILE"
+
+cat ./src/geom/point.js >> "$OUT_FILE"
+cat ./src/geom/matrix.js >> "$OUT_FILE"
+cat ./src/geom/rectangle.js >> "$OUT_FILE"
+
+cat ./src/eventdispatcher.js >> "$OUT_FILE"
+cat ./src/node.js >> "$OUT_FILE"
+cat ./src/sprite.js >> "$OUT_FILE"
+
+cat ./src/elementnode.js >> "$OUT_FILE"
+cat ./src/layer.js >> "$OUT_FILE"
+cat ./src/display.js >> "$OUT_FILE"

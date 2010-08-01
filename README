@@ -1,0 +1,13 @@
+Doodle-js v0.2
+
+Completely rewritten using ES5 features available in newer
+JavaScript engines. Version 0.1 still runs on JS2 and is
+located in the downloads section as a source archive.
+
+Some of the new features:
+  * Supports multiple displays, each containing multiple layers.
+  * Added a scene graph.
+  * Has a new event handling system for Doodle objects.
+  * Bounding Box for sprites.
+
+Some features work, some don't.

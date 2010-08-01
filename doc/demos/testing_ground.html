@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Doodle testing</title>
+    
+    <script type="application/javascript" src="../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+//global for testing purposes
+var display;
+
+function init_doodle () {
+  display = doodle.Display("my_display");
+  //display.element = "my_display";
+  display.width = 400;
+	display.height = 400;
+	display.backgroundColor = "#ffffff";
+  l1 = display.addLayer();
+	s1 = doodle.Sprite(function () {this.x = 100; this.y = 100;});
+	l1.addChild(s1);
+	s1.graphics.beginFill("#ff0000");
+	s1.graphics.rect(0, 0, 50, 50);
+
+	s2 = doodle.Sprite();
+	l1.addChild(s2);
+	s2.graphics.beginFill("#00ff00");
+	s2.graphics.rect(0, 0, 5, 5);
+	
+}
+
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_doodle();">
+    
+    <div id="my_display" style="float:left;"></div>
+  </body>
+</html>
