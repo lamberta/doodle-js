@@ -9,6 +9,8 @@ cd "$PROJECT_HOME"
 cat ./build/prologue.js > "$OUT_FILE"
 cat ./src/utils.js >> "$OUT_FILE"
 
+cat ./src/event.js >> "$OUT_FILE"
+
 cat ./src/geom/point.js >> "$OUT_FILE"
 cat ./src/geom/matrix.js >> "$OUT_FILE"
 cat ./src/geom/rectangle.js >> "$OUT_FILE"
