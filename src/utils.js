@@ -93,7 +93,8 @@
     },
 
     check_event_type: function (evt, caller_name) {
-      if (evt && evt.toString() === "[object Event]") {
+      if (evt && (evt.toString() === "[object Event]" ||
+									evt.toString() === "[object MouseEvent]")) {
         return true;
       } else {
         caller_name = (caller_name === undefined) ? "check_event_type" : caller_name;

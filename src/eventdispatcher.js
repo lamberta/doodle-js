@@ -12,13 +12,13 @@
         initializer,
         evt_disp = {},
         eventListeners = {};
-		
-		//check if passed an init function
+    
+    //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
     } else if (arg_len > 0) {
-			throw new SyntaxError("[object EventDispatcher]: Invalid number of parameters.");
-		}
+      throw new SyntaxError("[object EventDispatcher]: Invalid number of parameters.");
+    }
 
     Object.defineProperties(evt_disp, evtdisp_properties);
     //properties that require privacy
@@ -222,13 +222,13 @@
           if (check_event_type(event, this+'.handleEvent')) {
             //check for listeners that match event type
             var phase = event.bubbles ? 'bubble':'capture',
-                listeners = this.eventListeners[event.type],
+                listeners = this.eventListeners[event.type], //obj
                 len, //listener count
                 rv,  //return value of handler
                 i = 0; //counter
             
             listeners = listeners && listeners[phase];
-            if (listeners.length > 0) {
+            if (listeners && listeners.length > 0) {
               //currentTarget is the object with addEventListener
               event.currentTarget = this;
               //if we have any, call each handler with event object
@@ -267,7 +267,6 @@
           if (!event.target) {
             event.target = this;
           }
-
           //a broadcast event goes out to every registered eventdispatcher object with
           //the proper event type listener, reguardless of tree propagation.
           if (broadcast) {
@@ -282,7 +281,6 @@
               len, //count of nodes up to root
               i, //counter
               rv; //return value of event listener
-          
           while (node && node !== this) {
             node_path.push(node);
             node = node.parent;
@@ -295,10 +293,12 @@
               return false;
             }
           }
+
           //target phase
           if (!target.handleEvent(event)) {
             return false;
           }
+
           //bubble phase, goes up
           if (event.bubbles) {
             for (i = 0; i < len; i = i+1) {

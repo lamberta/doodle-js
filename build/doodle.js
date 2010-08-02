@@ -107,7 +107,8 @@ doodle.geom = {};
     },
 
     check_event_type: function (evt, caller_name) {
-      if (evt && evt.toString() === "[object Event]") {
+      if (evt && (evt.toString() === "[object Event]" ||
+									evt.toString() === "[object MouseEvent]")) {
         return true;
       } else {
         caller_name = (caller_name === undefined) ? "check_event_type" : caller_name;
@@ -166,6 +167,143 @@ doodle.geom = {};
   };
 
 }());
+
+(function () {
+  var event_properties,
+      check_string_type = doodle.utils.types.check_string_type;
+  
+  /* Super constructor
+   * @param {Function} initializer
+   * @return {Object}
+   */
+  doodle.Event = function (type, bubbles, cancelable) {
+    var arg_len = arguments.length,
+        initializer,
+				//some event properties aren't writable, so we'll copy over
+				event_temp = document.createEvent("Event"),
+				event = Object.create(Object.getPrototypeOf(event_temp));
+		
+    //check if passed an init function
+    if (arg_len === 1 && typeof arguments[0] === 'function') {
+      initializer = arguments[0];
+    } else if (arg_len > 3) {
+      throw new SyntaxError("[object Event]: Invalid number of parameters.");
+    } else {
+      //parameter defaults
+      check_string_type(type); //required
+      bubbles = bubbles === true; //false
+      cancelable = cancelable === true; //false
+    }
+
+		//can't call this on the copy
+		event_temp.initEvent(type, bubbles, cancelable);
+		//copy over properties to our malleable event object
+		for (var attr in event_temp) {
+			if (event_temp.hasOwnProperty(attr)) {
+				event[attr] = event_temp[attr];
+			}
+		}
+
+		//add my own event methods, adjust property privacy
+		Object.defineProperties(event, event_properties);
+
+		//init
+    //
+    
+    return event;
+  };
+
+
+  (function () {
+    
+    event_properties = {
+
+			'toString': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          return "[object Event]";
+        }
+      }
+			
+    };//end event_properties
+  }());
+
+  //constants
+  Object.defineProperties(doodle.Event, {
+
+    'ENTER_FRAME': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "enterFrame"
+    }
+    
+  });
+
+
+
+  doodle.MouseEvent = function (type, bubbles, cancelable) {
+    var arg_len = arguments.length,
+        initializer,
+        event;
+    
+    //check if passed an init function
+    if (arg_len === 1 && typeof arguments[0] === 'function') {
+      initializer = arguments[0];
+    } else if (arg_len > 3) {
+      throw new SyntaxError("[object MouseEvent]: Invalid number of parameters.");
+    } else {
+      //parameter defaults
+      check_string_type(type); //required
+      bubbles = bubbles === true; //false
+      cancelable = cancelable === true; //false
+    }
+    
+    event = document.createEvent("MouseEvent");
+    event.initEvent(type, bubbles, cancelable);
+    
+    return event;
+  };
+
+
+  //constants
+  //more need to be added
+  Object.defineProperties(doodle.MouseEvent, {
+
+    'CLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "click"
+    },
+
+    'DOUBLE_CLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "doubleClick"
+    },
+
+    'MOUSE_DOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseDown"
+    },
+
+    'MOUSE_MOVE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseMove"
+    }
+    
+  });
+
+  
+}());//end class closure
 
 (function () {
   var point_properties,
@@ -1749,13 +1887,13 @@ doodle.geom = {};
           if (check_event_type(event, this+'.handleEvent')) {
             //check for listeners that match event type
             var phase = event.bubbles ? 'bubble':'capture',
-                listeners = this.eventListeners[event.type],
+                listeners = this.eventListeners[event.type], //obj
                 len, //listener count
                 rv,  //return value of handler
                 i = 0; //counter
             
             listeners = listeners && listeners[phase];
-            if (listeners.length > 0) {
+            if (listeners && listeners.length > 0) {
               //currentTarget is the object with addEventListener
               event.currentTarget = this;
               //if we have any, call each handler with event object
@@ -1794,7 +1932,6 @@ doodle.geom = {};
           if (!event.target) {
             event.target = this;
           }
-
           //a broadcast event goes out to every registered eventdispatcher object with
           //the proper event type listener, reguardless of tree propagation.
           if (broadcast) {
@@ -1809,7 +1946,6 @@ doodle.geom = {};
               len, //count of nodes up to root
               i, //counter
               rv; //return value of event listener
-          
           while (node && node !== this) {
             node_path.push(node);
             node = node.parent;
@@ -1822,10 +1958,12 @@ doodle.geom = {};
               return false;
             }
           }
+					console.log("here1");
           //target phase
           if (!target.handleEvent(event)) {
             return false;
           }
+					console.log("here2");
           //bubble phase, goes up
           if (event.bubbles) {
             for (i = 0; i < len; i = i+1) {
@@ -3280,12 +3418,21 @@ var last_event;
         }
       },
 
+			'toString': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          return "[object Display]";
+        }
+      },
+
       'toDataUrl': {
         value: function () {
           //iterate over each canvas layer,
           //output image data and merge in new file
           //output that image data
-          return
+          return;
         }
       },
 

@@ -112,12 +112,21 @@ var last_event;
         }
       },
 
+			'toString': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          return "[object Display]";
+        }
+      },
+
       'toDataUrl': {
         value: function () {
           //iterate over each canvas layer,
           //output image data and merge in new file
           //output that image data
-          return
+          return;
         }
       },
 
