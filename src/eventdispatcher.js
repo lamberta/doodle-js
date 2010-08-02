@@ -84,34 +84,6 @@
         check_function_type = doodle.utils.types.check_function_type,
         check_event_type = doodle.utils.types.check_event_type;
 
-    /* Sends event to every dispatcher object with listener for it.
-     * Not affected by scene graph, objects come from dispatcher queue array.
-     * @param {Event} event
-     * @return {Boolean}
-     */
-    function broadcast_event (event) {
-      var receivers, //event listeners of correct type
-          len, //count of event listeners
-          i, //counter
-          rv; //return value for event handler
-      
-      //pare down to eligible receivers with event type listener
-      receivers = dispatcher_queue.filter(function (obj) {
-        return obj.hasEventListener(event.type);
-      });
-      
-      //and call each
-      for (i = 0, len = receivers.length; i < len; i=i+1) {
-        rv = receivers[i].handleEvent(event);
-        //event cancelled in listener?
-        if (rv === false || event.returnValue === false || event.cancelBubble) {
-          return false;
-        }
-      }
-      return true;
-    }
-    
-    
     evtdisp_properties = {
       /*
        * METHODS
@@ -212,7 +184,7 @@
 
       /* Lookup and call listener if registered for specific event type.
        * @param {Event} event
-       * @return {Boolean}
+       * @return {Boolean} true if node has listeners of event type.
        */
       'handleEvent': {
         enumerable: false,
@@ -223,26 +195,40 @@
             //check for listeners that match event type
             var phase = event.bubbles ? 'bubble':'capture',
                 listeners = this.eventListeners[event.type], //obj
-                len, //listener count
+                count = 0, //listener count
                 rv,  //return value of handler
-                i = 0; //counter
+                i; //counter
             
             listeners = listeners && listeners[phase];
             if (listeners && listeners.length > 0) {
               //currentTarget is the object with addEventListener
-              event.currentTarget = this;
+              event.__setCurrentTarget(this);
+              
               //if we have any, call each handler with event object
-              len = listeners.length;
-              for (; i < len; i += 1) {
+              count = listeners.length;
+              for (i = 0; i < count; i += 1) {
+                //pass event to handler
                 rv = listeners[i].call(this, event);
-                //event cancelled inside listener?
+      
+                //when event.stopPropagation is called
+                //cancel event for other nodes, but check other handlers on this one
+                //returning false from handler does the same thing
                 if (rv === false || event.returnValue === false) {
-                  event.stopPropagation();
-                  return false;
+                  //set event stopped if not already
+                  if (!event.__cancel) {
+                    event.stopPropagation();
+                  }
+                }
+                //when event.stopImmediatePropagation is called
+                //ignore other handlers on this target
+                if (event.__cancelNow) {
+                  break;
                 }
               }
             }
-            return true;
+
+            //any handlers found on this node?
+            return (count > 0) ? true : false;
           }
         }
       },
@@ -250,67 +236,129 @@
       /* Dispatches an event into the event flow. The event target is the
        * EventDispatcher object upon which the dispatchEvent() method is called.
        * @param {Event} event
-       * @param {Boolean} broadcast Send event to every object, ignore propagation.
        * @return {Boolean} true if the event was successfully dispatched.
        */
       'dispatchEvent': {
-        enumerable: false,
+        enumerable: true,
         writable: false,
         configurable: false,
-        value: function (event, broadcast) {
-          check_event_type(event, this+'.dispatchEvent');
-          
-          broadcast = broadcast === true; //default is false
-          //should clone event if being re-dispatched
-          
-          //set target to the first object that dispatched it
-          if (!event.target) {
-            event.target = this;
-          }
-          //a broadcast event goes out to every registered eventdispatcher object with
-          //the proper event type listener, reguardless of tree propagation.
-          if (broadcast) {
-            return broadcast_event(event);
-          }
-
+        value: function (event) {
           //events are dispatched from the child,
           //capturing goes down to the child, bubbling then goes back up
-          var target = event.target,
-              node = target,
+          var target,
+              node,
               node_path = [],
               len, //count of nodes up to root
               i, //counter
               rv; //return value of event listener
-          while (node && node !== this) {
-            node_path.push(node);
-            node = node.parent;
+          
+          check_event_type(event, this+'.dispatchEvent');
+
+          //can't dispatch an event that's already stopped
+          if (event.__cancel) {
+            return false;
           }
-          //capture phase, goes down
-          i = len = node_path.length;
-          while ((i=i-1) >= 0) {
-            console.log("dispatchEvent: capture call " + i);
-            if (!node_path[i].handleEvent(event)) {
-              return false;
-            }
+          
+          //set target to the object that dispatched it
+          //if already set, then we're re-dispatching an event for another target
+          //this could lead to confusion
+          if (!event.target) {
+            event.__setTarget(this);
           }
 
-          //target phase
-          if (!target.handleEvent(event)) {
+          target = event.target;
+          //this only works on node objects in the scene graph
+          if (target.parent || target.parent === null) {
+            node = target.parent;
+          } else {
+            //need to broadcast an event not in scene graph
             return false;
           }
 
-          //bubble phase, goes up
-          if (event.bubbles) {
-            for (i = 0; i < len; i = i+1) {
-              console.log("dispatchEvent: bubble call " + i);
-              rv = node_path[i].handleEvent(event);
-              //event cancelled in listener?
-              if (rv === false || event.cancelBubble) {
-                return false;
-              }
+          //create path from node's parent to top of tree
+          while (node) {
+            node_path.push(node);
+            node = node.parent;
+          }
+
+          //enter capture phase: down the tree
+          event.__setEventPhase(event.CAPTURING_PHASE);
+          i = len = node_path.length;
+          while ((i=i-1) >= 0) {
+            node_path[i].handleEvent(event);
+            //was the event stopped inside the handler?
+            if (event.__cancel) {
+              return true;
             }
           }
 
+          //enter target phase
+          event.__setEventPhase(event.AT_TARGET);
+          target.handleEvent(event);
+          //was the event stopped inside the handler?
+          if (event.__cancel) {
+            return true;
+          }
+
+          //does event bubble, or bubbling cancelled in capture/target phase?
+          if (!event.bubbles || event.cancelBubble) {
+            return true;
+          }
+
+          //enter bubble phase: back up the tree
+          event.__setEventPhase(event.BUBBLING_PHASE);
+          for (i = 0; i < len; i = i+1) {
+            node_path[i].handleEvent(event);
+            //was the event stopped inside the handler?
+            if (event.__cancel || event.cancelBubble) {
+              return true;
+            }
+          }
+
+          return true; //dispatched successfully
+        }
+      },
+
+      /* Dispatches an event to every object with an active listener.
+       * Ignores propagation path, objects come from 
+       * @param {Event} event
+       * @return {Boolean} true if the event was successfully dispatched.
+       */
+      'broadcastEvent': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function (event) {
+          var receivers, //event listeners of correct type
+              len, //count of event listeners
+              i; //counter
+          
+          check_event_type(event, this+'.broadcastEvent');
+
+          if (event.__cancel) {
+            throw new Error(this+'.broadcastEvent: Can not dispatch a cancelled event.');
+          }
+          
+          //set target to the object that dispatched it
+          //if already set, then we're re-dispatching an event for another target
+          if (!event.target) {
+            event.__setTarget(this);
+          }
+      
+          //pare down to eligible receivers with event type listener
+          receivers = dispatcher_queue.filter(function (obj) {
+            return obj.hasEventListener(event.type);
+          });
+          
+          //and call each
+          for (i = 0, len = receivers.length; i < len; i=i+1) {
+            receivers[i].handleEvent(event);
+            //event cancelled in listener?
+            if (event.__cancel) {
+              break;
+            }
+          }
+          
           return true;
         }
       },

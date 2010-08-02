@@ -168,8 +168,16 @@ doodle.geom = {};
 
 }());
 
+/* Will propbably want to implement the dom event interface:
+ * http://www.w3.org/TR/DOM-Level-3-Events/
+ * But this works for now.
+ */
+
 (function () {
-  var event_properties,
+  var event_prototype = {},
+      event_properties,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type;
   
   /* Super constructor
@@ -179,10 +187,26 @@ doodle.geom = {};
   doodle.Event = function (type, bubbles, cancelable) {
     var arg_len = arguments.length,
         initializer,
-				//some event properties aren't writable, so we'll copy over
-				event_temp = document.createEvent("Event"),
-				event = Object.create(Object.getPrototypeOf(event_temp));
-		
+        event = Object.create(event_prototype), //doodle event
+        //generate dom event that we'll copy values from - mouseevent
+        //event_temp = document.createEvent('Event'),
+        //read-only event properties
+        e_type,
+        e_bubbles,
+        e_cancelable,
+        e_cancel = false, //internal use
+        e_cancelNow = false, //internal use
+        e_cancelBubble = false,
+        e_defaultPrevented = false,
+        e_eventPhase = 0,
+        e_target = null,
+        e_currentTarget = null,
+        e_timeStamp = new Date(),
+        e_clipboardData,
+        e_srcElement = null;
+    
+    
+    
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
@@ -190,45 +214,220 @@ doodle.geom = {};
       throw new SyntaxError("[object Event]: Invalid number of parameters.");
     } else {
       //parameter defaults
-      check_string_type(type); //required
       bubbles = bubbles === true; //false
       cancelable = cancelable === true; //false
     }
 
-		//can't call this on the copy
-		event_temp.initEvent(type, bubbles, cancelable);
-		//copy over properties to our malleable event object
-		for (var attr in event_temp) {
-			if (event_temp.hasOwnProperty(attr)) {
-				event[attr] = event_temp[attr];
-			}
-		}
 
-		//add my own event methods, adjust property privacy
-		Object.defineProperties(event, event_properties);
+    Object.defineProperties(event, event_properties);
+    //properties that require privacy
+    Object.defineProperties(event, {
+      /*
+       * PROPERTIES
+       */
 
-		//init
-    //
+      'bubbles': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_bubbles; }
+      },
+
+      'cancelBubble': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_cancelBubble; },
+        set: function (cancelp) {
+          check_boolean_type(cancelp, this+'.cancelBubble');
+          e_cancelBubble = cancelp;
+        }
+      },
+
+      'cancelable': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_cancelable; }
+      },
+
+      //test if event propagation should stop after this node
+      //@internal
+      '__cancel': {
+        enumerable: false,
+        configurable: false,
+        get: function () { return e_cancel; }
+      },
+
+      //test if event propagation should stop immediately,
+      //ignore other handlers on this node
+      //@internal
+      '__cancelNow': {
+        enumerable: false,
+        configurable: false,
+        get: function () { return e_cancelNow; }
+      },
+
+      'currentTarget': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_currentTarget; }
+      },
+
+      //currentTarget is read-only, but damnit I need to set it sometimes
+      '__setCurrentTarget': {
+        enumerable: false,
+        value: function (target) {
+          e_currentTarget = target;
+        }
+      },
+
+      'target': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_target; }
+      },
+
+      '__setTarget': {
+        enumerable: false,
+        value: function (target) {
+          e_target = target;
+        }
+      },
+
+      'eventPhase': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_eventPhase; }
+      },
+      
+      '__setEventPhase': {
+        enumerable: false,
+        value: function (phase) {
+          check_number_type(phase);
+          e_eventPhase = phase;
+        }
+      },
+
+      'srcElement': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_srcElement; }
+      },
+
+      'timeStamp': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_timeStamp; }
+      },
+
+      'type': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_type; }
+      },
+      
+      /*
+       * METHODS
+       */
+
+      'initEvent': {
+        enumerable: true,
+        configurable: false,
+        value: function (type, bubbles, cancelable) {
+          bubbles = bubbles || false;
+          cancelable = cancelable || false;
+          check_string_type(type, this+'.initEvent');
+          check_boolean_type(bubbles, this+'.initEvent');
+          check_boolean_type(cancelable, this+'.initEvent');
+          e_type = type;
+          e_bubbles = bubbles;
+          e_cancelable = cancelable;
+        }
+      },
+
+      'preventDefault': {
+        enumerable: true,
+        configurable: false,
+        value: function () {
+          e_defaultPrevented = true;
+        },
+      },
+
+      'stopPropagation': {
+        enumerable: true,
+        configurable: false,
+        value: function () {
+          if (!this.cancelable) {
+            throw new Error(this+'.stopPropagation: Event can not be cancelled.');
+          } else {
+            e_cancel = true;
+          }
+        }
+      },
+
+      'stopImmediatePropagation': {
+        enumerable: true,
+        configurable: false,
+        value: function () {
+          if (!this.cancelable) {
+            throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
+          } else {
+            e_cancel = true;
+            e_cancelNow = true;
+          }
+        }
+      }
+    });
+
+
+    //init event
+
+    //needed for mouseevent
+    /*for (var attr in event_temp) {
+      if (event_temp.hasOwnProperty(attr)) {
+        event[attr] = event_temp[attr];
+      }
+    }*/
+    
+    event.initEvent(type, bubbles, cancelable);
     
     return event;
   };
 
 
   (function () {
+
+    var dom_event_proto = Object.getPrototypeOf(document.createEvent('Event'));
+
+    //copy event property constants, will add my own methods later
+    for (var prop in dom_event_proto) {
+      if (typeof dom_event_proto[prop] !== 'function') {
+        event_prototype[prop] = dom_event_proto[prop];
+      }
+    }
+
+
     
     event_properties = {
 
-			'toString': {
-        enumerable: false,
+      'returnValue': {
+        enumerable: true,
+        writable: true,
+        configurable: false,
+        value: true
+      },
+
+      'toString': {
+        enumerable: true,
         writable: false,
         configurable: false,
         value: function () {
           return "[object Event]";
         }
       }
-			
+      
     };//end event_properties
   }());
+
+  
 
   //constants
   Object.defineProperties(doodle.Event, {
@@ -242,6 +441,10 @@ doodle.geom = {};
     
   });
 
+  
+
+
+  
 
 
   doodle.MouseEvent = function (type, bubbles, cancelable) {
@@ -1677,13 +1880,13 @@ doodle.geom = {};
         initializer,
         evt_disp = {},
         eventListeners = {};
-		
-		//check if passed an init function
+    
+    //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
     } else if (arg_len > 0) {
-			throw new SyntaxError("[object EventDispatcher]: Invalid number of parameters.");
-		}
+      throw new SyntaxError("[object EventDispatcher]: Invalid number of parameters.");
+    }
 
     Object.defineProperties(evt_disp, evtdisp_properties);
     //properties that require privacy
@@ -1749,34 +1952,6 @@ doodle.geom = {};
         check_function_type = doodle.utils.types.check_function_type,
         check_event_type = doodle.utils.types.check_event_type;
 
-    /* Sends event to every dispatcher object with listener for it.
-     * Not affected by scene graph, objects come from dispatcher queue array.
-     * @param {Event} event
-     * @return {Boolean}
-     */
-    function broadcast_event (event) {
-      var receivers, //event listeners of correct type
-          len, //count of event listeners
-          i, //counter
-          rv; //return value for event handler
-      
-      //pare down to eligible receivers with event type listener
-      receivers = dispatcher_queue.filter(function (obj) {
-        return obj.hasEventListener(event.type);
-      });
-      
-      //and call each
-      for (i = 0, len = receivers.length; i < len; i=i+1) {
-        rv = receivers[i].handleEvent(event);
-        //event cancelled in listener?
-        if (rv === false || event.returnValue === false || event.cancelBubble) {
-          return false;
-        }
-      }
-      return true;
-    }
-    
-    
     evtdisp_properties = {
       /*
        * METHODS
@@ -1877,7 +2052,7 @@ doodle.geom = {};
 
       /* Lookup and call listener if registered for specific event type.
        * @param {Event} event
-       * @return {Boolean}
+       * @return {Boolean} true if node has listeners of event type.
        */
       'handleEvent': {
         enumerable: false,
@@ -1888,26 +2063,40 @@ doodle.geom = {};
             //check for listeners that match event type
             var phase = event.bubbles ? 'bubble':'capture',
                 listeners = this.eventListeners[event.type], //obj
-                len, //listener count
+                count = 0, //listener count
                 rv,  //return value of handler
-                i = 0; //counter
+                i; //counter
             
             listeners = listeners && listeners[phase];
             if (listeners && listeners.length > 0) {
               //currentTarget is the object with addEventListener
-              event.currentTarget = this;
+              event.__setCurrentTarget(this);
+              
               //if we have any, call each handler with event object
-              len = listeners.length;
-              for (; i < len; i += 1) {
+              count = listeners.length;
+              for (i = 0; i < count; i += 1) {
+                //pass event to handler
                 rv = listeners[i].call(this, event);
-                //event cancelled inside listener?
+      
+                //when event.stopPropagation is called
+                //cancel event for other nodes, but check other handlers on this one
+                //returning false from handler does the same thing
                 if (rv === false || event.returnValue === false) {
-                  event.stopPropagation();
-                  return false;
+                  //set event stopped if not already
+                  if (!event.__cancel) {
+                    event.stopPropagation();
+                  }
+                }
+                //when event.stopImmediatePropagation is called
+                //ignore other handlers on this target
+                if (event.__cancelNow) {
+                  break;
                 }
               }
             }
-            return true;
+
+            //any handlers found on this node?
+            return (count > 0) ? true : false;
           }
         }
       },
@@ -1915,67 +2104,129 @@ doodle.geom = {};
       /* Dispatches an event into the event flow. The event target is the
        * EventDispatcher object upon which the dispatchEvent() method is called.
        * @param {Event} event
-       * @param {Boolean} broadcast Send event to every object, ignore propagation.
        * @return {Boolean} true if the event was successfully dispatched.
        */
       'dispatchEvent': {
-        enumerable: false,
+        enumerable: true,
         writable: false,
         configurable: false,
-        value: function (event, broadcast) {
-          check_event_type(event, this+'.dispatchEvent');
-          
-          broadcast = broadcast === true; //default is false
-          //should clone event if being re-dispatched
-          
-          //set target to the first object that dispatched it
-          if (!event.target) {
-            event.target = this;
-          }
-          //a broadcast event goes out to every registered eventdispatcher object with
-          //the proper event type listener, reguardless of tree propagation.
-          if (broadcast) {
-            return broadcast_event(event);
-          }
-
+        value: function (event) {
           //events are dispatched from the child,
           //capturing goes down to the child, bubbling then goes back up
-          var target = event.target,
-              node = target,
+          var target,
+              node,
               node_path = [],
               len, //count of nodes up to root
               i, //counter
               rv; //return value of event listener
-          while (node && node !== this) {
+          
+          check_event_type(event, this+'.dispatchEvent');
+
+          //can't dispatch an event that's already stopped
+          if (event.__cancel) {
+            return false;
+          }
+          
+          //set target to the object that dispatched it
+          //if already set, then we're re-dispatching an event for another target
+          //this could lead to confusion
+          if (!event.target) {
+            event.__setTarget(this);
+          }
+
+          target = event.target;
+          //this only works on node objects in the scene graph
+          if (target.parent || target.parent === null) {
+            node = target.parent;
+          } else {
+            //need to broadcast an event not in scene graph
+            return false;
+          }
+
+          //create path from node's parent to top of tree
+          while (node) {
             node_path.push(node);
             node = node.parent;
           }
-          //capture phase, goes down
+
+          //enter capture phase: down the tree
+          event.__setEventPhase(event.CAPTURING_PHASE);
           i = len = node_path.length;
           while ((i=i-1) >= 0) {
-            console.log("dispatchEvent: capture call " + i);
-            if (!node_path[i].handleEvent(event)) {
-              return false;
-            }
-          }
-					console.log("here1");
-          //target phase
-          if (!target.handleEvent(event)) {
-            return false;
-          }
-					console.log("here2");
-          //bubble phase, goes up
-          if (event.bubbles) {
-            for (i = 0; i < len; i = i+1) {
-              console.log("dispatchEvent: bubble call " + i);
-              rv = node_path[i].handleEvent(event);
-              //event cancelled in listener?
-              if (rv === false || event.cancelBubble) {
-                return false;
-              }
+            node_path[i].handleEvent(event);
+            //was the event stopped inside the handler?
+            if (event.__cancel) {
+              return true;
             }
           }
 
+          //enter target phase
+          event.__setEventPhase(event.AT_TARGET);
+          target.handleEvent(event);
+          //was the event stopped inside the handler?
+          if (event.__cancel) {
+            return true;
+          }
+
+          //does event bubble, or bubbling cancelled in capture/target phase?
+          if (!event.bubbles || event.cancelBubble) {
+            return true;
+          }
+
+          //enter bubble phase: back up the tree
+          event.__setEventPhase(event.BUBBLING_PHASE);
+          for (i = 0; i < len; i = i+1) {
+            node_path[i].handleEvent(event);
+            //was the event stopped inside the handler?
+            if (event.__cancel || event.cancelBubble) {
+              return true;
+            }
+          }
+
+          return true; //dispatched successfully
+        }
+      },
+
+      /* Dispatches an event to every object with an active listener.
+       * Ignores propagation path, objects come from 
+       * @param {Event} event
+       * @return {Boolean} true if the event was successfully dispatched.
+       */
+      'broadcastEvent': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function (event) {
+          var receivers, //event listeners of correct type
+              len, //count of event listeners
+              i; //counter
+          
+          check_event_type(event, this+'.broadcastEvent');
+
+          if (event.__cancel) {
+            throw new Error(this+'.broadcastEvent: Can not dispatch a cancelled event.');
+          }
+          
+          //set target to the object that dispatched it
+          //if already set, then we're re-dispatching an event for another target
+          if (!event.target) {
+            event.__setTarget(this);
+          }
+      
+          //pare down to eligible receivers with event type listener
+          receivers = dispatcher_queue.filter(function (obj) {
+            return obj.hasEventListener(event.type);
+          });
+          
+          //and call each
+          for (i = 0, len = receivers.length; i < len; i=i+1) {
+            receivers[i].handleEvent(event);
+            //event cancelled in listener?
+            if (event.__cancel) {
+              break;
+            }
+          }
+          
           return true;
         }
       },
