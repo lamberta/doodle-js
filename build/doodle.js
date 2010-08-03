@@ -38,20 +38,6 @@ doodle.geom = {};
     }
   };
 
-  get_style_property = doodle.utils.get_style_property = function (element, property) {
-    if (document.defaultView && document.defaultView.getComputedStyle) {
-      return document.defaultView.getComputedStyle(element, null)[property];
-    } else if (element.currentStyle) {
-      return element.currentStyle[property];
-    } else if (element.style) {
-      return element.style[property];
-    } else {
-      throw new Error("get_style_property: Could not determine style.");
-    }
-  };
-
-  
-
   /* also contains:
    * check_point_type
    * check_matrix_type
@@ -108,7 +94,7 @@ doodle.geom = {};
 
     check_event_type: function (evt, caller_name) {
       if (evt && (evt.toString() === "[object Event]" ||
-									evt.toString() === "[object MouseEvent]")) {
+                  evt.toString() === "[object MouseEvent]")) {
         return true;
       } else {
         caller_name = (caller_name === undefined) ? "check_event_type" : caller_name;
@@ -166,6 +152,20 @@ doodle.geom = {};
     return element;
   };
 
+  /* Returns css property of element, it's own or inherited.
+   */
+  get_style_property = doodle.utils.get_style_property = function (element, property) {
+    if (document.defaultView && document.defaultView.getComputedStyle) {
+      return document.defaultView.getComputedStyle(element, null)[property];
+    } else if (element.currentStyle) {
+      return element.currentStyle[property];
+    } else if (element.style) {
+      return element.style[property];
+    } else {
+      throw new Error("get_style_property: Could not determine style.");
+    }
+  };
+
 }());
 
 /* Will propbably want to implement the dom event interface:
@@ -176,12 +176,19 @@ doodle.geom = {};
 (function () {
   var event_prototype = {},
       event_properties,
+      isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type;
   
   /* Super constructor
-   * @param {Function} initializer
+   * @param {String} type
+   * @param {Boolean} bubbles
+   * @param {Boolean} cancelable
+   *
+   * @alternative instantiation
+   * @param {Event} initializer event to wrap
+   *
    * @return {Object}
    */
   doodle.Event = function (type, bubbles, cancelable) {
@@ -203,21 +210,38 @@ doodle.geom = {};
         e_currentTarget = null,
         e_timeStamp = new Date(),
         e_clipboardData,
-        e_srcElement = null;
-    
-    
-    
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-    } else if (arg_len > 3) {
-      throw new SyntaxError("[object Event]: Invalid number of parameters.");
-    } else {
-      //parameter defaults
-      bubbles = bubbles === true; //false
-      cancelable = cancelable === true; //false
-    }
+        e_srcElement = null,
+        e_returnValue = true;
 
+    //check if given an init event to wrap
+    if (arg_len === 1 && isEvent(arguments[0])) {
+      initializer = arguments[0];
+      //copy properties over - we'll check these when we init the new event
+      type = initializer.type;
+      bubbles = initializer.bubbles;
+      cancelable = initializer.cancelable;
+      //the rest we'll have to assume the previous event is good
+      e_cancelBubble = initializer.cancelBubble;
+      e_defaultPrevented = initializer.defaultPrevented;
+      e_eventPhase = initializer.eventPhase;
+      e_target = initializer.target;
+      e_currentTarget = initializer.currentTarget;
+      e_timeStamp = initializer.timeStamp;
+      e_clipboardData = initializer.clipboardData;
+      e_srcElement = initializer.srcElement;
+      e_returnValue = initializer.returnValue;
+      //check for doodle internal event properties
+      if (initializer.__cancel) {
+        e_cancel = initializer.__cancel;
+      }
+      if (initializer.__cancelNow) {
+        e_cancelNow = initializer.__cancelNow;
+      }
+      
+    } else if (arg_len === 0 || arg_len > 3) {
+      //check arg count
+      throw new SyntaxError("[object Event]: Invalid number of parameters.");
+    }
 
     Object.defineProperties(event, event_properties);
     //properties that require privacy
@@ -323,6 +347,12 @@ doodle.geom = {};
         configurable: false,
         get: function () { return e_type; }
       },
+
+      'returnValue': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_returnValue; }
+      },
       
       /*
        * METHODS
@@ -332,14 +362,16 @@ doodle.geom = {};
         enumerable: true,
         configurable: false,
         value: function (type, bubbles, cancelable) {
-          bubbles = bubbles || false;
-          cancelable = cancelable || false;
+          //parameter defaults
+          bubbles = bubbles === true; //false
+          cancelable = cancelable === true; //false
           check_string_type(type, this+'.initEvent');
           check_boolean_type(bubbles, this+'.initEvent');
           check_boolean_type(cancelable, this+'.initEvent');
           e_type = type;
           e_bubbles = bubbles;
           e_cancelable = cancelable;
+          return this;
         }
       },
 
@@ -377,16 +409,7 @@ doodle.geom = {};
       }
     });
 
-
     //init event
-
-    //needed for mouseevent
-    /*for (var attr in event_temp) {
-      if (event_temp.hasOwnProperty(attr)) {
-        event[attr] = event_temp[attr];
-      }
-    }*/
-    
     event.initEvent(type, bubbles, cancelable);
     
     return event;
@@ -405,15 +428,8 @@ doodle.geom = {};
     }
 
 
-    
+    //static event properties
     event_properties = {
-
-      'returnValue': {
-        enumerable: true,
-        writable: true,
-        configurable: false,
-        value: true
-      },
 
       'toString': {
         enumerable: true,
@@ -427,9 +443,9 @@ doodle.geom = {};
     };//end event_properties
   }());
 
-  
-
-  //constants
+  /*
+   * CLASS CONSTANTS
+   */
   Object.defineProperties(doodle.Event, {
 
     'ENTER_FRAME': {
@@ -441,38 +457,490 @@ doodle.geom = {};
     
   });
 
+  /*
+   * CLASS METHODS
+   */
+
+  /* Test if an object is an event of any kind (Event/MouseEvent/etc).
+   * Returns true on Doodle events as well as DOM events.
+   * @param {Event} event
+   * @return {Boolean}
+   */
+  isEvent = doodle.Event.isEvent = function (event) {
+    var evt_name;
+    if (typeof event !== 'object') {
+          return false;
+    } else {
+      evt_name = event.toString();
+    }
+    return (evt_name === '[object Event]' ||
+            evt_name === '[object UIEvent]' ||
+            evt_name === '[object MouseEvent]');
+  };
   
+}());//end class closure
 
-
+(function () {
+  var uievent_properties,
+      isEvent = doodle.Event.isEvent,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
+      check_string_type = doodle.utils.types.check_string_type;
   
-
-
-  doodle.MouseEvent = function (type, bubbles, cancelable) {
+  /* Super constructor
+   * @param {String} type
+   * @param {Boolean} bubbles
+   * @param {Boolean} cancelable
+   * @param {DOM Object} view
+   * @param {Number} detail
+   *
+   * @alternative instantiation
+   * @param {Event} initializer event to wrap
+   *
+   * @return {UIEvent}
+   */
+  doodle.UIEvent = function (type, bubbles, cancelable, view, detail) {
     var arg_len = arguments.length,
         initializer,
-        event;
-    
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
+        uievent,
+        //default ui-event read-only properties
+        e_view = null,
+        e_detail = 0,
+        e_which = 0,
+        e_charCode = 0,
+        e_keyCode = 0,
+        e_layerX = 0,
+        e_layerY = 0,
+        e_pageX = 0,
+        e_pageY = 0;
+
+    //check if given an init event to wrap
+    if (arg_len === 1 && isEvent(arguments[0])) {
       initializer = arguments[0];
-    } else if (arg_len > 3) {
-      throw new SyntaxError("[object MouseEvent]: Invalid number of parameters.");
+      //handle properties derived from UIEvent objects
+      if (initializer.toString() === '[object UIEvent]' ||
+          initializer.toString() === '[object MouseEvent]') {
+        //copy properties over - we'll check these when we init the new event
+        type = initializer.type;
+        bubbles = initializer.bubbles;
+        cancelable = initializer.cancelable;
+        view = initializer.view;
+        detail = initializer.detail;
+        //the rest we'll have to assume the previous event is good
+        e_which = initializer.which;
+        e_charCode = initializer.charCode;
+        e_keyCode = initializer.keyCode;
+        e_layerX = initializer.layerX;
+        e_layerY = initializer.layerY;
+        e_pageX = initializer.pageX;
+        e_pageY = initializer.pageY;
+      }
+      //init uiobject with event
+      uievent = Object.create(doodle.Event(initializer));
+      
+    } else if (arg_len === 0 || arg_len > 5) {
+      //check arg count
+      throw new SyntaxError("[object UIEvent]: Invalid number of parameters.");
     } else {
-      //parameter defaults
-      check_string_type(type); //required
-      bubbles = bubbles === true; //false
-      cancelable = cancelable === true; //false
+      //regular instantiation
+      uievent = Object.create(doodle.Event(type, bubbles, cancelable));
     }
     
-    event = document.createEvent("MouseEvent");
-    event.initEvent(type, bubbles, cancelable);
-    
-    return event;
-  };
+    Object.defineProperties(uievent, uievent_properties);
+    Object.defineProperties(uievent, {
+      /* PROPERTIES
+       */
+      'view': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_view; }
+      },
 
+      'detail': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_detail; }
+      },
+
+      'which': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_which; }
+      },
+
+      'charCode': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_charCode; }
+      },
+
+      'keyCode': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_keyCode; }
+      },
+
+      'layerX': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_layerX; }
+      },
+
+      'layerY': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_layerY; }
+      },
+
+      'pageX': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_pageX; }
+      },
+
+      'pageY': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_pageY; }
+      },
+
+      /* METHODS
+       */
+      'initUIEvent': {
+        value: function (type, bubbles, cancelable, view, detail) {
+          //parameter defaults
+          bubbles = bubbles === true; //false
+          cancelable = cancelable === true; //false
+          e_view = (view === undefined) ? null : view;
+          e_detail = (detail === undefined) ? 0 : detail;
+          //type-check
+          check_string_type(type, this+'.initUIEvent');
+          check_boolean_type(bubbles, this+'.initUIEvent');
+          check_boolean_type(cancelable, this+'.initUIEvent');
+          check_number_type(e_detail, this+'.initUIEvent');
+          
+          this.initEvent(type, bubbles, cancelable);
+          return this;
+        }
+      }
+
+    });
+
+    //init event
+    uievent.initUIEvent(type, bubbles, cancelable, view, detail);
+    
+    return uievent;
+  };
+    
+  
+  (function () {
+
+    uievent_properties = {
+      'toString': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function () {
+          return "[object UIEvent]";
+        }
+      }
+    };
+
+  }());
 
   //constants
-  //more need to be added
+  Object.defineProperties(doodle.UIEvent, {
+
+    'FOCUS_IN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "focusIn"
+    }
+    
+  });
+
+}());//end class closure
+
+
+(function () {
+  var mouseevent_properties,
+      isEvent = doodle.Event.isEvent,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
+      check_string_type = doodle.utils.types.check_string_type;
+  
+  /* Super constructor
+   * @param {String} type
+   * @param {Boolean} bubbles
+   * @param {Boolean} cancelable
+   * @param {DOM Object} view
+   * @param {Number} detail
+   * @param {Number} screenX
+   * @param {Number} screenY
+   * @param {Number} clientX
+   * @param {Number} clientY
+   * @param {Boolean} ctrlKey
+   * @param {Boolean} altKey
+   * @param {Boolean} shiftKey
+   * @param {Boolean} metaKey
+   * @param {Number} button Mouse button that caused the event (0|1|2)
+   * @param {Node} relatedTarget Secondary target for event (only for some events)
+   *
+   * @alternative instantiation
+   * @param {Event} initializer event to wrap
+   *
+   * @return {MouseEvent}
+   */
+  doodle.MouseEvent = function (type, bubbles, cancelable, view, detail,
+                                screenX, screenY, clientX, clientY, 
+                                ctrlKey, altKey, shiftKey, metaKey,
+                                button, relatedTarget) {
+    var arg_len = arguments.length,
+        initializer,
+        mouseevent,
+        //mouse-event read-only properties
+        e_x = 0,
+        e_y = 0,
+        e_screenX = 0,
+        e_screenY = 0,
+        e_clientX = 0,
+        e_clientY = 0,
+        e_offsetX = 0,
+        e_offsetY = 0,
+        e_ctrlKey = false,
+        e_altKey = false,
+        e_shiftKey = false,
+        e_metaKey = false,
+        e_button = 0,
+        e_relatedTarget = null,
+        e_toElement = null,
+        e_fromElement = null,
+        e_dataTransfer = null;
+
+    //check if given an init event to wrap
+    if (arg_len === 1 && isEvent(arguments[0])) {
+      initializer = arguments[0];
+      //handle properties derived from MouseEvent objects
+      if (initializer.toString() === '[object MouseEvent]') {
+        //copy properties over - we'll check these when we init the new event
+        type = initializer.type;
+        bubbles = initializer.bubbles;
+        cancelable = initializer.cancelable;
+        view = initializer.view;
+        detail = initializer.detail;
+        screenX = initializer.screenX;
+        screenY = initializer.screenY;
+        clientX = initializer.clientX;
+        clientY = initializer.clientY;
+        ctrlKey = initializer.ctrlKey;
+        altKey = initializer.altKey;
+        shiftKey = initializer.shiftKey;
+        metaKey = initializer.metaKey;
+        button = initializer.button;
+        relatedTarget = initializer.relatedTarget;
+        //the rest we'll have to assume the previous event is good
+        e_dataTransfer = initializer.dataTransfer;
+        e_toElement = initializer.toElement;
+        e_fromElement = initializer.fromElement;
+        e_x = initializer.x;
+        e_y = initializer.y;
+        e_offsetX = initializer.offsetX;
+        e_offsetY = initializer.offsetY;
+      }
+      //init mouse-event object with uievent
+      mouseevent = Object.create(doodle.UIEvent(initializer));
+
+    } else if (arg_len === 0 || arg_len > 15) {
+      //check arg count
+      throw new SyntaxError("[object MouseEvent]: Invalid number of parameters.");
+    } else {
+      //regular instantiation
+      mouseevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+    }
+    
+    Object.defineProperties(mouseevent, mouseevent_properties);
+    Object.defineProperties(mouseevent, {
+      /* PROPERTIES
+       */
+
+      'x': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_x; }
+      },
+
+      'y': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_y; }
+      },
+
+      'screenX': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_screenX; }
+      },
+
+      'screenY': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_screenY; }
+      },
+
+      'clientX': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_clientX; }
+      },
+
+      'clientY': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_clientY; }
+      },
+
+      'offsetX': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_offsetX; }
+      },
+
+      'offsetY': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_offsetY; }
+      },
+
+      'ctrlKey': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_ctrlKey; }
+      },
+
+      'altKey': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_altKey; }
+      },
+
+      'shiftKey': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_shiftKey; }
+      },
+
+      'metaKey': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_metaKey; }
+      },
+
+      'button': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_button; }
+      },
+
+      'relatedTarget': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_relatedTarget; }
+      },
+
+      'toElement': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_toElement; }
+      },
+
+      'fromElement': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_fromElement; }
+      },
+
+      'dataTransfer': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return e_dataTransfer; }
+      },
+
+      /* METHODS
+       */
+
+      'initMouseEvent': {
+        value: function (type, bubbles, cancelable, view, detail,
+                         screenX, screenY, clientX, clientY, 
+                         ctrlKey, altKey, shiftKey, metaKey,
+                         button, relatedTarget) {
+          //parameter defaults
+          bubbles = bubbles === true; //false
+          cancelable = cancelable === true; //false
+          view = (view === undefined) ? null : view;
+          detail = (detail === undefined) ? 0 : detail;
+          //position is zero
+          e_screenX = (screenX === undefined) ? 0 : screenX;
+          e_screenY = (screenY === undefined) ? 0 : screenY;
+          e_clientX = (clientX === undefined) ? 0 : clientX;
+          e_clientY = (clientY === undefined) ? 0 : clientY;
+          //keys are false
+          e_ctrlKey = ctrlKey === true;
+          e_altKey = altKey === true;
+          e_shiftKey = shiftKey === true;
+          e_metaKey = metaKey === true;
+          //else
+          e_button = (button === undefined) ? 0 : button;
+          e_relatedTarget = (relatedTarget === undefined) ? null : relatedTarget;
+          
+          //type-check
+          check_string_type(type, this+'.initMouseEvent');
+          check_boolean_type(bubbles, this+'.initMouseEvent');
+          check_boolean_type(cancelable, this+'.initMouseEvent');
+          check_number_type(detail, this+'.initMouseEvent');
+          check_number_type(e_screenX, this+'.initMouseEvent');
+          check_number_type(e_screenY, this+'.initMouseEvent');
+          check_number_type(e_clientX, this+'.initMouseEvent');
+          check_number_type(e_clientY, this+'.initMouseEvent');
+          check_boolean_type(e_ctrlKey, this+'.initMouseEvent');
+          check_boolean_type(e_altKey, this+'.initMouseEvent');
+          check_boolean_type(e_shiftKey, this+'.initMouseEvent');
+          check_boolean_type(e_metaKey, this+'.initMouseEvent');
+          check_number_type(e_button, this+'.initMouseEvent');
+          
+          this.initUIEvent(type, bubbles, cancelable, view, detail);
+          return this;
+        }
+      }
+
+    });
+
+    //init event
+    mouseevent.initMouseEvent(type, bubbles, cancelable, view, detail,
+                              screenX, screenY, clientX, clientY, 
+                              ctrlKey, altKey, shiftKey, metaKey,
+                              button, relatedTarget);
+    
+    return mouseevent;
+  };
+    
+  
+  (function () {
+
+    mouseevent_properties = {
+      'toString': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function () {
+          return "[object MouseEvent]";
+        }
+      }
+    };
+
+  }());
+
+  //constants
   Object.defineProperties(doodle.MouseEvent, {
 
     'CLICK': {
@@ -489,6 +957,20 @@ doodle.geom = {};
       value: "doubleClick"
     },
 
+    'MIDDLE_CLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "middleClick"
+    },
+
+    'RIGHT_CLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "rightClick"
+    },
+
     'MOUSE_DOWN': {
       enumerable: true,
       writable: false,
@@ -496,16 +978,85 @@ doodle.geom = {};
       value: "mouseDown"
     },
 
+    'MIDDLE_MOUSE_DOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "middleMouseDown"
+    },
+
+    'RIGHT_MOUSE_DOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "rightMouseDown"
+    },
+
+    'MOUSE_UP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseUp"
+    },
+
+    'MIDDLE_MOUSE_UP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "middleMouseUp"
+    },
+
+    'RIGHT_MOUSE_UP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "rightMouseUp"
+    },
+
     'MOUSE_MOVE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: "mouseMove"
+    },
+
+    'MOUSE_OUT': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseOut"
+    },
+
+    'MOUSE_OVER': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseOver"
+    },
+
+    'ROLL_OVER': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "rollOver"
+    },
+
+    'ROLL_OUT': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "rollOut"
+    },
+
+    'MOUSE_WHEEL': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseWheel"
     }
     
   });
 
-  
 }());//end class closure
 
 (function () {

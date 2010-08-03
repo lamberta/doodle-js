@@ -24,20 +24,6 @@
     }
   };
 
-  get_style_property = doodle.utils.get_style_property = function (element, property) {
-    if (document.defaultView && document.defaultView.getComputedStyle) {
-      return document.defaultView.getComputedStyle(element, null)[property];
-    } else if (element.currentStyle) {
-      return element.currentStyle[property];
-    } else if (element.style) {
-      return element.style[property];
-    } else {
-      throw new Error("get_style_property: Could not determine style.");
-    }
-  };
-
-  
-
   /* also contains:
    * check_point_type
    * check_matrix_type
@@ -94,7 +80,7 @@
 
     check_event_type: function (evt, caller_name) {
       if (evt && (evt.toString() === "[object Event]" ||
-									evt.toString() === "[object MouseEvent]")) {
+                  evt.toString() === "[object MouseEvent]")) {
         return true;
       } else {
         caller_name = (caller_name === undefined) ? "check_event_type" : caller_name;
@@ -150,6 +136,20 @@
       throw new ReferenceError(caller_name + ": Unable to get HTML element: " + id);
     }
     return element;
+  };
+
+  /* Returns css property of element, it's own or inherited.
+   */
+  get_style_property = doodle.utils.get_style_property = function (element, property) {
+    if (document.defaultView && document.defaultView.getComputedStyle) {
+      return document.defaultView.getComputedStyle(element, null)[property];
+    } else if (element.currentStyle) {
+      return element.currentStyle[property];
+    } else if (element.style) {
+      return element.style[property];
+    } else {
+      throw new Error("get_style_property: Could not determine style.");
+    }
   };
 
 }());
