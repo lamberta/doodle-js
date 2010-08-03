@@ -32,7 +32,7 @@
         textevent,
         //text-event read-only properties
         e_data = "",
-        e_inputMode = 0;
+        e_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
 
     //check if given an init event to wrap
     if (arg_len === 1 && isEvent(arguments[0])) {
@@ -87,14 +87,14 @@
           cancelable = cancelable === true; //false
           view = (view === undefined) ? null : view;
           e_data = (data === undefined) ? "" : data;
-          e_inputMode = (inputMode === undefined) ? 0 : inputMode;
+          e_inputMode = (inputMode === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputMode;
           
           //type-check
           check_string_type(type, this+'.initTextEvent');
           check_boolean_type(bubbles, this+'.initTextEvent');
           check_boolean_type(cancelable, this+'.initTextEvent');
-          check_string_type(data, this+'.initTextEvent');
-          check_number_type(inputMode, this+'.initTextEvent');
+          check_string_type(e_data, this+'.initTextEvent');
+          check_number_type(e_inputMode, this+'.initTextEvent');
           
           this.initUIEvent(type, bubbles, cancelable, view);
           return this;

@@ -12,6 +12,8 @@ cat ./src/utils.js >> "$OUT_FILE"
 cat ./src/events/event.js >> "$OUT_FILE"
 cat ./src/events/uievent.js >> "$OUT_FILE"
 cat ./src/events/mouseevent.js >> "$OUT_FILE"
+cat ./src/events/textevent.js >> "$OUT_FILE"
+cat ./src/events/keyevent.js >> "$OUT_FILE"
 
 cat ./src/geom/point.js >> "$OUT_FILE"
 cat ./src/geom/matrix.js >> "$OUT_FILE"
