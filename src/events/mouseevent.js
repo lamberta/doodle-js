@@ -291,105 +291,63 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "doubleClick"
+      value: "dblclick"
     },
 
     'MIDDLE_CLICK': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "middleClick"
+      value: "middleclick"
     },
 
     'RIGHT_CLICK': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "rightClick"
+      value: "rightclick"
     },
 
     'MOUSE_DOWN': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "mouseDown"
-    },
-
-    'MIDDLE_MOUSE_DOWN': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "middleMouseDown"
-    },
-
-    'RIGHT_MOUSE_DOWN': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "rightMouseDown"
+      value: "mousedown"
     },
 
     'MOUSE_UP': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "mouseUp"
-    },
-
-    'MIDDLE_MOUSE_UP': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "middleMouseUp"
-    },
-
-    'RIGHT_MOUSE_UP': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "rightMouseUp"
+      value: "mouseup"
     },
 
     'MOUSE_MOVE': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "mouseMove"
+      value: "mousemove"
+    },
+
+		'MOUSE_ENTER': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseenter"
     },
 
     'MOUSE_OUT': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "mouseOut"
+      value: "mouseout"
     },
 
     'MOUSE_OVER': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "mouseOver"
-    },
-
-    'ROLL_OVER': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "rollOver"
-    },
-
-    'ROLL_OUT': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "rollOut"
-    },
-
-    'MOUSE_WHEEL': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mouseWheel"
+      value: "mouseover"
     }
     
   });
