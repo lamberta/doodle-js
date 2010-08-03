@@ -2129,19 +2129,16 @@ doodle.geom = {};
           
           //set target to the object that dispatched it
           //if already set, then we're re-dispatching an event for another target
-          //this could lead to confusion
           if (!event.target) {
             event.__setTarget(this);
+          } else {
+            //this is a bit confusing, show warning for now
+            console.log(this+'.dispatchEvent: event.target already set to ' + event.target);
           }
 
           target = event.target;
-          //this only works on node objects in the scene graph
-          if (target.parent || target.parent === null) {
-            node = target.parent;
-          } else {
-            //need to broadcast an event not in scene graph
-            return false;
-          }
+          //path starts at node parent
+          node = target.parent || null;
 
           //create path from node's parent to top of tree
           while (node) {
