@@ -82,8 +82,12 @@
     },
 
     check_event_type: function (evt, caller, param) {
+      //list all event types
       if (evt && (evt.toString() === "[object Event]" ||
-                  evt.toString() === "[object MouseEvent]")) {
+                  evt.toString() === "[object UIEvent]" ||
+                  evt.toString() === "[object MouseEvent]" ||
+                  evt.toString() === "[object KeyboardEvent]" ||
+                  evt.toString() === "[object TextEvent]")) {
         return true;
       } else {
         caller = (caller === undefined) ? "check_event_type" : caller;

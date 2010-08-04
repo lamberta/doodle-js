@@ -87,9 +87,9 @@
         enumerable: true,
         configurable: false,
         get: function () { return cancelBubble; },
-        set: function (cancelp) {
-          check_boolean_type(cancelp, this+'.cancelBubble');
-          e_cancelBubble = cancelp;
+        set: function (cancelArg) {
+          check_boolean_type(cancelArg, this+'.cancelBubble');
+          cancelBubble = cancelp;
         }
       },
 
@@ -125,8 +125,8 @@
       //currentTarget is read-only, but damnit I need to set it sometimes
       '__setCurrentTarget': {
         enumerable: false,
-        value: function (target) {
-          e_currentTarget = target;
+        value: function (targetArg) {
+          currentTarget = targetArg;
         }
       },
 
@@ -138,8 +138,8 @@
 
       '__setTarget': {
         enumerable: false,
-        value: function (target) {
-          e_target = target;
+        value: function (targetArg) {
+          target = targetArg;
         }
       },
 
@@ -151,9 +151,9 @@
       
       '__setEventPhase': {
         enumerable: false,
-        value: function (phase) {
-          check_number_type(phase);
-          e_eventPhase = phase;
+        value: function (phaseArg) {
+          check_number_type(phaseArg);
+          eventPhase = phaseArg;
         }
       },
 
@@ -273,6 +273,45 @@
    * CLASS CONSTANTS
    */
   Object.defineProperties(doodle.Event, {
+
+    'CAPTURING_PHASE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 1
+    },
+
+    'AT_TARGET': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 2
+    },
+
+    'BUBBLING_PHASE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 3
+    },
+
+		/* Dispatched when object is added to display path.
+		 */
+		'ADDED': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "added"
+    },
+
+		/* Dispatched when object is removed from display path.
+		 */
+		'REMOVED': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "removed"
+    },
 
     'ENTER_FRAME': {
       enumerable: true,

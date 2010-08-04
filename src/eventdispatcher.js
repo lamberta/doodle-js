@@ -193,12 +193,13 @@
         value: function (event) {
           if (check_event_type(event, this+'.handleEvent')) {
             //check for listeners that match event type
-            var phase = event.bubbles ? 'bubble':'capture',
+						//if capture not set, using bubble listeners - like for AT_TARGET phase
+            var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
                 listeners = this.eventListeners[event.type], //obj
                 count = 0, //listener count
                 rv,  //return value of handler
                 i; //counter
-            
+
             listeners = listeners && listeners[phase];
             if (listeners && listeners.length > 0) {
               //currentTarget is the object with addEventListener
@@ -251,7 +252,7 @@
               len, //count of nodes up to root
               i, //counter
               rv; //return value of event listener
-          
+
           check_event_type(event, this+'.dispatchEvent');
 
           //can't dispatch an event that's already stopped

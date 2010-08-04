@@ -49,7 +49,7 @@ var last_event;
 
 					//add listeners to dom events that we'll re-dispatch to the scene graph
 					for (var type in doodle.MouseEvent) {
-						element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event, false);
+						element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event_to_sprite, false);
 					}
 					//add keyboard listeners to document
 					//how to make this work for multiple displays?
@@ -251,33 +251,42 @@ var last_event;
 }());//end class closure
 
 
-
+var inheritsSprite = doodle.Sprite.inheritsSprite;
 //test mouse click collision with sprite bounds
-var dispatch_mouse_event = function (event) {
-  console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
+var dispatch_mouse_event_to_sprite = function (event) {
   last_event = event;
   //position on canvas element
   //offset is relative to div, however this implementation adds 1 to y?
-  var global_x = event.globalX = event.offsetX,
-      global_y = event.globalY = event.offsetY,
+  var global_x = event.offsetX,
+      global_y = event.offsetY,
       dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+			evt = doodle.MouseEvent(event), //wrap dom event in doodle event
       local_pt;
-  
+
+	console.log("coords: "+[,] +"type: " + event.type + ", bubbles: " + event.bubbles);
+	
   dispatcher_queue.forEach(function (obj) {
-    if (obj.hasEventListener(event.type)) {
-      //needs to be a sprite
-      if (obj.hitArea && obj.hitArea.containsPoint({x: global_x, y: global_y})) {
+    if (obj.hasEventListener(evt.type) && inheritsSprite(obj)) {
+      if (obj.hitArea.containsPoint({x: global_x, y: global_y})) {
         //check z-index to determine who's on top?
         local_pt = obj.globalToLocal({x: global_x, y: global_y});
-        event.localX = local_pt.x;
-        event.localY = local_pt.y;
-        obj.handleEvent(event);
+        //evt.localX = local_pt.x;
+        //evt.localY = local_pt.y;
+				console.log("go!");
+				evt.__setTarget(null); //dom setting target as canvas element
+        obj.dispatchEvent(evt);
       }
     }
   });
 }
 
 var dispatch_keyboard_event = function (event) {
-	console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
-  last_event = event;
+	//console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
+  var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+			evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
+	dispatcher_queue.forEach(function (obj) {
+		if (obj.hasEventListener(evt.type)) {
+			obj.handleEvent(evt);
+		}
+	});
 };

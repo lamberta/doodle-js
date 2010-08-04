@@ -4,6 +4,7 @@
       node_count = 0,
       isNode,
       inheritsNode,
+      inDisplayList,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_string_type = doodle.utils.types.check_string_type;
   
@@ -23,15 +24,15 @@
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
-			id = undefined;
+      id = undefined;
     } else if (arg_len > 1) {
-			throw new SyntaxError("[object Node]: Invalid number of parameters.");
-		}
+      throw new SyntaxError("[object Node]: Invalid number of parameters.");
+    }
 
     Object.defineProperties(node, node_properties);
     //properties that require privacy
     Object.defineProperties(node, {
-			
+      
       'id': {
         enumerable: true,
         configurable: false,
@@ -42,7 +43,7 @@
           }
         }
       },
-			
+      
       'root': {
         enumerable: true,
         configurable: false,
@@ -55,7 +56,7 @@
           }
         }
       },
-			
+      
       'parent': {
         enumerable: true,
         configurable: false,
@@ -68,7 +69,7 @@
           }
         }
       },
-			
+      
       'children': {
         enumerable: false,
         configurable: false,
@@ -76,7 +77,7 @@
           return children;
         }
       },
-			
+      
       'transform': {
         enumerable: false,
         configurable: false,
@@ -104,9 +105,9 @@
   };
 
 
-	/*
-	 * CLASS METHODS
-	 */
+  /*
+   * CLASS METHODS
+   */
 
   /* Test if an object is an node.
    * Not the best way to test object, but it'll do for now.
@@ -137,11 +138,24 @@
 
   doodle.utils.types.check_node_type = function (node, caller_name) {
     if (!inheritsNode(node)) {
-			caller_name = (caller_name === undefined) ? "check_node_type" : caller_name;
+      caller_name = (caller_name === undefined) ? "check_node_type" : caller_name;
       throw new TypeError(caller_name + ": Parameter must be a node.");
     } else {
       return true;
     }
+  };
+
+  /* A node is part of the display list if it can find a context to
+   * draw on in it's scene graph.
+   */
+  inDisplayList = doodle.Node.inDisplayList = function (node) {
+    while (node) {
+      if (node.context) {
+        return true;
+      }
+      node = node.parent;
+    }
+    return false;
   };
 
 
@@ -149,18 +163,28 @@
 
     var Point = doodle.geom.Point,
         isPoint = Point.isPoint,
+        Event = doodle.Event,
         check_number_type = doodle.utils.types.check_number_type,
         check_point_type = doodle.utils.types.check_point_type,
-				check_node_type = doodle.utils.types.check_node_type,a
-				to_degrees = 180/Math.PI,
-				to_radians = Math.PI/180;
+        check_node_type = doodle.utils.types.check_node_type,a
+        to_degrees = 180/Math.PI,
+        to_radians = Math.PI/180;
+
+    /* Dispatches and event type from all of a nodes children and grandchildren,
+     */
+    function children_dispatch_event (node, event_type) {
+      node.children.forEach(function (child) {
+        child.dispatchEvent(Event(event_type, true));
+        children_dispatch_event(child, event_type);
+      });
+    }
 
     node_properties = {
       /*
        * PROPERTIES
        */
 
-			'x': {
+      'x': {
         enumerable: true,
         configurable: false,
         get: function () {
@@ -184,19 +208,19 @@
         }
       },
 
-			//registration point
-			'axis': {
-				//temp value
-				value: {x: this.x, y: this.y}
-			},
+      //registration point
+      'axis': {
+        //temp value
+        value: {x: this.x, y: this.y}
+      },
 
-			'rotate': { //around external point?
-				value: function (deg) {
-					check_number_type(deg, this+'.rotate');
-					this.transform.rotate(deg * to_radians);
-				}
-			},
-			
+      'rotate': { //around external point?
+        value: function (deg) {
+          check_number_type(deg, this+'.rotate');
+          this.transform.rotate(deg * to_radians);
+        }
+      },
+      
       'rotation': {
         enumerable: true,
         configurable: false,
@@ -255,27 +279,33 @@
         writable: false,
         configurable: false,
         value: function (node, index) {
-					//if already a child then ignore
-					if (this.children.indexOf(node) !== -1) {
-						return false;
-					}
-					//type check
-					check_node_type(node, this+'.addChildAt');
-					check_number_type(index, this+'.addChildAt');
-					
-					//make sure parent/child share same root
-					if (node.root !== this.root) {
-						node.root = this.root;
-					}
-					//if has previous parent, remove from it's children
-					if (node.parent !== null && node.parent !== this) {
-						node.parent.removeChild(node);
-					}
-					node.parent = this;
-					this.children.splice(index, 0, node);
+          //if already a child then ignore
+          if (this.children.indexOf(node) !== -1) {
+            return false;
+          }
+          //type check
+          check_node_type(node, this+'.addChildAt');
+          check_number_type(index, this+'.addChildAt');
+          
+          //make sure parent/child share same root
+          if (node.root !== this.root) {
+            node.root = this.root;
+          }
+          //if has previous parent, remove from it's children
+          if (node.parent !== null && node.parent !== this) {
+            node.parent.removeChild(node);
+          }
+          node.parent = this;
+          this.children.splice(index, 0, node);
+          
+          //is the node now a part of the display list?
+          if (inDisplayList(node)) {
+            node.dispatchEvent(Event(Event.ADDED, true));
+            children_dispatch_event(node, Event.ADDED);
+          }
 
-					return node;
-				}
+          return node;
+        }
       },
       
       'addChild': {
@@ -294,9 +324,17 @@
         value: function (index) {
           check_number_type(index, this+'.removeChildAt');
           var node = this.children[index];
+          
+          this.children.splice(index, 1);
+
+          //is it no longer a part of the display list?
+          if (inDisplayList(node)) {
+            node.dispatchEvent(Event(Event.REMOVED, true));
+            children_dispatch_event(node, Event.REMOVED);
+          }
+          //these are needed for final transversal
           node.root = null;
           node.parent = null;
-          this.children.splice(index, 1);
         }
       },
       
