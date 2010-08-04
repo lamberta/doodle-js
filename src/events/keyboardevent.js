@@ -217,6 +217,27 @@
 
   //constants
   Object.defineProperties(doodle.KeyboardEvent, {
+    
+    'KEY_PRESS': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "keypress"
+    },
+
+    'KEY_UP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "keyup"
+    },
+
+    'KEY_DOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "keydown"
+    },
 
     'KEY_LOCATION_STANDARD': {
       enumerable: true,

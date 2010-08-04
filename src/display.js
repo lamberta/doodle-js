@@ -46,9 +46,17 @@ var last_event;
           element.style.position = "relative";
           //init rest - can you transfer layers to another div?
           this.root = this;
-          
-          //add event listeners
-          element.onmousedown = dispatch_mouse_event;
+
+					//add listeners to dom events that we'll re-dispatch to the scene graph
+					for (var type in doodle.MouseEvent) {
+						element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event, false);
+					}
+					//add keyboard listeners to document
+					//how to make this work for multiple displays?
+					document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event, false);
+					document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event, false);
+					document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event, false);
+					
         }
       }
     });
@@ -246,7 +254,7 @@ var last_event;
 
 //test mouse click collision with sprite bounds
 var dispatch_mouse_event = function (event) {
-  console.log(event.type + "!");
+  console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
   last_event = event;
   //position on canvas element
   //offset is relative to div, however this implementation adds 1 to y?
@@ -268,3 +276,8 @@ var dispatch_mouse_event = function (event) {
     }
   });
 }
+
+var dispatch_keyboard_event = function (event) {
+	console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
+  last_event = event;
+};

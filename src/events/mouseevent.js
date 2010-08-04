@@ -277,9 +277,14 @@
 
   }());
 
-  //constants
+
+  /* MouseEvent types
+   * Compatibility tables: http://www.quirksmode.org/dom/events/index.html
+   */
   Object.defineProperties(doodle.MouseEvent, {
 
+    /* To test for left/middle/right button check value for event.which (0,1,2)
+     */
     'CLICK': {
       enumerable: true,
       writable: false,
@@ -294,18 +299,11 @@
       value: "dblclick"
     },
 
-    'MIDDLE_CLICK': {
+    'CONTEXT_MENU': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "middleclick"
-    },
-
-    'RIGHT_CLICK': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "rightclick"
+      value: "contextmenu"
     },
 
     'MOUSE_DOWN': {
@@ -322,18 +320,18 @@
       value: "mouseup"
     },
 
+    'MOUSE_WHEEL': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mousewheel"
+    },
+
     'MOUSE_MOVE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: "mousemove"
-    },
-
-    'MOUSE_ENTER': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mouseenter"
     },
 
     'MOUSE_OUT': {
@@ -348,6 +346,20 @@
       writable: false,
       configurable: false,
       value: "mouseover"
+    },
+
+    'MOUSE_ENTER': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseenter"
+    },
+
+    'MOUSE_LEAVE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "mouseleave"
     }
     
   });
