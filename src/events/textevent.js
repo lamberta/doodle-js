@@ -1,9 +1,6 @@
 
-/* TextEvent applies only to characters and is designed for use with
- * any text input devices, not just keyboards.
+/* DOM 3 Event: TextEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-textevents
- *
- * It's here for now, I don't know how important this is to implement.
  */
 
 (function () {
@@ -28,35 +25,36 @@
    */
   doodle.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
     var arg_len = arguments.length,
-        initializer,
-        textevent,
-        //text-event read-only properties
-        e_data = "",
-        e_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
+        initializer, //if passed another event object
+        textevent; //super-object to construct
 
     //check if given an init event to wrap
     if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0];
-      //handle properties derived from TextEvent objects
-      if (initializer.toString() === '[object TextEvent]') {
-        //copy properties over - we'll check these when we init the new event
-        type = initializer.type;
-        bubbles = initializer.bubbles;
-        cancelable = initializer.cancelable;
-        view = initializer.view;
-        data = initializer.data;
-        inputMode = initializer.inputMode;
-        //the rest we'll have to assume the previous event is good
-        //e_data = initializer.data;
-      }
-      //init mouse-event object with uievent
+      initializer = arguments[0]; //event object
+      
+      //copy event properties to our args that'll be used for initialization
+      //initTextEvent() will typecheck these
+      type = initializer.type;
+      bubbles = initializer.bubbles;
+      cancelable = initializer.cancelable;
+      view = initializer.view;
+      data = initializer.data;
+      inputMode = initializer.inputMode;
+      
+      //pass on the event arg to init our uievent prototype
       textevent = Object.create(doodle.UIEvent(initializer));
 
     } else if (arg_len === 0 || arg_len > 6) {
       //check arg count
       throw new SyntaxError("[object TextEvent]: Invalid number of parameters.");
     } else {
-      //regular instantiation
+      //regular instantiation of prototype
+      bubbles = bubbles === true; //false
+      cancelable = cancelable === true;
+      view = (viewArg === undefined) ? null : view;
+      check_string_type(type, '[object TextEvent].constructor', 'type');
+      check_boolean_type(bubbles, '[object TextEvent].constructor', 'bubbles');
+      check_boolean_type(cancelable, '[object TextEvent].constructor', 'cancelable');
       textevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
     }
     
@@ -68,33 +66,34 @@
       'data': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_data; }
+        get: function () { return data; }
       },
 
       'inputMode': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_inputMode; }
+        get: function () { return inputMode; }
       },
 
       /* METHODS
        */
 
       'initTextEvent': {
-        value: function (type, bubbles, cancelable, view, data, inputMode) {
+        value: function (typeArg, canBubbleArg, cancelableArg,
+                         viewArg, dataArg, inputModeArg) {
           //parameter defaults
-          bubbles = bubbles === true; //false
-          cancelable = cancelable === true; //false
-          view = (view === undefined) ? null : view;
-          e_data = (data === undefined) ? "" : data;
-          e_inputMode = (inputMode === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputMode;
-          
+          type = typeArg;
+          bubbles = canBubbleArg === true; //false
+          cancelable = cancelableArg === true;
+          view = (viewArg === undefined) ? null : viewArg;
+          data = (dataArg === undefined) ? "" : dataArg;
+          inputMode = (inputModeArg === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
           //type-check
-          check_string_type(type, this+'.initTextEvent');
-          check_boolean_type(bubbles, this+'.initTextEvent');
-          check_boolean_type(cancelable, this+'.initTextEvent');
-          check_string_type(e_data, this+'.initTextEvent');
-          check_number_type(e_inputMode, this+'.initTextEvent');
+          check_string_type(type, this+'.initTextEvent', 'type');
+          check_boolean_type(bubbles, this+'.initTextEvent', 'bubbles');
+          check_boolean_type(cancelable, this+'.initTextEvent', 'cancelable');
+          check_string_type(data, this+'.initTextEvent', 'data');
+          check_number_type(inputMode, this+'.initTextEvent', 'inputMode');
           
           this.initUIEvent(type, bubbles, cancelable, view);
           return this;

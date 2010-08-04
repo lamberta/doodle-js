@@ -1,4 +1,8 @@
 
+/* DOM 2 Event: UIEvent:Event
+ * http://www.w3.org/TR/DOM-Level-3-Events/#events-Events-UIEvent
+ */
+
 (function () {
   var uievent_properties,
       isEvent = doodle.Event.isEvent,
@@ -20,40 +24,37 @@
    */
   doodle.UIEvent = function (type, bubbles, cancelable, view, detail) {
     var arg_len = arguments.length,
-        initializer,
-        uievent,
-        //default ui-event read-only properties
-        e_view = null,
-        e_detail = 0,
-        e_which = 0,
-        e_charCode = 0,
-        e_keyCode = 0,
-        e_layerX = 0,
-        e_layerY = 0,
-        e_pageX = 0,
-        e_pageY = 0;
+        initializer, //if passed another event object
+        uievent, //super-object to construct
+        //read-only properties
+        which = 0,
+        charCode = 0,
+        keyCode = 0,
+        layerX = 0,
+        layerY = 0,
+        pageX = 0,
+        pageY = 0;
 
     //check if given an init event to wrap
     if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0];
-      //handle properties derived from UIEvent objects
-      if (initializer.toString() === '[object UIEvent]' ||
-          initializer.toString() === '[object MouseEvent]') {
-        //copy properties over - we'll check these when we init the new event
-        type = initializer.type;
-        bubbles = initializer.bubbles;
-        cancelable = initializer.cancelable;
-        view = initializer.view;
-        detail = initializer.detail;
-        //the rest we'll have to assume the previous event is good
-        e_which = initializer.which;
-        e_charCode = initializer.charCode;
-        e_keyCode = initializer.keyCode;
-        e_layerX = initializer.layerX;
-        e_layerY = initializer.layerY;
-        e_pageX = initializer.pageX;
-        e_pageY = initializer.pageY;
-      }
+      initializer = arguments[0]; //event object
+      
+      //copy event properties to our args that'll be used for initialization
+      //initUIEvent() will typecheck these
+      type = initializer.type;
+      bubbles = initializer.bubbles;
+      cancelable = initializer.cancelable;
+      view = initializer.view;
+      detail = initializer.detail;
+      //initUIEvent() won't touch these
+      which = initializer.which || 0;
+      charCode = initializer.charCode || 0;
+      keyCode = initializer.keyCode || 0;
+      layerX = initializer.layerX || 0;
+      layerY = initializer.layerY || 0;
+      pageX = initializer.pageX || 0;
+      pageY = initializer.pageY || 0;
+
       //init uiobject with event
       uievent = Object.create(doodle.Event(initializer));
       
@@ -61,7 +62,12 @@
       //check arg count
       throw new SyntaxError("[object UIEvent]: Invalid number of parameters.");
     } else {
-      //regular instantiation
+      //regular instantiation of prototype
+      bubbles = bubbles === true; //false
+      cancelable = cancelable === true;
+      check_string_type(type, '[object UIEvent].constructor', 'type');
+      check_boolean_type(bubbles, '[object UIEvent].constructor', 'bubbles');
+      check_boolean_type(cancelable, '[object UIEvent].constructor', 'cancelable');
       uievent = Object.create(doodle.Event(type, bubbles, cancelable));
     }
     
@@ -72,71 +78,72 @@
       'view': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_view; }
+        get: function () { return view; }
       },
 
       'detail': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_detail; }
+        get: function () { return detail; }
       },
 
       'which': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_which; }
+        get: function () { return which; }
       },
 
       'charCode': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_charCode; }
+        get: function () { return charCode; }
       },
 
       'keyCode': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_keyCode; }
+        get: function () { return keyCode; }
       },
 
       'layerX': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_layerX; }
+        get: function () { return layerX; }
       },
 
       'layerY': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_layerY; }
+        get: function () { return layerY; }
       },
 
       'pageX': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_pageX; }
+        get: function () { return pageX; }
       },
 
       'pageY': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_pageY; }
+        get: function () { return pageY; }
       },
 
       /* METHODS
        */
       'initUIEvent': {
-        value: function (type, bubbles, cancelable, view, detail) {
+        value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg) {
           //parameter defaults
-          bubbles = bubbles === true; //false
-          cancelable = cancelable === true; //false
-          e_view = (view === undefined) ? null : view;
-          e_detail = (detail === undefined) ? 0 : detail;
+          type = typeArg;
+          bubbles = canBubbleArg === true; //false
+          cancelable = cancelableArg === true;
+          view = (viewArg === undefined) ? null : viewArg;
+          detail = (detailArg === undefined) ? 0 : detailArg;
           //type-check
-          check_string_type(type, this+'.initUIEvent');
-          check_boolean_type(bubbles, this+'.initUIEvent');
-          check_boolean_type(cancelable, this+'.initUIEvent');
-          check_number_type(e_detail, this+'.initUIEvent');
+          check_string_type(type, this+'.initUIEvent', 'type');
+          check_boolean_type(bubbles, this+'.initUIEvent', 'bubbles');
+          check_boolean_type(cancelable, this+'.initUIEvent', 'cancelable');
+          check_number_type(detail, this+'.initUIEvent', 'detail');
           
           this.initEvent(type, bubbles, cancelable);
           return this;

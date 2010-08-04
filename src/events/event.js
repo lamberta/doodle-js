@@ -24,49 +24,45 @@
    */
   doodle.Event = function (type, bubbles, cancelable) {
     var arg_len = arguments.length,
-        initializer,
-        event = Object.create(event_prototype), //doodle event
-        //generate dom event that we'll copy values from - mouseevent
-        //event_temp = document.createEvent('Event'),
-        //read-only event properties
-        e_type,
-        e_bubbles,
-        e_cancelable,
-        e_cancel = false, //internal use
-        e_cancelNow = false, //internal use
-        e_cancelBubble = false,
-        e_defaultPrevented = false,
-        e_eventPhase = 0,
-        e_target = null,
-        e_currentTarget = null,
-        e_timeStamp = new Date(),
-        e_clipboardData,
-        e_srcElement = null,
-        e_returnValue = true;
+        initializer, //if passed another event object
+        event = Object.create(event_prototype), //super-object
+        //read-only properties
+        cancel = false, //internal use
+        cancelNow = false, //internal use
+        cancelBubble = false,
+        defaultPrevented = false,
+        eventPhase = 0,
+        target = null,
+        currentTarget = null,
+        timeStamp = new Date(),
+        clipboardData,
+        srcElement = null,
+        returnValue = true;
 
     //check if given an init event to wrap
     if (arg_len === 1 && isEvent(arguments[0])) {
       initializer = arguments[0];
-      //copy properties over - we'll check these when we init the new event
+      //copy event properties to our args that'll be used for initialization
+      //initEvent() will typecheck these
       type = initializer.type;
       bubbles = initializer.bubbles;
       cancelable = initializer.cancelable;
-      //the rest we'll have to assume the previous event is good
-      e_cancelBubble = initializer.cancelBubble;
-      e_defaultPrevented = initializer.defaultPrevented;
-      e_eventPhase = initializer.eventPhase;
-      e_target = initializer.target;
-      e_currentTarget = initializer.currentTarget;
-      e_timeStamp = initializer.timeStamp;
-      e_clipboardData = initializer.clipboardData;
-      e_srcElement = initializer.srcElement;
-      e_returnValue = initializer.returnValue;
+      //initEvent() won't touch these
+      cancelBubble = initializer.cancelBubble;
+      defaultPrevented = initializer.defaultPrevented;
+      eventPhase = initializer.eventPhase;
+      target = initializer.target;
+      currentTarget = initializer.currentTarget;
+      timeStamp = initializer.timeStamp;
+      clipboardData = initializer.clipboardData;
+      srcElement = initializer.srcElement;
+      returnValue = initializer.returnValue;
       //check for doodle internal event properties
       if (initializer.__cancel) {
-        e_cancel = initializer.__cancel;
+        cancel = initializer.__cancel;
       }
       if (initializer.__cancelNow) {
-        e_cancelNow = initializer.__cancelNow;
+        cancelNow = initializer.__cancelNow;
       }
       
     } else if (arg_len === 0 || arg_len > 3) {
@@ -84,13 +80,13 @@
       'bubbles': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_bubbles; }
+        get: function () { return bubbles; }
       },
 
       'cancelBubble': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_cancelBubble; },
+        get: function () { return cancelBubble; },
         set: function (cancelp) {
           check_boolean_type(cancelp, this+'.cancelBubble');
           e_cancelBubble = cancelp;
@@ -100,7 +96,7 @@
       'cancelable': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_cancelable; }
+        get: function () { return cancelable; }
       },
 
       //test if event propagation should stop after this node
@@ -108,7 +104,7 @@
       '__cancel': {
         enumerable: false,
         configurable: false,
-        get: function () { return e_cancel; }
+        get: function () { return cancel; }
       },
 
       //test if event propagation should stop immediately,
@@ -117,13 +113,13 @@
       '__cancelNow': {
         enumerable: false,
         configurable: false,
-        get: function () { return e_cancelNow; }
+        get: function () { return cancelNow; }
       },
 
       'currentTarget': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_currentTarget; }
+        get: function () { return currentTarget; }
       },
 
       //currentTarget is read-only, but damnit I need to set it sometimes
@@ -137,7 +133,7 @@
       'target': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_target; }
+        get: function () { return target; }
       },
 
       '__setTarget': {
@@ -150,7 +146,7 @@
       'eventPhase': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_eventPhase; }
+        get: function () { return eventPhase; }
       },
       
       '__setEventPhase': {
@@ -164,25 +160,25 @@
       'srcElement': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_srcElement; }
+        get: function () { return srcElement; }
       },
 
       'timeStamp': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_timeStamp; }
+        get: function () { return timeStamp; }
       },
 
       'type': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_type; }
+        get: function () { return type; }
       },
 
       'returnValue': {
         enumerable: true,
         configurable: false,
-        get: function () { return e_returnValue; }
+        get: function () { return returnValue; }
       },
       
       /*
@@ -192,16 +188,15 @@
       'initEvent': {
         enumerable: true,
         configurable: false,
-        value: function (type, bubbles, cancelable) {
+        value: function (typeArg, canBubbleArg, cancelableArg) {
           //parameter defaults
-          bubbles = bubbles === true; //false
-          cancelable = cancelable === true; //false
-          check_string_type(type, this+'.initEvent');
-          check_boolean_type(bubbles, this+'.initEvent');
-          check_boolean_type(cancelable, this+'.initEvent');
-          e_type = type;
-          e_bubbles = bubbles;
-          e_cancelable = cancelable;
+          bubbles = canBubbleArg === true; //false
+          cancelable = cancelableArg === true;
+          //typecheck
+          check_string_type(type, this+'.initEvent', 'type');
+          check_boolean_type(bubbles, this+'.initEvent', 'bubbles');
+          check_boolean_type(cancelable, this+'.initEvent', 'cancelable');
+          
           return this;
         }
       },
@@ -210,7 +205,7 @@
         enumerable: true,
         configurable: false,
         value: function () {
-          e_defaultPrevented = true;
+          defaultPrevented = true;
         },
       },
 
@@ -221,7 +216,7 @@
           if (!this.cancelable) {
             throw new Error(this+'.stopPropagation: Event can not be cancelled.');
           } else {
-            e_cancel = true;
+            cancel = true;
           }
         }
       },
@@ -233,8 +228,8 @@
           if (!this.cancelable) {
             throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
           } else {
-            e_cancel = true;
-            e_cancelNow = true;
+            cancel = true;
+            cancelNow = true;
           }
         }
       }

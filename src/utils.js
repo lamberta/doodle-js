@@ -32,86 +32,93 @@
    */
   doodle.utils.types = {
     //checks n, or all elements if n is an array
-    check_number_type: function (n, caller_name) {
+    check_number_type: function (n, caller, param) {
       var i;
+      caller = (caller === undefined) ? "check_number_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
       if (typeof n === "number") {
         return true;
       } else if (i = n.length) {
         //given array, or semi-array
         while ((i -= 1) >= 0) {
           if (typeof n[i] !== "number") {
-            caller_name = (caller_name === undefined) ? "check_number_type" : caller_name;
-            throw new TypeError(caller_name + ": Parameter must be a number.");
+            throw new TypeError(caller + param +": Parameter must be a number.");
           }
         }
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_number_type" : caller_name;
-        throw new TypeError(caller_name + ": Parameter must be a number.");
+        throw new TypeError(caller + param +": Parameter must be a number.");
       }
     },
 
-    check_boolean_type: function (bool, caller_name) {
+    check_boolean_type: function (bool, caller, param) {
       if (typeof bool === "boolean") {
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_boolean_type" : caller_name;
-        throw new TypeError(caller_name + ": Parameter must be a boolean.");
+        caller = (caller === undefined) ? "check_boolean_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be a boolean.");
       }
     },
 
-    check_string_type: function (str, caller_name) {
+    check_string_type: function (str, caller, param) {
       if (typeof str === "string") {
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_string_type" : caller_name;
-        throw new TypeError(caller_name + ": Parameter must be a string.");
+        caller = (caller === undefined) ? "check_string_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be a string.");
       }
     },
 
-    check_function_type: function (fn, caller_name) {
+    check_function_type: function (fn, caller, param) {
       if (typeof fn === "function") {
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_function_type" : caller_name;
-        throw new TypeError(caller_name + ": Parameter must be a function.");
+        caller = (caller === undefined) ? "check_function_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be a function.");
       }
     },
 
-    check_event_type: function (evt, caller_name) {
+    check_event_type: function (evt, caller, param) {
       if (evt && (evt.toString() === "[object Event]" ||
                   evt.toString() === "[object MouseEvent]")) {
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_event_type" : caller_name;
-        throw new TypeError(caller_name + ": Parameter must be an event.");
+        caller = (caller === undefined) ? "check_event_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be an event.");
       }
     },
 
-    check_canvas_type: function (canvas, caller_name) {
+    check_canvas_type: function (canvas, caller, param) {
       if (canvas && canvas.toString() === "[object HTMLCanvasElement]") {
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_canvas_type" : caller_name;
-        throw new TypeError(caller_name + ": Parameter must be an canvas element.");
+        caller = (caller === undefined) ? "check_canvas_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be an canvas element.");
       }
     },
 
-    check_context_type: function (ctx, caller_name) {
+    check_context_type: function (ctx, caller, param) {
       if (ctx && ctx.toString() === "[object CanvasRenderingContext2D]") {
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_context_type" : caller_name;
-        throw new TypeError(caller_name + ": Parameter must be an canvas context.");
+        caller = (caller === undefined) ? "check_context_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be an canvas context.");
       }
     },
 
-    check_block_element: function (element, caller_name) {
+    check_block_element: function (element, caller, param) {
       if (get_style_property(element, 'display') === "block") {
         return true;
       } else {
-        caller_name = (caller_name === undefined) ? "check_block_element" : caller_name;
-        throw new TypeError(caller_name + ": HTML element must have display: block.");
+        caller = (caller === undefined) ? "check_block_element" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": HTML element must have display: block.");
       }
     }
     
@@ -120,7 +127,7 @@
 
   /* Returns HTML element from id name or element itself.
    */
-  doodle.utils.get_element = function (id, caller_name) {
+  doodle.utils.get_element = function (id, caller) {
     var element;
     if (typeof id === 'string') {
       //lop off pound-sign if given
@@ -132,8 +139,8 @@
     }
 
     if (!element) {
-      caller_name = (caller_name === undefined) ? "get_element" : caller_name;
-      throw new ReferenceError(caller_name + ": Unable to get HTML element: " + id);
+      caller = (caller === undefined) ? "get_element" : caller;
+      throw new ReferenceError(caller + ": Unable to get HTML element: " + id);
     }
     return element;
   };
