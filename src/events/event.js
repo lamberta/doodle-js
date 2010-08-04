@@ -301,7 +301,9 @@
     }
     return (evt_name === '[object Event]' ||
             evt_name === '[object UIEvent]' ||
-            evt_name === '[object MouseEvent]');
+            evt_name === '[object MouseEvent]' ||
+            evt_name === '[object KeyboardEvent]' ||
+            evt_name === '[object TextEvent]');
   };
   
 }());//end class closure
