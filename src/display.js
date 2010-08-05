@@ -6,8 +6,11 @@ var last_event;
   var display_properties,
       check_block_element = doodle.utils.types.check_block_element,
       get_element = doodle.utils.get_element,
-      Event = doodle.Event;
-
+      Event = doodle.Event,
+      ENTER_FRAME = Event.ENTER_FRAME,
+      enterFrame = Event(ENTER_FRAME),
+      dispatcher_queue = doodle.EventDispatcher.dispatcher_queue;
+  
   /* Super constructor
    * @param {String|Function} id|initializer
    * @return {Object}
@@ -15,9 +18,7 @@ var last_event;
   doodle.Display = function (element) {
     var arg_len = arguments.length,
         initializer,
-        display = Object.create(doodle.ElementNode()),
-    interval_id,
-    frameRate = false; //fps
+        display = Object.create(doodle.ElementNode());
 
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
@@ -64,33 +65,26 @@ var last_event;
        * for this event. It does not go through a "capture phase" and is dispatched
        * directly to the target, whether the target is on the display list or not.
        */
-      'frameRate': {
-        get: function () { return frameRate; },
-        set: function (fps) {
-          var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-              enterframe_name = Event.ENTER_FRAME,
-              enterframe_evt = Event(enterframe_name);
-
-          //turn off interval
-          if (fps === 0 || fps === false) {
-            clearInterval(interval_id);
-            frameRate = false;
-          } else if (fps !== frameRate && isFinite(1000/fps)) {
-            frameRate = fps;
-            clearInterval(interval_id);
-            interval_id = setInterval(function () {
-              dispatcher_queue.forEach(function (obj) {
-                if (obj.hasEventListener(enterframe_name)) {
-                  enterframe_evt.__setTarget(obj);
-                  obj.handleEvent(enterframe_evt);
-                }
-              });
-            }, 1000/frameRate);
-          } else {
-            throw new TypeError('[object Display].frameRate: Parameter must be a valid number or false.');
+      'frameRate': (function () {
+        var frame_rate = false, //fps
+            framerate_interval_id;
+        return {
+          get: function () { return frame_rate; },
+          set: function (fps) {
+            //turn off interval
+            if (fps === 0 || fps === false) {
+              frame_rate = false;
+              clearInterval(framerate_interval_id);
+            } else if (typeof fps === 'number' && fps !== frame_rate && isFinite(1000/fps)) {
+              frame_rate = fps;
+              clearInterval(framerate_interval_id);
+              framerate_interval_id = setInterval(create_frame, 1000/frame_rate);
+            } else {
+              throw new TypeError('[object Display].frameRate: Parameter must be a valid number or false.');
+            }
           }
         }
-      }
+      }())
     });
 
     
@@ -106,30 +100,41 @@ var last_event;
       throw new ReferenceError("[object Display]: Requires a HTML element.");
     }
 
-    //once the frameRate is set, draw all children and grandchildren
-    display.addEventListener(Event.ENTER_FRAME, draw_scene_graph);
 
-    function draw_scene_graph (evt) {
-      draw_node_children(display);
-    }
-    function draw_node_children (node) {
-      node.children.forEach(function (node) {
-        if (typeof node.clear === 'function') {
-          node.clear();
+    /* Clear, move, draw.
+     * Dispatches Event.ENTER_FRAME to all objects listening to it,
+     * reguardless if it's on the scene graph or not.
+     */
+    function create_frame () {
+      clear_scene_graph(display);
+      dispatcher_queue.forEach(function (obj) {
+        if (obj.hasEventListener(ENTER_FRAME)) {
+          enterFrame.__setTarget(obj);
+          obj.handleEvent(enterFrame);
         }
-        if (typeof node.draw === 'function') {
-          node.draw();
+      });
+      draw_scene_graph(display);
+    }
+    function clear_scene_graph (node) {
+      node.children.forEach(function (child) {
+        if (typeof child.clear === 'function') {
+          child.clear();
+        }
+        clear_scene_graph(child);
+      });
+    }
+    function draw_scene_graph (node) {
+      node.children.forEach(function (child) {
+        if (typeof child.draw === 'function') {
+          child.draw();
         };
-        draw_node_children(node);
+        draw_scene_graph(child);
       });
     }
     
     return display;
   };
 
-
-  
-  
 
   (function () {
 

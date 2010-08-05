@@ -17,13 +17,13 @@ function init () {
   display.width = 800;
 	display.height = 600;
 	display.backgroundColor = "#ffffff";
-	display.frameRate = 24;
+	display.frameRate = 1;
 
 	var layer0 = display.addLayer();
 	
 	ball = doodle.Sprite(function () {
-		this.x = 20;
-		this.y = 100;
+		this.x = 0;
+		this.y = 0;
 
 		this.graphics.beginFill("#ff0000");
 		this.graphics.rect(0, 0, 50, 50);
@@ -31,9 +31,8 @@ function init () {
 		this.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 
 		function onEnterFrame (event) {
-			//this.clear();
-			this.x += 1;
-			//this.draw();
+			this.x += 10;
+			console.log("move sprite");
 		}
 
 	});
