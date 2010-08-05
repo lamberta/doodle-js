@@ -13,7 +13,7 @@
 (function () {
 
   var sprite_properties,
-			bounds_properties,
+      bounds_properties,
       isSprite,
       inheritsSprite,
       hex_to_rgb = doodle.utils.hex_to_rgb,
@@ -21,8 +21,8 @@
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_rect_type = doodle.utils.types.check_rect_type,
-			check_context_type = doodle.utils.types.check_context_type,
-			Rectangle = doodle.geom.Rectangle;
+      check_context_type = doodle.utils.types.check_context_type,
+      Rectangle = doodle.geom.Rectangle;
 
 
   /* Super constructor
@@ -33,10 +33,10 @@
     var arg_len = arguments.length,
         initializer,
         sprite,
-				width = 0,
-				height = 0,
+        width = 0,
+        height = 0,
         hit_area = null,
-				draw_commands = [];
+        draw_commands = [];
 
     //inherits from doodle.Node, if string pass along id
     sprite = (typeof id === 'string') ?
@@ -57,7 +57,7 @@
        * PROPERTIES
        */
 
-			/* Indicates the width of the sprite, in pixels.
+      /* Indicates the width of the sprite, in pixels.
        * @param {Number}
        */
       'width': {
@@ -91,40 +91,40 @@
         enumerable: false,
         configurable: false,
         get: (function () {
-					//we'll be reusing these vars
-					var bounding_box = Rectangle(),
-							min = Math.min,
-							max = Math.max,
-							x, y, w, h,
-							//transform_point,
-							tr0, tr1, tr2, tr3;
-					
-					return function () {
-						//var transform_point = this.transform.transformPoint;
-						//x = this.x;
-						//y = this.y;
-						w = this.width;
-						h = this.height;
-						
-						//re-calculate bounding box
+          //we'll be reusing these vars
+          var bounding_box = Rectangle(),
+              min = Math.min,
+              max = Math.max,
+              x, y, w, h,
+              //transform_point,
+              tr0, tr1, tr2, tr3;
+          
+          return function () {
+            //var transform_point = this.transform.transformPoint;
+            //x = this.x;
+            //y = this.y;
+            w = this.width;
+            h = this.height;
+            
+            //re-calculate bounding box
 
-						//transform corners: tl, tr, br, bl
-						//relative to x/y of sprite!
-						//this matrix has dx/dy to apply
-						tr0 = this.transform.transformPoint({x: 0, y: 0});
-						tr1 = this.transform.transformPoint({x: w, y: 0});
-						tr2 = this.transform.transformPoint({x: w, y: h});
-						tr3 = this.transform.transformPoint({x: 0, y: h});
-						
-						//set rect with extremas
-						bounding_box.left = min(tr0.x, tr1.x, tr2.x, tr3.x);
-						bounding_box.right = max(tr0.x, tr1.x, tr2.x, tr3.x);
-						bounding_box.top = min(tr0.y, tr1.y, tr2.y, tr3.y);
-						bounding_box.bottom = max(tr0.y, tr1.y, tr2.y, tr3.y);
-						
-						return bounding_box;
-					}
-				}())
+            //transform corners: tl, tr, br, bl
+            //relative to x/y of sprite!
+            //this matrix has dx/dy to apply
+            tr0 = this.transform.transformPoint({x: 0, y: 0});
+            tr1 = this.transform.transformPoint({x: w, y: 0});
+            tr2 = this.transform.transformPoint({x: w, y: h});
+            tr3 = this.transform.transformPoint({x: 0, y: h});
+            
+            //set rect with extremas
+            bounding_box.left = min(tr0.x, tr1.x, tr2.x, tr3.x);
+            bounding_box.right = max(tr0.x, tr1.x, tr2.x, tr3.x);
+            bounding_box.top = min(tr0.y, tr1.y, tr2.y, tr3.y);
+            bounding_box.bottom = max(tr0.y, tr1.y, tr2.y, tr3.y);
+            
+            return bounding_box;
+          }
+        }())
       },
       
       'hitArea': {
@@ -146,23 +146,23 @@
         }
       },
 
-			//drawing context to use
-			'context': {
-				get: function () {
-					//will keep checking parent for context till found or null
-					var node = this.parent,
-							ctx;
-					while (node) {
-						if (node.context) {
-							ctx = node.context;
-							check_context_type(ctx, this+'.context (traversal)')
-							return ctx;
-						}
-						node = node.parent;
-					}
-					return null;
-				}
-			},
+      //drawing context to use
+      'context': {
+        get: function () {
+          //will keep checking parent for context till found or null
+          var node = this.parent,
+              ctx;
+          while (node) {
+            if (node.context) {
+              ctx = node.context;
+              check_context_type(ctx, this+'.context (traversal)')
+              return ctx;
+            }
+            node = node.parent;
+          }
+          return null;
+        }
+      },
 
       /*
        * METHODS
@@ -177,17 +177,17 @@
         configurable: false,
         value: function () {
           var self = this,
-							ctx = this.context,
-							mat = this.transform.toArray();
+              ctx = this.context,
+              mat = this.transform.toArray();
 
-					if (!ctx) {
-						throw new ReferenceError(this+".draw: Unable to find 2d Render Context.");
-					}
+          if (!ctx) {
+            throw new ReferenceError(this+".draw: Unable to find 2d Render Context.");
+          }
 
-					//need to move context around
-					ctx.save();
-					ctx.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
-					
+          //need to move context around
+          ctx.save();
+          ctx.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
+          
           draw_commands.forEach(function (cmd) {
             //draw function, provide self for this and context as arg
             if (typeof cmd === "function") {
@@ -207,17 +207,21 @@
               break;
             }
           });
-					ctx.restore();
+          ctx.restore();
         }
       },
 
-			'clear': {
-				value: function () {
-					var b_box = this.bounds;
+      'clear': {
+        value: function () {
+          var b_box = this.bounds,
+              ctx = this.context;
 
-					this.context.clearRect(b_box.x, b_box.y, b_box.width, b_box.height);
-				}
-			},
+          if (!ctx) {
+            throw new ReferenceError(this+".clear: Unable to find 2d Render Context.");
+          }
+          ctx.clearRect(b_box.x, b_box.y, b_box.width, b_box.height);
+        }
+      },
 
       /*
        * GRAPHICS
@@ -263,9 +267,9 @@
               while ((i=i-1) >= 0) {
                 draw_commands.splice(i, 1);
               }
-							//reset dimensions
-							sprite.width = 0;
-							sprite.height = 0;
+              //reset dimensions
+              sprite.width = 0;
+              sprite.height = 0;
             }
           },
 
@@ -303,15 +307,15 @@
               check_number_type(arguments, sprite+'.graphics.rect');
               //relative to registration point of sprite
 
-							var new_w = x + w,
-									new_h = y + h;
+              var new_w = x + w,
+                  new_h = y + h;
               //check for new bounds extrema
-							if (new_w > sprite.width) {
-								sprite.width = new_w;
-							}
-							if (new_h > sprite.height) {
-								sprite.height = new_h;
-							}
+              if (new_w > sprite.width) {
+                sprite.width = new_w;
+              }
+              if (new_h > sprite.height) {
+                sprite.height = new_h;
+              }
               
               draw_commands.push({'fillRect': [x,y,w,h]});
             }
@@ -441,7 +445,7 @@
     if (initializer) {
       initializer.call(sprite);
     }
-		
+    
     return sprite;
   };
 
@@ -489,8 +493,8 @@
        * PROPERTIES
        */
 
-			'rotation': {
-				enumerable: true,
+      'rotation': {
+        enumerable: true,
         configurable: false,
         get: function () {
           return this.transform.rotation * 180/Math.PI; //return degress
@@ -500,11 +504,11 @@
             this.transform.rotation = deg * Math.PI/180; //deg-to-rad
           }
 
-					//re-calc bounding box
-					new_xy = this.transform.transformPoint({x: this.x, y: this.y});
-					
+          //re-calc bounding box
+          new_xy = this.transform.transformPoint({x: this.x, y: this.y});
+          
         }
-			},
+      },
 
       /*
        * METHODS
@@ -543,6 +547,6 @@
         }
       }
     };//end sprite_properties
-		
+    
   }());
 }());//end class closure
