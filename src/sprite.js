@@ -95,7 +95,7 @@
           var bounding_box = Rectangle(),
               min = Math.min,
               max = Math.max,
-              x, y, w, h,
+							x, y, w, h,
               //transform_point,
               tr0, tr1, tr2, tr3;
           
@@ -155,7 +155,7 @@
           while (node) {
             if (node.context) {
               ctx = node.context;
-              check_context_type(ctx, this+'.context (traversal)')
+              check_context_type(ctx, this+'.context (traversal)');
               return ctx;
             }
             node = node.parent;
@@ -169,29 +169,21 @@
        */
 
       /* When called execute all the draw commands in the stack.
+			 * This draws from screen 0,0 - transforms are applied when the
+			 * entire scene graph is drawn.
        * @param {Context} context 2d canvas context to draw on.
        */
-      'draw': {
+      '__draw': {
         enumerable: false,
         writable: false,
         configurable: false,
-        value: function () {
-          var self = this,
-              ctx = this.context,
-              mat = this.transform.toArray();
+        value: function (ctx) {
+					check_context_type(ctx, this+'.__draw', 'context');
 
-          if (!ctx) {
-            throw new ReferenceError(this+".draw: Unable to find 2d Render Context.");
-          }
-
-          //need to move context around
-          ctx.save();
-          ctx.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
-          
           draw_commands.forEach(function (cmd) {
             //draw function, provide self for this and context as arg
             if (typeof cmd === "function") {
-              cmd.call(self, ctx);
+              cmd.call(sprite, ctx);
               return;
             }
             //draw object, given canvas.context command and param
@@ -208,20 +200,20 @@
             }
           });
 
-					//if (this.debug) { }; //draw bounding box, reg-point, axis
 					
-          ctx.restore();
+
         }
       },
 
       'clear': {
-        value: function () {
-          var b_box = this.bounds,
-              ctx = this.context;
+        value: function (ctx) {
+          var b_box = this.bounds;
 
           if (!ctx) {
-            throw new ReferenceError(this+".clear: Unable to find 2d Render Context.");
+            ctx = this.context;
           }
+          check_context_type(ctx, this+'.clear', 'context');
+          
           ctx.clearRect(b_box.x, b_box.y, b_box.width, b_box.height);
         }
       },
@@ -325,8 +317,8 @@
           },
 
           /*
-           * @param {Number} x
-           * @param {Number} y
+           * @param {Number} x The x location of the center of the circle relative to the registration point of the parent display object (in pixels).
+           * @param {Number} y The y location of the center of the circle relative to the registration point of the parent display object (in pixels).
            * @param {Number} radius
            */
           'circle': {
@@ -335,11 +327,9 @@
             configurable: false,
             value: function (x, y, radius) {
               check_number_type(arguments, sprite+'.graphics.circle');
-              var startAngle = 0,
-              endAngle = Math.PI * 2,
-              anticlockwise = true;
               draw_commands.push({'beginPath': null});
-              draw_commands.push({'arc': [x, y, radius, startAngle, endAngle, anticlockwise]});
+							//x, y, radius, start_angle, end_angle, anti-clockwise
+              draw_commands.push({'arc': [x, y, radius, 0, Math.PI*2, true]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
             }

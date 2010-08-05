@@ -6,6 +6,7 @@ var last_event;
   var display_properties,
       check_block_element = doodle.utils.types.check_block_element,
       get_element = doodle.utils.get_element,
+      check_context_type = doodle.utils.types.check_context_type,
       Event = doodle.Event,
       ENTER_FRAME = Event.ENTER_FRAME,
       enterFrame = Event(ENTER_FRAME),
@@ -18,7 +19,8 @@ var last_event;
   doodle.Display = function (element) {
     var arg_len = arguments.length,
         initializer,
-        display = Object.create(doodle.ElementNode());
+        display = Object.create(doodle.ElementNode()),
+        frame_count = 0;
 
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
@@ -101,6 +103,12 @@ var last_event;
     }
 
 
+    /* Redraw scene graph when children are added and removed.
+     */
+    display.addEventListener(Event.ADDED, redraw_scene_graph);
+    display.addEventListener(Event.REMOVED, redraw_scene_graph);
+    
+
     /* Clear, move, draw.
      * Dispatches Event.ENTER_FRAME to all objects listening to it,
      * reguardless if it's on the scene graph or not.
@@ -114,22 +122,61 @@ var last_event;
         }
       });
       draw_scene_graph(display);
+      frame_count += 1;
     }
-    function clear_scene_graph (node) {
+    function clear_scene_graph (node, context) {
       node.children.forEach(function (child) {
-        if (typeof child.clear === 'function') {
-          child.clear();
+        context = context || child.context;
+        check_context_type(context, this+'.clear_scene_graph', 'context');
+        
+        if (child.bounds) {
+          var bounds = child.bounds;
+          //take into account bounding box border
+          context.clearRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
         }
-        clear_scene_graph(child);
+        clear_scene_graph(child, context);
       });
     }
-    function draw_scene_graph (node) {
+    function draw_scene_graph (node, context) {
+      var m; //child transform matrix
       node.children.forEach(function (child) {
-        if (typeof child.draw === 'function') {
-          child.draw();
+        context = context || child.context;
+        m = child.transform.toArray();
+        context.save();
+        context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        
+        if (typeof child.__draw === 'function') {
+          child.__draw(context);
         };
-        draw_scene_graph(child);
+
+        //if (this.debug) { }; //draw bounding box, reg-point, axis
+        (function () {
+          if (child.bounds) {
+            var bounds = child.bounds;
+            context.save();
+            context.setTransform(1, 0, 0, 1, 0, 0); //reset
+            //bounding box
+            context.lineWidth = 0.5;
+            context.strokeStyle = "#0000ff";
+            context.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            //registraion point
+            context.fillStyle = "#000000";
+            context.beginPath();
+            context.arc(child.x, child.y, 3, 0, Math.PI*2, true);
+            context.closePath();
+            context.fill();
+            
+            context.restore();
+          }
+        }());
+        
+        draw_scene_graph(child, context);
+        context.restore();
       });
+    }
+    function redraw_scene_graph (evt) {
+      clear_scene_graph(display);
+      draw_scene_graph(display);
     }
     
     return display;
