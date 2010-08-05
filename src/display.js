@@ -299,7 +299,7 @@ var dispatch_mouse_event_to_sprite = function (event) {
       evt = doodle.MouseEvent(event), //wrap dom event in doodle event
       local_pt;
 
-  console.log("coords: "+[,] +"type: " + event.type + ", bubbles: " + event.bubbles);
+  //console.log("coords: "+[,] +"type: " + event.type + ", bubbles: " + event.bubbles);
   
   dispatcher_queue.forEach(function (obj) {
     if (obj.hasEventListener(evt.type) && inheritsSprite(obj)) {
