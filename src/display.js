@@ -5,7 +5,8 @@ var last_event;
 
   var display_properties,
       check_block_element = doodle.utils.types.check_block_element,
-      get_element = doodle.utils.get_element;
+      get_element = doodle.utils.get_element,
+      Event = doodle.Event;
 
 //Stage
 //frameRate
@@ -18,15 +19,17 @@ var last_event;
   doodle.Display = function (element) {
     var arg_len = arguments.length,
         initializer,
-        display = Object.create(doodle.ElementNode());
+        display = Object.create(doodle.ElementNode()),
+    interval_id,
+    frameRate = false; //fps
 
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
-			element = undefined;
+      element = undefined;
     } else if (arg_len > 1) {
-			throw new SyntaxError("[object Display]: Invalid number of parameters.");
-		}
+      throw new SyntaxError("[object Display]: Invalid number of parameters.");
+    }
 
     Object.defineProperties(display, display_properties);
     //properties that require privacy
@@ -47,43 +50,76 @@ var last_event;
           //init rest - can you transfer layers to another div?
           this.root = this;
 
-					//add listeners to dom events that we'll re-dispatch to the scene graph
-					for (var type in doodle.MouseEvent) {
-						element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event_to_sprite, false);
-					}
-					//add keyboard listeners to document
-					//how to make this work for multiple displays?
-					document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event, false);
-					document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event, false);
-					document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event, false);
-					
+          //add listeners to dom events that we'll re-dispatch to the scene graph
+          for (var type in doodle.MouseEvent) {
+            element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event_to_sprite, false);
+          }
+          //add keyboard listeners to document
+          //how to make this work for multiple displays?
+          document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event, false);
+          document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event, false);
+          document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event, false);
+          
+        }
+      },
+
+      /* Determines the interval to dispatch the event type Event.ENTER_FRAME.
+       * This event is dispatched simultaneously to all display objects listenting
+       * for this event. It does not go through a "capture phase" and is dispatched
+       * directly to the target, whether the target is on the display list or not.
+       */
+      'frameRate': {
+        get: function () { return frameRate; },
+        set: function (fps) {
+          var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+              enterframe_name = Event.ENTER_FRAME,
+              enterframe_evt = Event(enterframe_name);
+
+          //turn off interval
+          if (fps === 0 || fps === false) {
+            clearInterval(interval_id);
+            frameRate = false;
+          } else if (fps !== frameRate && isFinite(1000/fps)) {
+            frameRate = fps;
+            clearInterval(interval_id);
+            interval_id = setInterval(function () {
+              dispatcher_queue.forEach(function (obj) {
+                if (obj.hasEventListener(enterframe_name)) {
+                  enterframe_evt.__setTarget(obj);
+                  obj.handleEvent(enterframe_evt);
+                }
+              });
+            }, 1000/frameRate);
+          } else {
+            throw new TypeError('[object Display].frameRate: Parameter must be a valid number or false.');
+          }
         }
       }
     });
 
-		
+    
     //passed an initialization object: function
     if (initializer) {
       initializer.call(display);
     } else {
-			//init
-			display.element = element;
+      //init
+      display.element = element;
     }
 
-		if (!display.element) {
-			throw new ReferenceError("[object Display]: Requires a HTML element.");
-		}
+    if (!display.element) {
+      throw new ReferenceError("[object Display]: Requires a HTML element.");
+    }
     
     return display;
   };
 
-	
+  
 
   (function () {
 
     var check_string_type = doodle.utils.types.check_string_type,
         check_number_type = doodle.utils.types.check_number_type,
-				check_layer_type = doodle.utils.types.check_layer_type;
+        check_layer_type = doodle.utils.types.check_layer_type;
     
     
     display_properties = {
@@ -120,7 +156,7 @@ var last_event;
         }
       },
 
-			'toString': {
+      'toString': {
         enumerable: false,
         writable: false,
         configurable: false,
@@ -235,7 +271,7 @@ var last_event;
         value: function (id) {
           var layer = doodle.Layer(id); //layer will auto-name
           this.addChild(layer);
-					return layer;
+          return layer;
         }
       },
 
@@ -260,11 +296,11 @@ var dispatch_mouse_event_to_sprite = function (event) {
   var global_x = event.offsetX,
       global_y = event.offsetY,
       dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-			evt = doodle.MouseEvent(event), //wrap dom event in doodle event
+      evt = doodle.MouseEvent(event), //wrap dom event in doodle event
       local_pt;
 
-	console.log("coords: "+[,] +"type: " + event.type + ", bubbles: " + event.bubbles);
-	
+  console.log("coords: "+[,] +"type: " + event.type + ", bubbles: " + event.bubbles);
+  
   dispatcher_queue.forEach(function (obj) {
     if (obj.hasEventListener(evt.type) && inheritsSprite(obj)) {
       if (obj.hitArea.containsPoint({x: global_x, y: global_y})) {
@@ -272,8 +308,8 @@ var dispatch_mouse_event_to_sprite = function (event) {
         local_pt = obj.globalToLocal({x: global_x, y: global_y});
         //evt.localX = local_pt.x;
         //evt.localY = local_pt.y;
-				console.log("go!");
-				evt.__setTarget(null); //dom setting target as canvas element
+        console.log("go!");
+        evt.__setTarget(null); //dom setting target as canvas element
         obj.dispatchEvent(evt);
       }
     }
@@ -281,12 +317,12 @@ var dispatch_mouse_event_to_sprite = function (event) {
 }
 
 var dispatch_keyboard_event = function (event) {
-	//console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
+  //console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
   var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-			evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
-	dispatcher_queue.forEach(function (obj) {
-		if (obj.hasEventListener(evt.type)) {
-			obj.handleEvent(evt);
-		}
-	});
+      evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
+  dispatcher_queue.forEach(function (obj) {
+    if (obj.hasEventListener(evt.type)) {
+      obj.handleEvent(evt);
+    }
+  });
 };
