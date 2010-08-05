@@ -109,10 +109,27 @@ var last_event;
     if (!display.element) {
       throw new ReferenceError("[object Display]: Requires a HTML element.");
     }
+
+		display.addEventListener(Event.ENTER_FRAME, draw_scene_graph);
+		
+		function draw_children (node) {
+			node.children.forEach(function (node) {
+				if (typeof node.draw === 'function') {
+					node.draw();
+				};
+				draw_children(node);
+			});
+		}
+		function draw_scene_graph (evt) {
+			console.log("draw all!");
+			draw_children(display);
+		}
     
     return display;
   };
 
+
+	
   
 
   (function () {
