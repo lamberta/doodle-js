@@ -207,6 +207,9 @@
               break;
             }
           });
+
+					//if (this.debug) { }; //draw bounding box, reg-point, axis
+					
           ctx.restore();
         }
       },

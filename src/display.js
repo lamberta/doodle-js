@@ -8,10 +8,6 @@ var last_event;
       get_element = doodle.utils.get_element,
       Event = doodle.Event;
 
-//Stage
-//frameRate
-//fullScreen? //make large div
-
   /* Super constructor
    * @param {String|Function} id|initializer
    * @return {Object}
@@ -110,26 +106,29 @@ var last_event;
       throw new ReferenceError("[object Display]: Requires a HTML element.");
     }
 
-		display.addEventListener(Event.ENTER_FRAME, draw_scene_graph);
-		
-		function draw_children (node) {
-			node.children.forEach(function (node) {
-				if (typeof node.draw === 'function') {
-					node.draw();
-				};
-				draw_children(node);
-			});
-		}
-		function draw_scene_graph (evt) {
-			console.log("draw all!");
-			draw_children(display);
-		}
+    //once the frameRate is set, draw all children and grandchildren
+    display.addEventListener(Event.ENTER_FRAME, draw_scene_graph);
+
+    function draw_scene_graph (evt) {
+      draw_node_children(display);
+    }
+    function draw_node_children (node) {
+      node.children.forEach(function (node) {
+        if (typeof node.clear === 'function') {
+          node.clear();
+        }
+        if (typeof node.draw === 'function') {
+          node.draw();
+        };
+        draw_node_children(node);
+      });
+    }
     
     return display;
   };
 
 
-	
+  
   
 
   (function () {
