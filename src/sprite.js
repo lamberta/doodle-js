@@ -88,46 +88,6 @@
           height = n;
         }
       },
-      
-      'bounds': {
-        enumerable: false,
-        configurable: false,
-        get: (function () {
-          //we'll be reusing these vars
-          var bounding_box = Rectangle(),
-              min = Math.min,
-              max = Math.max,
-              x, y, w, h,
-              //transform_point,
-              tr0, tr1, tr2, tr3;
-          
-          return function () {
-            //var transform_point = this.transform.transformPoint;
-            //x = this.x;
-            //y = this.y;
-            w = this.width;
-            h = this.height;
-            
-            //re-calculate bounding box
-
-            //transform corners: tl, tr, br, bl
-            //relative to x/y of sprite!
-            //this matrix has dx/dy to apply
-            tr0 = this.transform.transformPoint({x: 0, y: 0});
-            tr1 = this.transform.transformPoint({x: w, y: 0});
-            tr2 = this.transform.transformPoint({x: w, y: h});
-            tr3 = this.transform.transformPoint({x: 0, y: h});
-            
-            //set rect with extremas
-            bounding_box.left = min(tr0.x, tr1.x, tr2.x, tr3.x);
-            bounding_box.right = max(tr0.x, tr1.x, tr2.x, tr3.x);
-            bounding_box.top = min(tr0.y, tr1.y, tr2.y, tr3.y);
-            bounding_box.bottom = max(tr0.y, tr1.y, tr2.y, tr3.y);
-            
-            return bounding_box;
-          }
-        }())
-      },
 
       /*
        * @param {Node|Matrix} targetCoordSpace

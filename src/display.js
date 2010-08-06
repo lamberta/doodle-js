@@ -129,8 +129,8 @@ var last_event;
         context = context || child.context;
         check_context_type(context, this+'.clear_scene_graph', 'context');
         
-        if (child.bounds) {
-          var bounds = child.bounds;
+        if (typeof child.getBounds === 'function') {
+          var bounds = child.getBounds(node);
           //take into account bounding box border
           context.clearRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
         }
@@ -154,10 +154,10 @@ var last_event;
 
         //if (this.debug) { }; //draw bounding box, reg-point, axis
         (function () {
-          if (child.bounds) {
+          if (typeof child.getBounds === 'function') {
             //calculate bounding box relative to parent
 						bounding_box = child.getBounds(node);
-            
+            console.log(bounding_box.toString());
             context.save();
             context.setTransform(1, 0, 0, 1, 0, 0); //reset
             //bounding box
