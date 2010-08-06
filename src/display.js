@@ -138,7 +138,10 @@ var last_event;
       });
     }
     function draw_scene_graph (node, context) {
-      var m; //child transform matrix
+      var m, //child transform matrix
+          bounding_box,
+          global_pt; //transformed point for bounding box
+      
       node.children.forEach(function (child) {
         context = context || child.context;
         m = child.transform.toArray();
@@ -152,13 +155,16 @@ var last_event;
         //if (this.debug) { }; //draw bounding box, reg-point, axis
         (function () {
           if (child.bounds) {
-            var bounds = child.bounds;
+            //calculate bounding box relative to parent
+						bounding_box = child.getBounds(node);
+            
             context.save();
             context.setTransform(1, 0, 0, 1, 0, 0); //reset
             //bounding box
             context.lineWidth = 0.5;
             context.strokeStyle = "#0000ff";
-            context.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            context.strokeRect(bounding_box.x, bounding_box.y,
+															 bounding_box.width, bounding_box.height);
             //registraion point
             context.fillStyle = "#000000";
             context.beginPath();

@@ -5,8 +5,9 @@ OUT_FILE="$PROJECT_HOME/build/doodle.js"
 
 cd "$PROJECT_HOME"
 
+cat ./src/compat/es5.js > "$OUT_FILE"
 
-cat ./build/prologue.js > "$OUT_FILE"
+cat ./build/prologue.js >> "$OUT_FILE"
 cat ./src/utils.js >> "$OUT_FILE"
 
 cat ./src/events/event.js >> "$OUT_FILE"

@@ -14,7 +14,7 @@
         matrix = {};
 
     //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
+    if (arg_len === 1) {
       initializer = arguments[0];
       a = undefined;
     } else if (arg_len > 6) {
@@ -145,9 +145,10 @@
    * @return {Boolean}
    */
   isMatrix = doodle.geom.Matrix.isMatrix = function (m) {
-    return (typeof m.a  === "number" && typeof m.b  === "number" &&
-            typeof m.c  === "number" && typeof m.d  === "number" &&
-            typeof m.tx === "number" && typeof m.ty === "number");
+    return (m !== undefined && m !== null &&
+            typeof m.a  === 'number' && typeof m.b  === 'number' &&
+            typeof m.c  === 'number' && typeof m.d  === 'number' &&
+            typeof m.tx === 'number' && typeof m.ty === 'number');
   };
 
   doodle.utils.types.check_matrix_type = function (m, caller_name) {

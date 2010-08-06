@@ -20,6 +20,8 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
+      isMatrix = doodle.geom.Matrix.isMatrix,
+      check_matrix_type = doodle.utils.types.check_matrix_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
       Rectangle = doodle.geom.Rectangle;
@@ -95,7 +97,7 @@
           var bounding_box = Rectangle(),
               min = Math.min,
               max = Math.max,
-							x, y, w, h,
+              x, y, w, h,
               //transform_point,
               tr0, tr1, tr2, tr3;
           
@@ -126,9 +128,58 @@
           }
         }())
       },
+
+      /*
+       * @param {Node|Matrix} targetCoordSpace
+       * @return {Rectangle}
+       */
+      'getBounds': {
+        enumerable: true,
+        configurable: false,
+        value: function (targetCoordSpace) {
+          var bounding_box,
+              min = Math.min,
+              max = Math.max,
+              w = this.width,
+              h = this.height,
+              this_transform = this.transform,
+              target_transform,
+              tr0, tr1, tr2, tr3;
+
+          //transform corners using this matrix: tl, tr, br, bl   
+          tr0 = this_transform.transformPoint({x: 0, y: 0});
+          tr1 = this_transform.transformPoint({x: w, y: 0});
+          tr2 = this_transform.transformPoint({x: w, y: h});
+          tr3 = this_transform.transformPoint({x: 0, y: h});
+          
+          //transform corners using target's matrix
+          if (targetCoordSpace !== this) {
+            //accepts a matrix, or a node with a matrix
+            if (isMatrix(targetCoordSpace)) {
+              target_transform = targetCoordSpace;
+            } else {
+              target_transform = targetCoordSpace.transform;
+              check_matrix_type(target_transform, this+'.getBounds', 'targetCoordinateSpace');
+            }
+            tr0 = target_transform.transformPoint(tr0);
+            tr1 = target_transform.transformPoint(tr1);
+            tr2 = target_transform.transformPoint(tr2);
+            tr3 = target_transform.transformPoint(tr3);
+          }
+
+          bounding_box = Rectangle();
+          //set rect with extremas
+          bounding_box.left = min(tr0.x, tr1.x, tr2.x, tr3.x);
+          bounding_box.right = max(tr0.x, tr1.x, tr2.x, tr3.x);
+          bounding_box.top = min(tr0.y, tr1.y, tr2.y, tr3.y);
+          bounding_box.bottom = max(tr0.y, tr1.y, tr2.y, tr3.y);
+          
+          return bounding_box;
+        }
+      },
       
       'hitArea': {
-        enumerable: false,
+        enumerable: true,
         configurable: false,
         get: function () {
           if (hit_area === null) {
@@ -169,52 +220,37 @@
        */
 
       /* When called execute all the draw commands in the stack.
-			 * This draws from screen 0,0 - transforms are applied when the
-			 * entire scene graph is drawn.
-       * @param {Context} context 2d canvas context to draw on.
+       * This draws from screen 0,0 - transforms are applied when the
+       * entire scene graph is drawn.
+       * @private
+       * @param {Context} ctx 2d canvas context to draw on.
        */
       '__draw': {
         enumerable: false,
         writable: false,
         configurable: false,
         value: function (ctx) {
-					check_context_type(ctx, this+'.__draw', 'context');
+          check_context_type(ctx, this+'.__draw', 'context');
 
           draw_commands.forEach(function (cmd) {
             //draw function, provide self for this and context as arg
-            if (typeof cmd === "function") {
+            if (typeof cmd === 'function') {
               cmd.call(sprite, ctx);
               return;
             }
             //draw object, given canvas.context command and param
             var prop = Object.keys(cmd)[0];
             switch (typeof ctx[prop]) {
-            case "function":
+            case 'function':
               //context method
               ctx[prop].apply(ctx, cmd[prop]);
               break;
-            case "string":
+            case 'string':
               //context property
               ctx[prop] = cmd[prop];
               break;
             }
           });
-
-					
-
-        }
-      },
-
-      'clear': {
-        value: function (ctx) {
-          var b_box = this.bounds;
-
-          if (!ctx) {
-            ctx = this.context;
-          }
-          check_context_type(ctx, this+'.clear', 'context');
-          
-          ctx.clearRect(b_box.x, b_box.y, b_box.width, b_box.height);
         }
       },
 
@@ -301,7 +337,6 @@
             value: function (x, y, w, h) {
               check_number_type(arguments, sprite+'.graphics.rect');
               //relative to registration point of sprite
-
               var new_w = x + w,
                   new_h = y + h;
               //check for new bounds extrema
@@ -326,9 +361,27 @@
             writable: false,
             configurable: false,
             value: function (x, y, radius) {
+              var w, h;
               check_number_type(arguments, sprite+'.graphics.circle');
+
+              sprite.x -= radius;
+              sprite.y -= radius;
+              x += radius;
+              y += radius;
+              
+              w = x + radius,
+              h = y + radius;
+              
+              //check for new bounds extrema
+              if (w > sprite.width) {
+                sprite.width = w;
+              }
+              if (h > sprite.height) {
+                sprite.height = h;
+              }
+              
               draw_commands.push({'beginPath': null});
-							//x, y, radius, start_angle, end_angle, anti-clockwise
+              //x, y, radius, start_angle, end_angle, anti-clockwise
               draw_commands.push({'arc': [x, y, radius, 0, Math.PI*2, true]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});

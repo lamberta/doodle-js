@@ -16,6 +16,9 @@ function init_doodle () {
   display.width = 400;
 	display.height = 400;
 	display.backgroundColor = "#ffffff";
+
+	display.frameRate = 1;
+
   l1 = display.addLayer();
 	s1 = doodle.Sprite(function () {this.x = 100; this.y = 100;});
 	l1.addChild(s1);
@@ -23,10 +26,12 @@ function init_doodle () {
 	s1.graphics.rect(0, 0, 50, 50);
 
 	s2 = doodle.Sprite();
-	l1.addChild(s2);
-	s2.graphics.beginFill("#00ff00");
-	s2.graphics.rect(0, 0, 5, 5);
 	
+	s2.graphics.beginFill("#ff00ff");
+	s2.graphics.rect(0, 0, 20, 30);
+	s1.addChild(s2);
+
+	s1.rotate(20);
 }
 
 

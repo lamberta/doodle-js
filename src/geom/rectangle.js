@@ -13,13 +13,13 @@
         initializer,
         rect = {};
 
-		//check if passed an init function
+    //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
-			x = undefined;
+      x = undefined;
     } else if (arg_len > 4) {
-			throw new SyntaxError("[object Rectangle]: Invalid number of parameters.");
-		}
+      throw new SyntaxError("[object Rectangle]: Invalid number of parameters.");
+    }
 
     Object.defineProperties(rect, rect_properties);
     //properties that require privacy
@@ -113,7 +113,7 @@
 
   doodle.utils.types.check_rect_type = function (rect, caller_name) {
     if (!isRect(rect)) {
-			caller_name = (caller_name === undefined) ? "check_rect_type" : caller_name;
+      caller_name = (caller_name === undefined) ? "check_rect_type" : caller_name;
       throw new TypeError(caller_name + ": Parameter must be a rectangle.");
     } else {
       return true;
