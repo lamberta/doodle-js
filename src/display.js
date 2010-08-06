@@ -157,7 +157,6 @@ var last_event;
           if (typeof child.getBounds === 'function') {
             //calculate bounding box relative to parent
 						bounding_box = child.getBounds(node);
-            console.log(bounding_box.toString());
             context.save();
             context.setTransform(1, 0, 0, 1, 0, 0); //reset
             //bounding box
