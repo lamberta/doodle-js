@@ -102,17 +102,10 @@
               max = Math.max,
               w = this.width,
               h = this.height,
-              this_transform = this.transform,
+              transform = this.transform.clone(), //this matrix, don't modify
               target_transform,
               tr0, tr1, tr2, tr3;
-
-          //transform corners using this matrix: tl, tr, br, bl   
-          tr0 = this_transform.transformPoint({x: 0, y: 0});
-          tr1 = this_transform.transformPoint({x: w, y: 0});
-          tr2 = this_transform.transformPoint({x: w, y: h});
-          tr3 = this_transform.transformPoint({x: 0, y: h});
           
-          //transform corners using target's matrix
           if (targetCoordSpace !== this) {
             //accepts a matrix, or a node with a matrix
             if (isMatrix(targetCoordSpace)) {
@@ -121,11 +114,13 @@
               target_transform = targetCoordSpace.transform;
               check_matrix_type(target_transform, this+'.getBounds', 'targetCoordinateSpace');
             }
-            tr0 = target_transform.transformPoint(tr0);
-            tr1 = target_transform.transformPoint(tr1);
-            tr2 = target_transform.transformPoint(tr2);
-            tr3 = target_transform.transformPoint(tr3);
+            transform.multiply(target_transform);
           }
+          //transform corners - tl, tr, br, bl
+          tr0 = transform.transformPoint({x: 0, y: 0});
+          tr1 = transform.transformPoint({x: w, y: 0});
+          tr2 = transform.transformPoint({x: w, y: h});
+          tr3 = transform.transformPoint({x: 0, y: h});
 
           bounding_box = Rectangle();
           //set rect with extremas
