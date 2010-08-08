@@ -95,32 +95,27 @@
        */
       'getBounds': {
         enumerable: true,
-        configurable: false,
+				writable: true,
+        configurable: false,//need to super in graphics.circle?
         value: function (targetCoordSpace) {
           var bounding_box,
               min = Math.min,
               max = Math.max,
               w = this.width,
               h = this.height,
-              transform = this.transform.clone(), //this matrix, don't modify
-              target_transform,
               tr0, tr1, tr2, tr3;
-          
-          if (targetCoordSpace !== this) {
-            //accepts a matrix, or a node with a matrix
-            if (isMatrix(targetCoordSpace)) {
-              target_transform = targetCoordSpace;
-            } else {
-              target_transform = targetCoordSpace.transform;
-              check_matrix_type(target_transform, this+'.getBounds', 'targetCoordinateSpace');
-            }
-            transform.multiply(target_transform);
-          }
-          //transform corners - tl, tr, br, bl
-          tr0 = transform.transformPoint({x: 0, y: 0});
-          tr1 = transform.transformPoint({x: w, y: 0});
-          tr2 = transform.transformPoint({x: w, y: h});
-          tr3 = transform.transformPoint({x: 0, y: h});
+
+					//transform corners to global - tl, tr, bl, br
+					tr0 = this.localToGlobal({x: 0, y: 0});
+					tr1 = this.localToGlobal({x: w, y: 0});
+					tr2 = this.localToGlobal({x: w, y: h});
+					tr3 = this.localToGlobal({x: 0, y: h});
+					
+					//transform global to target space
+					tr0 = targetCoordSpace.globalToLocal(tr0);
+					tr1 = targetCoordSpace.globalToLocal(tr1);
+					tr2 = targetCoordSpace.globalToLocal(tr2);
+					tr3 = targetCoordSpace.globalToLocal(tr3);
 
           bounding_box = Rectangle();
           //set rect with extremas
@@ -128,7 +123,7 @@
           bounding_box.right = max(tr0.x, tr1.x, tr2.x, tr3.x);
           bounding_box.top = min(tr0.y, tr1.y, tr2.y, tr3.y);
           bounding_box.bottom = max(tr0.y, tr1.y, tr2.y, tr3.y);
-          
+
           return bounding_box;
         }
       },
@@ -315,24 +310,22 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (x, y, radius) {
+            value: (function (x, y, radius) {
               var w, h;
-              check_number_type(arguments, sprite+'.graphics.circle');
+              check_number_type(arguments, this+'.graphics.circle');
 
-              sprite.x -= radius;
-              sprite.y -= radius;
-              x += radius;
-              y += radius;
-              
-              w = x + radius,
-              h = y + radius;
+							//sprite.axis.x = radius; //rotate circle from its center
+							//sprite.axis.y = radius;
+
+              w = radius * 2;
+              h = radius * 2;
               
               //check for new bounds extrema
-              if (w > sprite.width) {
-                sprite.width = w;
+              if (w > this.width) {
+                this.width = w;
               }
-              if (h > sprite.height) {
-                sprite.height = h;
+              if (h > this.height) {
+                this.height = h;
               }
               
               draw_commands.push({'beginPath': null});
@@ -340,7 +333,21 @@
               draw_commands.push({'arc': [x, y, radius, 0, Math.PI*2, true]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
-            }
+
+							/*
+							//new get bounds formula
+							var super_getBounds = this.getBounds.bind(this);
+							this.getBounds = function (targetCoordSpace) {
+								var offset = this.transform.clone();
+								//targetCoordSpace.transform;
+								offset.multiply(targetCoordSpace.transform);
+								offset.translate(-this.width/2, -this.height/2);
+								
+								return super_getBounds(offset);
+							};
+							*/
+							
+            }).bind(sprite)
           },
 
           /*

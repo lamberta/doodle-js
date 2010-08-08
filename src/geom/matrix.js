@@ -535,8 +535,8 @@
         configurable: false,
         value: function (pt, radians) {
           /*DEBUG_START*/
-          check_point_type(pt, this+'.rotateAroundExternalPoint');
-          check_number_type(radians, this+'.rotateAroundExternalPoint');
+          check_point_type(pt, this+'.rotateAroundExternalPoint', 'point,radians');
+          check_number_type(radians, this+'.rotateAroundExternalPoint', 'point,radians');
           /*DEBUG_END*/
           var parent_matrix = Matrix().rotate(radians), //global space
               reg_pt, //new registration point
@@ -558,8 +558,8 @@
         writable: false,
         configurable: false,
         value: function (pt, radians) {
-          check_point_type(pt, this+'.rotateAroundInternalPoint');
-          check_number_type(radians, this+'.rotateAroundInternalPoint');
+          check_point_type(pt, this+'.rotateAroundInternalPoint', 'point,radians');
+          check_number_type(radians, this+'.rotateAroundInternalPoint', 'point,radians');
           var p = this.transformPoint(pt);
           return this.rotateAroundExternalPoint(p, radians);
         }

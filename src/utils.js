@@ -36,18 +36,19 @@
       var i;
       caller = (caller === undefined) ? "check_number_type" : caller;
       param = (param === undefined) ? "" : '('+param+')';
-      if (typeof n === "number") {
+      if (typeof n === 'number') {
         return true;
-      } else if (i = n.length) {
+      } else if (n && n.length) {
         //given array, or semi-array
+				i = n.length;
         while ((i -= 1) >= 0) {
-          if (typeof n[i] !== "number") {
+          if (typeof n[i] !== 'number') {
             throw new TypeError(caller + param +": Parameter must be a number.");
           }
         }
         return true;
       } else {
-        throw new TypeError(caller + param +": Parameter must be a number.");
+        throw new TypeError(caller + param +": Parameter must be a number, or array of numbers.");
       }
     },
 

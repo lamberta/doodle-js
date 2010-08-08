@@ -156,7 +156,8 @@ var last_event;
         (function () {
           if (typeof child.getBounds === 'function') {
             //calculate bounding box relative to parent
-						bounding_box = child.getBounds(node);
+						bounding_box = child.getBounds(display);
+						
             context.save();
             context.setTransform(1, 0, 0, 1, 0, 0); //reset
             //bounding box
@@ -164,13 +165,15 @@ var last_event;
             context.strokeStyle = "#0000ff";
             context.strokeRect(bounding_box.x, bounding_box.y,
 															 bounding_box.width, bounding_box.height);
-            //registraion point
+
+						/* not applying parent transforms
+						//registration point
             context.fillStyle = "#000000";
             context.beginPath();
             context.arc(child.x, child.y, 3, 0, Math.PI*2, true);
             context.closePath();
             context.fill();
-            
+            */
             context.restore();
           }
         }());

@@ -90,13 +90,14 @@
    * @return {Boolean}
    */
   isPoint = doodle.geom.Point.isPoint = function (pt) {
-    return (typeof pt.x === "number" && typeof pt.y === "number");
+    return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
   }
 
-  doodle.utils.types.check_point_type = function (pt, caller_name) {
+  doodle.utils.types.check_point_type = function (pt, caller, param) {
     if (!isPoint(pt)) {
-			caller_name = (caller_name === undefined) ? "check_point_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a point.");
+			caller = (caller === undefined) ? "check_point_type" : caller;
+			param = (param === undefined) ? "" : '('+param+')';
+			throw new TypeError(caller + param +": Parameter must be a point.");
     } else {
       return true;
     }

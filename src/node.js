@@ -217,9 +217,23 @@
       'rotate': { //around external point?
         value: function (deg) {
           check_number_type(deg, this+'.rotate');
+
+          if (this.axis.x !== undefined && this.axis.y !== undefined) {
+            this.transform.rotateAroundInternalPoint(this.axis, deg*to_radians);
+          } else {
+            this.transform.rotate(deg*to_radians);
+          }
+        }
+      },
+
+      /*
+      'rotate': { //around external point?
+        value: function (deg) {
+          check_number_type(deg, this+'.rotate');
           this.transform.rotate(deg * to_radians);
         }
       },
+      */
       
       'rotation': {
         enumerable: true,
@@ -229,7 +243,7 @@
         },
         set: function (deg) {
           check_number_type(deg, this+'.rotation');
-          this.transform.rotation = deg * to_radians; //deg-to-rad
+          this.transform.rotation = deg*to_radians; //deg-to-rad
         }
       },
       
@@ -449,26 +463,30 @@
           return false;
         }
       },
-      
-      'globalToLocal': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          if (check_point_type(pt, this+'.globalToLocal')) {
-            return Point(pt.x - this.x, pt.y - this.y);
-          }
-        }
-      },
 
       'localToGlobal': {
         enumerable: false,
         writable: false,
         configurable: false,
         value: function (pt) {
-          if (check_point_type(pt, this+'.localToGlobal')) {
-            return Point(pt.x + this.x, pt.y + this.y);
+          check_point_type(pt, this+'.localToGlobal', 'point');
+          var node = this;
+          while (node) {
+						pt = node.transform.transformPoint(pt);
+            node = node.parent;
           }
+					return pt;
+        }
+      },
+
+      'globalToLocal': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (pt) {
+          check_point_type(pt, this+'.globalToLocal', 'point');
+          var global_pos = this.localToGlobal({x: 0, y: 0});
+          return Point(pt.x - global_pos.x, pt.y - global_pos.y);
         }
       }
       
