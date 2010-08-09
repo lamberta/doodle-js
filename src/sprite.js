@@ -20,7 +20,6 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
-      check_point_type = doodle.utils.types.check_point_type,
       isMatrix = doodle.geom.Matrix.isMatrix,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_rect_type = doodle.utils.types.check_rect_type,
@@ -36,10 +35,10 @@
     var arg_len = arguments.length,
         initializer,
         sprite,
-        width = 0,
-        height = 0,
         hit_area = null,
-        draw_commands = [];
+				draw_commands = [],
+				bounds_offsetX = 0, //offsets used in getBounds and graphics shapes
+				bounds_offsetY = 0;
 
     //inherits from doodle.Node, if string pass along id
     sprite = (typeof id === 'string') ?
@@ -63,32 +62,38 @@
       /* Indicates the width of the sprite, in pixels.
        * @param {Number}
        */
-      'width': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return width;
-        },
-        set: function (n) {
-          check_number_type(n, this+'.width');
-          width = n;
-        }
-      },
+      'width': (function () {
+				var width = 0;
+				return {
+					enumerable: true,
+					configurable: false,
+					get: function () {
+						return width;
+					},
+					set: function (n) {
+						check_number_type(n, this+'.width');
+						width = n;
+					}
+				};
+      }()),
 
       /* Indicates the height of the sprite, in pixels.
        * @param {Number}
        */
-      'height': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return height;
-        },
-        set: function (n) {
-          check_number_type(n, this+'.height');
-          height = n;
-        }
-      },
+      'height': (function () {
+				var height = 0;
+				return {
+					enumerable: true,
+					configurable: false,
+					get: function () {
+						return height;
+					},
+					set: function (n) {
+						check_number_type(n, this+'.height');
+						height = n;
+					}
+				};
+      }()),
 
       /*
        * @param {Node|Matrix} targetCoordSpace
@@ -98,24 +103,16 @@
         enumerable: true,
         writable: true,
         configurable: false,
-        value: function (targetCoordSpace, offset/*optional*/) {
-          if (offset) {
-            //used for a sprite that x,y home is not top left corner (circle)
-            check_point_type(offset, this+'.getBounds', 'targetCoordSpace,offset');
-          } else {
-            offset = {x:0, y:0};
-          }
+        value: function (targetCoordSpace) {
           var min = Math.min, max = Math.max,
               bounding_box = Rectangle(),
-              x = offset.x,
-              y = offset.y,
               w = this.width,
               h = this.height,
               //transform corners to global
-              tl = this.localToGlobal({x: x, y: y}), //top left
-              tr = this.localToGlobal({x: x+w, y: y}), //top right
-              br = this.localToGlobal({x: x+w, y: y+h}), //bot right
-              bl = this.localToGlobal({x: x, y: y+h}); //bot left
+              tl = this.localToGlobal({x: bounds_offsetX, y: bounds_offsetY}), //top left
+              tr = this.localToGlobal({x: bounds_offsetX+w, y: bounds_offsetY}), //top right
+              br = this.localToGlobal({x: bounds_offsetX+w, y: bounds_offsetY+h}), //bot right
+              bl = this.localToGlobal({x: bounds_offsetX, y: bounds_offsetY+h}); //bot left
           
           //transform global to target space
           tl = targetCoordSpace.globalToLocal(tl);
@@ -255,6 +252,9 @@
               //reset dimensions
               this.width = 0;
               this.height = 0;
+							//and getBounds offset
+							bounds_offsetX = 0;
+							bounds_offsetY = 0;
             }).bind(sprite)
           },
 
@@ -288,20 +288,45 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: (function (x, y, w, h) {
+            value: (function (x, y, width, height) {
               check_number_type(arguments, this+'.graphics.rect', 'x,y,width,height');
               //relative to registration point of sprite
-              var new_w = x + w,
-                  new_h = y + h;
+              var w = x + width,
+                  h = y + height;
+
+							//determine width and bounds offsets
+							if (x >= 0) {
+								w = x + width;
+								bounds_offsetX = 0;
+							} else if (x < 0 && x >= -width) {
+								w = width;
+								bounds_offsetX = x;
+							} else if (x < -width) {
+								w = -x;
+								bounds_offsetX = x;
+							}
+
+							//determine width and bounds offsets
+							if (y >= 0) {
+								h = y + height;
+								bounds_offsetY = 0;
+							} else if (y < 0 && y >= -height) {
+								h = height;
+								bounds_offsetY = y;
+							} else if (y < -height) {
+								h = -y;
+								bounds_offsetY = y;
+							}
+							
               //check for new bounds extrema
-              if (new_w > this.width) {
-                this.width = new_w;
+              if (w > this.width) {
+                this.width = w;
               }
-              if (new_h > this.height) {
-                this.height = new_h;
+              if (h > this.height) {
+                this.height = h;
               }
               
-              draw_commands.push({'fillRect': [x,y,w,h]});
+              draw_commands.push({'fillRect': [x, y, width, height]});
             }).bind(sprite)
           },
 
@@ -316,9 +341,38 @@
             configurable: false,
             value: (function (x, y, radius) {
               check_number_type(arguments, this+'.graphics.circle', 'x,y,radius');
-              var w = radius * 2,
-                  h = radius * 2;
+              var w = radius*2,
+									h = radius*2;
+							
+							//determine width and bounds offset
+							if (x >= 0 && x <= radius) {
+								w = radius*2;
+								bounds_offsetX = -w/2 + x;
+							} else if (x > radius) {
+								w = radius + x;
+								bounds_offsetX = 0;
+							} else if (x < 0 && x >= -radius) {
+								w = radius*2;
+								bounds_offsetX = -radius + x;
+							} else if (x < -radius) {
+								w = -x + radius;
+								bounds_offsetX = x + -radius;
+							}
 
+							if (y >= 0 && y <= radius) {
+								h = radius*2;
+								bounds_offsetY = -h/2 + y;
+							} else if (y > radius) {
+								h = radius + y;
+								bounds_offsetY = 0;
+							} else if (y < 0 && y >= -radius) {
+								h = radius*2;
+								bounds_offsetY = -radius + y;
+							} else if (y < -radius) {
+								h = -y + radius;
+								bounds_offsetY = y + -radius;
+							}
+							
               //check for new bounds extrema
               if (w > this.width) {
                 this.width = w;
@@ -332,12 +386,6 @@
               draw_commands.push({'arc': [x, y, radius, 0, Math.PI*2, true]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
-
-              //circle requires offset for determining bounds
-              var super_getBounds = this.getBounds.bind(this);
-              this.getBounds = function (targetCoordSpace) {
-                return super_getBounds(targetCoordSpace, {x: -this.width/2, y: -this.height/2});
-              };
               
             }).bind(sprite)
           },
