@@ -20,6 +20,7 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
+      check_point_type = doodle.utils.types.check_point_type,
       isMatrix = doodle.geom.Matrix.isMatrix,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_rect_type = doodle.utils.types.check_rect_type,
@@ -95,34 +96,38 @@
        */
       'getBounds': {
         enumerable: true,
-				writable: true,
-        configurable: false,//need to super in graphics.circle?
-        value: function (targetCoordSpace) {
-          var bounding_box,
-              min = Math.min,
-              max = Math.max,
+        writable: true,
+        configurable: false,
+        value: function (targetCoordSpace, offset/*optional*/) {
+          if (offset) {
+            //used for a sprite that x,y home is not top left corner (circle)
+            check_point_type(offset, this+'.getBounds', 'targetCoordSpace,offset');
+          } else {
+            offset = {x:0, y:0};
+          }
+          var min = Math.min, max = Math.max,
+              bounding_box = Rectangle(),
+              x = offset.x,
+              y = offset.y,
               w = this.width,
               h = this.height,
-              tr0, tr1, tr2, tr3;
+              //transform corners to global
+              tl = this.localToGlobal({x: x, y: y}), //top left
+              tr = this.localToGlobal({x: x+w, y: y}), //top right
+              br = this.localToGlobal({x: x+w, y: y+h}), //bot right
+              bl = this.localToGlobal({x: x, y: y+h}); //bot left
+          
+          //transform global to target space
+          tl = targetCoordSpace.globalToLocal(tl);
+          tr = targetCoordSpace.globalToLocal(tr);
+          br = targetCoordSpace.globalToLocal(br);
+          bl = targetCoordSpace.globalToLocal(bl);
 
-					//transform corners to global - tl, tr, bl, br
-					tr0 = this.localToGlobal({x: 0, y: 0});
-					tr1 = this.localToGlobal({x: w, y: 0});
-					tr2 = this.localToGlobal({x: w, y: h});
-					tr3 = this.localToGlobal({x: 0, y: h});
-					
-					//transform global to target space
-					tr0 = targetCoordSpace.globalToLocal(tr0);
-					tr1 = targetCoordSpace.globalToLocal(tr1);
-					tr2 = targetCoordSpace.globalToLocal(tr2);
-					tr3 = targetCoordSpace.globalToLocal(tr3);
-
-          bounding_box = Rectangle();
           //set rect with extremas
-          bounding_box.left = min(tr0.x, tr1.x, tr2.x, tr3.x);
-          bounding_box.right = max(tr0.x, tr1.x, tr2.x, tr3.x);
-          bounding_box.top = min(tr0.y, tr1.y, tr2.y, tr3.y);
-          bounding_box.bottom = max(tr0.y, tr1.y, tr2.y, tr3.y);
+          bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
+          bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
+          bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
+          bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
 
           return bounding_box;
         }
@@ -229,11 +234,10 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (fn) {
-              if (check_function_type(fn, sprite+'.graphics.draw')) {
-                draw_commands.push(fn);
-              }
-            }
+            value: (function (fn) {
+              check_function_type(fn, this+'.graphics.draw', 'function');
+              draw_commands.push(fn);
+            }).bind(sprite)
           },
 
           /* Remove all drawing commands for sprite.
@@ -242,16 +246,16 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function () {
+            value: (function () {
               //should probably test, better to assign new empty array?
               var i = draw_commands.length;
               while ((i=i-1) >= 0) {
                 draw_commands.splice(i, 1);
               }
               //reset dimensions
-              sprite.width = 0;
-              sprite.height = 0;
-            }
+              this.width = 0;
+              this.height = 0;
+            }).bind(sprite)
           },
 
           /* Specifies a simple one-color fill that subsequent calls to other
@@ -263,15 +267,15 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (color, alpha) {
+            value: (function (color, alpha) {
               alpha = alpha ? alpha : 1.0;
-              check_number_type(alpha, sprite+'.graphics.beginFill');
+              check_number_type(alpha, this+'.graphics.beginFill', 'color, alpha');
 
               var rgb = hex_to_rgb(color),
                   rgb_str = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +','+ alpha +')';
               
               draw_commands.push({'fillStyle': rgb_str});
-            }
+            }).bind(sprite)
           },
 
           /*
@@ -284,21 +288,21 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (x, y, w, h) {
-              check_number_type(arguments, sprite+'.graphics.rect');
+            value: (function (x, y, w, h) {
+              check_number_type(arguments, this+'.graphics.rect', 'x,y,width,height');
               //relative to registration point of sprite
               var new_w = x + w,
                   new_h = y + h;
               //check for new bounds extrema
-              if (new_w > sprite.width) {
-                sprite.width = new_w;
+              if (new_w > this.width) {
+                this.width = new_w;
               }
-              if (new_h > sprite.height) {
-                sprite.height = new_h;
+              if (new_h > this.height) {
+                this.height = new_h;
               }
               
               draw_commands.push({'fillRect': [x,y,w,h]});
-            }
+            }).bind(sprite)
           },
 
           /*
@@ -311,15 +315,10 @@
             writable: false,
             configurable: false,
             value: (function (x, y, radius) {
-              var w, h;
-              check_number_type(arguments, this+'.graphics.circle');
+              check_number_type(arguments, this+'.graphics.circle', 'x,y,radius');
+              var w = radius * 2,
+                  h = radius * 2;
 
-							//sprite.axis.x = radius; //rotate circle from its center
-							//sprite.axis.y = radius;
-
-              w = radius * 2;
-              h = radius * 2;
-              
               //check for new bounds extrema
               if (w > this.width) {
                 this.width = w;
@@ -334,19 +333,12 @@
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
 
-							/*
-							//new get bounds formula
-							var super_getBounds = this.getBounds.bind(this);
-							this.getBounds = function (targetCoordSpace) {
-								var offset = this.transform.clone();
-								//targetCoordSpace.transform;
-								offset.multiply(targetCoordSpace.transform);
-								offset.translate(-this.width/2, -this.height/2);
-								
-								return super_getBounds(offset);
-							};
-							*/
-							
+              //circle requires offset for determining bounds
+              var super_getBounds = this.getBounds.bind(this);
+              this.getBounds = function (targetCoordSpace) {
+                return super_getBounds(targetCoordSpace, {x: -this.width/2, y: -this.height/2});
+              };
+              
             }).bind(sprite)
           },
 
@@ -360,13 +352,13 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (x, y, width, height) {
-              check_number_type(arguments, sprite+'.graphics.ellipse');
+            value: (function (x, y, width, height) {
+              check_number_type(arguments, this+'.graphics.ellipse', 'x,y,width,height');
               var kappa = 0.5522847498,
-              rx = width / 2,
-              ry = height / 2,
-              krx = kappa * rx,
-              kry = kappa * ry;
+                  rx = width / 2,
+                  ry = height / 2,
+                  krx = kappa * rx,
+                  kry = kappa * ry;
               
               draw_commands.push({'beginPath': null});
               draw_commands.push({'moveTo': [x+rx, y]});
@@ -377,7 +369,7 @@
               draw_commands.push({'bezierCurveTo': [x+krx, y+ry, x+rx, y+kry, x+rx, y]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
-            }
+            }).bind(sprite)
           },
 
           /*
@@ -392,14 +384,14 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (x, y, width, height, rx, ry) {
-              check_number_type(arguments, sprite+'.graphics.roundRect');
+            value: (function (x, y, width, height, rx, ry) {
+              check_number_type(arguments, this+'.graphics.roundRect', 'x,y,width,height,rx,ry');
               var x3 = x + width,
-              x2 = x3 - rx,
-              x1 = x + rx,
-              y3 = y + height,
-              y2 = y3 - ry,
-              y1 = y + ry;
+                  x2 = x3 - rx,
+                  x1 = x + rx,
+                  y3 = y + height,
+                  y2 = y3 - ry,
+                  y1 = y + ry;
               
               //clockwise
               draw_commands.push({'moveTo': [x1, y]});
@@ -414,7 +406,7 @@
               draw_commands.push({'quadraticCurveTo': [x, y, x1, y]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
-            }
+            }).bind(sprite)
           },
 
           /*
@@ -425,10 +417,10 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (x, y) {
-              check_number_type(arguments, sprite+'.graphics.lineTo');
+            value: (function (x, y) {
+              check_number_type(arguments, this+'.graphics.lineTo', 'x,y');
               draw_commands.push({'lineTo': [x, y]});
-            }
+            }).bind(sprite)
           },
 
           /*
@@ -439,10 +431,10 @@
             enumerable: false,
             writable: false,
             configurable: false,
-            value: function (x, y) {
-              check_number_type(arguments, sprite+'.graphics.moveTo');
+            value: (function (x, y) {
+              check_number_type(arguments, this+'.graphics.moveTo', 'x,y');
               draw_commands.push({'moveTo': [x, y]});
-            }
+            }).bind(sprite)
           }
         })
       }//end graphics object
