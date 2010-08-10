@@ -258,26 +258,6 @@
             }).bind(sprite)
           },
 
-          /* Specifies a simple one-color fill that subsequent calls to other
-           * graphics methods use when drawing.
-           * @param {Color} color In hex format.
-           * @param {Number} alpha
-           */
-          'beginFill': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (color, alpha) {
-              alpha = alpha ? alpha : 1.0;
-              check_number_type(alpha, this+'.graphics.beginFill', 'color, alpha');
-
-              var rgb = hex_to_rgb(color),
-                  rgb_str = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +','+ alpha +')';
-              
-              draw_commands.push({'fillStyle': rgb_str});
-            }).bind(sprite)
-          },
-
           /*
            * @param {Number} x
            * @param {Number} y
@@ -371,13 +351,37 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height) {
+							height = height || width; //default to circle
               check_number_type(arguments, this+'.graphics.ellipse', 'x,y,width,height');
-              var kappa = 0.5522847498,
+              var min = Math.min,
+									max = Math.max,
+									w = this.width,
+									h = this.height,
+									kappa = 0.5522847498,
                   rx = width / 2,
                   ry = height / 2,
                   krx = kappa * rx,
                   kry = kappa * ry;
-              
+
+							//relative to registration point of sprite - radius
+							bounds_offsetX = min(0, -rx+x);
+							bounds_offsetY = min(0, -ry+y);
+
+							if (x <= 0) {
+								this.width = max(w, rx*2, -x + w + rx);
+							} else if (x > 0 && x < rx) {
+								this.width = max(w, rx*2, x + w);
+							} else if (x >= rx) {
+								this.width = max(w, rx*2, x + rx);
+							}
+							if (y <= 0) {
+								this.height = max(h, ry*2, -y + h + ry);
+							} else if (y > 0 && y < ry) {
+								this.height = max(h, ry*2, y + h);
+							} else if (y >= ry) {
+								this.height = max(h, ry*2, y + ry);
+							}
+							
               draw_commands.push({'beginPath': null});
               draw_commands.push({'moveTo': [x+rx, y]});
               //(cp1), (cp2), (pt)
@@ -403,14 +407,35 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height, rx, ry) {
+							rx = rx || 0;
+							ry = ry || 0;
               check_number_type(arguments, this+'.graphics.roundRect', 'x,y,width,height,rx,ry');
-              var x3 = x + width,
+              var min = Math.min,
+									max = Math.max,
+									w = this.width,
+									h = this.height,
+									x3 = x + width,
                   x2 = x3 - rx,
                   x1 = x + rx,
                   y3 = y + height,
                   y2 = y3 - ry,
                   y1 = y + ry;
-              
+
+							//relative to registration point of sprite
+							bounds_offsetX = min(0, x);
+							bounds_offsetY = min(0, y);
+
+							if (x >= 0) {
+								this.width = max(w, width, x+width);
+							} else {
+								this.width = max(w, width, -x + w);
+							}
+							if (y >= 0) {
+								this.height = max(h, height, y+height);
+							} else {
+								this.height = max(h, height, -y + h);
+							}
+							
               //clockwise
               draw_commands.push({'moveTo': [x1, y]});
               draw_commands.push({'beginPath': null});
@@ -437,6 +462,12 @@
             configurable: false,
             value: (function (x, y) {
               check_number_type(arguments, this+'.graphics.lineTo', 'x,y');
+							var min = Math.min,
+									max = Math.max;
+							//relative to registration point of sprite
+							bounds_offsetX = min(0, x);
+							bounds_offsetY = min(0, y);
+							
               draw_commands.push({'lineTo': [x, y]});
             }).bind(sprite)
           },
@@ -453,7 +484,37 @@
               check_number_type(arguments, this+'.graphics.moveTo', 'x,y');
               draw_commands.push({'moveTo': [x, y]});
             }).bind(sprite)
-          }
+          },
+
+					/* Specifies a simple one-color fill that subsequent calls to other
+           * graphics methods use when drawing.
+           * @param {Color} color In hex format.
+           * @param {Number} alpha
+           */
+          'beginFill': {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: (function (color, alpha) {
+              alpha = alpha ? alpha : 1.0;
+              check_number_type(alpha, this+'.graphics.beginFill', 'color, alpha');
+
+              var rgb = hex_to_rgb(color),
+                  rgb_str = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +','+ alpha +')';
+              
+              draw_commands.push({'fillStyle': rgb_str});
+            }).bind(sprite)
+          },
+
+					'endFill': {
+						enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function () {
+              draw_commands.push({'stroke': null});
+            }
+					}
+					
         })
       }//end graphics object
     });//end sprite property definitions w/ privact
