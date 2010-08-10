@@ -36,9 +36,13 @@
         initializer,
         sprite,
         hit_area = null,
-				draw_commands = [],
-				bounds_offsetX = 0, //offsets used in getBounds and graphics shapes
-				bounds_offsetY = 0;
+        draw_commands = [],
+        bounds_min_x = 0, //offsets used in getBounds and graphics shapes
+        bounds_min_y = 0,
+        bounds_max_x = 0,
+        bounds_max_y = 0,
+        graphics_cursor_x = 0,
+        graphics_cursor_y = 0;
 
     //inherits from doodle.Node, if string pass along id
     sprite = (typeof id === 'string') ?
@@ -63,36 +67,36 @@
        * @param {Number}
        */
       'width': (function () {
-				var width = 0;
-				return {
-					enumerable: true,
-					configurable: false,
-					get: function () {
-						return width;
-					},
-					set: function (n) {
-						check_number_type(n, this+'.width');
-						width = n;
-					}
-				};
+        var width = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () {
+            return width;
+          },
+          set: function (n) {
+            check_number_type(n, this+'.width');
+            width = n;
+          }
+        };
       }()),
 
       /* Indicates the height of the sprite, in pixels.
        * @param {Number}
        */
       'height': (function () {
-				var height = 0;
-				return {
-					enumerable: true,
-					configurable: false,
-					get: function () {
-						return height;
-					},
-					set: function (n) {
-						check_number_type(n, this+'.height');
-						height = n;
-					}
-				};
+        var height = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () {
+            return height;
+          },
+          set: function (n) {
+            check_number_type(n, this+'.height');
+            height = n;
+          }
+        };
       }()),
 
       /*
@@ -104,15 +108,14 @@
         writable: true,
         configurable: false,
         value: function (targetCoordSpace) {
-          var min = Math.min, max = Math.max,
-              bounding_box = Rectangle(),
+          var bounding_box = Rectangle(),
               w = this.width,
               h = this.height,
               //transform corners to global
-              tl = this.localToGlobal({x: bounds_offsetX, y: bounds_offsetY}), //top left
-              tr = this.localToGlobal({x: bounds_offsetX+w, y: bounds_offsetY}), //top right
-              br = this.localToGlobal({x: bounds_offsetX+w, y: bounds_offsetY+h}), //bot right
-              bl = this.localToGlobal({x: bounds_offsetX, y: bounds_offsetY+h}); //bot left
+              tl = this.localToGlobal({x: bounds_min_x, y: bounds_min_y}), //top left
+              tr = this.localToGlobal({x: bounds_min_x+w, y: bounds_min_y}), //top right
+              br = this.localToGlobal({x: bounds_min_x+w, y: bounds_min_y+h}), //bot right
+              bl = this.localToGlobal({x: bounds_min_x, y: bounds_min_y+h}); //bot left
           
           //transform global to target space
           tl = targetCoordSpace.globalToLocal(tl);
@@ -121,10 +124,10 @@
           bl = targetCoordSpace.globalToLocal(bl);
 
           //set rect with extremas
-          bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
-          bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
-          bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
-          bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
+          bounding_box.left = Math.min(tl.x, tr.x, br.x, bl.x);
+          bounding_box.right = Math.max(tl.x, tr.x, br.x, bl.x);
+          bounding_box.top = Math.min(tl.y, tr.y, br.y, bl.y);
+          bounding_box.bottom = Math.max(tl.y, tr.y, br.y, bl.y);
 
           return bounding_box;
         }
@@ -252,9 +255,10 @@
               //reset dimensions
               this.width = 0;
               this.height = 0;
-							//and getBounds offset
-							bounds_offsetX = 0;
-							bounds_offsetY = 0;
+
+              bounds_min_x = bounds_min_y = bounds_max_x = bounds_max_y = 0;
+              graphics_cursor_x = graphics_cursor_y = 0;
+              
             }).bind(sprite)
           },
 
@@ -269,29 +273,20 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height) {
-							var max = Math.max,
-									min = Math.min,
-									w = this.width,
-									h = this.height;
-							
               check_number_type(arguments, this+'.graphics.rect', 'x,y,width,height');
 
-              //relative to registration point of sprite
-							bounds_offsetX = min(0, x);
-							bounds_offsetY = min(0, y);
-
-							if (x >= 0) {
-								this.width = max(w, width, x+width);
-							} else {
-								this.width = max(w, width, -x + w);
-							}
-							if (y >= 0) {
-								this.height = max(h, height, y+height);
-							} else {
-								this.height = max(h, height, -y + h);
-							}
+              //update extremas
+              bounds_min_x = Math.min(0, x, bounds_min_x);
+              bounds_min_y = Math.min(0, y, bounds_min_y);
+              bounds_max_x = Math.max(0, x, x+width, bounds_max_x);
+              bounds_max_y = Math.max(0, y, y+height, bounds_max_y);
+              
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
               
               draw_commands.push({'fillRect': [x, y, width, height]});
+              
             }).bind(sprite)
           },
 
@@ -305,32 +300,18 @@
             writable: false,
             configurable: false,
             value: (function (x, y, radius) {
-							var max = Math.max,
-									min = Math.min
-									w = this.width,
-									h = this.height;
-							
               check_number_type(arguments, this+'.graphics.circle', 'x,y,radius');
 
-							//relative to registration point of sprite - radius
-							bounds_offsetX = min(0, -radius+x);
-							bounds_offsetY = min(0, -radius+y);
-
-							if (x <= 0) {
-								this.width = max(w, radius*2, -x + w + radius);
-							} else if (x > 0 && x < radius) {
-								this.width = max(w, radius*2, x + w);
-							} else if (x >= radius) {
-								this.width = max(w, radius*2, x + radius);
-							}
-							if (y <= 0) {
-								this.height = max(h, radius*2, -y + h + radius);
-							} else if (y > 0 && y < radius) {
-								this.height = max(h, radius*2, y + h);
-							} else if (y >= radius) {
-								this.height = max(h, radius*2, y + radius);
-							}
+              //update extremas
+              bounds_min_x = Math.min(0, -radius+x, bounds_min_x);
+              bounds_min_y = Math.min(0, -radius+y, bounds_min_y);
+              bounds_max_x = Math.max(0, x, x+radius, bounds_max_x);
+              bounds_max_y = Math.max(0, y, y+radius, bounds_max_y);
               
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
+
               draw_commands.push({'beginPath': null});
               //x, y, radius, start_angle, end_angle, anti-clockwise
               draw_commands.push({'arc': [x, y, radius, 0, Math.PI*2, true]});
@@ -351,37 +332,23 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height) {
-							height = height || width; //default to circle
+              height = height || width; //default to circle
               check_number_type(arguments, this+'.graphics.ellipse', 'x,y,width,height');
-              var min = Math.min,
-									max = Math.max,
-									w = this.width,
-									h = this.height,
-									kappa = 0.5522847498,
-                  rx = width / 2,
+              var rx = width / 2,
                   ry = height / 2,
-                  krx = kappa * rx,
-                  kry = kappa * ry;
+                  krx = 0.5522847498 * rx, //kappa * radius_x
+                  kry = 0.5522847498 * ry;
 
-							//relative to registration point of sprite - radius
-							bounds_offsetX = min(0, -rx+x);
-							bounds_offsetY = min(0, -ry+y);
+              //update extremas
+              bounds_min_x = Math.min(0, -rx+x, bounds_min_x);
+              bounds_min_y = Math.min(0, -ry+y, bounds_min_y);
+              bounds_max_x = Math.max(0, x, x+rx, bounds_max_x);
+              bounds_max_y = Math.max(0, y, y+ry, bounds_max_y);
+              
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
 
-							if (x <= 0) {
-								this.width = max(w, rx*2, -x + w + rx);
-							} else if (x > 0 && x < rx) {
-								this.width = max(w, rx*2, x + w);
-							} else if (x >= rx) {
-								this.width = max(w, rx*2, x + rx);
-							}
-							if (y <= 0) {
-								this.height = max(h, ry*2, -y + h + ry);
-							} else if (y > 0 && y < ry) {
-								this.height = max(h, ry*2, y + h);
-							} else if (y >= ry) {
-								this.height = max(h, ry*2, y + ry);
-							}
-							
               draw_commands.push({'beginPath': null});
               draw_commands.push({'moveTo': [x+rx, y]});
               //(cp1), (cp2), (pt)
@@ -391,6 +358,7 @@
               draw_commands.push({'bezierCurveTo': [x+krx, y+ry, x+rx, y+kry, x+rx, y]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
+              
             }).bind(sprite)
           },
 
@@ -407,35 +375,26 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height, rx, ry) {
-							rx = rx || 0;
-							ry = ry || 0;
+              rx = rx || 0; //default to rectangle
+              ry = ry || 0;
               check_number_type(arguments, this+'.graphics.roundRect', 'x,y,width,height,rx,ry');
-              var min = Math.min,
-									max = Math.max,
-									w = this.width,
-									h = this.height,
-									x3 = x + width,
+              var x3 = x + width,
                   x2 = x3 - rx,
                   x1 = x + rx,
                   y3 = y + height,
                   y2 = y3 - ry,
                   y1 = y + ry;
 
-							//relative to registration point of sprite
-							bounds_offsetX = min(0, x);
-							bounds_offsetY = min(0, y);
+              //update extremas
+              bounds_min_x = Math.min(0, x, bounds_min_x);
+              bounds_min_y = Math.min(0, y, bounds_min_y);
+              bounds_max_x = Math.max(0, x, x+width, bounds_max_x);
+              bounds_max_y = Math.max(0, y, y+height, bounds_max_y);
+              
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
 
-							if (x >= 0) {
-								this.width = max(w, width, x+width);
-							} else {
-								this.width = max(w, width, -x + w);
-							}
-							if (y >= 0) {
-								this.height = max(h, height, y+height);
-							} else {
-								this.height = max(h, height, -y + h);
-							}
-							
               //clockwise
               draw_commands.push({'moveTo': [x1, y]});
               draw_commands.push({'beginPath': null});
@@ -449,6 +408,7 @@
               draw_commands.push({'quadraticCurveTo': [x, y, x1, y]});
               draw_commands.push({'closePath': null});
               draw_commands.push({'fill': null});
+              
             }).bind(sprite)
           },
 
@@ -462,13 +422,25 @@
             configurable: false,
             value: (function (x, y) {
               check_number_type(arguments, this+'.graphics.lineTo', 'x,y');
-							var min = Math.min,
-									max = Math.max;
-							//relative to registration point of sprite
-							bounds_offsetX = min(0, x);
-							bounds_offsetY = min(0, y);
-							
+
+              //update extremas
+              bounds_min_x = min(0, x, graphics_cursor_x, bounds_min_x);
+              bounds_min_y = min(0, y, graphics_cursor_y, bounds_min_y);
+              bounds_max_x = max(0, x, graphics_cursor_x, bounds_max_x);
+              bounds_max_y = max(0, y, graphics_cursor_y, bounds_max_y);
+              
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
+
+              //push canvas commands to draw stack
+              draw_commands.push({'moveTo': [graphics_cursor_x, graphics_cursor_y]});
               draw_commands.push({'lineTo': [x, y]});
+
+              //update cursor
+              graphics_cursor_x = x;
+              graphics_cursor_y = y;
+              
             }).bind(sprite)
           },
 
@@ -483,10 +455,14 @@
             value: (function (x, y) {
               check_number_type(arguments, this+'.graphics.moveTo', 'x,y');
               draw_commands.push({'moveTo': [x, y]});
+              //update cursor
+              graphics_cursor_x = x;
+              graphics_cursor_y = y;
+              
             }).bind(sprite)
           },
 
-					/* Specifies a simple one-color fill that subsequent calls to other
+          /* Specifies a simple one-color fill that subsequent calls to other
            * graphics methods use when drawing.
            * @param {Color} color In hex format.
            * @param {Number} alpha
@@ -506,15 +482,15 @@
             }).bind(sprite)
           },
 
-					'endFill': {
-						enumerable: false,
+          'endFill': {
+            enumerable: false,
             writable: false,
             configurable: false,
             value: function () {
               draw_commands.push({'stroke': null});
             }
-					}
-					
+          }
+          
         })
       }//end graphics object
     });//end sprite property definitions w/ privact
