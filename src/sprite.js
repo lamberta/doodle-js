@@ -289,42 +289,27 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height) {
-              check_number_type(arguments, this+'.graphics.rect', 'x,y,width,height');
-              //relative to registration point of sprite
-              var w = x + width,
-                  h = y + height;
-
-							//determine width and bounds offsets
-							if (x >= 0) {
-								w = x + width;
-								bounds_offsetX = 0;
-							} else if (x < 0 && x >= -width) {
-								w = width;
-								bounds_offsetX = x;
-							} else if (x < -width) {
-								w = -x;
-								bounds_offsetX = x;
-							}
-
-							//determine width and bounds offsets
-							if (y >= 0) {
-								h = y + height;
-								bounds_offsetY = 0;
-							} else if (y < 0 && y >= -height) {
-								h = height;
-								bounds_offsetY = y;
-							} else if (y < -height) {
-								h = -y;
-								bounds_offsetY = y;
-							}
+							var max = Math.max,
+									min = Math.min,
+									w = this.width,
+									h = this.height;
 							
-              //check for new bounds extrema
-              if (w > this.width) {
-                this.width = w;
-              }
-              if (h > this.height) {
-                this.height = h;
-              }
+              check_number_type(arguments, this+'.graphics.rect', 'x,y,width,height');
+
+              //relative to registration point of sprite
+							bounds_offsetX = min(0, x);
+							bounds_offsetY = min(0, y);
+
+							if (x >= 0) {
+								this.width = max(w, width, x+width);
+							} else {
+								this.width = max(w, width, -x + w);
+							}
+							if (y >= 0) {
+								this.height = max(h, height, y+height);
+							} else {
+								this.height = max(h, height, -y + h);
+							}
               
               draw_commands.push({'fillRect': [x, y, width, height]});
             }).bind(sprite)
@@ -340,46 +325,31 @@
             writable: false,
             configurable: false,
             value: (function (x, y, radius) {
+							var max = Math.max,
+									min = Math.min
+									w = this.width,
+									h = this.height;
+							
               check_number_type(arguments, this+'.graphics.circle', 'x,y,radius');
-              var w = radius*2,
-									h = radius*2;
-							
-							//determine width and bounds offset
-							if (x >= 0 && x <= radius) {
-								w = radius*2;
-								bounds_offsetX = -w/2 + x;
-							} else if (x > radius) {
-								w = radius + x;
-								bounds_offsetX = 0;
-							} else if (x < 0 && x >= -radius) {
-								w = radius*2;
-								bounds_offsetX = -radius + x;
-							} else if (x < -radius) {
-								w = -x + radius;
-								bounds_offsetX = x + -radius;
-							}
 
-							if (y >= 0 && y <= radius) {
-								h = radius*2;
-								bounds_offsetY = -h/2 + y;
-							} else if (y > radius) {
-								h = radius + y;
-								bounds_offsetY = 0;
-							} else if (y < 0 && y >= -radius) {
-								h = radius*2;
-								bounds_offsetY = -radius + y;
-							} else if (y < -radius) {
-								h = -y + radius;
-								bounds_offsetY = y + -radius;
+							//relative to registration point of sprite - radius
+							bounds_offsetX = min(0, -radius+x);
+							bounds_offsetY = min(0, -radius+y);
+
+							if (x <= 0) {
+								this.width = max(w, radius*2, -x + w + radius);
+							} else if (x > 0 && x < radius) {
+								this.width = max(w, radius*2, x + w);
+							} else if (x >= radius) {
+								this.width = max(w, radius*2, x + radius);
 							}
-							
-              //check for new bounds extrema
-              if (w > this.width) {
-                this.width = w;
-              }
-              if (h > this.height) {
-                this.height = h;
-              }
+							if (y <= 0) {
+								this.height = max(h, radius*2, -y + h + radius);
+							} else if (y > 0 && y < radius) {
+								this.height = max(h, radius*2, y + h);
+							} else if (y >= radius) {
+								this.height = max(h, radius*2, y + radius);
+							}
               
               draw_commands.push({'beginPath': null});
               //x, y, radius, start_angle, end_angle, anti-clockwise
