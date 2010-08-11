@@ -108,102 +108,16 @@
     return textevent;
   };
     
-  
-  (function () {
-
-    textevent_properties = {
-      'toString': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object TextEvent]";
-        }
+  //static
+  textevent_properties = {
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object TextEvent]";
       }
-    };
-
-  }());
-
-  //constants
-  Object.defineProperties(doodle.TextEvent, {
-
-    'TEXT_INPUT': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "textInput"
-    },
-
-    'INPUT_METHOD_UNKNOWN': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x00
-    },
-
-    'INPUT_METHOD_KEYBOARD': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x01
-    },
-
-    'INPUT_METHOD_PASTE': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x02
-    },
-
-    'INPUT_METHOD_DROP': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x03
-    },
-
-    'INPUT_METHOD_IME': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x04
-    },
-
-    'INPUT_METHOD_OPTION': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x05
-    },
-
-    'INPUT_METHOD_HANDWRITING': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x06
-    },
-
-    'INPUT_METHOD_VOICE': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x07
-    },
-
-    'INPUT_METHOD_MULTIMODAL': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x08
-    },
-
-    'INPUT_METHOD_SCRIPT': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x09
     }
-    
-  });
-
+  };
+	
 }());//end class closure

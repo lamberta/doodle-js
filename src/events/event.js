@@ -270,68 +270,6 @@
   }());
 
   /*
-   * CLASS CONSTANTS
-   */
-  Object.defineProperties(doodle.Event, {
-
-    'CAPTURING_PHASE': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 1
-    },
-
-    'AT_TARGET': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 2
-    },
-
-    'BUBBLING_PHASE': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 3
-    },
-
-    /* Dispatched when object is added to display path.
-     */
-    'ADDED': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "added"
-    },
-
-    /* Dispatched when object is removed from display path.
-     */
-    'REMOVED': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "removed"
-    },
-
-    'ENTER_FRAME': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "enterFrame"
-    },
-
-    /* Dispatched when element is loaded.
-     */
-    'LOAD': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "load"
-    }
-    
-  });
-
-  /*
    * CLASS METHODS
    */
 

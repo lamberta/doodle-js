@@ -157,33 +157,17 @@
     
     return uievent;
   };
-    
-  
-  (function () {
 
-    uievent_properties = {
-      'toString': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object UIEvent]";
-        }
-      }
-    };
-
-  }());
-
-  //constants
-  Object.defineProperties(doodle.UIEvent, {
-
-    'FOCUS_IN': {
+  //static
+  uievent_properties = {
+    'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: "focusIn"
+      value: function () {
+        return "[object UIEvent]";
+      }
     }
-    
-  });
+  };
 
 }());//end class closure

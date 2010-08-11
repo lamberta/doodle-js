@@ -261,107 +261,16 @@
     return mouseevent;
   };
     
-  
-  (function () {
-
-    mouseevent_properties = {
-      'toString': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object MouseEvent]";
-        }
+  //static
+  mouseevent_properties = {
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object MouseEvent]";
       }
-    };
-
-  }());
-
-
-  /* MouseEvent types
-   * Compatibility tables: http://www.quirksmode.org/dom/events/index.html
-   */
-  Object.defineProperties(doodle.MouseEvent, {
-
-    /* To test for left/middle/right button check value for event.which (0,1,2)
-     */
-    'CLICK': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "click"
-    },
-
-    'DOUBLE_CLICK': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "dblclick"
-    },
-
-    'CONTEXT_MENU': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "contextmenu"
-    },
-
-    'MOUSE_DOWN': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mousedown"
-    },
-
-    'MOUSE_UP': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mouseup"
-    },
-
-    'MOUSE_WHEEL': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mousewheel"
-    },
-
-    'MOUSE_MOVE': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mousemove"
-    },
-
-    'MOUSE_OUT': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mouseout"
-    },
-
-    'MOUSE_OVER': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mouseover"
-    },
-
-    'MOUSE_ENTER': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mouseenter"
-    },
-
-    'MOUSE_LEAVE': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "mouseleave"
     }
-    
-  });
+  };
 
 }());//end class closure

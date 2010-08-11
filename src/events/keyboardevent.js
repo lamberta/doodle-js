@@ -199,88 +199,16 @@
     return keyboardevent;
   };
     
-  
-  (function () {
-
-    keyboardevent_properties = {
-      'toString': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object KeyboardEvent]";
-        }
+  //static
+  keyboardevent_properties = {
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object KeyboardEvent]";
       }
-    };
-
-  }());
-
-  //constants
-  Object.defineProperties(doodle.KeyboardEvent, {
-    
-    'KEY_PRESS': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "keypress"
-    },
-
-    'KEY_UP': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "keyup"
-    },
-
-    'KEY_DOWN': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: "keydown"
-    },
-
-    'KEY_LOCATION_STANDARD': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x00
-    },
-
-    'KEY_LOCATION_LEFT': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x01
-    },
-
-    'KEY_LOCATION_RIGHT': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x02
-    },
-
-    'KEY_LOCATION_NUMPAD': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x03
-    },
-
-    'KEY_LOCATION_MOBILE': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x04
-    },
-
-    'KEY_LOCATION_JOYSTICK': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: 0x05
     }
-    
-  });
+  };
 
 }());//end class closure
