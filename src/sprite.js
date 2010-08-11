@@ -24,6 +24,7 @@
       check_array_type = doodle.utils.types.check_array_type,
       isMatrix = doodle.geom.Matrix.isMatrix,
       check_matrix_type = doodle.utils.types.check_matrix_type,
+      check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
       Rectangle = doodle.geom.Rectangle;
@@ -420,6 +421,26 @@
            * @param {Number} x
            * @param {Number} y
            */
+          'moveTo': {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: (function (x, y) {
+              check_number_type(arguments, this+'.graphics.moveTo', 'x,y');
+              draw_commands.push(function (ctx) {
+                ctx.moveTo(x, y);
+              });
+              //update cursor
+              graphics_cursor_x = x;
+              graphics_cursor_y = y;
+              
+            }).bind(sprite)
+          },
+
+          /*
+           * @param {Number} x
+           * @param {Number} y
+           */
           'lineTo': {
             enumerable: false,
             writable: false,
@@ -438,7 +459,7 @@
               this.height = -bounds_min_y + bounds_max_y;
 
               draw_commands.push(function (ctx) {
-                ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
+                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
                 ctx.lineTo(x, y);
               });
 
@@ -449,22 +470,93 @@
             }).bind(sprite)
           },
 
-          /*
-           * @param {Number} x
-           * @param {Number} y
+          /* Quadratic curve to point.
+           * @param {Point} pt1 Control point
+           * @param {Point} pt2 End point
            */
-          'moveTo': {
+          'curveTo': {
             enumerable: false,
             writable: false,
             configurable: false,
-            value: (function (x, y) {
-              check_number_type(arguments, this+'.graphics.moveTo', 'x,y');
+            value: (function (pt1, pt2) {
+              check_point_type(pt1, this+'.graphics.arcTo', '*ctl_point*,point');
+              check_point_type(pt2, this+'.graphics.arcTo', 'ctl_point,*point*');
+
+              var x0 = graphics_cursor_x,
+                  y0 = graphics_cursor_y,
+                  x1 = pt1.x,
+                  y1 = pt1.y,
+                  x2 = pt2.x,
+                  y2 = pt2.y,
+                  t,
+                  cx = 0,
+                  cy = 0;
+              
+              //curve ratio of extrema
+              t = (x0 - x1) / (x0 - 2 * x1 + x2);
+              //if true, store extrema position
+              if (0 <= t && t <= 1) {
+                cx = (1-t) * (1-t) * x0 + 2 * (1-t) * t * x1 + t * t * x2;
+              }
+
+              t = (y0 - y1) / (y0 - 2 * y1 + y2);
+              if (0 <= t && t <= 1) {
+                cy = (1-t) * (1-t) * y0 + 2 * (1-t) * t * y1 + t * t * y2;
+              }
+              
+              //update extremas
+              bounds_min_x = Math.min(0, x0, cx, x2, bounds_min_x);
+              bounds_min_y = Math.min(0, y0, cy, y2, bounds_min_y);
+              bounds_max_x = Math.max(0, x0, cx, x2, bounds_max_x);
+              bounds_max_y = Math.max(0, y0, cy, y2, bounds_max_y);
+              
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
+
               draw_commands.push(function (ctx) {
-                ctx.moveTo(x, y);
+                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
+                ctx.quadraticCurveTo(x1, y1, x2, y2);
               });
+
               //update cursor
-              graphics_cursor_x = x;
-              graphics_cursor_y = y;
+              graphics_cursor_x = x2;
+              graphics_cursor_y = y2;
+              
+            }).bind(sprite)
+          },
+
+          /* Acting wierd
+           * @param {Number} x
+           * @param {Number} y
+           */
+          'arcTo': {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: (function (pt1, pt2, radius) {
+              check_point_type(pt1, this+'.graphics.arcTo', '*point1*,point2,radius');
+              check_point_type(pt2, this+'.graphics.arcTo', 'point1,*point2*,radius');
+              check_number_type(radius, this+'.graphics.arcTo', 'point1,point2,*radius*');
+
+              //update extremas
+              bounds_min_x = Math.min(0, pt1.x, pt2.x, graphics_cursor_x, bounds_min_x);
+              bounds_min_y = Math.min(0, pt1.y, pt2.y, graphics_cursor_y, bounds_min_y);
+              bounds_max_x = Math.max(0, pt1.x, pt2.x, graphics_cursor_x, bounds_max_x);
+              bounds_max_y = Math.max(0, pt1.y, pt2.y, graphics_cursor_y, bounds_max_y);
+              
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
+
+              draw_commands.push(function (ctx) {
+                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
+                ctx.arcTo(pt1.x, pt1.y, pt2.x, pt2.y, radius);
+              });
+
+              //update cursor
+              graphics_cursor_x = pt2.x;
+              graphics_cursor_y = pt2.y;
               
             }).bind(sprite)
           },
@@ -650,6 +742,8 @@
               draw_commands.push(function (ctx) {
                 ctx.stroke();
               });
+              graphics_cursor_x = 0;
+              graphics_cursor_y = 0;
             }
           }
           
