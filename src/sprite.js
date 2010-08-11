@@ -17,7 +17,7 @@
       isSprite,
       inheritsSprite,
       hex_to_rgb = doodle.utils.hex_to_rgb,
-			hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+      hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
@@ -188,32 +188,21 @@
         enumerable: false,
         writable: false,
         configurable: false,
-        value: function (ctx) {
-          check_context_type(ctx, this+'.__draw', 'context');
+        value: (function () {
+          var context,
+              run_command = (function (cmd) {
+                check_function_type(cmd, this+'.__draw: [draw_commands]::', 'command');
+                //draw function, provide self for this and context as arg
+                cmd.call(this, context);
+              }).bind(sprite);
 
-          draw_commands.forEach(function (cmd) {
-            //draw function, provide self for this and context as arg
-            if (typeof cmd === 'function') {
-              cmd.call(sprite, ctx);
-              return;
-            }
-            /* draw object, given canvas.context command and param
-						 * if context.method, put arguments in an array
-						 * if context.property, just use key-value
-						 */
-            var prop = Object.keys(cmd)[0];
-            switch (typeof ctx[prop]) {
-            case 'function':
-              //context method
-              ctx[prop].apply(ctx, cmd[prop]);
-              break;
-            case 'string':
-              //context property
-              ctx[prop] = cmd[prop];
-              break;
-            }
-          });
-        }
+          //this is what's getting called
+          return (function (ctx) {
+            check_context_type(ctx, this+'.__draw', 'context');
+            context = ctx;
+            draw_commands.forEach(run_command);
+          }).bind(sprite);
+        }())
       },
 
       /*
@@ -292,7 +281,9 @@
               this.width = -bounds_min_x + bounds_max_x;
               this.height = -bounds_min_y + bounds_max_y;
               
-              draw_commands.push({'fillRect': [x, y, width, height]});
+              draw_commands.push(function (ctx) {
+                ctx.fillRect(x, y, width, height);
+              });
               
             }).bind(sprite)
           },
@@ -319,11 +310,13 @@
               this.width = -bounds_min_x + bounds_max_x;
               this.height = -bounds_min_y + bounds_max_y;
 
-              draw_commands.push({'beginPath': null});
-              //x, y, radius, start_angle, end_angle, anti-clockwise
-              draw_commands.push({'arc': [x, y, radius, 0, Math.PI*2, true]});
-              draw_commands.push({'closePath': null});
-              draw_commands.push({'fill': null});
+              draw_commands.push(function (ctx) {
+                ctx.beginPath();
+                //x, y, radius, start_angle, end_angle (Math.PI*2), anti-clockwise
+                ctx.arc(x, y, radius, 0, 6.283185307179586, true);
+                ctx.closePath();
+                ctx.fill();
+              });
               
             }).bind(sprite)
           },
@@ -356,15 +349,17 @@
               this.width = -bounds_min_x + bounds_max_x;
               this.height = -bounds_min_y + bounds_max_y;
 
-              draw_commands.push({'beginPath': null});
-              draw_commands.push({'moveTo': [x+rx, y]});
-              //(cp1), (cp2), (pt)
-              draw_commands.push({'bezierCurveTo': [x+rx, y-kry, x+krx, y-ry, x, y-ry]});
-              draw_commands.push({'bezierCurveTo': [x-krx, y-ry, x-rx, y-kry, x-rx, y]});
-              draw_commands.push({'bezierCurveTo': [x-rx, y+kry, x-krx, y+ry, x, y+ry]});
-              draw_commands.push({'bezierCurveTo': [x+krx, y+ry, x+rx, y+kry, x+rx, y]});
-              draw_commands.push({'closePath': null});
-              draw_commands.push({'fill': null});
+              draw_commands.push(function (ctx) {
+                ctx.beginPath();
+                ctx.moveTo(x+rx, y);
+                //(cp1), (cp2), (pt)
+                ctx.bezierCurveTo(x+rx, y-kry, x+krx, y-ry, x, y-ry);
+                ctx.bezierCurveTo(x-krx, y-ry, x-rx, y-kry, x-rx, y);
+                ctx.bezierCurveTo(x-rx, y+kry, x-krx, y+ry, x, y+ry);
+                ctx.bezierCurveTo(x+krx, y+ry, x+rx, y+kry, x+rx, y);
+                ctx.closePath();
+                ctx.fill();
+              });
               
             }).bind(sprite)
           },
@@ -402,19 +397,21 @@
               this.width = -bounds_min_x + bounds_max_x;
               this.height = -bounds_min_y + bounds_max_y;
 
-              //clockwise
-              draw_commands.push({'moveTo': [x1, y]});
-              draw_commands.push({'beginPath': null});
-              draw_commands.push({'lineTo': [x2, y]});
-              draw_commands.push({'quadraticCurveTo': [x3, y, x3, y1]});
-              draw_commands.push({'lineTo': [x3, y2]});
-              draw_commands.push({'quadraticCurveTo': [x3, y3, x2, y3]});
-              draw_commands.push({'lineTo': [x1, y3]});
-              draw_commands.push({'quadraticCurveTo': [x, y3, x, y2]});
-              draw_commands.push({'lineTo': [x, y1]});
-              draw_commands.push({'quadraticCurveTo': [x, y, x1, y]});
-              draw_commands.push({'closePath': null});
-              draw_commands.push({'fill': null});
+              draw_commands.push(function (ctx) {
+                //clockwise
+                ctx.moveTo(x1, y);
+                ctx.beginPath();
+                ctx.lineTo(x2, y);
+                ctx.quadraticCurveTo(x3, y, x3, y1);
+                ctx.lineTo(x3, y2);
+                ctx.quadraticCurveTo(x3, y3, x2, y3);
+                ctx.lineTo(x1, y3);
+                ctx.quadraticCurveTo(x, y3, x, y2);
+                ctx.lineTo(x, y1);
+                ctx.quadraticCurveTo(x, y, x1, y);
+                ctx.closePath();
+                ctx.fill();
+              });
               
             }).bind(sprite)
           },
@@ -440,9 +437,10 @@
               this.width = -bounds_min_x + bounds_max_x;
               this.height = -bounds_min_y + bounds_max_y;
 
-              //push canvas commands to draw stack
-              draw_commands.push({'moveTo': [graphics_cursor_x, graphics_cursor_y]});
-              draw_commands.push({'lineTo': [x, y]});
+              draw_commands.push(function (ctx) {
+                ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
+                ctx.lineTo(x, y);
+              });
 
               //update cursor
               graphics_cursor_x = x;
@@ -461,7 +459,9 @@
             configurable: false,
             value: (function (x, y) {
               check_number_type(arguments, this+'.graphics.moveTo', 'x,y');
-              draw_commands.push({'moveTo': [x, y]});
+              draw_commands.push(function (ctx) {
+                ctx.moveTo(x, y);
+              });
               //update cursor
               graphics_cursor_x = x;
               graphics_cursor_y = y;
@@ -481,11 +481,10 @@
             value: (function (color, alpha) {
               alpha = alpha ? alpha : 1.0;
               check_number_type(alpha, this+'.graphics.beginFill', 'color, alpha');
-
-              var rgb = hex_to_rgb(color),
-                  rgb_str = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +','+ alpha +')';
               
-              draw_commands.push({'fillStyle': rgb_str});
+              draw_commands.push(function (ctx) {
+                ctx.fillStyle = hex_to_rgb_str(color, alpha);
+              });
             }).bind(sprite)
           },
 
@@ -584,68 +583,73 @@
             }).bind(sprite)
           },
 
-					'lineStyle': {
-						enumerable: true,
+          'lineStyle': {
+            enumerable: true,
             writable: false,
             configurable: false,
             value: (function (thickness, color, alpha, caps, joints, miterLimit) {
-							//defaults
-							thickness = thickness || 1;
-							color = color || "#000000";
-							alpha = alpha || 1;
-							caps = caps || doodle.LineCap.BUTT;
-							joints = joints || doodle.LineJoin.MITER;
-							miterLimit = miterLimit || 10;
-							check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*,color,alpha,caps,joints,miterLimit');
-							check_number_type(alpha, this+'.graphics.lineStyle', 'thickness,color,*alpha*,caps,joints,miterLimit');
-							check_string_type(caps, this+'.graphics.lineStyle', 'thickness,color,alpha,*caps*,joints,miterLimit');
-							check_string_type(joints, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,*joints*,miterLimit');
-							check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,joints,*miterLimit*');
-							//convert color to canvas rgb() format
-							if (typeof color === 'string' || typeof color === 'number') {
-								color = hex_to_rgb_str(color, alpha);
-							} else {
-								throw new TypeError(this+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
-							}
+              //defaults
+              thickness = thickness || 1;
+              color = color || "#000000";
+              alpha = alpha || 1;
+              caps = caps || doodle.LineCap.BUTT;
+              joints = joints || doodle.LineJoin.MITER;
+              miterLimit = miterLimit || 10;
+              check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*,color,alpha,caps,joints,miterLimit');
+              check_number_type(alpha, this+'.graphics.lineStyle', 'thickness,color,*alpha*,caps,joints,miterLimit');
+              check_string_type(caps, this+'.graphics.lineStyle', 'thickness,color,alpha,*caps*,joints,miterLimit');
+              check_string_type(joints, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,*joints*,miterLimit');
+              check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,joints,*miterLimit*');
+              //convert color to canvas rgb() format
+              if (typeof color === 'string' || typeof color === 'number') {
+                color = hex_to_rgb_str(color, alpha);
+              } else {
+                throw new TypeError(this+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
+              }
 
-							
-							draw_commands.push(function (ctx) {
-								ctx.lineWidth = thickness;
-								ctx.strokeStyle = color;
-								ctx.lineCap = caps;
-								ctx.lineJoin = joints;
-								ctx.miterLimit = miterLimit;
-							});
-							
-						}).bind(sprite)
-					},
+              draw_commands.push(function (ctx) {
+                ctx.lineWidth = thickness;
+                ctx.strokeStyle = color;
+                ctx.lineCap = caps;
+                ctx.lineJoin = joints;
+                ctx.miterLimit = miterLimit;
+              });
+              
+            }).bind(sprite)
+          },
 
-					'beginPath': {
-						enumerable: false,
+          'beginPath': {
+            enumerable: false,
             writable: false,
             configurable: false,
             value: function () {
-              draw_commands.push({'beginPath': null});
+              draw_commands.push(function (ctx) {
+                ctx.beginPath();
+              });
             }
-					},
+          },
 
-					//temp
+          //temp
           'endFill': {
             enumerable: false,
             writable: false,
             configurable: false,
             value: function () {
-              draw_commands.push({'fill': null});
+              draw_commands.push(function (ctx) {
+                ctx.fill();
+              });
             }
           },
-					
-					//temp
+          
+          //temp
           'endStroke': {
             enumerable: false,
             writable: false,
             configurable: false,
             value: function () {
-              draw_commands.push({'stroke': null});
+              draw_commands.push(function (ctx) {
+                ctx.stroke();
+              });
             }
           }
           
