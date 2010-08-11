@@ -11,3 +11,6 @@ Some of the new features:
   * Bounding Box for sprites.
 
 Some features work, some don't.
+
+Basic build instructions:
+./build/make-doodle => ./build/doodle.js
