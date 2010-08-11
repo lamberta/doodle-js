@@ -14,8 +14,8 @@
   
   /* Super constructor
    * @param {String} type
-   * @param {Boolean} bubbles
-   * @param {Boolean} cancelable
+   * @param {Boolean} bubbles = false
+   * @param {Boolean} cancelable = false
    *
    * @alternative instantiation
    * @param {Event} initializer event to wrap
@@ -295,18 +295,18 @@
       value: 3
     },
 
-		/* Dispatched when object is added to display path.
-		 */
-		'ADDED': {
+    /* Dispatched when object is added to display path.
+     */
+    'ADDED': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: "added"
     },
 
-		/* Dispatched when object is removed from display path.
-		 */
-		'REMOVED': {
+    /* Dispatched when object is removed from display path.
+     */
+    'REMOVED': {
       enumerable: true,
       writable: false,
       configurable: false,
@@ -318,6 +318,15 @@
       writable: false,
       configurable: false,
       value: "enterFrame"
+    },
+
+    /* Dispatched when element is loaded.
+     */
+    'LOAD': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: "load"
     }
     
   });

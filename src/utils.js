@@ -5,7 +5,7 @@
   doodle.utils = {
     rgb_to_hex: function (r, g, b) {
       if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number') {
-        throw new TypeError("rgb_to_hec: Color values must be numbers.");
+        throw new TypeError("rgb_to_hex: Color values must be numbers.");
       }
       return "#" + (b | (g << 8) | (r << 16)).toString(16);
     },
@@ -21,6 +21,20 @@
       }
       //return array: [r,g,b]
       return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
+    },
+
+    hex_to_rgb_str: function (color, alpha) {
+      alpha = alpha || 1;
+      if (typeof alpha !== 'number') {
+         throw new TypeError("hex_to_rgb_str(color,*alpha*): Parameter must be a number.");
+      }
+      alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
+      color = doodle.utils.hex_to_rgb(color);
+      if (alpha === 1) {
+        return "rgb("+ color[0] +","+ color[1] +","+ color[2] +")";
+      } else {
+        return "rgba("+ color[0] +","+ color[1] +","+ color[2] +","+ alpha +")";
+      }
     }
   };
 
@@ -40,7 +54,7 @@
         return true;
       } else if (n && n.length) {
         //given array, or semi-array
-				i = n.length;
+        i = n.length;
         while ((i -= 1) >= 0) {
           if (typeof n[i] !== 'number') {
             throw new TypeError(caller + param +": Parameter must be a number.");
@@ -79,6 +93,16 @@
         caller = (caller === undefined) ? "check_function_type" : caller;
         param = (param === undefined) ? "" : '('+param+')';
         throw new TypeError(caller + param +": Parameter must be a function.");
+      }
+    },
+
+    check_array_type: function (array, caller, param) {
+      if (Array.isArray(array)) {
+        return true;
+      } else {
+        caller = (caller === undefined) ? "check_array_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be an array.");
       }
     },
 

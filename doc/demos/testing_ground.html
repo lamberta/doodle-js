@@ -28,9 +28,21 @@ function init_doodle () {
 
 	
 	s2 = doodle.Sprite();
-	s2.graphics.beginFill("#00ffff");
-	s2.graphics.rect(0, 0, 20, 30);
-	s1.addChild(s2);
+	//s2.graphics.beginFill("#00ffff");
+	s2.x = 10;
+	s2.y = 50;
+	/*
+	s2.graphics.beginGradientFill(doodle.GradientType.RADIAL,
+																{x:45,y:45, radius:10},
+																{x:50, y:52, radius:30},
+																[0, 0.9], ['#ffff00', '#ff0000'], [0.25, 0.5]);
+	*/
+	//s2.graphics.beginPatternFill('http://skepacabra.files.wordpress.com/2009/05/bikini.jpg');
+	var img = new Image();
+	img.src = 'http://blog.kickino.org/noia/girl.png';
+	s2.graphics.beginPatternFill(img, doodle.Pattern.REPEAT);
+	s2.graphics.rect(0, 0, 300, 300);
+	l1.addChild(s2);
 	
 	s3 = doodle.Sprite();
 	s3.x = 0;

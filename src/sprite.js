@@ -20,6 +20,7 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
+      check_array_type = doodle.utils.types.check_array_type,
       isMatrix = doodle.geom.Matrix.isMatrix,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_rect_type = doodle.utils.types.check_rect_type,
@@ -35,7 +36,6 @@
     var arg_len = arguments.length,
         initializer,
         sprite,
-        hit_area = null,
         draw_commands = [],
         bounds_min_x = 0, //offsets used in getBounds and graphics shapes
         bounds_min_y = 0,
@@ -133,24 +133,27 @@
         }
       },
       
-      'hitArea': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          if (hit_area === null) {
-            return this.bounds;
-          } else {
-            return hit_area;
+      'hitArea': (function () {
+        var hit_area = null;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () {
+            if (hit_area === null) {
+              return this.bounds;
+            } else {
+              return hit_area;
+            }
+          },
+          set: function (rect) {
+            rect = (rect === false) ? null : rect;
+            //accepts null or rectangle area for now
+            if (rect === null || check_rect_type(rect, this+'.hitArea')) {
+              hit_area = rect;
+            }
           }
-        },
-        set: function (rect) {
-          rect = (rect === false) ? null : rect;
-          //accepts null or rectangle area for now
-          if (rect === null || check_rect_type(rect, this+'.hitArea')) {
-            hit_area = rect;
-          }
-        }
-      },
+        };
+      }()),
 
       //drawing context to use
       'context': {
@@ -482,6 +485,102 @@
             }).bind(sprite)
           },
 
+          'beginGradientFill': {
+            enumerable: true,
+            writable: false,
+            configurable: false,
+            value: (function () {
+              var check_point_type = doodle.utils.types.check_point_type,
+                  LINEAR = doodle.GradientType.LINEAR,
+                  RADIAL = doodle.GradientType.RADIAL;
+              
+              return (function (type, pt1, pt2, ratios, colors, alphas) {
+                check_point_type(pt1, this+'.beginGradientFill', 'type,*point1*,point2,ratios,colors,alphas');
+                check_point_type(pt2, this+'.beginGradientFill', 'type,point1,*point2*,ratios,colors,alphas');
+                check_array_type(ratios, this+'.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
+                check_number_type(ratios, this+'.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
+                check_array_type(colors, this+'.beginGradientFill', 'type,point1,point2,ratios,*colors*,alphas');
+                check_array_type(alphas, this+'.beginGradientFill', 'type,point1,point2,ratios,colors,*alphas*');
+                
+                draw_commands.push(function (ctx) {
+                  var hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+                      gradient,
+                      len = ratios.length,
+                      i = 0;
+                  if (type === LINEAR) {
+                    //not really too keen on creating this here, but I need access to the context
+                    gradient = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
+                    
+                  } else if (type === RADIAL) {
+                    check_number_type(pt1.radius, this+'.beginGradientFill', 'type,*circle1.radius*,circle2,ratios,colors,alphas');
+                    check_number_type(pt2.radius, this+'.beginGradientFill', 'type,circle1,*circle2.radius*,ratios,colors,alphas');
+                    gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
+                                                        pt2.x, pt2.y, pt2.radius);
+                  } else {
+                    throw new TypeError(this+'.beginGradientFill(*type*,point1,point2,ratios,colors,alphas): Unknown gradient type.');
+                  }
+                  //add color ratios to our gradient
+                  for (; i < len; i+=1) {
+                    gradient.addColorStop(ratios[i], hex_to_rgb_str(colors[i], alphas[i]));
+                  }
+                  ctx.fillStyle = gradient;
+                });
+                
+              }).bind(sprite);
+            }())
+          },
+
+          'beginPatternFill': {
+            enumerable: true,
+            writable: false,
+            configurable: false,
+            value: (function (image, repeat) {
+              var img = null, //image after loaded
+                  _img, //image before loaded
+                  on_image_error,
+                  Pattern = doodle.Pattern,
+                  Event = doodle.Event;
+              
+              repeat = repeat || Pattern.REPEAT;
+              check_string_type(repeat, this+'.beginPatternFill', 'image,*repeat*');
+              if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
+                  repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
+                throw new SyntaxError(this+'.beginPatternFill(image,*repeat*): Invalid pattern repeat type.');
+              }
+
+              if (typeof image === 'string') {
+                _img = new Image();
+                _img.src = encodeURI(image);
+              } else if (image && image.tagName === 'IMG') {
+                _img = image;
+              } else {
+                throw new TypeError(this+'.beginPatternFill(*image*,repeat): Parameter must be an Image object or url.');
+              }
+
+              //assign image handlers
+              _img.onload = (function () {
+                img = _img;
+                this.dispatchEvent(Event(Event.LOAD));
+              }).bind(this);
+              on_image_error = (function () {
+                throw new URIError(this+'.beginPatternFill(*image*,repeat): Unable to load ' + _img.src);
+              }).bind(this);
+              _img.onerror = on_image_error;
+              _img.onabort = on_image_error;
+              
+              draw_commands.push(function (ctx) {
+                if (img) {
+                  ctx.fillStyle = ctx.createPattern(img, repeat);
+                } else {
+                  //use transparent fill until image is loaded
+                  ctx.fillStyle = 'rgba(0,0,0,0)';
+                }
+              });
+              
+            }).bind(sprite)
+          },
+
+          //temp
           'endFill': {
             enumerable: false,
             writable: false,
@@ -605,3 +704,51 @@
     
   }());
 }());//end class closure
+
+
+doodle.GradientType = {};
+Object.defineProperties(doodle.GradientType, {
+  'LINEAR': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: 'linearGradient'
+  },
+  'RADIAL': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: 'radialGradient'
+  }
+});
+
+doodle.Pattern = {};
+Object.defineProperties(doodle.Pattern, {
+  'REPEAT': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: 'repeat'
+  },
+
+  'REPEAT_X': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: 'repeat-x'
+  },
+
+  'REPEAT_Y': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: 'repeat-y'
+  },
+
+  'NO_REPEAT': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: 'no-repeat'
+  }
+});
