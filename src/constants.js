@@ -53,3 +53,57 @@ Object.defineProperty(doodle, 'Pattern', {
     }
   })
 });
+
+Object.defineProperty(doodle, 'LineCap', {
+  enumerable: true,
+  writable: false,
+  configurable: false,
+  value: Object.create(null, {
+    //default
+    'BUTT': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 'butt'
+    },
+    'ROUND': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 'round'
+    },
+    'SQUARE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 'square'
+    }
+  })
+});
+
+Object.defineProperty(doodle, 'LineJoin', {
+  enumerable: true,
+  writable: false,
+  configurable: false,
+  value: Object.create(null, {
+    // default
+    'MITER': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 'miter'
+    },
+    'ROUND': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 'round'
+    },
+    'BEVEL': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 'bevel'
+    }
+  })
+});

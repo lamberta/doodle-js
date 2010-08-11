@@ -30,7 +30,7 @@ function init_doodle () {
 	s2 = doodle.Sprite();
 	//s2.graphics.beginFill("#00ffff");
 	s2.x = 10;
-	s2.y = 50;
+	s2.y = 250;
 	/*
 	s2.graphics.beginGradientFill(doodle.GradientType.RADIAL,
 																{x:45,y:45, radius:10},
@@ -41,26 +41,31 @@ function init_doodle () {
 	var img = new Image();
 	img.src = 'http://blog.kickino.org/noia/girl.png';
 	s2.graphics.beginPatternFill(img, doodle.Pattern.REPEAT);
-	s2.graphics.rect(0, 0, 300, 300);
+	s2.graphics.rect(0, 0, 100, 100);
 	l1.addChild(s2);
 	
 	s3 = doodle.Sprite();
 	s3.x = 0;
 	s3.y = 0;
+	s3.graphics.lineStyle(15, "#ff0000", 0.5);
 	s3.graphics.beginFill("#00ff00");
 	s3.graphics.rect(80, 80, 20, 20);
 	s3.graphics.beginFill("#5533cc");
 	s3.graphics.circle(0, 0, 20);
-	//s3.graphics.moveTo(0, 0);
-	/*
+	s3.graphics.endFill();
+	s3.graphics.endStroke();
+	
+	s3.graphics.lineStyle(10, "#ff00ff", 1);
+	s3.graphics.beginPath();
+	s3.graphics.moveTo(0, 0);
 	s3.graphics.lineTo(20, 20);
 	s3.graphics.lineTo(-50, 30);
 	s3.graphics.lineTo(80, 40);
 	s3.graphics.lineTo(120, -40);
 	s3.graphics.moveTo(180, 30);
 	s3.graphics.lineTo(0, 50);
-	s3.graphics.endFill();
-	*/
+	s3.graphics.endStroke();
+
 	s1.addChild(s3);
 
 	s4 = doodle.Sprite();

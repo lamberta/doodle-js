@@ -17,6 +17,7 @@
       isSprite,
       inheritsSprite,
       hex_to_rgb = doodle.utils.hex_to_rgb,
+			hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
@@ -196,7 +197,10 @@
               cmd.call(sprite, ctx);
               return;
             }
-            //draw object, given canvas.context command and param
+            /* draw object, given canvas.context command and param
+						 * if context.method, put arguments in an array
+						 * if context.property, just use key-value
+						 */
             var prop = Object.keys(cmd)[0];
             switch (typeof ctx[prop]) {
             case 'function':
@@ -427,10 +431,10 @@
               check_number_type(arguments, this+'.graphics.lineTo', 'x,y');
 
               //update extremas
-              bounds_min_x = min(0, x, graphics_cursor_x, bounds_min_x);
-              bounds_min_y = min(0, y, graphics_cursor_y, bounds_min_y);
-              bounds_max_x = max(0, x, graphics_cursor_x, bounds_max_x);
-              bounds_max_y = max(0, y, graphics_cursor_y, bounds_max_y);
+              bounds_min_x = Math.min(0, x, graphics_cursor_x, bounds_min_x);
+              bounds_min_y = Math.min(0, y, graphics_cursor_y, bounds_min_y);
+              bounds_max_x = Math.max(0, x, graphics_cursor_x, bounds_max_x);
+              bounds_max_y = Math.max(0, y, graphics_cursor_y, bounds_max_y);
               
               //update size for bounding box
               this.width = -bounds_min_x + bounds_max_x;
@@ -495,12 +499,12 @@
                   RADIAL = doodle.GradientType.RADIAL;
               
               return (function (type, pt1, pt2, ratios, colors, alphas) {
-                check_point_type(pt1, this+'.beginGradientFill', 'type,*point1*,point2,ratios,colors,alphas');
-                check_point_type(pt2, this+'.beginGradientFill', 'type,point1,*point2*,ratios,colors,alphas');
-                check_array_type(ratios, this+'.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
-                check_number_type(ratios, this+'.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
-                check_array_type(colors, this+'.beginGradientFill', 'type,point1,point2,ratios,*colors*,alphas');
-                check_array_type(alphas, this+'.beginGradientFill', 'type,point1,point2,ratios,colors,*alphas*');
+                check_point_type(pt1, this+'.graphics.beginGradientFill', 'type,*point1*,point2,ratios,colors,alphas');
+                check_point_type(pt2, this+'.graphics.beginGradientFill', 'type,point1,*point2*,ratios,colors,alphas');
+                check_array_type(ratios, this+'.graphics.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
+                check_number_type(ratios, this+'.graphics.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
+                check_array_type(colors, this+'.graphics.beginGradientFill', 'type,point1,point2,ratios,*colors*,alphas');
+                check_array_type(alphas, this+'.graphics.beginGradientFill', 'type,point1,point2,ratios,colors,*alphas*');
                 
                 draw_commands.push(function (ctx) {
                   var hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
@@ -512,12 +516,12 @@
                     gradient = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
                     
                   } else if (type === RADIAL) {
-                    check_number_type(pt1.radius, this+'.beginGradientFill', 'type,*circle1.radius*,circle2,ratios,colors,alphas');
-                    check_number_type(pt2.radius, this+'.beginGradientFill', 'type,circle1,*circle2.radius*,ratios,colors,alphas');
+                    check_number_type(pt1.radius, this+'.graphics.beginGradientFill', 'type,*circle1.radius*,circle2,ratios,colors,alphas');
+                    check_number_type(pt2.radius, this+'.graphics.beginGradientFill', 'type,circle1,*circle2.radius*,ratios,colors,alphas');
                     gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
                                                         pt2.x, pt2.y, pt2.radius);
                   } else {
-                    throw new TypeError(this+'.beginGradientFill(*type*,point1,point2,ratios,colors,alphas): Unknown gradient type.');
+                    throw new TypeError(this+'.graphics.beginGradientFill(*type*,point1,point2,ratios,colors,alphas): Unknown gradient type.');
                   }
                   //add color ratios to our gradient
                   for (; i < len; i+=1) {
@@ -542,10 +546,10 @@
                   Event = doodle.Event;
               
               repeat = repeat || Pattern.REPEAT;
-              check_string_type(repeat, this+'.beginPatternFill', 'image,*repeat*');
+              check_string_type(repeat, this+'.graphics.beginPatternFill', 'image,*repeat*');
               if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
                   repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
-                throw new SyntaxError(this+'.beginPatternFill(image,*repeat*): Invalid pattern repeat type.');
+                throw new SyntaxError(this+'.graphics.beginPatternFill(image,*repeat*): Invalid pattern repeat type.');
               }
 
               if (typeof image === 'string') {
@@ -554,7 +558,7 @@
               } else if (image && image.tagName === 'IMG') {
                 _img = image;
               } else {
-                throw new TypeError(this+'.beginPatternFill(*image*,repeat): Parameter must be an Image object or url.');
+                throw new TypeError(this+'.graphics.beginPatternFill(*image*,repeat): Parameter must be an Image object or url.');
               }
 
               //assign image handlers
@@ -563,7 +567,7 @@
                 this.dispatchEvent(Event(Event.LOAD));
               }).bind(this);
               on_image_error = (function () {
-                throw new URIError(this+'.beginPatternFill(*image*,repeat): Unable to load ' + _img.src);
+                throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + _img.src);
               }).bind(this);
               _img.onerror = on_image_error;
               _img.onabort = on_image_error;
@@ -580,8 +584,63 @@
             }).bind(sprite)
           },
 
-          //temp
+					'lineStyle': {
+						enumerable: true,
+            writable: false,
+            configurable: false,
+            value: (function (thickness, color, alpha, caps, joints, miterLimit) {
+							//defaults
+							thickness = thickness || 1;
+							color = color || "#000000";
+							alpha = alpha || 1;
+							caps = caps || doodle.LineCap.BUTT;
+							joints = joints || doodle.LineJoin.MITER;
+							miterLimit = miterLimit || 10;
+							check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*,color,alpha,caps,joints,miterLimit');
+							check_number_type(alpha, this+'.graphics.lineStyle', 'thickness,color,*alpha*,caps,joints,miterLimit');
+							check_string_type(caps, this+'.graphics.lineStyle', 'thickness,color,alpha,*caps*,joints,miterLimit');
+							check_string_type(joints, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,*joints*,miterLimit');
+							check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,joints,*miterLimit*');
+							//convert color to canvas rgb() format
+							if (typeof color === 'string' || typeof color === 'number') {
+								color = hex_to_rgb_str(color, alpha);
+							} else {
+								throw new TypeError(this+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
+							}
+
+							
+							draw_commands.push(function (ctx) {
+								ctx.lineWidth = thickness;
+								ctx.strokeStyle = color;
+								ctx.lineCap = caps;
+								ctx.lineJoin = joints;
+								ctx.miterLimit = miterLimit;
+							});
+							
+						}).bind(sprite)
+					},
+
+					'beginPath': {
+						enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function () {
+              draw_commands.push({'beginPath': null});
+            }
+					},
+
+					//temp
           'endFill': {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function () {
+              draw_commands.push({'fill': null});
+            }
+          },
+					
+					//temp
+          'endStroke': {
             enumerable: false,
             writable: false,
             configurable: false,
