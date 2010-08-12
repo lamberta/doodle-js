@@ -27,6 +27,7 @@
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
+      get_element = doodle.utils.get_element,
       Rectangle = doodle.geom.Rectangle;
 
 
@@ -681,25 +682,35 @@
                 throw new SyntaxError(this+'.graphics.beginPatternFill(image,*repeat*): Invalid pattern repeat type.');
               }
 
+              //given element id
+              if (typeof image === 'string' && image[0] === '#') {
+                image = get_element(image, this+'.beginPatternFill');
+              }
               if (typeof image === 'string') {
+                //src url
                 _img = new Image();
                 _img.src = encodeURI(image);
               } else if (image && image.tagName === 'IMG') {
                 _img = image;
               } else {
-                throw new TypeError(this+'.graphics.beginPatternFill(*image*,repeat): Parameter must be an Image object or url.');
+                throw new TypeError(this+'.graphics.beginPatternFill(*image*,repeat): Parameter must be an src url, image object, or element id.');
               }
 
-              //assign image handlers
-              _img.onload = (function () {
+              //check if image has already been loaded
+              if (_img.complete) {
                 img = _img;
-                this.dispatchEvent(Event(Event.LOAD));
-              }).bind(this);
-              on_image_error = (function () {
-                throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + _img.src);
-              }).bind(this);
-              _img.onerror = on_image_error;
-              _img.onabort = on_image_error;
+              } else {
+                //if not, assign load handlers
+                _img.onload = (function () {
+                  img = _img;
+                  this.dispatchEvent(Event(Event.LOAD));
+                }).bind(this);
+                on_image_error = (function () {
+                  throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + _img.src);
+                }).bind(this);
+                _img.onerror = on_image_error;
+                _img.onabort = on_image_error;
+              }
               
               draw_commands.push(function (ctx) {
                 if (img) {
