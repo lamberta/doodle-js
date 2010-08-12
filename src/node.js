@@ -170,12 +170,18 @@
         to_degrees = 180/Math.PI,
         to_radians = Math.PI/180;
 
-    /* Dispatches and event type from all of a nodes children and grandchildren,
+    /* Dispatches and event type from all of a nodes children and grandchildren.
+     * @param {Node} node
+     * @param {String} event_type
+     * @param {Function} child_action
      */
-    function children_dispatch_event (node, event_type) {
+    function children_dispatch_event (node, event_type, child_action) {
       node.children.forEach(function (child) {
+        if (typeof child_action === 'function') {
+          child_action(child);
+        }
         child.dispatchEvent(Event(event_type, true));
-        children_dispatch_event(child, event_type);
+        children_dispatch_event(child, event_type, child_action);
       });
     }
 
@@ -337,18 +343,32 @@
         configurable: false,
         value: function (index) {
           check_number_type(index, this+'.removeChildAt');
-          var node = this.children[index];
+          var node = this.children[index],
+              ctx = node.context,
+              node_bounds;
           
           this.children.splice(index, 1);
 
           //is it no longer a part of the display list?
-          if (inDisplayList(node)) {
+          if (ctx) {
+            clear_node_bounds(node);
             node.dispatchEvent(Event(Event.REMOVED, true));
-            children_dispatch_event(node, Event.REMOVED);
+            children_dispatch_event(node, Event.REMOVED, clear_node_bounds);
           }
           //these are needed for final transversal
           node.root = null;
           node.parent = null;
+
+          /* Called on every child of removed node with a context.
+           * Ensures it's old bounds are cleared before being re-parented.
+           */
+          function clear_node_bounds (child) {
+            var bounds = child.getBounds(child.root);
+            if (ctx) {
+              ctx.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+            child.root = null;
+          }
         }
       },
       
@@ -472,10 +492,10 @@
           check_point_type(pt, this+'.localToGlobal', 'point');
           var node = this;
           while (node) {
-						pt = node.transform.transformPoint(pt);
+            pt = node.transform.transformPoint(pt);
             node = node.parent;
           }
-					return pt;
+          return pt;
         }
       },
 
