@@ -128,21 +128,20 @@
         writable: false,
         configurable: false,
         value: function (type, listener, useCapture) {
-          if (check_string_type(type, this+'.addEventListener') &&
-              check_function_type(listener, this+'.addEventListener')) {
-            
-            useCapture = useCapture === true; //default to false, bubble event
+          check_string_type(type, this+'.addEventListener');
+          check_function_type(listener, this+'.addEventListener');
+          var self = this;
+          useCapture = useCapture === true; //default to false, bubble event
 
-            //if new event type, create it's array to store callbacks
-            if (!this.eventListeners[type]) {
-              this.eventListeners[type] = {capture:[], bubble:[]};
-            }
-            this.eventListeners[type][useCapture ? 'capture':'bubble'].push(listener);
-            
-            //now that we're receiving events, add to object queue
-            if(!dispatcher_queue.some(function(x) { return x === this; })) {
-              dispatcher_queue.push(this);
-            }
+          //if new event type, create it's array to store callbacks
+          if (!this.eventListeners[type]) {
+            this.eventListeners[type] = {capture:[], bubble:[]};
+          }
+          this.eventListeners[type][useCapture ? 'capture':'bubble'].push(listener);
+          
+          //object ready for events, add to receivers if not already there
+          if (dispatcher_queue.every(function(obj) { return self !== obj; })) {
+            dispatcher_queue.push(self);
           }
         }
       },
@@ -193,7 +192,7 @@
         value: function (event) {
           if (check_event_type(event, this+'.handleEvent')) {
             //check for listeners that match event type
-						//if capture not set, using bubble listeners - like for AT_TARGET phase
+            //if capture not set, using bubble listeners - like for AT_TARGET phase
             var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
                 listeners = this.eventListeners[event.type], //obj
                 count = 0, //listener count

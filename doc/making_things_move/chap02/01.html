@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Doodle.js Port - Making Things Move</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+function init_scene () {
+  //dom block element wrapper
+  var display = doodle.Display("#my_display");
+  display.width = 800;
+  display.height = 600;
+  display.backgroundColor = "#ffffff";
+
+  //creates new canvas element wrapper
+  var layer0 = display.addLayer();
+  
+  var eventSprite = doodle.Sprite();
+  eventSprite.graphics.beginFill(0xff0000);
+  eventSprite.graphics.circle(0, 0, 100);
+  eventSprite.graphics.endFill();
+  eventSprite.x = display.width/2;
+  eventSprite.y = display.height/2;
+
+  eventSprite.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseDown);
+  eventSprite.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
+
+  /* When a child is added or removed from the scene-graph, the
+   * scene is automatically re-drawn.
+   * Otherwise, set display.frameRate for animation intervals.
+   */
+  layer0.addChild(eventSprite);
+
+  /* A Doodle MouseEvent has many of the same properties as
+   * it's dom counterpart.
+   */
+  function onMouseDown (event) {
+    console.log(event.target + ": " + event.type);
+  }
+  function onMouseUp (event) {
+    console.log(event.target + ": " + event.type);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    
+    <div id="my_display" style="float:left;"></div>
+  </body>
+</html>

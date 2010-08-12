@@ -27,6 +27,7 @@
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
+			inheritsNode = doodle.Node.inheritsNode,
       get_element = doodle.utils.get_element,
       Rectangle = doodle.geom.Rectangle;
 
@@ -111,6 +112,9 @@
         writable: true,
         configurable: false,
         value: function (targetCoordSpace) {
+					if (!inheritsNode(targetCoordSpace)) {
+						throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
+					}
           var bounding_box = Rectangle(),
               w = this.width,
               h = this.height,
@@ -143,7 +147,7 @@
           configurable: false,
           get: function () {
             if (hit_area === null) {
-              return this.bounds;
+              return this.getBounds(this);
             } else {
               return hit_area;
             }

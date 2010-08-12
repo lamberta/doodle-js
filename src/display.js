@@ -1,12 +1,11 @@
 
-var last_event;
-
 (function () {
 
   var display_properties,
       check_block_element = doodle.utils.types.check_block_element,
       get_element = doodle.utils.get_element,
       check_context_type = doodle.utils.types.check_context_type,
+      inheritsSprite = doodle.Sprite.inheritsSprite,
       Event = doodle.Event,
       ENTER_FRAME = Event.ENTER_FRAME,
       enterFrame = Event(ENTER_FRAME),
@@ -156,18 +155,18 @@ var last_event;
         (function () {
           if (typeof child.getBounds === 'function') {
             //calculate bounding box relative to parent
-						bounding_box = child.getBounds(display);
-						
+            bounding_box = child.getBounds(display);
+            
             context.save();
             context.setTransform(1, 0, 0, 1, 0, 0); //reset
             //bounding box
             context.lineWidth = 0.5;
             context.strokeStyle = "#0000ff";
             context.strokeRect(bounding_box.x, bounding_box.y,
-															 bounding_box.width, bounding_box.height);
+                               bounding_box.width, bounding_box.height);
 
-						/* not applying parent transforms
-						//registration point
+            /* not applying parent transforms
+            //registration point
             context.fillStyle = "#000000";
             context.beginPath();
             context.arc(child.x, child.y, 3, 0, Math.PI*2, true);
@@ -186,11 +185,51 @@ var last_event;
       clear_scene_graph(display);
       draw_scene_graph(display);
     }
-    
+
+    redraw_scene_graph();
     return display;
-  };
 
 
+    /* Event dispatching - not ready for prime-time.
+     */
+    function dispatch_mouse_event_to_sprite (event) {
+      //last_event = event;
+      //position on canvas element
+      //offset is relative to div, however this implementation adds 1 to y?
+      var global_x = event.offsetX,
+          global_y = event.offsetY,
+          dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+          evt = doodle.MouseEvent(event), //wrap dom event in doodle event
+          local_pt;
+      
+      dispatcher_queue.forEach(function (obj) {
+        if (obj.hasEventListener(evt.type) && inheritsSprite(obj)) {
+          if (obj.getBounds(display).containsPoint({x: global_x, y: global_y})) {
+            //check z-index to determine who's on top?
+            local_pt = obj.globalToLocal({x: global_x, y: global_y});
+            //evt.localX = local_pt.x;
+            //evt.localY = local_pt.y;
+            evt.__setTarget(null); //dom setting target as canvas element
+            obj.dispatchEvent(evt);
+          }
+        }
+      });
+    }
+
+    function dispatch_keyboard_event (event) {
+      //console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
+      var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+          evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
+      dispatcher_queue.forEach(function (obj) {
+        if (obj.hasEventListener(evt.type)) {
+          obj.handleEvent(evt);
+        }
+      });
+    }
+
+  };//end doodle.Display
+
+  
   (function () {
 
     var check_string_type = doodle.utils.types.check_string_type,
@@ -361,44 +400,3 @@ var last_event;
     };//end display_properties
   }());
 }());//end class closure
-
-
-var inheritsSprite = doodle.Sprite.inheritsSprite;
-//test mouse click collision with sprite bounds
-var dispatch_mouse_event_to_sprite = function (event) {
-  last_event = event;
-  //position on canvas element
-  //offset is relative to div, however this implementation adds 1 to y?
-  var global_x = event.offsetX,
-      global_y = event.offsetY,
-      dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-      evt = doodle.MouseEvent(event), //wrap dom event in doodle event
-      local_pt;
-
-  //console.log("coords: "+[,] +"type: " + event.type + ", bubbles: " + event.bubbles);
-  
-  dispatcher_queue.forEach(function (obj) {
-    if (obj.hasEventListener(evt.type) && inheritsSprite(obj)) {
-      if (obj.hitArea.containsPoint({x: global_x, y: global_y})) {
-        //check z-index to determine who's on top?
-        local_pt = obj.globalToLocal({x: global_x, y: global_y});
-        //evt.localX = local_pt.x;
-        //evt.localY = local_pt.y;
-        console.log("go!");
-        evt.__setTarget(null); //dom setting target as canvas element
-        obj.dispatchEvent(evt);
-      }
-    }
-  });
-}
-
-var dispatch_keyboard_event = function (event) {
-  //console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
-  var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-      evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
-  dispatcher_queue.forEach(function (obj) {
-    if (obj.hasEventListener(evt.type)) {
-      obj.handleEvent(evt);
-    }
-  });
-};
