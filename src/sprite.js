@@ -599,41 +599,6 @@
             }).bind(sprite)
           },
 
-          /* Acting wierd
-           * @param {Number} x
-           * @param {Number} y
-           */
-          'arcTo': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (pt1, pt2, radius) {
-              check_point_type(pt1, this+'.graphics.arcTo', '*point1*,point2,radius');
-              check_point_type(pt2, this+'.graphics.arcTo', 'point1,*point2*,radius');
-              check_number_type(radius, this+'.graphics.arcTo', 'point1,point2,*radius*');
-
-              //update extremas
-              bounds_min_x = Math.min(0, pt1.x, pt2.x, graphics_cursor_x, bounds_min_x);
-              bounds_min_y = Math.min(0, pt1.y, pt2.y, graphics_cursor_y, bounds_min_y);
-              bounds_max_x = Math.max(0, pt1.x, pt2.x, graphics_cursor_x, bounds_max_x);
-              bounds_max_y = Math.max(0, pt1.y, pt2.y, graphics_cursor_y, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
-
-              draw_commands.push(function (ctx) {
-                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
-                ctx.arcTo(pt1.x, pt1.y, pt2.x, pt2.y, radius);
-              });
-
-              //update cursor
-              graphics_cursor_x = pt2.x;
-              graphics_cursor_y = pt2.y;
-              
-            }).bind(sprite)
-          },
-
           /* Specifies a simple one-color fill that subsequent calls to other
            * graphics methods use when drawing.
            * @param {Color} color In hex format.
