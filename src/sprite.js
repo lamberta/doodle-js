@@ -567,21 +567,21 @@
                 xt = pow(1-t,3) * x0 + 3 * pow(1-t,2) * t * x1 +
                   3 * pow(1-t,1) * pow(t,2) * x2 + pow(t,3) * x3;
                 //extremas
-                cx_max = max(cx_max, xt);
-                cx_min = min(cx_min, xt);
+                if (xt > cx_max) { cx_max = xt; }
+                if (xt < cx_min) { cx_min = xt; }
                 
                 yt = pow(1-t,3) * y0 + 3 * pow(1-t,2) * t * y1 +
                   3 * pow(1-t,1) * pow(t,2) * y2 + pow(t,3) * y3;
                 //extremas
-                cy_max = max(cy_max, yt);
-                cy_min = min(cy_min, yt);
+                if (yt > cy_max) { cy_max = yt; }
+                if (yt < cy_min) { cy_min = yt; }
               }
 
               //update extremas
-              bounds_min_x = Math.min(0, x0, cx_min, x3, bounds_min_x);
-              bounds_min_y = Math.min(0, y0, cy_min, y3, bounds_min_y);
-              bounds_max_x = Math.max(0, x0, cx_max, x3, bounds_max_x);
-              bounds_max_y = Math.max(0, y0, cy_max, y3, bounds_max_y);
+              bounds_min_x = min(0, x0, cx_min, x3, bounds_min_x);
+              bounds_min_y = min(0, y0, cy_min, y3, bounds_min_y);
+              bounds_max_x = max(0, x0, cx_max, x3, bounds_max_x);
+              bounds_max_y = max(0, y0, cy_max, y3, bounds_max_y);
               
               //update size for bounding box
               this.width = -bounds_min_x + bounds_max_x;
