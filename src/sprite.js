@@ -479,8 +479,8 @@
             writable: false,
             configurable: false,
             value: (function (pt1, pt2) {
-              check_point_type(pt1, this+'.graphics.arcTo', '*ctl_point*,point');
-              check_point_type(pt2, this+'.graphics.arcTo', 'ctl_point,*point*');
+              check_point_type(pt1, this+'.graphics.curveTo', '*ctl_point*,point');
+              check_point_type(pt2, this+'.graphics.curveTo', 'ctl_point,*point*');
 
               var x0 = graphics_cursor_x,
                   y0 = graphics_cursor_y,
@@ -523,6 +523,79 @@
               graphics_cursor_x = x2;
               graphics_cursor_y = y2;
               
+            }).bind(sprite)
+          },
+
+          /* Bezier curve to point.
+           * @param {Point} pt1 Control point 1
+           * @param {Point} pt2 Control point 2
+           * @param {Point} pt3 End point
+           */
+          'bezierCurveTo': {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: (function (pt1, pt2, pt3) {
+              check_point_type(pt1, this+'.graphics.bezierCurveTo', '*ctl_point1*,ctl_point2,point');
+              check_point_type(pt2, this+'.graphics.bezierCurveTo', 'ctl_point1,*ctl_point2*,point');
+              check_point_type(pt3, this+'.graphics.bezierCurveTo', 'ctl_point1,ctl_point2,*point*');
+
+              var pow = Math.pow,
+                  max = Math.max,
+                  min = Math.min,
+                  x0 = graphics_cursor_x,
+                  y0 = graphics_cursor_y,
+                  x1 = pt1.x,
+                  y1 = pt1.y,
+                  x2 = pt2.x,
+                  y2 = pt2.y,
+                  x3 = pt3.x,
+                  y3 = pt3.y,
+                  t,
+                  xt,
+                  yt,
+                  cx_max = 0,
+                  cx_min = 0,
+                  cy_max = 0,
+                  cy_min = 0;
+
+              /* Solve for t on curve at various intervals and keep extremas.
+               * Kinda hacky until I can find a real equation.
+               * 0 <= t && t <= 1
+               */
+              for (t = 0; t <= 1; t += 0.1) {
+                xt = pow(1-t,3) * x0 + 3 * pow(1-t,2) * t * x1 +
+                  3 * pow(1-t,1) * pow(t,2) * x2 + pow(t,3) * x3;
+                //extremas
+                cx_max = max(cx_max, xt);
+                cx_min = min(cx_min, xt);
+                
+                yt = pow(1-t,3) * y0 + 3 * pow(1-t,2) * t * y1 +
+                  3 * pow(1-t,1) * pow(t,2) * y2 + pow(t,3) * y3;
+                //extremas
+                cy_max = max(cy_max, yt);
+                cy_min = min(cy_min, yt);
+              }
+
+              //update extremas
+              bounds_min_x = Math.min(0, x0, cx_min, x3, bounds_min_x);
+              bounds_min_y = Math.min(0, y0, cy_min, y3, bounds_min_y);
+              bounds_max_x = Math.max(0, x0, cx_max, x3, bounds_max_x);
+              bounds_max_y = Math.max(0, y0, cy_max, y3, bounds_max_y);
+              
+              //update size for bounding box
+              this.width = -bounds_min_x + bounds_max_x;
+              this.height = -bounds_min_y + bounds_max_y;
+
+              draw_commands.push(function (ctx) {
+                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
+                ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+              });
+
+              //update cursor
+              graphics_cursor_x = x3;
+              graphics_cursor_y = y3;
+
             }).bind(sprite)
           },
 
