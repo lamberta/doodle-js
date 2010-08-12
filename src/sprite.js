@@ -563,7 +563,7 @@
                * Kinda hacky until I can find a real equation.
                * 0 <= t && t <= 1
                */
-              for (t = 0; t <= 1; t += 0.1) {
+              for (t = 0.1; t < 1; t += 0.1) {
                 xt = pow(1-t,3) * x0 + 3 * pow(1-t,2) * t * x1 +
                   3 * pow(1-t,1) * pow(t,2) * x2 + pow(t,3) * x3;
                 //extremas
