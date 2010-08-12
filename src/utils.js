@@ -4,12 +4,30 @@
   
   doodle.utils = {
     rgb_to_hex: function (r, g, b) {
+      var hex_color;
       if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number') {
         throw new TypeError("rgb_to_hex: Color values must be numbers.");
       }
-      return "#" + (b | (g << 8) | (r << 16)).toString(16);
+      hex_color = (b | (g << 8) | (r << 16)).toString(16);
+      return '#'+ String('000000'+hex_color).slice(-6); //pad out
     },
 
+    rgb_str_to_hex: function (rgb_str) {
+      var rgb_match;
+      if (typeof rgb_str !== 'string') {
+        throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
+      }
+      rgb_match = rgb_str.trim().match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,?.*\)$/);
+
+      if (Array.isArray(rgb_match)) {
+        return doodle.utils.rgb_to_hex(parseInt(rgb_match[1]),
+                                       parseInt(rgb_match[2]),
+                                       parseInt(rgb_match[3]));
+      } else {
+        throw new SyntaxError('rgb_str_to_hex(rgb_str): Parameter must be in the format: "rgb(n, n, n)".');
+      }
+    },
+    
     hex_to_rgb: function (color) {
       //number in octal format or string prefixed with #
       if (typeof color === 'string') {

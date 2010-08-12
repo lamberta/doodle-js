@@ -39,7 +39,10 @@
         set: function (id) {
           //get by name or actual element
           //element = document.getElementById(id);
-          var e = get_element(id, '[object Display]');
+          var e = get_element(id, '[object Display]'),
+              type,
+              w, h;
+          
           if (check_block_element(e, this+'.element')) {
             element = e;
           }
@@ -48,8 +51,14 @@
           //init rest - can you transfer layers to another div?
           this.root = this;
 
+          //check for default values
+          w = e.getAttribute('width');
+          h = e.getAttribute('height');
+          if (w) { this.width = parseInt(w); }
+          if (h) { this.height = parseInt(h); }
+
           //add listeners to dom events that we'll re-dispatch to the scene graph
-          for (var type in doodle.MouseEvent) {
+          for (type in doodle.MouseEvent) {
             element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event_to_sprite, false);
           }
           //add keyboard listeners to document
@@ -291,16 +300,16 @@
 
       'backgroundColor': {
         get: function () {
-          var color = this.element.style.backgroundColor,
-          rgb;
-          if (/rgba?\(.*\)/.test(color)) {
-            rgb = color.match(/(\d{1,3})/g);
-            color = doodle.utils.rgb_to_hex(rgb[0], rgb[1], rgb[2]);
+          var color = this.element.style.backgroundColor;
+          if (/rgba?.*/.test(color)) {
+            color = doodle.utils.rgb_str_to_hex(color);
           }
           return color;
         },
         set: function (color) {
-          //check color
+          if (typeof color === 'number') {
+            color = doodle.utils.hex_to_rgb_str(color);
+          }
           this.element.style.backgroundColor = color;
         }
       },

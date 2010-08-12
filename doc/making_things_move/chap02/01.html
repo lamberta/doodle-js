@@ -10,10 +10,6 @@
 function init_scene () {
   //dom block element wrapper
   var display = doodle.Display("#my_display");
-  display.width = 800;
-  display.height = 600;
-  display.backgroundColor = "#ffffff";
-
   //creates new canvas element wrapper
   var layer0 = display.addLayer();
   
@@ -48,6 +44,6 @@ function init_scene () {
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
     
-    <div id="my_display" style="float:left;"></div>
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
   </body>
 </html>
