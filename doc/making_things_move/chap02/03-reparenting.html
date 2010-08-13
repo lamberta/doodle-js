@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>Doodle.js Port - Making Things Move</title>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.2, p.39: The Display List</title>
     
     <script type="application/javascript" src="../../../build/doodle.js"></script>
     <script type="application/javascript">
 
-/* p. 39
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
  */
+
 function init_scene () {
 
   var display = doodle.Display("#my_display");
