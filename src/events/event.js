@@ -174,6 +174,14 @@
         configurable: false,
         get: function () { return type; }
       },
+			
+			'__setType': {
+				enumerable: false,
+        value: function (typeArg) {
+          check_string_type(typeArg);
+          type = typeArg;
+        }
+			},
 
       'returnValue': {
         enumerable: true,
@@ -190,12 +198,16 @@
         configurable: false,
         value: function (typeArg, canBubbleArg, cancelableArg) {
           //parameter defaults
-          bubbles = canBubbleArg === true; //false
-          cancelable = cancelableArg === true;
+          canBubbleArg = canBubbleArg === true; //false
+          cancelableArg = cancelableArg === true;
           //typecheck
-          check_string_type(type, this+'.initEvent', 'type');
-          check_boolean_type(bubbles, this+'.initEvent', 'bubbles');
-          check_boolean_type(cancelable, this+'.initEvent', 'cancelable');
+          check_string_type(type, this+'.initEvent', '*type*,bubbles,cancelable');
+          check_boolean_type(canBubbleArg, this+'.initEvent', 'type,*bubbles*,cancelable');
+          check_boolean_type(cancelableArg, this+'.initEvent', 'type,bubbles,*cancelable*');
+
+					type = typeArg;
+					bubbles = canBubbleArg;
+					cancelable = cancelableArg;
           
           return this;
         }
@@ -289,7 +301,8 @@
             evt_name === '[object UIEvent]' ||
             evt_name === '[object MouseEvent]' ||
             evt_name === '[object KeyboardEvent]' ||
-            evt_name === '[object TextEvent]');
+            evt_name === '[object TextEvent]' ||
+            evt_name === '[object WheelEvent]');
   };
   
 }());//end class closure

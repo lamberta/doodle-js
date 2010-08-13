@@ -263,9 +263,6 @@
           //if already set, then we're re-dispatching an event for another target
           if (!event.target) {
             event.__setTarget(this);
-          } else {
-            //this is a bit confusing, show warning for now
-            console.log(this+'.dispatchEvent: event.target already set to ' + event.target);
           }
 
           target = event.target;

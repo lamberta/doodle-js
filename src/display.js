@@ -7,6 +7,7 @@
       check_context_type = doodle.utils.types.check_context_type,
       inheritsSprite = doodle.Sprite.inheritsSprite,
       Event = doodle.Event,
+      MouseEvent = doodle.MouseEvent,
       ENTER_FRAME = Event.ENTER_FRAME,
       enterFrame = Event(ENTER_FRAME),
       dispatcher_queue = doodle.EventDispatcher.dispatcher_queue;
@@ -202,26 +203,48 @@
     /* Event dispatching - not ready for prime-time.
      */
     function dispatch_mouse_event_to_sprite (event) {
+      //console.log(event.type + ", " + event);
       //last_event = event;
       //position on canvas element
       //offset is relative to div, however this implementation adds 1 to y?
       var global_x = event.offsetX,
           global_y = event.offsetY,
           dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-          evt = doodle.MouseEvent(event), //wrap dom event in doodle event
+          MouseEvent = doodle.MouseEvent,
+          MOUSE_OVER = MouseEvent.MOUSE_OVER,
+          MOUSE_OUT = MouseEvent.MOUSE_OUT,
+          evt = MouseEvent(event), //wrap dom event in doodle event
           local_pt;
-      
+
       dispatcher_queue.forEach(function (obj) {
-        if (obj.hasEventListener(evt.type) && inheritsSprite(obj)) {
-          if (obj.getBounds(display).containsPoint({x: global_x, y: global_y})) {
-            //check z-index to determine who's on top?
-            local_pt = obj.globalToLocal({x: global_x, y: global_y});
-            //evt.localX = local_pt.x;
-            //evt.localY = local_pt.y;
-            evt.__setTarget(null); //dom setting target as canvas element
+
+        if (inheritsSprite(obj)) {
+          var bounds = obj.getBounds(display),
+              point_in_bounds = bounds.containsPoint({x: global_x, y: global_y});
+
+          evt.__setTarget(null); //dom setting target as canvas element
+          
+          if (point_in_bounds && obj.hasEventListener(evt.type)) {
             obj.dispatchEvent(evt);
           }
+          //have to manufacture mouse over/out
+          if (point_in_bounds && obj.hasEventListener(MOUSE_OVER)) {
+            // __mouse_over property is only used here
+            if (!obj.__mouse_over) {
+              obj.__mouse_over = true;
+              evt.__setType(MOUSE_OVER)
+              obj.dispatchEvent(evt);
+            }
+          }
+          if (!point_in_bounds && obj.hasEventListener(MOUSE_OUT)) {
+            if (obj.__mouse_over) {
+              obj.__mouse_over = false;
+              evt.__setType(MOUSE_OUT)
+              obj.dispatchEvent(evt);
+            }
+          }
         }
+        
       });
     }
 

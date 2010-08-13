@@ -48,7 +48,6 @@
     //check if given an init event to wrap
     if (arg_len === 1 && isEvent(arguments[0])) {
       initializer = arguments[0]; //event object
-
       //copy event properties to our args that'll be used for initialization
       //initMouseEvent() will typecheck these
       type = initializer.type;

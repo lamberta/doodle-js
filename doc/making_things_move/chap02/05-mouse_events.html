@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Doodle.js Port - Making Things Move</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* p. 44
+ */
+function init_scene () {
+  //dom block element wrapper
+  var display = doodle.Display("#my_display");
+  //creates new canvas element wrapper
+  var layer0 = display.addLayer();
+  
+  var sprite = doodle.Sprite();
+  sprite.graphics.beginFill(0xff0000);
+  sprite.graphics.circle(0, 0, 50);
+  sprite.graphics.endFill();
+  sprite.x = display.width/2;
+  sprite.y = display.height/2;
+  layer0.addChild(sprite);
+
+  sprite.addEventListener(doodle.MouseEvent.CLICK, onMouseEvent);
+  sprite.addEventListener(doodle.MouseEvent.DOUBLE_CLICK, onMouseEvent);
+  sprite.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseEvent);
+  sprite.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseEvent);
+  sprite.addEventListener(doodle.MouseEvent.MOUSE_OUT, onMouseEvent);
+  sprite.addEventListener(doodle.MouseEvent.MOUSE_OVER, onMouseEvent);
+  sprite.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseEvent);
+  sprite.addEventListener(doodle.MouseEvent.MOUSE_WHEEL, onMouseEvent);
+
+  function onMouseEvent (event) {
+    console.log(event.target + ": " + event.type);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Doodle.js Port - Making Things Move</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* p. 42
+ */
+
+/* Creates new objects that inherit from Sprite.
+ */
+function ParentBox () {
+  return doodle.Sprite(function () {
+    this.graphics.rect(-50, -50, 100, 100);
+  });
+};
+
+function init_scene () {
+  var display = doodle.Display("#my_display");
+  var layer0 = display.addLayer();
+
+  var parent1 = ParentBox();
+  parent1.x = 60;
+  parent1.y = 60;
+  layer0.addChild(parent1);
+  
+  var parent2 = ParentBox();
+  parent2.x = 170;
+  parent2.y = 60;
+  layer0.addChild(parent2);
+  
+  var ball = doodle.Sprite();
+  ball.graphics.beginFill(0xff0000);
+  ball.graphics.circle(0, 0, 40);
+  ball.graphics.endFill();
+  ball.x = 20;
+  ball.y = display.height/2;
+  parent1.addChild(ball);
+  
+  ball.addEventListener(doodle.MouseEvent.CLICK, onBallClick);
+
+  function onBallClick (event) {
+    parent2.addChild(ball);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
