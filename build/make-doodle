@@ -8,8 +8,13 @@ cd "$PROJECT_HOME"
 cat ./src/compat/es5.js > "$OUT_FILE"
 
 cat ./build/prologue.js >> "$OUT_FILE"
-cat ./src/constants.js >> "$OUT_FILE"
 cat ./src/utils.js >> "$OUT_FILE"
+#constants
+cat ./src/constants/keyboard.js >> "$OUT_FILE"
+cat ./src/constants/gradienttype.js >> "$OUT_FILE"
+cat ./src/constants/pattern.js >> "$OUT_FILE"
+cat ./src/constants/linecap.js >> "$OUT_FILE"
+cat ./src/constants/linejoin.js >> "$OUT_FILE"
 
 cat ./src/events/event.js >> "$OUT_FILE"
 cat ./src/events/uievent.js >> "$OUT_FILE"
