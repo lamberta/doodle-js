@@ -134,17 +134,34 @@
       frame_count += 1;
     }
     function clear_scene_graph (node, context) {
+      /* Brute way, clear entire layer in big rect.
+       */
       node.children.forEach(function (child) {
         context = context || child.context;
+        context.clearRect(0, 0, child.width, child.height);
+      });
+      
+      /* Clear each object individually by clearing it's bounding box.
+       * Will need to test speed, and it's not working now.
+       *
+      node.children.forEach(function (child) {
+        
+        context = context || child.context;
         check_context_type(context, this+'.clear_scene_graph', 'context');
+        context.save();
+        context.setTransform(1, 0, 0, 1, 0, 0); //reset
         
         if (typeof child.getBounds === 'function') {
-          var bounds = child.getBounds(node);
+          var bounds = child.getBounds(display);
+          //console.log(bounds.toString());
           //take into account bounding box border
           context.clearRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
+          //context.fillRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
         }
+        context.restore();
         clear_scene_graph(child, context);
       });
+      */
     }
     function draw_scene_graph (node, context) {
       var m, //child transform matrix

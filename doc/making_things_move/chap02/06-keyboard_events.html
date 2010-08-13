@@ -16,7 +16,7 @@ function init_scene () {
   display.addEventListener(doodle.KeyboardEvent.KEY_UP, onKeyboardEvent);
 
   function onKeyboardEvent (event) {
-    console.log(event.type);
+    console.log(event.type + ", " + event.keyCode);
   }
 }
 
