@@ -217,7 +217,6 @@
           local_pt;
 
       dispatcher_queue.forEach(function (obj) {
-
         if (inheritsSprite(obj)) {
           var bounds = obj.getBounds(display),
               point_in_bounds = bounds.containsPoint({x: global_x, y: global_y});
@@ -244,7 +243,6 @@
             }
           }
         }
-        
       });
     }
 
