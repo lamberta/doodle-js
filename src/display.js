@@ -20,9 +20,9 @@
     var arg_len = arguments.length,
         initializer,
         display = Object.create(doodle.ElementNode()),
-				frame_count = 0,
-				mouseX = 0,
-				mouseY = 0;
+        frame_count = 0,
+        mouseX = 0,
+        mouseY = 0;
 
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
@@ -65,11 +65,11 @@
             element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event_to_sprite, false);
           }
 
-					element.addEventListener(doodle.MouseEvent.MOUSE_MOVE, function (evt) {
-						mouseX = evt.offsetX;
-						mouseY = evt.offsetY;
-					});
-					
+          element.addEventListener(doodle.MouseEvent.MOUSE_MOVE, function (evt) {
+            mouseX = evt.offsetX;
+            mouseY = evt.offsetY;
+          });
+          
           //add keyboard listeners to document
           //how to make this work for multiple displays?
           document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event, false);
@@ -105,22 +105,22 @@
         }
       }()),
 
-			'mouseX': {
-				enumerable: false,
-				configurable: false,
-				get: function () {
-					return mouseX;
-				}
-			},
+      'mouseX': {
+        enumerable: false,
+        configurable: false,
+        get: function () {
+          return mouseX;
+        }
+      },
 
-			'mouseY': {
-				enumerable: false,
-				configurable: false,
-				get: function () {
-					return mouseY;
-				}
-			}
-			
+      'mouseY': {
+        enumerable: false,
+        configurable: false,
+        get: function () {
+          return mouseY;
+        }
+      }
+      
     });
 
     //passed an initialization object: function
@@ -140,10 +140,10 @@
     display.addEventListener(Event.ADDED, redraw_scene_graph);
     display.addEventListener(Event.REMOVED, redraw_scene_graph);
 
-		//draw_scene_graph(display);
-		redraw_scene_graph();
+    //draw_scene_graph(display);
+    redraw_scene_graph();
     return display;
-		
+    
 
     /* Clear, move, draw.
      * Dispatches Event.ENTER_FRAME to all objects listening to it,
@@ -160,23 +160,23 @@
       draw_scene_graph(display);
       frame_count += 1;
     }
-		
+    
     function clear_scene_graph (node, context) {
       /* Brute way, clear entire layer in big rect.
        */
-			display.children.forEach(function (layer) {
-				var ctx = layer.context;
-				ctx.save();
+      display.children.forEach(function (layer) {
+        var ctx = layer.context;
+        ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
-				ctx.clearRect(0, 0, layer.width, layer.height);
-				ctx.restore();
-			});
-			/*
+        ctx.clearRect(0, 0, layer.width, layer.height);
+        ctx.restore();
+      });
+      /*
       node.children.forEach(function (child) {
         context = context || child.context;
         context.clearRect(0, 0, child.width, child.height);
       });
-			*/
+      */
       
       /* Clear each object individually by clearing it's bounding box.
        * Will need to test speed, and it's not working now.
@@ -200,7 +200,7 @@
       });
       */
     }
-		
+    
     function draw_scene_graph (node, context) {
       var m, //child transform matrix
           bounding_box,
@@ -216,37 +216,31 @@
           child.__draw(context);
         };
 
-        //if (this.debug) { }; //draw bounding box, reg-point, axis
-        (function () {
-          if (typeof child.getBounds === 'function') {
-            //calculate bounding box relative to parent
-            bounding_box = child.getBounds(display);
-            
-            context.save();
-            context.setTransform(1, 0, 0, 1, 0, 0); //reset
-            //bounding box
-            context.lineWidth = 0.5;
-            context.strokeStyle = "#0000ff";
-            context.strokeRect(bounding_box.x, bounding_box.y,
-                               bounding_box.width, bounding_box.height);
+        if (true) { //debug
+          draw_bounding_box(child, context);
+        }
 
-            /* not applying parent transforms
-            //registration point
-            context.fillStyle = "#000000";
-            context.beginPath();
-            context.arc(child.x, child.y, 3, 0, Math.PI*2, true);
-            context.closePath();
-            context.fill();
-            */
-            context.restore();
-          }
-        }());
-
-				draw_scene_graph(child, context); //recursive
+        draw_scene_graph(child, context); //recursive
         context.restore();
       });
     }
-		
+
+    function draw_bounding_box (sprite, context) {
+      if (typeof sprite.getBounds === 'function') {
+        //calculate bounding box relative to parent
+        var bounding_box = sprite.getBounds(display);
+        
+        context.save();
+        context.setTransform(1, 0, 0, 1, 0, 0); //reset
+        //bounding box
+        context.lineWidth = 0.5;
+        context.strokeStyle = "#0000ff";
+        context.strokeRect(bounding_box.x, bounding_box.y,
+                           bounding_box.width, bounding_box.height);
+        context.restore();
+      }
+    }
+    
     function redraw_scene_graph (evt) {
       clear_scene_graph(display);
       draw_scene_graph(display);
@@ -302,7 +296,7 @@
       //console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
       var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
           evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
-			
+      
       dispatcher_queue.forEach(function (obj) {
         if (obj.hasEventListener(evt.type)) {
           obj.handleEvent(evt);

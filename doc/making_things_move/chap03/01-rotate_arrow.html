@@ -17,9 +17,10 @@
 
 function Arrow () {
   return doodle.Sprite(function () {
-    this.graphics.lineStyle(1, "#000000", 1);
+    //this.graphics.lineStyle(1, "#000000", 1);
     this.graphics.beginFill("#ffff00");
     this.graphics.moveTo(-50, -25);
+    this.graphics.beginPath();
     this.graphics.lineTo(0, -25);
     this.graphics.lineTo(0, -50);
     this.graphics.lineTo(50, 0);
@@ -28,6 +29,7 @@ function Arrow () {
     this.graphics.lineTo(-50, 25);
     this.graphics.lineTo(-50, -25);
     this.graphics.endFill();
+    this.graphics.closePath();
   });
 };
 
@@ -41,7 +43,7 @@ function init_scene () {
   layer0.addChild(arrow);
   arrow.x = display.width/2;
   arrow.y = display.height/2;
-
+  
   display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {

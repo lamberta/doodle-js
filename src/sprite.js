@@ -27,7 +27,7 @@
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
-			inheritsNode = doodle.Node.inheritsNode,
+      inheritsNode = doodle.Node.inheritsNode,
       get_element = doodle.utils.get_element,
       Rectangle = doodle.geom.Rectangle;
 
@@ -47,7 +47,9 @@
         bounds_max_y = 0,
         graphics_cursor_x = 0,
         graphics_cursor_y = 0;
-
+    
+    dc_check = draw_commands;
+    
     //inherits from doodle.Node, if string pass along id
     sprite = (typeof id === 'string') ?
       Object.create(doodle.Node(id)) : Object.create(doodle.Node());
@@ -112,9 +114,9 @@
         writable: true,
         configurable: false,
         value: function (targetCoordSpace) {
-					if (!inheritsNode(targetCoordSpace)) {
-						throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
-					}
+          if (!inheritsNode(targetCoordSpace)) {
+            throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
+          }
           var bounding_box = Rectangle(),
               w = this.width,
               h = this.height,
@@ -194,7 +196,16 @@
         enumerable: false,
         writable: false,
         configurable: false,
-        value: (function () {
+        value: function (ctx) {
+          check_context_type(ctx, this+'.__draw', 'context');
+          draw_commands.forEach(function (cmd) {
+            check_function_type(cmd, sprite+'.__draw: [draw_commands]::', 'command');
+            cmd.call(sprite, ctx);
+          });
+        }
+      },
+      /***
+        (function () {
           var context,
               run_command = (function (cmd) {
                 check_function_type(cmd, this+'.__draw: [draw_commands]::', 'command');
@@ -210,6 +221,7 @@
           }).bind(sprite);
         }())
       },
+      ***/
 
       /*
        * GRAPHICS
@@ -770,6 +782,17 @@
             value: function () {
               draw_commands.push(function (ctx) {
                 ctx.beginPath();
+              });
+            }
+          },
+
+          'closePath': {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function () {
+              draw_commands.push(function (ctx) {
+                ctx.closePath();
               });
             }
           },
