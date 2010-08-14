@@ -21,8 +21,8 @@
         initializer,
         display = Object.create(doodle.ElementNode()),
 				frame_count = 0,
-				mouseX,
-				mouseY;
+				mouseX = 0,
+				mouseY = 0;
 
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
@@ -166,8 +166,8 @@
        */
 			display.children.forEach(function (layer) {
 				var ctx = layer.context;
-				cxt.save();
-        cxt.setTransform(1, 0, 0, 1, 0, 0); //reset
+				ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
 				ctx.clearRect(0, 0, layer.width, layer.height);
 				ctx.restore();
 			});
