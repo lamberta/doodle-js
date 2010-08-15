@@ -151,7 +151,7 @@
      */
     function create_frame () {
       clear_scene_graph(display);
-      dispatcher_queue.forEach(function (obj) {
+      dispatcher_queue.forEach(function dispatch_enterframe_evt (obj) {
         if (obj.hasEventListener(ENTER_FRAME)) {
           enterFrame.__setTarget(obj);
           obj.handleEvent(enterFrame);
@@ -206,7 +206,7 @@
           bounding_box,
           global_pt; //transformed point for bounding box
       
-      node.children.forEach(function (child) {
+      node.children.forEach(function draw_child (child) {
         context = context || child.context;
         m = child.transform.toArray();
         context.save();
