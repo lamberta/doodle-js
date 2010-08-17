@@ -94,7 +94,7 @@
             if (fps === 0 || fps === false) {
               frame_rate = false;
               clearInterval(framerate_interval_id);
-            } else if (typeof fps === 'number' && fps !== frame_rate && isFinite(1000/fps)) {
+            } else if (typeof fps === 'number' && isFinite(1000/fps)) {
               frame_rate = fps;
               clearInterval(framerate_interval_id);
               framerate_interval_id = setInterval(create_frame, 1000/frame_rate);

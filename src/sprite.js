@@ -204,24 +204,6 @@
           });
         }
       },
-      /***
-        (function () {
-          var context,
-              run_command = (function (cmd) {
-                check_function_type(cmd, this+'.__draw: [draw_commands]::', 'command');
-                //draw function, provide self for this and context as arg
-                cmd.call(this, context);
-              }).bind(sprite);
-
-          //this is what's getting called
-          return (function (ctx) {
-            check_context_type(ctx, this+'.__draw', 'context');
-            context = ctx;
-            draw_commands.forEach(run_command);
-          }).bind(sprite);
-        }())
-      },
-      ***/
 
       /*
        * GRAPHICS
@@ -300,7 +282,10 @@
               this.height = -bounds_min_y + bounds_max_y;
               
               draw_commands.push(function (ctx) {
-                ctx.fillRect(x, y, width, height);
+                ctx.beginPath();
+                ctx.rect(x, y, width, height);
+                ctx.closePath();
+                ctx.stroke();
               });
               
             }).bind(sprite)
@@ -333,7 +318,7 @@
                 //x, y, radius, start_angle, end_angle (Math.PI*2), anti-clockwise
                 ctx.arc(x, y, radius, 0, 6.283185307179586, true);
                 ctx.closePath();
-                ctx.fill();
+                ctx.stroke();
               });
               
             }).bind(sprite)
@@ -376,7 +361,7 @@
                 ctx.bezierCurveTo(x-rx, y+kry, x-krx, y+ry, x, y+ry);
                 ctx.bezierCurveTo(x+krx, y+ry, x+rx, y+kry, x+rx, y);
                 ctx.closePath();
-                ctx.fill();
+                ctx.stroke();
               });
               
             }).bind(sprite)
@@ -416,6 +401,7 @@
               this.height = -bounds_min_y + bounds_max_y;
 
               draw_commands.push(function (ctx) {
+                ctx.beginPath();
                 //clockwise
                 ctx.moveTo(x1, y);
                 ctx.beginPath();
@@ -428,7 +414,7 @@
                 ctx.lineTo(x, y1);
                 ctx.quadraticCurveTo(x, y, x1, y);
                 ctx.closePath();
-                ctx.fill();
+                ctx.stroke();
               });
               
             }).bind(sprite)
@@ -474,7 +460,7 @@
               //update size for bounding box
               this.width = -bounds_min_x + bounds_max_x;
               this.height = -bounds_min_y + bounds_max_y;
-
+              
               draw_commands.push(function (ctx) {
                 //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
                 ctx.lineTo(x, y);
@@ -793,7 +779,10 @@
             value: function () {
               draw_commands.push(function (ctx) {
                 ctx.closePath();
+                ctx.stroke();
               });
+              graphics_cursor_x = 0;
+              graphics_cursor_y = 0;
             }
           },
 
@@ -810,7 +799,7 @@
           },
           
           //temp
-          'endStroke': {
+          'stroke': {
             enumerable: false,
             writable: false,
             configurable: false,

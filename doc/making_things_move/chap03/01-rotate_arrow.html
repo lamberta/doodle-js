@@ -17,7 +17,7 @@
 
 function Arrow () {
   return doodle.Sprite(function () {
-    this.graphics.lineStyle(1, "#000000", 1);
+    this.graphics.lineStyle(2, "#000000", 1);
     this.graphics.beginFill("#ffff00");
     this.graphics.moveTo(-50, -25);
     this.graphics.beginPath();
@@ -28,8 +28,8 @@ function Arrow () {
     this.graphics.lineTo(0, 25);
     this.graphics.lineTo(-50, 25);
     this.graphics.lineTo(-50, -25);
-    this.graphics.endFill();
     this.graphics.closePath();
+    this.graphics.endFill();
   });
 };
 
