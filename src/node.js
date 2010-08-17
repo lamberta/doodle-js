@@ -252,29 +252,28 @@
           this.transform.rotation = deg*to_radians; //deg-to-rad
         }
       },
-      
-      'scale': {
+
+      'scaleX': {
         enumerable: true,
         configurable: false,
         get: function () {
-          return Point(this.transform.a, this.transform.d);
+          return this.transform.a;
         },
-        /* Scale uniformly if given a single number, otherwise scale x and y.
-         * @param {Number|Array|Point} s
-         */
-        set: function (s) {
-          if (typeof s === "number") {
-            this.transform.a = s;
-            this.transform.d = s;
-          } else if (Array.isArray(s)) {
-            this.transform.a = s[0];
-            this.transform.d = s[1];
-          } else if (isPoint(s)) {
-            this.transform.a = s.x;
-            this.transform.d = s.y;
-          } else {
-            throw new TypeError(this+".scale: Wrong parameter type.");
-          }
+        set: function (sx) {
+          check_number_type(sx, this+'.scaleX');
+          this.transform.a = sx;
+        }
+      },
+      
+      'scaleY': {
+        enumerable: true,
+        configurable: false,
+        get: function () {
+          return this.transform.d;
+        },
+        set: function (sy) {
+          check_number_type(sy, this+'.scaleY');
+          this.transform.d = sy;
         }
       },
 
