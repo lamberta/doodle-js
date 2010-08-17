@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.3, p.78: Distance Between Two Points</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var angle = 0,
+      centerX = 200,
+      centerY = 200,
+      radiusX = 200,
+      radiusY = 100,
+      speed = 0.1;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+  
+  var layer0 = display.addLayer();
+
+  var sprite1 = doodle.Sprite();
+  sprite1.graphics.beginFill("#000000");
+  sprite1.graphics.rect(-2, -2, 4, 4);
+  sprite1.graphics.endFill();
+  sprite1.x = Math.random() * display.width;
+  sprite1.y = Math.random() * display.height;
+  layer0.addChild(sprite1);
+  
+  var sprite2 = doodle.Sprite();
+  sprite2.graphics.beginFill("#ff0000");
+  sprite2.graphics.rect(-2, -2, 4, 4);
+  sprite2.graphics.endFill();
+  sprite2.x = Math.random() * display.width;
+  sprite2.y = Math.random() * display.height;
+  layer0.addChild(sprite2);
+
+  var dx = sprite1.x - sprite2.x,
+      dy = sprite1.y - sprite2.y,
+      dist = Math.sqrt(dx * dx + dy * dy);
+  console.log("distance: " + dist);
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
