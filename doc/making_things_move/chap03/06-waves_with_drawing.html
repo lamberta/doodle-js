@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.3, p.71: Waves with the Drawing API</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var angle = 0,
+      centerY = 200,
+      range = 50,
+      xspeed = 1,
+      yspeed = 0.05,
+      xpos = 0;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+  
+  var layer0 = display.addLayer();
+
+  var wave = doodle.Sprite();
+  wave.graphics.lineStyle(1, 0, 1);
+  wave.graphics.moveTo(0, centerY);
+  layer0.addChild(wave);
+  
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    xpos += xspeed;
+    angle += yspeed;
+    ypos = centerY + Math.sin(angle) * range;
+    wave.graphics.lineTo(xpos, ypos);
+    //this is running very slow, will come back
+    wave.graphics.stroke();
+  }
+
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
