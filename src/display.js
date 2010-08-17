@@ -62,7 +62,7 @@
 
           //add listeners to dom events that we'll re-dispatch to the scene graph
           for (type in doodle.MouseEvent) {
-            element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event_to_sprite, false);
+            element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event, false);
           }
 
           element.addEventListener(doodle.MouseEvent.MOUSE_MOVE, function (evt) {
@@ -248,7 +248,7 @@
 
     /* Event dispatching - not ready for prime-time.
      */
-    function dispatch_mouse_event_to_sprite (event) {
+    function dispatch_mouse_event (event) {
       //console.log(event.type + ", " + event);
       //last_event = event;
       //position on canvas element
@@ -263,7 +263,15 @@
           local_pt;
 
       dispatcher_queue.forEach(function (obj) {
-        if (inheritsSprite(obj)) {
+        //our display can handle some mouse events
+        if (display === obj && obj.hasEventListener(evt.type)) {
+          if (evt.type === MOUSE_OVER) {
+            evt.__setType(MOUSE_OVER)
+          }
+          evt.__setTarget(null)
+          display.dispatchEvent(evt);
+          
+        } else if (inheritsSprite(obj)) {
           var bounds = obj.getBounds(display),
               point_in_bounds = bounds.containsPoint({x: global_x, y: global_y});
 

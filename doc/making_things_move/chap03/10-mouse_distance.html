@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.3, p.78: Mouse Distance</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var angle = 0,
+      centerX = 200,
+      centerY = 200,
+      radiusX = 200,
+      radiusY = 100,
+      speed = 0.1;
+  
+  display = doodle.Display("#my_display");
+  display.frameRate = 20;
+  
+  var layer0 = display.addLayer();
+
+  var sprite1 = doodle.Sprite();
+  sprite1.graphics.beginFill("#000000");
+  sprite1.graphics.rect(-2, -2, 4, 4);
+  sprite1.graphics.endFill();
+  sprite1.x = display.width / 2;
+  sprite1.y = display.height / 2;
+  layer0.addChild(sprite1);
+  
+  var sprite2 = doodle.Sprite();
+  layer0.addChild(sprite2);
+
+  display.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+
+  function onMouseMove (event) {
+    sprite2.graphics.clear();
+    sprite2.graphics.lineStyle(1, 0, 1);
+    sprite2.graphics.moveTo(sprite1.x, sprite1.y);
+    sprite2.graphics.lineTo(display.mouseX, display.mouseY);
+    sprite2.graphics.stroke();
+    var dx = sprite1.x - display.mouseX,
+        dy = sprite1.y - display.mouseY,
+        dist = Math.sqrt(dx * dx + dy * dy);
+    console.log("distance: " + dist);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
