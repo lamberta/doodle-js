@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.5, p.136: Acceleration on Two Axis</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function Ball (radius, color) {
+  radius = radius || 40;
+  color = color || "#ff0000";
+  return doodle.Sprite(function () {
+    this.graphics.beginFill(color);
+    this.graphics.circle(0, 0, radius);
+    this.graphics.endFill();
+  });
+};
+
+function init_scene () {
+  var vx = 0,
+      vy = 0,
+      ax = 0,
+      ay = 0;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+  
+  var layer0 = display.addLayer();
+
+  var ball = Ball();
+  ball.x = display.width/2;
+  ball.y = display.height/2;
+  layer0.addChild(ball);
+  
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
+  display.addEventListener(doodle.KeyboardEvent.KEY_UP, onKeyUp);
+
+  function onKeyDown (event) {
+    switch (event.keyCode) {
+    case doodle.Keyboard.LEFT:
+      ax = -0.2;
+      break;
+    case doodle.Keyboard.RIGHT:
+      ax = 0.2;
+      break;
+    case doodle.Keyboard.UP:
+      ay = -0.2;
+      break;
+    case doodle.Keyboard.DOWN:
+      ay = 0.2;
+      break;
+    default:
+      break;
+    }
+  }
+
+  function onKeyUp (event) {
+    ax = 0;
+    ay = 0;
+  }
+  
+  function onEnterFrame (event) {
+    vx += ax;
+    vy += ay;
+    ball.x += vx;
+    ball.y += vy
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
