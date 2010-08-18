@@ -253,40 +253,45 @@
       //last_event = event;
       //position on canvas element
       //offset is relative to div, however this implementation adds 1 to y?
-      var global_x = event.offsetX,
-          global_y = event.offsetY,
-          dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+      var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+          dq_len = dispatcher_queue.length,
           MouseEvent = doodle.MouseEvent,
           MOUSE_OVER = MouseEvent.MOUSE_OVER,
           MOUSE_OUT = MouseEvent.MOUSE_OUT,
+          MOUSE_MOVE = MouseEvent.MOUSE_MOVE,
           evt = MouseEvent(event), //wrap dom event in doodle event
+          evt_type = evt.type,
           local_pt;
 
+      /* Hack --
+       * The idea is that I only want to dispatch a mouse event to the display
+       * if there are no other objects under the point to dispatch to.
+       */
+      var evt_dispatched_p = false;
+      
       dispatcher_queue.forEach(function (obj) {
-        //our display can handle some mouse events
-        if (display === obj && obj.hasEventListener(evt.type)) {
-          if (evt.type === MOUSE_OVER) {
-            evt.__setType(MOUSE_OVER)
-          }
-          evt.__setTarget(null)
-          display.dispatchEvent(evt);
-          
-        } else if (inheritsSprite(obj)) {
-          var bounds = obj.getBounds(display),
-              point_in_bounds = bounds.containsPoint({x: global_x, y: global_y});
+        if (inheritsSprite(obj)) {
+          var point_in_bounds = obj.getBounds(display).containsPoint({x: evt.offsetX,
+                                                                      y: evt.offsetY});
 
           evt.__setTarget(null); //dom setting target as canvas element
-          
-          if (point_in_bounds && obj.hasEventListener(evt.type)) {
+
+          if (point_in_bounds && obj.hasEventListener(evt_type)) {
             obj.dispatchEvent(evt);
+
+            evt_dispatched_p = true;
+            
           }
-          //have to manufacture mouse over/out
+          
+          //have to manufacture mouse over/out since dom element won't know
           if (point_in_bounds && obj.hasEventListener(MOUSE_OVER)) {
             // __mouse_over property is only used here
             if (!obj.__mouse_over) {
               obj.__mouse_over = true;
               evt.__setType(MOUSE_OVER)
               obj.dispatchEvent(evt);
+
+              evt_dispatched_p = true;
             }
           }
           if (!point_in_bounds && obj.hasEventListener(MOUSE_OUT)) {
@@ -294,8 +299,24 @@
               obj.__mouse_over = false;
               evt.__setType(MOUSE_OUT)
               obj.dispatchEvent(evt);
+
+              evt_dispatched_p = true;
             }
           }
+          
+        }
+      });
+
+      //dispatch to display if no other object under cursor has
+      dispatcher_queue.forEach(function (obj) {
+        if (obj === display && !evt_dispatched_p && obj.hasEventListener(MOUSE_MOVE)) {
+          if (evt_type === MOUSE_MOVE) {
+            evt.__setType(MOUSE_MOVE)
+          }
+          evt.__setTarget(null)
+          obj.dispatchEvent(evt);
+          
+          evt_dispatched_p = true;
         }
       });
     }
