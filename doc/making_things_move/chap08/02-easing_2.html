@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.8, p.194: Simple Easing 2</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function Ball (radius, color) {
+  radius = radius || 40;
+  color = color || "#ff0000";
+  return doodle.Sprite(function () {
+    this.vx = 0;
+    this.vy = 0;
+    this.radius = radius;
+    
+    this.graphics.beginFill(color);
+    this.graphics.circle(0, 0, radius);
+    this.graphics.endFill();
+  });
+};
+
+function init_scene () {
+  var easing = 0.2,
+      targetX,
+      targetY;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  targetX = display.width/2;
+  targetY = display.height/2;
+  
+  var layer0 = display.addLayer();
+
+  var ball = Ball();
+  layer0.addChild(ball);
+
+  ball.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseDown);
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onMouseDown (event) {
+    vx = vy = 0;
+    display.removeEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+    display.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
+    display.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+  }
+
+  function onMouseUp (event) {
+    display.removeEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
+    display.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  }
+
+  function onMouseMove () {
+    ball.x = display.mouseX;
+    ball.y = display.mouseY;
+  }
+  
+  function onEnterFrame (event) {
+    var vx = (targetX - ball.x) * easing,
+        vy = (targetY - ball.y) * easing;
+    ball.x += vx;
+    ball.y += vy;
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

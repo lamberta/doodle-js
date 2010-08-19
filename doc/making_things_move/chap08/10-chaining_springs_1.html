@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.8, p.207: Chaining Springs</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function Ball (radius, color) {
+  radius = radius || 40;
+  color = color || "#ff0000";
+  return doodle.Sprite(function () {
+    this.vx = 0;
+    this.vy = 0;
+    this.radius = radius;
+    
+    this.graphics.beginFill(color);
+    this.graphics.circle(0, 0, radius);
+    this.graphics.endFill();
+  });
+};
+
+function init_scene () {
+  var spring = 0.1,
+      friction = 0.8,
+      gravity = 5;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  var ball0 = Ball();
+  layer0.addChild(ball0);
+  var ball1 = Ball();
+  layer0.addChild(ball1);
+  var ball2 = Ball();
+  layer0.addChild(ball2);
+
+  var spring_line = doodle.Sprite();
+  layer0.addChild(spring_line);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    var mouseX = display.mouseX,
+        mouseY = display.mouseY;
+    moveBall(ball0, mouseX, mouseY);
+    moveBall(ball1, ball0.x, ball0.y);
+    moveBall(ball2, ball1.x, ball1.y);
+
+    //draw spring to it's own sprite
+    spring_line.graphics.clear();
+    spring_line.graphics.beginPath();
+    spring_line.graphics.moveTo(mouseX, mouseY);
+    spring_line.graphics.lineTo(ball0.x, ball0.y);
+    spring_line.graphics.lineTo(ball1.x, ball1.y);
+    spring_line.graphics.lineTo(ball2.x, ball2.y);
+    spring_line.graphics.stroke();
+  }
+  
+  function moveBall (ball, targetX, targetY) {
+    ball.vx += (targetX - ball.x) * spring;
+    ball.vy += (targetY - ball.y) * spring;
+    ball.vy += gravity;
+    ball.vx *= friction;
+    ball.vy *= friction;
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

@@ -207,6 +207,7 @@
               //if we have any, call each handler with event object
               count = listeners.length;
               for (i = 0; i < count; i += 1) {
+                check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
                 //pass event to handler
                 rv = listeners[i].call(this, event);
       
