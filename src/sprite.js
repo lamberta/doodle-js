@@ -16,6 +16,7 @@
       bounds_properties,
       isSprite,
       inheritsSprite,
+      check_sprite_type,
       hex_to_rgb = doodle.utils.hex_to_rgb,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       check_number_type = doodle.utils.types.check_number_type,
@@ -163,6 +164,26 @@
           }
         };
       }()),
+
+      'hitTestObject': {
+        enumerable: true,
+        writable: true,
+        configurable: false,
+        value: function (obj) {
+          check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
+          return this.getBounds(this).intersects(obj.getBounds(this));
+        }
+      },
+
+      'hitTestPoint': {
+        enumerable: true,
+        writable: true,
+        configurable: false,
+        value: function (pt) {
+          check_point_type(pt, this+'.hitTestPoint', '*point*');
+          return this.getBounds(this).containsPoint(this.globalToLocal(pt));
+        }
+      },
 
       //drawing context to use
       'context': {
@@ -852,12 +873,13 @@
     return false;
   };
 
-  doodle.utils.types.check_sprite_type = function (sprite, caller_name) {
-    if (!inheritsSprite(sprite)) {
-      caller_name = (caller_name === undefined) ? "check_sprite_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a sprite.");
-    } else {
+  check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, param) {
+    if (inheritsSprite(sprite)) {
       return true;
+    } else {
+      caller = (caller === undefined) ? "check_sprite_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must inherit from Sprite.");
     }
   };
   
