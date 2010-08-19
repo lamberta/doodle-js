@@ -789,6 +789,7 @@
             value: function () {
               draw_commands.push(function (ctx) {
                 ctx.beginPath();
+                ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
               });
             }
           },

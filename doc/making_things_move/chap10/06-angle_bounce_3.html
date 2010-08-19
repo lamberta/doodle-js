@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>Doodle.js -- Making Things Move: Ch.10, p.259: Bouncing Off an Angle</title>
+    <title>Doodle.js -- Making Things Move: Ch.10, p.265: Bouncing Off an Angle - Bounds Checking</title>
     
     <script type="application/javascript" src="../../../build/doodle.js"></script>
     <script type="application/javascript">
@@ -33,7 +33,7 @@ function init_scene () {
   var gravity = 0.3,
       bounce = -0.6;
   
-  var display = doodle.Display("#my_display");
+  display = doodle.Display("#my_display");
   display.frameRate = 20;
 
   var layer0 = display.addLayer();
@@ -55,35 +55,46 @@ function init_scene () {
   display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
+    //move line with mouse
+    line.rotation = (display.width/2 - display.mouseX) * 0.1;
+    
     //normal motion code
     ball.vy += gravity;
     ball.x += ball.vx;
     ball.y += ball.vy;
-    //get angle, sine, and cosine
-    var angle = line.rotation * Math.PI/180;
-    var cos = Math.cos(angle);
-    var sin = Math.sin(angle);
-    //get position of ball, relative to line
-    var x1 = ball.x - line.x;
-    var y1 = ball.y - line.y;
-    //rotate coordinates
-    var x2 = cos * x1 + sin * y1;
-    var y2 = cos * y1 - sin * x1;
-    //rotate velocity
-    var vx1 = cos * ball.vx + sin * ball.vy;
-    var vy1 = cos * ball.vy - sin * ball.vx;
-    //perform bounce with rotated values
-    if (y2 > -ball.height/2) {
-      y2 = -ball.height/2;
-      vy1 *= bounce;
+
+    //bounds hit testing
+    var bounds = line.getBounds(display);
+    if (ball.x > bounds.left && ball.x < bounds.right) {
+      //get angle, sine, and cosine
+      var angle = line.rotation * Math.PI/180;
+      var cos = Math.cos(angle);
+      var sin = Math.sin(angle);
+      //get position of ball, relative to line
+      var x1 = ball.x - line.x;
+      var y1 = ball.y - line.y;
+      //rotate coordinates
+      var y2 = cos * y1 - sin * x1;
+      //perform bounce with rotated values
+      if (y2 > -ball.height/2) {
+        //rotate coordinates
+        var x2 = cos * x1 + sin * y1;
+        //rotate velocity
+        var vx1 = cos * ball.vx + sin * ball.vy;
+        var vy1 = cos * ball.vy - sin * ball.vx;
+        
+        y2 = -ball.height/2;
+        vy1 *= bounce;
+
+        //rotate everything back
+        x1 = cos * x2 - sin * y2;
+        y1 = cos * y2 + sin * x2;
+        ball.vx = cos * vx1 - sin * vy1;
+        ball.vy = cos * vy1 + sin * vx1;
+        ball.x = line.x + x1;
+        ball.y = line.y + y1;
+      }
     }
-    //rotate everything back
-    x1 = cos * x2 - sin * y2;
-    y1 = cos * y2 + sin * x2;
-    ball.vx = cos * vx1 - sin * vy1;
-    ball.vy = cos * vy1 + sin * vx1;
-    ball.x = line.x + x1;
-    ball.y = line.y + y1;
   }
 }
 
