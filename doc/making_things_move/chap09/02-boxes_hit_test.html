@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.9, p.228: Hit Testing Two Sprites</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function Box (width, height, color) {
+  width = width || 50;
+  height = height || 50;
+  color = color || "#ff0000";
+  return doodle.Sprite(function () {
+    this.vx = 0;
+    this.vy = 0;
+    
+    this.graphics.beginFill(color);
+    this.graphics.rect(-width/2, -height/2, width, height);
+    this.graphics.endFill();
+  });
+};
+
+function init_scene () {
+  var box,
+      boxes = [],
+      gravity = 0.2;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  createBox();
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  
+  function onEnterFrame (event) {
+    box.vy += gravity;
+    box.y += box.vy;
+
+    if (box.y + box.height / 2 > display.height) {
+      box.y = display.height - box.height / 2;
+      createBox();
+    }
+    for (var i = 0; i < boxes.length; i++) {
+      if (box !== boxes[i] && box.hitTestObject(boxes[i])) {
+        box.y = boxes[i].y - boxes[i].height / 2 - box.height / 2;
+        createBox();
+      }
+    }
+  }
+
+  function createBox () {
+    box = Box(Math.random() * 40 + 10, Math.random() * 40 + 10);
+    box.x = Math.random() * display.width;
+    layer0.addChild(box);
+    boxes.push(box);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
