@@ -1,9 +1,10 @@
 #!/bin/bash
 
-PROJECT_HOME="$HOME/projects/doodle-js"
+#this script is in the ./build dir
+cd "$(dirname $(readlink -f $0))"
+cd ..
+PROJECT_HOME="$PWD"
 OUT_FILE="$PROJECT_HOME/build/doodle.js"
-
-cd "$PROJECT_HOME"
 
 cat ./src/compat/es5.js > "$OUT_FILE"
 
