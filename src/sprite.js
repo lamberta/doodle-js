@@ -49,7 +49,7 @@
         graphics_cursor_x = 0,
         graphics_cursor_y = 0;
 
-		/**for testing**/
+    /**for testing**/
     dc_check = draw_commands;
     
     //inherits from doodle.Node, if string pass along id
@@ -484,7 +484,6 @@
               this.height = -bounds_min_y + bounds_max_y;
               
               draw_commands.push(function (ctx) {
-                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
                 ctx.lineTo(x, y);
               });
 
@@ -540,7 +539,6 @@
               this.height = -bounds_min_y + bounds_max_y;
 
               draw_commands.push(function (ctx) {
-                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
                 ctx.quadraticCurveTo(x1, y1, x2, y2);
               });
 
@@ -613,7 +611,6 @@
               this.height = -bounds_min_y + bounds_max_y;
 
               draw_commands.push(function (ctx) {
-                //ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
                 ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
               });
 
@@ -790,6 +787,7 @@
             value: function () {
               draw_commands.push(function (ctx) {
                 ctx.beginPath();
+                ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
               });
             }
           },
