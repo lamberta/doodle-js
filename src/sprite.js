@@ -48,7 +48,8 @@
         bounds_max_y = 0,
         graphics_cursor_x = 0,
         graphics_cursor_y = 0;
-    
+
+		/**for testing**/
     dc_check = draw_commands;
     
     //inherits from doodle.Node, if string pass along id
@@ -789,7 +790,6 @@
             value: function () {
               draw_commands.push(function (ctx) {
                 ctx.beginPath();
-                ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
               });
             }
           },
