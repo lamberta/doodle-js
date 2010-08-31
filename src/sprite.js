@@ -480,8 +480,8 @@
               bounds_max_y = Math.max(0, y, graphics_cursor_y, bounds_max_y);
               
               //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
+              this.width = bounds_max_x - bounds_min_x;
+              this.height = bounds_max_y - bounds_min_y;
               
               draw_commands.push(function (ctx) {
                 ctx.lineTo(x, y);
