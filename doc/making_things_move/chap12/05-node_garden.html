@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.12, p.314: A Springy Node Garden</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function Ball (radius, color) {
+  radius = radius || 40;
+  color = color || "#ff0000";
+  return doodle.Sprite(function () {
+    this.radius = radius;
+    this.vx = 0;
+    this.vy = 0;
+    this.mass = 1;
+    
+    this.graphics.beginFill(color);
+    this.graphics.circle(0, 0, radius);
+    this.graphics.endFill();
+  });
+};
+
+function init_scene () {
+  var particles = [],
+      numParticles = 15,
+      minDist = 100,
+      springAmount = 0.001;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  for (var i=0; i < numParticles; i++) {
+    var particle = Ball(5, 0xffffff);
+    particle.x = Math.random() * display.width;
+    particle.y = Math.random() * display.height;
+    particle.vx = Math.random() * 6 - 3;
+    particle.vy = Math.random() * 6 - 3;
+    layer0.addChild(particle);
+    particles.push(particle);
+  }
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  
+  function onEnterFrame (event) {
+    var particle, partA, partB;
+    
+    for (var i=0; i < numParticles; i++) {
+      particle = particles[i];
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+
+      if (particle.x > display.width) {
+        particle.x = 0;
+      } else if (particle.x < 0) {
+        particle.x = display.width;
+      }
+      if (particle.y > display.height) {
+        particle.y = 0;
+      } else if (particle.y < 0) {
+        particle.y = display.height;
+      }
+    }
+    
+    for (i=0; i < numParticles; i++) {
+      partA = particles[i];
+      for (var j=i+1; j < numParticles; j++) {
+        partB = particles[j];
+        spring(partA, partB);
+      }
+    }
+  }
+
+  function spring (partA, partB) {
+    var dx = partB.x - partA.x,
+        dy = partB.y - partA.y,
+        dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < minDist) {
+      var ax = dx * springAmount,
+          ay = dy * springAmount;
+      partA.vx += ax;
+      partA.vy += ay;
+      partB.vx -= ax;
+      partB.vy -= ay;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #000000;"></div>
+  </body>
+</html>
