@@ -13,4 +13,7 @@ Some of the new features:
 Some features work, some don't.
 
 Basic build instructions:
+git clone git://github.com/biilly/doodle-js.git
 ./build/make-doodle => ./build/doodle.js
+
+Take a look at some of the demos in ./doc/making_things_move/
