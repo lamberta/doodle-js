@@ -10,6 +10,9 @@ cat ./src/compat/es5.js > "$OUT_FILE"
 
 cat ./build/prologue.js >> "$OUT_FILE"
 cat ./src/utils.js >> "$OUT_FILE"
+
+cat ./lib/Stats.js >> "$OUT_FILE"
+
 #constants
 cat ./src/constants/keyboard.js >> "$OUT_FILE"
 cat ./src/constants/gradienttype.js >> "$OUT_FILE"

@@ -5,6 +5,7 @@
       check_block_element = doodle.utils.types.check_block_element,
       get_element = doodle.utils.get_element,
       check_context_type = doodle.utils.types.check_context_type,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
       inheritsSprite = doodle.Sprite.inheritsSprite,
       Event = doodle.Event,
       MouseEvent = doodle.MouseEvent,
@@ -22,7 +23,8 @@
         display = Object.create(doodle.ElementNode()),
         frame_count = 0,
         mouseX = 0,
-        mouseY = 0;
+        mouseY = 0,
+        debug_stats = null; //stats object
 
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
@@ -119,6 +121,29 @@
         get: function () {
           return mouseY;
         }
+      },
+
+      'debug': {
+        enumerable: true,
+        configurable: false,
+        value: Object.create(null, {
+          'stats': {
+            get: function () {
+              return debug_stats ? true : false;
+            },
+            set: function (useStats) {
+              check_boolean_type(useStats, display+'.debug.stats');
+              if (useStats && !debug_stats) {
+                //fps counter from http://github.com/mrdoob/stats.js
+                debug_stats = new Stats();
+                display.element.appendChild(debug_stats.domElement);
+              } else if (!useStats && debug_stats) {
+                display.element.removeChild(debug_stats.domElement);
+                debug_stats = null;
+              }
+            }
+          }
+        })
       }
       
     });
@@ -159,6 +184,10 @@
       });
       draw_scene_graph(display);
       frame_count += 1;
+      //update our stats counter if needed
+      if (debug_stats) {
+        debug_stats.update();
+      }
     }
     
     function clear_scene_graph (node, context) {
