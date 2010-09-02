@@ -56,6 +56,13 @@ Object.defineProperties(doodle.Event, {
     writable: false,
     configurable: false,
     value: "load"
+  },
+
+  'CHANGE': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "change"
   }
 });
 
