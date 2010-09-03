@@ -426,6 +426,27 @@
           })[0];
         }
       },
+
+      'setChildIndex': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function (child, index) {
+          check_node_type(child, this+'.setChildIndex', '*child*, index');
+          check_number_type(index, this+'.setChildIndex', 'child, *index*')
+          var children = this.children,
+              len = children.length,
+              pos = children.indexOf(child);
+          if (pos === -1) {
+            throw new ReferenceError(this+'.setChildIndex(*child*, index): ' + child + ' does not exist on child list.');
+          }
+          if (index > len || index < -len) {
+            throw new RangeError(this+'.setChildIndex(child, *index*): ' + index + ' does not exist on child list.');
+          }
+          children.splice(pos, 1); //remove element
+          children.splice(index, 0, child); //set new position
+        }
+      },
       
       'swapChildrenAt': {
         enumerable: false,
