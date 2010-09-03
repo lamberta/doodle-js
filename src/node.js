@@ -6,6 +6,7 @@
       inheritsNode,
       inDisplayList,
       check_matrix_type = doodle.utils.types.check_matrix_type,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
       check_string_type = doodle.utils.types.check_string_type;
   
   /* Super constructor
@@ -89,7 +90,20 @@
             transform = matrix;
           }
         }
-      }
+      },
+
+      'visible': (function () {
+        var visible = true;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return visible; },
+          set: function (isVisible) {
+            check_boolean_type(isVisible, node+'.visible');
+            visible = isVisible;
+          }
+        };
+      }())
     });
 
     //passed an initialization object: function

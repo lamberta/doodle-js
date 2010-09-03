@@ -128,6 +128,8 @@
         configurable: false,
         value: Object.create(null, {
           'stats': {
+            enumerable: true,
+            configurable: false,
             get: function () {
               return debug_stats ? true : false;
             },
@@ -240,15 +242,17 @@
         m = child.transform.toArray();
         context.save();
         context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        
-        if (typeof child.__draw === 'function') {
-          child.__draw(context);
-        };
 
-        if (true) { //debug
-          draw_bounding_box(child, context);
+        if (child.visible) {
+          if (typeof child.__draw === 'function') {
+            child.__draw(context);
+          };
+          if (true) { //debug
+            draw_bounding_box(child, context);
+          }
         }
-
+        //draw children even if it's parent is invisible
+        //in as3, children won't be drawn if parent not visible
         draw_scene_graph(child, context); //recursive
         context.restore();
       });
