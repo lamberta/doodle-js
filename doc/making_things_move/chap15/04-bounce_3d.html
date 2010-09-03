@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.15, p.385: Single Object Bouncing</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var xpos = 0,
+      ypos = 0,
+      zpos = 0,
+      vx = Math.random() * 10 - 5,
+      vy = Math.random() * 10 - 5,
+      vz = Math.random() * 10 - 5,
+      fl = 250,
+      vpX,
+      vpY,
+      top = -100,
+      bottom = 100,
+      left = -100,
+      right = 100,
+      front = 100,
+      back = -100;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  var ball = Ball(15);
+  layer0.addChild(ball);
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    xpos += vx;
+    ypos += vy;
+    zpos += vz;
+
+    var radius = ball.radius;
+
+    if (xpos + radius > right) {
+      xpos = right - radius;
+      vx *= -1;
+    } else if (xpos - radius < left) {
+      xpos = left + radius;
+      vx *= -1;
+    }
+    if (ypos + radius > bottom) {
+      ypos = bottom - radius;
+      vy *= -1;
+    } else if (ypos - radius < top) {
+      ypos = top + radius;
+      vy *= -1;
+    }
+    if (zpos + radius > front) {
+      zpos = front - radius;
+      vz *= -1;
+    } else if (zpos - radius < back) {
+      zpos = back + radius;
+      vz *= -1;
+    }
+    
+    if (zpos > -fl) {
+      var scale = fl / (fl + zpos);
+      ball.scaleX = ball.scaleY = scale;
+      ball.x = vpX + xpos * scale;
+      ball.y = vpY + ypos * scale;
+      ball.visible = true;
+    } else {
+      ball.visible = false;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
