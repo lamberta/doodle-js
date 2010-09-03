@@ -342,7 +342,13 @@
             }
           }
           
-        }
+        } else if (obj.hasEventListener(evt_type)) {
+					//if in queue and not sprite, could be ElementNode - display, layer
+					//don't want these going off if sprite is in front
+					evt.__setTarget(null);
+					obj.dispatchEvent(evt);
+					evt_dispatched_p = true;
+				}
       });
 
       //dispatch to display if no other object under cursor has
