@@ -7,6 +7,7 @@
       inDisplayList,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type;
   
   /* Super constructor
@@ -101,6 +102,20 @@
           set: function (isVisible) {
             check_boolean_type(isVisible, node+'.visible');
             visible = isVisible;
+          }
+        };
+      }()),
+
+      'alpha': (function () {
+        var alpha = 1;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return alpha; },
+          set: function (alphaValue) {
+            check_number_type(alphaValue, node+'.alpha');
+            //alpha is between 0 and 1
+            alpha = (alphaValue > 1) ? 1 : ((alphaValue < 0) ? 0 : alphaValue);
           }
         };
       }())

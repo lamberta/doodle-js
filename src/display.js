@@ -245,6 +245,10 @@
           m = child.transform.toArray();
           context.save();
           context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+          //apply alpha to node and it's children
+          if (child.alpha !== 1) {
+            context.globalAlpha = child.alpha;
+          }
           
           if (typeof child.__draw === 'function') {
             child.__draw(context);
