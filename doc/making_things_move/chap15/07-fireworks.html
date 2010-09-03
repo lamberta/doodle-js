@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.15, p.392: Gravity</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball3D.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var balls = [],
+      numBalls = 20,
+      fl = 250,
+      vpX,
+      vpY,
+      gravity = 0.2,
+      floor = 200,
+      bounce = -0.6;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  for (var i=0; i < numBalls; i++) {
+    var ball = Ball3D(3, Math.random() * 0xffffff);
+    balls.push(ball);
+    ball.ypos = -100;
+    ball.vx = Math.random() * 6 - 3;
+    ball.vy = Math.random() * 6 - 6;
+    ball.vz = Math.random() * 6 - 3;
+    layer0.addChild(ball);
+  }
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    for (var i=0; i < numBalls; i++) {
+      var ball = balls[i];
+      move(ball);
+    }
+    sortZ();
+  }
+
+  function move (ball) {
+    ball.vy += gravity;
+    ball.xpos += ball.vx;
+    ball.ypos += ball.vy;
+    ball.zpos += ball.vz;
+
+    if (ball.ypos > floor) {
+      ball.ypos = floor;
+      ball.vy *= bounce;
+    }
+    
+    if (ball.zpos > -fl) {
+      var scale = fl / (fl + ball.zpos);
+      ball.scaleX = ball.scaleY = scale;
+      ball.x = vpX + ball.xpos * scale;
+      ball.y = vpY + ball.ypos * scale;
+      ball.visible = true;
+    } else {
+      ball.visible = false;
+    }
+  }
+
+  function sortZ () {
+    balls.sort(function (a, b) { return b.zpos - a.zpos; });
+    for (var i=0; i < numBalls; i++) {
+      var ball = balls[i];
+      layer0.setChildIndex(ball, i);
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #000000;"></div>
+  </body>
+</html>
