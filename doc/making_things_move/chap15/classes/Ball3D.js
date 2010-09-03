@@ -11,9 +11,20 @@ function Ball3D (radius, color) {
     this.vz = 0;
     this.mass = 1;
 
-		this.graphics.lineStyle(0);
+    this.graphics.lineStyle(0);
     this.graphics.beginFill(color);
-    this.graphics.circle(0, 0, radius);
+    this.graphics.circle(0, 0, this.radius);
     this.graphics.endFill();
+
+    /* Just a temporary implementation to conform with the book demo.
+     * Redraws circle using a new color value.
+     */
+    this.color_transform = function (colorValue) {
+      this.graphics.clear();
+      this.graphics.lineStyle(0);
+      this.graphics.beginFill(colorValue);
+      this.graphics.circle(0, 0, this.radius);
+      this.graphics.endFill();
+    }
   });
 }
