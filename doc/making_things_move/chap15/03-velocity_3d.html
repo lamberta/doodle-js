@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>Doodle.js -- Making Things Move: Ch.15, p.379: Perspective</title>
+    <title>Doodle.js -- Making Things Move: Ch.15, p.382: Velocity and Acceleration</title>
     
     <script type="application/javascript" src="../../../build/doodle.js"></script>
     <script type="application/javascript" src="./classes/Ball.js"></script>
@@ -20,6 +20,10 @@ function init_scene () {
   var xpos = 0,
       ypos = 0,
       zpos = 0,
+      vx = 0,
+      vy = 0,
+      vz = 0,
+      friction = 0.98,
       fl = 250,
       vpX,
       vpY;
@@ -39,19 +43,47 @@ function init_scene () {
   display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
 
   function onEnterFrame (event) {
-    xpos = display.mouseX - vpX;
-    ypos = display.mouseY - vpY;
-    var scale = fl / (fl + zpos);
-    ball.scaleX = ball.scaleY = scale;
-    ball.x = vpX + xpos * scale;
-    ball.y = vpY + ypos * scale;
+    xpos += vx;
+    ypos += vy;
+    zpos += vz;
+
+    vx *= friction;
+    vy *= friction;
+    vz *= friction;
+    
+    if (zpos > -fl) {
+      var scale = fl / (fl + zpos);
+      ball.scaleX = ball.scaleY = scale;
+      ball.x = vpX + xpos * scale;
+      ball.y = vpY + ypos * scale;
+      ball.visible = true;
+    } else {
+      ball.visible = false;
+    }
   }
 
   function onKeyDown (event) {
-    if (event.keyCode === doodle.Keyboard.UP) {
-      zpos += 5;
-    } else if (event.keyCode === doodle.Keyboard.DOWN) {
-      zpos -= 5;
+    switch (event.keyCode) {
+    case doodle.Keyboard.UP:
+      vy -= 1;
+      break;
+    case doodle.Keyboard.DOWN:
+      vy += 1;
+      break;
+    case doodle.Keyboard.LEFT:
+      vx -= 1;
+      break;
+    case doodle.Keyboard.RIGHT:
+      vx += 1;
+      break;
+    case doodle.Keyboard.SHIFT:
+      vz += 1;
+      break;
+    case doodle.Keyboard.CONTROL:
+      vz -= 1;
+      break;
+    default:
+      break;
     }
   }
 }
