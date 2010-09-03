@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.13, p.328: Moving Two Segments</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Segment.js"></script>
+    <script type="application/javascript" src="./classes/SimpleSlider.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  var segment0 = Segment(100, 20);
+  segment0.x = 100;
+  segment0.y = 100;
+  layer0.addChild(segment0);
+
+  var segment1 = Segment(100, 20);
+  segment1.x = segment0.getPin().x;
+  segment1.y = segment0.getPin().y;
+  layer0.addChild(segment1);
+
+  var slider0 = SimpleSlider(-90, 90, 0);
+  slider0.x = 320;
+  slider0.y = 20;
+  layer0.addChild(slider0);
+  slider0.addEventListener(doodle.Event.CHANGE, onChange);
+
+  var slider1 = SimpleSlider(-90, 90, 0);
+  slider1.x = 340;
+  slider1.y = 20;
+  layer0.addChild(slider1);
+  slider1.addEventListener(doodle.Event.CHANGE, onChange);
+
+  function onChange (event) {
+    segment0.rotation = slider0.value;
+    segment1.rotation = slider1.value;
+    segment1.x = segment0.getPin().x;
+    segment1.y = segment0.getPin().y;
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

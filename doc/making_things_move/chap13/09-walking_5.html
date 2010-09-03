@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.13, p.334: Making it Dynamic</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Segment.js"></script>
+    <script type="application/javascript" src="./classes/SimpleSlider.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var cycle = 0;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  var segment0 = Segment(100, 30);
+  segment0.x = 200;
+  segment0.y = 100;
+  layer0.addChild(segment0);
+
+  var segment1 = Segment(100, 20);
+  segment1.x = segment0.getPin().x;
+  segment1.y = segment0.getPin().y;
+  layer0.addChild(segment1);
+
+  var segment2 = Segment(100, 30);
+  segment2.x = 200;
+  segment2.y = 100;
+  layer0.addChild(segment2);
+
+  var segment3 = Segment(100, 20);
+  segment3.x = segment2.getPin().x;
+  segment3.y = segment2.getPin().y;
+  layer0.addChild(segment3);
+
+  var speedSlider = SimpleSlider(0, 0.3, 0.12);
+  speedSlider.x = 10;
+  speedSlider.y = 10;
+  layer0.addChild(speedSlider);
+
+  var thighRangeSlider = SimpleSlider(0, 90, 45);
+  thighRangeSlider.x = 30;
+  thighRangeSlider.y = 10;
+  layer0.addChild(thighRangeSlider);
+
+  var thighBaseSlider = SimpleSlider(0, 180, 90);
+  thighBaseSlider.x = 50;
+  thighBaseSlider.y = 10;
+  layer0.addChild(thighBaseSlider);
+
+  var calfRangeSlider = SimpleSlider(0, 90, 45);
+  calfRangeSlider.x = 70;
+  calfRangeSlider.y = 10;
+  layer0.addChild(calfRangeSlider);
+
+  var calfOffsetSlider = SimpleSlider(-3.14, 3.14, -1.57);
+  calfOffsetSlider.x = 90;
+  calfOffsetSlider.y = 10;
+  layer0.addChild(calfOffsetSlider);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    walk(segment0, segment1, cycle);
+    walk(segment2, segment3, cycle + Math.PI);
+    cycle += speedSlider.value;
+  }
+
+  function walk (segA, segB, cyc) {
+    var angleA = Math.sin(cyc) * thighRangeSlider.value + thighBaseSlider.value,
+        angleB = Math.sin(cyc + calfOffsetSlider.value) * calfRangeSlider.value + calfRangeSlider.value;
+    segA.rotation = angleA;
+    segB.rotation = segA.rotation + angleB;
+    segB.x = segA.getPin().x;
+    segB.y = segA.getPin().y;
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

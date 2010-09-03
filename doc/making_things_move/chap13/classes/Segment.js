@@ -1,4 +1,3 @@
-
 function Segment (segmentWidth, segmentHeight, color) {
   color = color || 0xffffff;
   return doodle.Sprite(function () {
@@ -6,9 +5,9 @@ function Segment (segmentWidth, segmentHeight, color) {
     this.segmentHeight = segmentHeight;
     this.vx = 0;
     this.vy = 0;
-    //init();
+    init.call(this);
 
-    //function init () {
+    function init () {
       //draw the segment itself
       this.graphics.lineStyle(0);
       this.graphics.beginFill(color);
@@ -19,17 +18,16 @@ function Segment (segmentWidth, segmentHeight, color) {
                               segmentHeight / 2,
                               segmentHeight / 2);
       this.graphics.endFill();
-    //draw the two "pins"
-    this.graphics.circle(0, 0, 2);
-    this.graphics.circle(segmentWidth, 0, 2);
-    
-    //}
+      //draw the two "pins"
+      this.graphics.circle(0, 0, 2);
+      this.graphics.circle(segmentWidth, 0, 2);
+    }
 
     this.getPin = function () {
       var angle = this.rotation * Math.PI / 180,
-          xPos = x + Math.cos(angle) * segmentWidth,
-          yPos = y + Math.sin(angle) * segmentWidth;
-      return {x:xPos, y:yPos};
+          xPos = this.x + Math.cos(angle) * segmentWidth,
+          yPos = this.y + Math.sin(angle) * segmentWidth;
+      return {x:xPos, y:yPos}; //point
     };
   });
 }
