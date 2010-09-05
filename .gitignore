@@ -1,4 +1,3 @@
 build/*.jar
-build/doodle*.js
 src/tmp/*
 doc/demos/*
