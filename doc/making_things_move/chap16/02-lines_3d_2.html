@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.16, p.427: Creating Points and Lines - Point3D</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Point3D.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var points = [],
+      numPoints = 20,
+      fl = 250,
+      vpX,
+      vpY;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  for (var i=0; i < numPoints; i++) {
+    var point = Point3D(Math.random() * 200 - 100,
+                        Math.random() * 200 - 100,
+                        Math.random() * 200 - 100);
+    point.setVanishingPoint(vpX, vpY);
+    points.push(point);
+  }
+
+  var lines = doodle.Sprite();
+  layer0.addChild(lines);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    var angleX = (display.mouseY - vpY) * 0.001,
+        angleY = (display.mouseX - vpX) * 0.001;
+
+    for (var i=0; i < numPoints; i++) {
+      var point = points[i];
+      point.rotateX(angleX);
+      point.rotateY(angleY);
+    }
+
+    lines.graphics.clear();
+    lines.graphics.lineStyle(0);
+    lines.graphics.beginPath();
+    lines.graphics.moveTo(points[0].screenX, points[0].screenY);
+    for (i = 1; i < numPoints; i++) {
+      lines.graphics.lineTo(points[i].screenX, points[i].screenY);
+    }
+    lines.graphics.stroke();
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

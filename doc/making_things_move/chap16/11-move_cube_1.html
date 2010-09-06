@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.16, p.448: Moving 3D Solids - Orbit Screen Center</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Point3D.js"></script>
+    <script type="application/javascript" src="./classes/Triangle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var points = [],
+      triangles = [],
+      fl = 250,
+      vpX,
+      vpY,
+      offsetX = 0,
+      offsetY = 0;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  //front four corners
+  points[0] = Point3D(-100, -100, -100);
+  points[1] = Point3D( 100, -100, -100);
+  points[2] = Point3D( 100,  100, -100);
+  points[3] = Point3D(-100,  100, -100);
+  //back four corners
+  points[4] = Point3D(-100, -100, 100);
+  points[5] = Point3D( 100, -100, 100);
+  points[6] = Point3D( 100,  100, 100);
+  points[7] = Point3D(-100,  100, 100);
+  
+  for (var i=0; i < points.length; i++) {
+    points[i].setVanishingPoint(vpX, vpY);
+    points[i].setCenter(0, 0, 200);
+  }
+
+  //front
+  triangles[0]  = Triangle(points[0], points[1], points[2], 0x6666cc);
+  triangles[1]  = Triangle(points[0], points[2], points[3], 0x6666cc);
+  //top
+  triangles[2]  = Triangle(points[0], points[5], points[1], 0x66cc66);
+  triangles[3]  = Triangle(points[0], points[4], points[5], 0x66cc66);
+  //back
+  triangles[4]  = Triangle(points[4], points[6], points[5], 0xcc6666);
+  triangles[5]  = Triangle(points[4], points[7], points[6], 0xcc6666);
+  //bottom
+  triangles[6]  = Triangle(points[3], points[2], points[6], 0xcc66cc);
+  triangles[7]  = Triangle(points[3], points[6], points[7], 0xcc66cc);
+  //right
+  triangles[8]  = Triangle(points[1], points[5], points[6], 0x66cccc);
+  triangles[9]  = Triangle(points[1], points[6], points[2], 0x66cccc);
+  //left
+  triangles[10] = Triangle(points[4], points[0], points[3], 0xcccc66);
+  triangles[11] = Triangle(points[4], points[3], points[7], 0xcccc66);
+
+  var triangle_graphics = doodle.Sprite();
+  layer0.addChild(triangle_graphics);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
+
+  function onEnterFrame (event) {
+    var angleX = (display.mouseY - vpY) * 0.001,
+        angleY = (display.mouseX - vpX) * 0.001;
+
+    for (var i = 0; i < points.length; i++) {
+      var point = points[i];
+      point.rotateX(angleX);
+      point.rotateY(angleY);
+    }
+
+    triangle_graphics.graphics.clear();
+    for (i = 0; i < triangles.length; i++) {
+      triangles[i].draw(triangle_graphics.graphics);
+    }
+  }
+
+  function onKeyDown (event) {
+    if (event.keyCode === doodle.Keyboard.LEFT) {
+      offsetX = -5;
+    } else if (event.keyCode === doodle.Keyboard.RIGHT) {
+      offsetX = 5;
+    } else if (event.keyCode === doodle.Keyboard.UP) {
+      offsetY = -5;
+    } else if (event.keyCode === doodle.Keyboard.DOWN) {
+      offsetY = 5;
+    }
+    for (var i = 0; i < points.length; i++) {
+      points[i].x += offsetX;
+      points[i].y += offsetY;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

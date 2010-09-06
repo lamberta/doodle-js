@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.16, p.445: Modeling Other Shapes - Cylinder</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Point3D.js"></script>
+    <script type="application/javascript" src="./classes/Triangle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var points = [],
+      triangles = [],
+      numFaces = 20,
+      fl = 250,
+      vpX,
+      vpY;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  var index = 0;
+  for (var i = 0; i < numFaces; i++) {
+    var angle = Math.PI * 2 / numFaces * i,
+        xpos = Math.cos(angle) * 200,
+        ypos = Math.sin(angle) * 200;
+    points[index]   = Point3D(xpos, ypos, -100);
+    points[index+1] = Point3D(xpos, ypos,  100);
+    index += 2;
+  }
+
+  for (i = 0; i < points.length; i++) {
+    points[i].setVanishingPoint(vpX, vpY);
+    points[i].setCenter(0, 0, 200);
+  }
+
+  index = 0;
+  for (i = 0; i < numFaces - 1; i++) {
+    triangles[index]   = Triangle(points[index],
+                                  points[index+3],
+                                  points[index+1],
+                                  0x6666cc);
+    triangles[index+1] = Triangle(points[index],
+                                  points[index+2],
+                                  points[index+3],
+                                  0x6666cc);
+    index += 2;
+  }
+
+  triangles[index]   = Triangle(points[index],
+                                points[1],
+                                points[index+1],
+                                0x6666cc);
+  triangles[index+1] = Triangle(points[index],
+                                points[0],
+                                points[1],
+                                0x6666cc);
+
+  var triangle_graphics = doodle.Sprite();
+  layer0.addChild(triangle_graphics);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    var angleX = (display.mouseY - vpY) * 0.001,
+        angleY = (display.mouseX - vpX) * 0.001;
+
+    for (var i = 0; i < points.length; i++) {
+      var point = points[i];
+      point.rotateX(angleX);
+      point.rotateY(angleY);
+    }
+
+    triangle_graphics.graphics.clear();
+    for (i = 0; i < triangles.length; i++) {
+      triangles[i].draw(triangle_graphics.graphics);
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>

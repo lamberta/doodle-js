@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.16, p.422: Creating Points and Lines</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball3D.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var balls = [],
+      numBalls = 20,
+      fl = 250,
+      vpX,
+      vpY;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  for (var i=0; i < numBalls; i++) {
+    var ball = Ball3D(5, 0);
+    balls.push(ball);
+    ball.xpos = Math.random() * 200 - 100;
+    ball.ypos = Math.random() * 200 - 100;
+    ball.zpos = Math.random() * 200 - 100;
+    layer0.addChild(ball);
+  }
+
+  var lines = doodle.Sprite();
+  layer0.addChild(lines);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    var angleX = (display.mouseY - vpY) * 0.001,
+        angleY = (display.mouseX - vpX) * 0.001;
+
+    for (var i=0; i < numBalls; i++) {
+      var ball = balls[i];
+      rotateX(ball, angleX);
+      rotateY(ball, angleY);
+      doPerspective(ball);
+    }
+
+    lines.graphics.clear();
+    lines.graphics.lineStyle(0);
+    lines.graphics.beginPath();
+    lines.graphics.moveTo(balls[0].x, balls[0].y);
+    for (i = 1; i < numBalls; i++) {
+      lines.graphics.lineTo(balls[i].x, balls[i].y);
+    }
+    lines.graphics.stroke();
+  }
+
+  function rotateX (ball, angleX) {
+    var cosX = Math.cos(angleX),
+        sinX = Math.sin(angleX),
+        y1 = ball.ypos * cosX - ball.zpos * sinX,
+        z1 = ball.zpos * cosX + ball.ypos * sinX;
+
+    ball.ypos = y1;
+    ball.zpos = z1;
+  }
+
+  function rotateY (ball, angleY) {
+    var cosY = Math.cos(angleY),
+        sinY = Math.sin(angleY),
+        x1 = ball.xpos * cosY - ball.zpos * sinY,
+        z1 = ball.zpos * cosY + ball.xpos * sinY;
+
+    ball.xpos = x1;
+    ball.zpos = z1;
+  }
+
+  function doPerspective (ball) {
+    if (ball.zpos > -fl) {
+      var scale = fl / (fl + ball.zpos);
+      ball.scaleX = ball.scaleY = scale;
+      ball.x = vpX + ball.xpos * scale;
+      ball.y = vpY + ball.ypos * scale;
+      ball.visible = true;
+    } else {
+      ball.visible = false;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
