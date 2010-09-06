@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.18, p.483: The Matrix Class - Skew X and Y</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var angle = 0;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  var box = doodle.Sprite();
+  box.graphics.beginFill(0xff0000);
+  box.graphics.rect(-50, -50, 100, 100);
+  box.graphics.endFill();
+  layer0.addChild(box);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    var skewX = (display.mouseX - display.width / 2) * 0.01,
+        skewY = (display.mouseY - display.height / 2) * 0.01;
+    box.transform = doodle.geom.Matrix(1, skewY,
+                                       skewX, 1,
+                                       display.width/2, display.height/2);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
