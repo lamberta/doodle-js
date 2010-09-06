@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.16, p.432: Creating 3D Fills</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Point3D.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var points = [],
+      numPoints = 12,
+      fl = 250,
+      vpX,
+      vpY;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+
+  var layer0 = display.addLayer();
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  //the letter 'E'
+  points[0]  = Point3D(-150, -250, 100);
+  points[1]  = Point3D( 150, -250, 100);
+  points[2]  = Point3D( 150, -150, 100);
+  points[3]  = Point3D( -50, -150, 100);
+  points[4]  = Point3D( -50,  -50, 100);
+  points[5]  = Point3D(  50,  -50, 100);
+  points[6]  = Point3D(  50,   50, 100);
+  points[7]  = Point3D( -50,   50, 100);
+  points[8]  = Point3D( -50,  150, 100);
+  points[9]  = Point3D( 150,  150, 100);
+  points[10] = Point3D( 150,  250, 100);
+  points[11] = Point3D(-150,  250, 100);
+  
+  for (var i=0; i < numPoints; i++) {
+    points[i].setVanishingPoint(vpX, vpY);
+    points[i].setCenter(0, 0, 200);
+  }
+
+  var lines = doodle.Sprite();
+  layer0.addChild(lines);
+
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    var angleX = (display.mouseY - vpY) * 0.001,
+        angleY = (display.mouseX - vpX) * 0.001;
+
+    for (var i=0; i < numPoints; i++) {
+      var point = points[i];
+      point.rotateX(angleX);
+      point.rotateY(angleY);
+    }
+
+    lines.graphics.clear();
+    lines.graphics.lineStyle(0);
+		lines.graphics.beginFill(0xffcccc);
+    lines.graphics.beginPath();
+    lines.graphics.moveTo(points[0].screenX, points[0].screenY);
+    for (i = 1; i < numPoints; i++) {
+      lines.graphics.lineTo(points[i].screenX, points[i].screenY);
+    }
+    lines.graphics.lineTo(points[0].screenX, points[0].screenY);
+		lines.graphics.endFill();
+    lines.graphics.stroke();
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+  </body>
+</html>
