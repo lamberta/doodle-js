@@ -20,7 +20,6 @@ function init_scene () {
   var numDots = 100;
   
   var display = doodle.Display("#my_display");
-  display.frameRate = 20;
 
   var layer0 = display.addLayer();
 
@@ -31,6 +30,7 @@ function init_scene () {
       dot,
       x1,
       x2;
+  
   for (var i = 0; i < numDots; i++) {
     dot = Ball(1, 0);
     x1 = random() * width;

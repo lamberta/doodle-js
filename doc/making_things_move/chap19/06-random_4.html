@@ -21,16 +21,27 @@ function init_scene () {
       maxRadius = 50;
   
   var display = doodle.Display("#my_display");
-  display.frameRate = 20;
 
   var layer0 = display.addLayer();
 
+  //help with property lookup times
+  var random = Math.random,
+      sqrt = Math.sqrt,
+      PI = Math.PI,
+      cos = Math.cos,
+      sin = Math.sin,
+      width = display.width,
+      height = display.height,
+      dot,
+      radius,
+      angle;
+
   for (var i = 0; i < numDots; i++) {
-    var dot = Ball(1, 0),
-        radius = Math.sqrt(Math.random()) * maxRadius,
-        angle = Math.random() * (Math.PI * 2);
-    dot.x = display.width / 2 + Math.cos(angle) * radius;
-    dot.y = display.height / 2 + Math.sin(angle) * radius;
+    dot = Ball(1, 0);
+    radius = sqrt(random()) * maxRadius;
+    angle = random() * (PI * 2);
+    dot.x = width / 2 + cos(angle) * radius;
+    dot.y = height / 2 + sin(angle) * radius;
     layer0.addChild(dot);
   }
 }

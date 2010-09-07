@@ -26,10 +26,16 @@ function init_scene () {
 
   var layer0 = display.addLayer();
 
+  //help with property lookup times
+  var random = Math.random,
+      width = display.width,
+      height = display.height,
+      dot;
+  
   for (var i = 0; i < numDots; i++) {
-    var dot = Ball(1, 0);
-    dot.x = Math.random() * display.width;
-    dot.y = Math.random() * display.height;
+    dot = Ball(1, 0);
+    dot.x = random() * width;
+    dot.y = random() * height;
     dot.vx = 0;
     dot.vy = 0;
     layer0.addChild(dot);
@@ -49,10 +55,10 @@ function init_scene () {
 
   function onEnterFrame (event) {
     for (var i = 0; i < numDots; i++) {
-      var dot = dots[i];
+      dot = dots[i];
       lines.graphics.moveTo(dot.x, dot.y);
-      dot.vx += Math.random() * 0.2 - 0.1;
-      dot.vy += Math.random() * 0.2 - 0.1;
+      dot.vx += random() * 0.2 - 0.1;
+      dot.vy += random() * 0.2 - 0.1;
       dot.x += dot.vx;
       dot.y += dot.vy;
       dot.vx *= friction;
@@ -60,15 +66,15 @@ function init_scene () {
       lines.graphics.lineTo(dot.x, dot.y);
       lines.graphics.stroke();
 
-      if (dot.x > display.width) {
+      if (dot.x > width) {
         dot.x = 0;
       } else if (dot.x < 0) {
-        dot.x = display.width;
+        dot.x = width;
       }
-      if (dot.y > display.height) {
+      if (dot.y > height) {
         dot.y = 0;
       } else if (dot.y < 0) {
-        dot.y = display.height;
+        dot.y = height;
       }
     }
   }

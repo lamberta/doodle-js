@@ -20,14 +20,19 @@ function init_scene () {
   var numDots = 50;
   
   var display = doodle.Display("#my_display");
-  display.frameRate = 20;
 
   var layer0 = display.addLayer();
 
+  //help with property lookup times
+  var random = Math.random,
+      width = display.width,
+      height = display.height,
+      dot;
+
   for (var i = 0; i < numDots; i++) {
-    var dot = Ball(1, 0);
-    dot.x = display.width / 2 + Math.random() * 200 - 100;
-    dot.y = display.height / 2 + Math.random() * 200 - 100;
+    dot = Ball(1, 0);
+    dot.x = width / 2 + random() * 200 - 100;
+    dot.y = height / 2 + random() * 200 - 100;
     layer0.addChild(dot);
   }
 }
