@@ -56,6 +56,7 @@ function init_scene () {
   ship.x = display.width/2;
   ship.y = display.height/2;
   layer0.addChild(ship);
+  ship.draw(false);
   
   display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
   display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
