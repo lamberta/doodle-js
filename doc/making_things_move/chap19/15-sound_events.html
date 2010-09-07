@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.19, p.510: Integrating Sound</title>
+    
+    <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/biilly/doodle-js
+ */
+
+function init_scene () {
+  var vx = Math.random() * 10 - 5,
+      vy = -10,
+      bounce = -0.7,
+      boing;
+  
+  var display = doodle.Display("#my_display");
+  display.frameRate = 20;
+  
+  var layer0 = display.addLayer();
+
+  var ball = Ball();
+  ball.x = display.width/2;
+  ball.y = display.height/2;
+  layer0.addChild(ball);
+
+  /* Sound doesn't really work now, but one day it might.
+   */
+  boing = document.getElementById('boing_sound');
+  //when sound ends, reset playhead
+  boing.addEventListener('ended', function () {
+    boing.currentTime = 0;
+  });
+  
+  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  
+  function onEnterFrame (event) {
+    var left = 0,
+        right = display.width,
+        top = 0,
+        bottom = display.height,
+        ball_r = ball.radius;
+
+    ball.x += vx;
+    ball.y += vy;
+
+    if (ball.x + ball_r > right) {
+      boing.play();
+      ball.x = right - ball_r;
+      vx *= bounce;
+    } else if (ball.x - ball_r < left) {
+      boing.play();
+      ball.x = left + ball_r;
+      vx *= bounce;
+    }
+    if (ball.y + ball_r > bottom) {
+      boing.play();
+      ball.y = bottom - ball_r;
+      vy *= bounce;
+    } else if (ball.y - ball_r < top) {
+      boing.play();
+      ball.y = top + ball_r;
+      vy *= bounce;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    
+    <audio id="boing_sound" preload="auto">
+      <source src="./assets/boing.ogg" type="audio/ogg"/>
+      <source src="./assets/boing.mp3" type="audio/mp3"/>
+      <source src="./assets/boing.wav" type="audio/x-wav"/>
+      <p>Your browser does not support the <code>audio</code> element.</p>
+    </audio>
+  </body>
+</html>
