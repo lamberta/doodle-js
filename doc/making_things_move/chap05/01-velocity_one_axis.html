@@ -5,6 +5,7 @@
     <title>Doodle.js -- Making Things Move: Ch.5, p.125: Velocity on One Axis</title>
     
     <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
     <script type="application/javascript">
 
 /* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
@@ -14,16 +15,6 @@
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
  * available at http://github.com/biilly/doodle-js
  */
-
-function Ball (radius, color) {
-  radius = radius || 40;
-  color = color || "#ff0000";
-  return doodle.Sprite(function () {
-    this.graphics.beginFill(color);
-    this.graphics.circle(0, 0, radius);
-    this.graphics.endFill();
-  });
-};
 
 function init_scene () {
   var vx = 5;
@@ -43,7 +34,6 @@ function init_scene () {
   function onEnterFrame (event) {
     ball.x += vx;
   }
-
 }
 
     </script>

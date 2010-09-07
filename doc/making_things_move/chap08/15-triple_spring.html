@@ -5,6 +5,7 @@
     <title>Doodle.js -- Making Things Move: Ch.8, p.218: Attaching Multiple Objects with Springs</title>
     
     <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
     <script type="application/javascript">
 
 /* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
@@ -15,27 +16,13 @@
  * available at http://github.com/biilly/doodle-js
  */
 
-function Ball (radius, color) {
-  radius = radius || 40;
-  color = color || "#ff0000";
-  return doodle.Sprite(function () {
-    this.vx = 0;
-    this.vy = 0;
-    this.radius = radius;
-    
-    this.graphics.beginFill(color);
-    this.graphics.circle(0, 0, radius);
-    this.graphics.endFill();
-  });
-};
-
 function init_scene () {
   var spring = 0.1,
       friction = 0.95,
       springLength = 100,
       ball0Dragging = false,
-			ball1Dragging = false,
-			ball2Dragging = false;
+      ball1Dragging = false,
+      ball2Dragging = false;
   
   var display = doodle.Display("#my_display");
   display.frameRate = 20;
@@ -54,7 +41,7 @@ function init_scene () {
   ball1.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onPress);
   layer0.addChild(ball1);
 
-	var ball2 = Ball(20);
+  var ball2 = Ball(20);
   ball2.x = Math.random() * display.width;
   ball2.y = Math.random() * display.height;
   ball2.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onPress);
@@ -68,24 +55,24 @@ function init_scene () {
   function onEnterFrame (event) {
     if (!ball0Dragging) {
       springTo(ball0, ball1);
-			springTo(ball0, ball2);
+      springTo(ball0, ball2);
     }
     if (!ball1Dragging) {
       springTo(ball1, ball0);
-			springTo(ball1, ball2);
+      springTo(ball1, ball2);
     }
-		if (!ball2Dragging) {
-			springTo(ball2, ball0);
-			springTo(ball2, ball1);
-		}
+    if (!ball2Dragging) {
+      springTo(ball2, ball0);
+      springTo(ball2, ball1);
+    }
     
     //draw spring to it's own sprite
     spring_line.graphics.clear();
     spring_line.graphics.beginPath();
     spring_line.graphics.moveTo(ball0.x, ball0.y);
     spring_line.graphics.lineTo(ball1.x, ball1.y);
-		spring_line.graphics.lineTo(ball2.x, ball2.y);
-		spring_line.graphics.lineTo(ball0.x, ball0.y);
+    spring_line.graphics.lineTo(ball2.x, ball2.y);
+    spring_line.graphics.lineTo(ball0.x, ball0.y);
     spring_line.graphics.stroke();
   }
 
@@ -111,7 +98,7 @@ function init_scene () {
     if (event.target === ball1) {
       ball1Dragging = true;
     }
-		if (event.target === ball2) {
+    if (event.target === ball2) {
       ball2Dragging = true;
     }
     display.addEventListener(doodle.MouseEvent.MOUSE_UP, onRelease);
@@ -123,7 +110,7 @@ function init_scene () {
     display.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
     ball0Dragging = false;
     ball1Dragging = false;
-		ball2Dragging = false;
+    ball2Dragging = false;
   }
 
   function onMouseMove (event) {
@@ -135,7 +122,7 @@ function init_scene () {
       ball1.x = display.mouseX;
       ball1.y = display.mouseY;
     }
-		if (ball2Dragging) {
+    if (ball2Dragging) {
       ball2.x = display.mouseX;
       ball2.y = display.mouseY;
     }

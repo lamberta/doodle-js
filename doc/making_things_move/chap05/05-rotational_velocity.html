@@ -5,6 +5,7 @@
     <title>Doodle.js -- Making Things Move: Ch.5, p.131: Velocity Extended</title>
     
     <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Arrow.js"></script>
     <script type="application/javascript">
 
 /* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
@@ -14,24 +15,6 @@
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
  * available at http://github.com/biilly/doodle-js
  */
-
-function Arrow () {
-  return doodle.Sprite(function () {
-    this.graphics.lineStyle(2, "#000000", 1);
-    this.graphics.beginFill("#ffff00");
-    this.graphics.moveTo(-50, -25);
-    this.graphics.beginPath();
-    this.graphics.lineTo(0, -25);
-    this.graphics.lineTo(0, -50);
-    this.graphics.lineTo(50, 0);
-    this.graphics.lineTo(0, 50);
-    this.graphics.lineTo(0, 25);
-    this.graphics.lineTo(-50, 25);
-    this.graphics.lineTo(-50, -25);
-    this.graphics.closePath();
-    this.graphics.endFill();
-  });
-};
 
 function init_scene () {
   var vr = 5;

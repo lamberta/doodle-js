@@ -5,6 +5,7 @@
     <title>Doodle.js -- Making Things Move: Ch.5, p.141: Spaceship</title>
     
     <script type="application/javascript" src="../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ship.js"></script>
     <script type="application/javascript">
 
 /* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
@@ -14,31 +15,6 @@
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
  * available at http://github.com/biilly/doodle-js
  */
-
-function Ship () {
-  return doodle.Sprite(function () {
-    //method to call when key pressed
-    this.draw = function (showFlame) {
-      this.graphics.clear();
-      this.graphics.lineStyle(1, 0xffffff);
-      this.graphics.beginPath();
-      this.graphics.moveTo(10, 0);
-      this.graphics.lineTo(-10, 10);
-      this.graphics.lineTo(-5, 0);
-      this.graphics.lineTo(-10, -10);
-      this.graphics.lineTo(10, 0);
-      this.graphics.stroke();
-      
-      if (showFlame) {
-        this.graphics.beginPath();
-        this.graphics.moveTo(-7.5, -5);
-        this.graphics.lineTo(-15, 0);
-        this.graphics.lineTo(-7.5, 5);
-        this.graphics.stroke();
-      }
-    };
-  });
-}
 
 function init_scene () {
   var vr = 0,
@@ -55,6 +31,7 @@ function init_scene () {
   ship.x = display.width/2;
   ship.y = display.height/2;
   layer0.addChild(ship);
+  ship.draw(false);
   
   display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
   display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
