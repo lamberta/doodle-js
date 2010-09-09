@@ -80,6 +80,8 @@ while getopts "hdDC" option; do
     esac
 done
 
+echo "For more options: $(basename $0) -h"
+
 echo "Build:"
 #creates debug version
 build_full
