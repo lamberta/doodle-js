@@ -52,9 +52,12 @@
       bubbles = bubbles === true; //false
       cancelable = cancelable === true;
       view = (viewArg === undefined) ? null : view;
-      check_string_type(type, '[object TextEvent].constructor', 'type');
-      check_boolean_type(bubbles, '[object TextEvent].constructor', 'bubbles');
-      check_boolean_type(cancelable, '[object TextEvent].constructor', 'cancelable');
+
+      /*DEBUG*/
+      check_string_type(type, '[object TextEvent].constructor', '*type*');
+      check_boolean_type(bubbles, '[object TextEvent].constructor', '*bubbles*');
+      check_boolean_type(cancelable, '[object TextEvent].constructor', '*cancelable*');
+      /*END_DEBUG*/
       textevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
     }
     
@@ -88,12 +91,14 @@
           view = (viewArg === undefined) ? null : viewArg;
           data = (dataArg === undefined) ? "" : dataArg;
           inputMode = (inputModeArg === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
-          //type-check
-          check_string_type(type, this+'.initTextEvent', 'type');
-          check_boolean_type(bubbles, this+'.initTextEvent', 'bubbles');
-          check_boolean_type(cancelable, this+'.initTextEvent', 'cancelable');
-          check_string_type(data, this+'.initTextEvent', 'data');
-          check_number_type(inputMode, this+'.initTextEvent', 'inputMode');
+
+          /*DEBUG*/
+          check_string_type(type, this+'.initTextEvent', '*type*');
+          check_boolean_type(bubbles, this+'.initTextEvent', '*bubbles*');
+          check_boolean_type(cancelable, this+'.initTextEvent', '*cancelable*');
+          check_string_type(data, this+'.initTextEvent', '*data*');
+          check_number_type(inputMode, this+'.initTextEvent', '*inputMode*');
+          /*END_DEBUG*/
           
           this.initUIEvent(type, bubbles, cancelable, view);
           return this;
@@ -119,5 +124,5 @@
       }
     }
   };
-	
+  
 }());//end class closure

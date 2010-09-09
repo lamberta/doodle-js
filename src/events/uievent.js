@@ -65,9 +65,12 @@
       //regular instantiation of prototype
       bubbles = bubbles === true; //false
       cancelable = cancelable === true;
-      check_string_type(type, '[object UIEvent].constructor', 'type');
-      check_boolean_type(bubbles, '[object UIEvent].constructor', 'bubbles');
-      check_boolean_type(cancelable, '[object UIEvent].constructor', 'cancelable');
+
+      /*DEBUG*/
+      check_string_type(type, '[object UIEvent].constructor', '*type*');
+      check_boolean_type(bubbles, '[object UIEvent].constructor', '*bubbles*');
+      check_boolean_type(cancelable, '[object UIEvent].constructor', '*cancelable*');
+      /*END_DEBUG*/
       uievent = Object.create(doodle.Event(type, bubbles, cancelable));
     }
     
@@ -139,11 +142,13 @@
           cancelable = cancelableArg === true;
           view = (viewArg === undefined) ? null : viewArg;
           detail = (detailArg === undefined) ? 0 : detailArg;
-          //type-check
-          check_string_type(type, this+'.initUIEvent', 'type');
-          check_boolean_type(bubbles, this+'.initUIEvent', 'bubbles');
-          check_boolean_type(cancelable, this+'.initUIEvent', 'cancelable');
-          check_number_type(detail, this+'.initUIEvent', 'detail');
+
+          /*DEBUG*/
+          check_string_type(type, this+'.initUIEvent', '*type*');
+          check_boolean_type(bubbles, this+'.initUIEvent', '*bubbles*');
+          check_boolean_type(cancelable, this+'.initUIEvent', '*cancelable*');
+          check_number_type(detail, this+'.initUIEvent', '*detail*');
+          /*END_DEBUG*/
           
           this.initEvent(type, bubbles, cancelable);
           return this;

@@ -88,8 +88,10 @@
         configurable: false,
         get: function () { return cancelBubble; },
         set: function (cancelArg) {
+          /*DEBUG*/
           check_boolean_type(cancelArg, this+'.cancelBubble');
-          cancelBubble = cancelp;
+          /*END_DEBUG*/
+          cancelBubble = cancelArg;
         }
       },
 
@@ -152,7 +154,9 @@
       '__setEventPhase': {
         enumerable: false,
         value: function (phaseArg) {
-          check_number_type(phaseArg);
+          /*DEBUG*/
+          check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
+          /*END_DEBUG*/
           eventPhase = phaseArg;
         }
       },
@@ -174,14 +178,16 @@
         configurable: false,
         get: function () { return type; }
       },
-			
-			'__setType': {
-				enumerable: false,
+      
+      '__setType': {
+        enumerable: false,
         value: function (typeArg) {
-          check_string_type(typeArg);
+          /*DEBUG*/
+          check_string_type(typeArg, this+'.__setType', '*type*');
+          /*END_DEBUG*/
           type = typeArg;
         }
-			},
+      },
 
       'returnValue': {
         enumerable: true,
@@ -200,14 +206,15 @@
           //parameter defaults
           canBubbleArg = canBubbleArg === true; //false
           cancelableArg = cancelableArg === true;
-          //typecheck
-          check_string_type(type, this+'.initEvent', '*type*,bubbles,cancelable');
-          check_boolean_type(canBubbleArg, this+'.initEvent', 'type,*bubbles*,cancelable');
-          check_boolean_type(cancelableArg, this+'.initEvent', 'type,bubbles,*cancelable*');
+          /*DEBUG*/
+          check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
+          check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
+          check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
+          /*END_DEBUG*/
 
-					type = typeArg;
-					bubbles = canBubbleArg;
-					cancelable = cancelableArg;
+          type = typeArg;
+          bubbles = canBubbleArg;
+          cancelable = cancelableArg;
           
           return this;
         }
@@ -218,7 +225,7 @@
         configurable: false,
         value: function () {
           defaultPrevented = true;
-        },
+        }
       },
 
       'stopPropagation': {

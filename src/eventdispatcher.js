@@ -110,10 +110,11 @@
         writable: false,
         configurable: false,
         value: function (fn) {
-          if (check_function_type(fn, this+'.modify')) {
-            fn.call(this);
-            return this;
-          }
+          /*DEBUG*/
+          check_function_type(fn, this+'.modify', '*function*');
+          /*END_DEBUG*/
+          fn.call(this);
+          return this;
         }
       },
 
@@ -128,11 +129,13 @@
         writable: false,
         configurable: false,
         value: function (type, listener, useCapture) {
-          check_string_type(type, this+'.addEventListener');
-          check_function_type(listener, this+'.addEventListener');
-          var self = this;
           useCapture = useCapture === true; //default to false, bubble event
-
+          /*DEBUG*/
+          check_string_type(type, this+'.addEventListener', '*type*, listener, useCapture');
+          check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
+          /*END_DEBUG*/
+          
+          var self = this;
           //if new event type, create it's array to store callbacks
           if (!this.eventListeners[type]) {
             this.eventListeners[type] = {capture:[], bubble:[]};
@@ -156,26 +159,27 @@
         writable: false,
         configurable: false,
         value: function (type, listener, useCapture) {
-          if (check_string_type(type, this+'.removeEventListener') &&
-              check_function_type(listener, this+'.removeEventListener')) {
+          useCapture = useCapture === true; //default to false, bubble event
+          /*DEBUG*/
+          check_string_type(type, this+'.removeEventListener', '*type*, listener, useCapture');
+          check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
+          /*END_DEBUG*/
           
-            useCapture = useCapture === true; //default to false, bubble event
-          
-            //make sure event type exists
-            if (this.eventListeners[type]) {
-              //grab our event type array and remove the callback function
-              var evt_type = this.eventListeners[type],
-              listeners = evt_type[useCapture ? 'capture':'bubble'];
-              listeners.splice(listeners.indexOf(listener), 1);
-              
-              //if none left, remove event type
-              if (evt_type.capture.length === 0 && evt_type.bubble.length === 0) {
-                delete this.eventListeners[type];
-              }
-              //if no more listeners, remove from object queue
-              if (Object.keys(this.eventListeners).length === 0) {
-                dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
-              }
+          //make sure event type exists
+          if (this.eventListeners[type]) {
+            //grab our event type array and remove the callback function
+            var evt_type = this.eventListeners[type],
+                listeners = evt_type[useCapture ? 'capture':'bubble'];
+
+            listeners.splice(listeners.indexOf(listener), 1);
+            
+            //if none left, remove event type
+            if (evt_type.capture.length === 0 && evt_type.bubble.length === 0) {
+              delete this.eventListeners[type];
+            }
+            //if no more listeners, remove from object queue
+            if (Object.keys(this.eventListeners).length === 0) {
+              dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
             }
           }
         }
@@ -190,47 +194,49 @@
         writable: false,
         configurable: false,
         value: function (event) {
-          if (check_event_type(event, this+'.handleEvent')) {
-            //check for listeners that match event type
-            //if capture not set, using bubble listeners - like for AT_TARGET phase
-            var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
-                listeners = this.eventListeners[event.type], //obj
-                count = 0, //listener count
-                rv,  //return value of handler
-                i; //counter
+          /*DEBUG*/
+          check_event_type(event, this+'.handleEvent');
+          /*END_DEBUG*/
+          
+          //check for listeners that match event type
+          //if capture not set, using bubble listeners - like for AT_TARGET phase
+          var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
+              listeners = this.eventListeners[event.type], //obj
+              count = 0, //listener count
+              rv,  //return value of handler
+              i; //counter
 
-            listeners = listeners && listeners[phase];
-            if (listeners && listeners.length > 0) {
-              //currentTarget is the object with addEventListener
-              event.__setCurrentTarget(this);
+          listeners = listeners && listeners[phase];
+          if (listeners && listeners.length > 0) {
+            //currentTarget is the object with addEventListener
+            event.__setCurrentTarget(this);
+            
+            //if we have any, call each handler with event object
+            count = listeners.length;
+            for (i = 0; i < count; i += 1) {
+              check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
+              //pass event to handler
+              rv = listeners[i].call(this, event);
               
-              //if we have any, call each handler with event object
-              count = listeners.length;
-              for (i = 0; i < count; i += 1) {
-                check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
-                //pass event to handler
-                rv = listeners[i].call(this, event);
-      
-                //when event.stopPropagation is called
-                //cancel event for other nodes, but check other handlers on this one
-                //returning false from handler does the same thing
-                if (rv === false || event.returnValue === false) {
-                  //set event stopped if not already
-                  if (!event.__cancel) {
-                    event.stopPropagation();
-                  }
-                }
-                //when event.stopImmediatePropagation is called
-                //ignore other handlers on this target
-                if (event.__cancelNow) {
-                  break;
+              //when event.stopPropagation is called
+              //cancel event for other nodes, but check other handlers on this one
+              //returning false from handler does the same thing
+              if (rv === false || event.returnValue === false) {
+                //set event stopped if not already
+                if (!event.__cancel) {
+                  event.stopPropagation();
                 }
               }
+              //when event.stopImmediatePropagation is called
+              //ignore other handlers on this target
+              if (event.__cancelNow) {
+                break;
+              }
             }
-
-            //any handlers found on this node?
-            return (count > 0) ? true : false;
           }
+          
+          //any handlers found on this node?
+          return (count > 0) ? true : false;
         }
       },
       
@@ -253,7 +259,9 @@
               i, //counter
               rv; //return value of event listener
 
-          check_event_type(event, this+'.dispatchEvent');
+          /*DEBUG*/
+          check_event_type(event, this+'.dispatchEvent', '*event*');
+          /*END_DEBUG*/
 
           //can't dispatch an event that's already stopped
           if (event.__cancel) {
@@ -328,7 +336,9 @@
               len, //count of event listeners
               i; //counter
           
-          check_event_type(event, this+'.broadcastEvent');
+          /*DEBUG*/
+          check_event_type(event, this+'.broadcastEvent', '*event*');
+          /*END_DEBUG*/
 
           if (event.__cancel) {
             throw new Error(this+'.broadcastEvent: Can not dispatch a cancelled event.');
@@ -368,9 +378,10 @@
         writable: false,
         configurable: false,
         value: function (type) {
-          if (check_string_type(type, this+'.hasEventListener')) {
-            return this.eventListeners !== null && this.eventListeners.hasOwnProperty(type);
-          }
+          /*DEBUG*/
+          check_string_type(type, this+'.hasEventListener', '*type*');
+          /*END_DEBUG*/
+          return this.eventListeners !== null && this.eventListeners.hasOwnProperty(type);
         }
       },
 
@@ -388,21 +399,23 @@
         writable: false,
         configurable: false,
         value: function (type) {
-          if (check_string_type(type, this+'.willTrigger')) {
-            if (this.hasEventListener(type)) {
-              return true;
-            } else if (!this.children || this.children.length === 0) {
-              //requires scene graph be in place to proceed down the tree
-              return false;
-            } else {
-              for (var i in this.children) {
-                if (this.children[i].willTrigger(type)) {
-                  return true;
-                }
+          /*DEBUG*/
+          check_string_type(type, this+'.willTrigger', '*type*');
+          /*END_DEBUG*/
+          
+          if (this.hasEventListener(type)) {
+            return true;
+          } else if (!this.children || this.children.length === 0) {
+            //requires scene graph be in place to proceed down the tree
+            return false;
+          } else {
+            for (var i in this.children) {
+              if (this.children[i].willTrigger(type)) {
+                return true;
               }
             }
-            return false;
           }
+          return false;
         }
       }
       

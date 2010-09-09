@@ -12,14 +12,14 @@
     var arg_len = arguments.length,
         initializer,
         point = {};
-		
-		//check if passed an init function
+    
+    //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
-			x = undefined;
+      x = undefined;
     } else if (arg_len > 2) {
-			throw new SyntaxError("[object Point]: Invalid number of parameters.");
-		}
+      throw new SyntaxError("[object Point]: Invalid number of parameters.");
+    }
 
     Object.defineProperties(point, point_properties);
     //properties that require privacy
@@ -32,9 +32,10 @@
         configurable: false,
         get: function () { return x; },
         set: function (n) {
-          if (check_number_type(n, this+'.x')) {
-            x = n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.x');
+          /*END_DEBUG*/
+          x = n;
         }
       },
 
@@ -46,9 +47,10 @@
         configurable: false,
         get: function () { return y; },
         set: function (n) {
-          if (check_number_type(n, this+'.y')) {
-            y = n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.y');
+          /*END_DEBUG*/
+          y = n;
         }
       }
     });
@@ -95,9 +97,9 @@
 
   doodle.utils.types.check_point_type = function (pt, caller, param) {
     if (!isPoint(pt)) {
-			caller = (caller === undefined) ? "check_point_type" : caller;
-			param = (param === undefined) ? "" : '('+param+')';
-			throw new TypeError(caller + param +": Parameter must be a point.");
+      caller = (caller === undefined) ? "check_point_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a point.");
     } else {
       return true;
     }
@@ -135,11 +137,13 @@
         writable: false,
         configurable: false,
         value: function (x, y) {
-          if (check_number_type(arguments, this+'.compose')) {
-            this.x = x;
-            this.y = y;
-            return this;
-          }
+          /*DEBUG*/
+          check_number_type(x, this+'.compose', '*x*, y');
+          check_number_type(y, this+'.compose', 'x, *y*');
+          /*END_DEBUG*/
+          this.x = x;
+          this.y = y;
+          return this;
         }
       },
 
@@ -190,12 +194,13 @@
         writable: false,
         configurable: false,
         value: function (pt1, pt2) {
-          if (check_point_type(pt1, this+'.distance') &&
-              check_point_type(pt2, this+'.distance')) {
-            var dx = pt2.x - pt1.x,
-                dy = pt2.y - pt1.x;
-            return Math.sqrt(dx*dx+dy*dy);
-          }
+          /*DEBUG*/
+          check_point_type(pt1, this+'.distance', '*pt1*, pt2');
+          check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
+          /*END_DEBUG*/
+          var dx = pt2.x - pt1.x,
+              dy = pt2.y - pt1.x;
+          return Math.sqrt(dx*dx+dy*dy);
         }
       },
 
@@ -209,17 +214,18 @@
         writable: false,
         configurable: false,
         value: function (thickness) {
-          if (check_number_type(thickness, this+'.normalize')) {
-            var len = this.length;
-            this.x = (this.x / len) * thickness;
-            this.y = (this.y / len) * thickness;
-            return this;
-            /*correct version?
-              var angle:Number = Math.atan2(this.y, this.x);
-              this.x = Math.cos(angle) * thickness;
-              this.y = Math.sin(angle) * thickness;
-            */
-          }
+          /*DEBUG*/
+          check_number_type(thickness, this+'.normalize', '*thickness*');
+          /*END_DEBUG*/
+          var len = this.length;
+          this.x = (this.x / len) * thickness;
+          this.y = (this.y / len) * thickness;
+          return this;
+          /*correct version?
+            var angle:Number = Math.atan2(this.y, this.x);
+            this.x = Math.cos(angle) * thickness;
+            this.y = Math.sin(angle) * thickness;
+          */
         }
       },
 
@@ -232,12 +238,13 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          if (check_point_type(pt, this+'.equals')) {
-            return ((this && point &&
-                     this.x === pt.x &&
-                     this.y === pt.y) ||
-                    (!this && !pt));
-          }
+          /*DEBUG*/
+          check_point_type(pt, this+'.equals', '*point*');
+          /*END_DEBUG*/
+          return ((this && point &&
+                   this.x === pt.x &&
+                   this.y === pt.y) ||
+                  (!this && !pt));
         }
       },
 
@@ -253,23 +260,24 @@
         writable: false,
         configurable: false,
         value: function (pt1, pt2, t) {
-          if (check_point_type(pt1, this+'.interpolate') &&
-              check_point_type(pt2, this+'.interpolate') &&
-              check_number_type(t, this+'.interpolate')) {
-            var x = pt1.x + (pt2.x - pt1.x) * t,
-                y = pt1.y + (pt2.y - pt1.y) * t;
-            return Point(x, y);
+          /*DEBUG*/
+          check_point_type(pt1, this+'.interpolate', '*pt1*, pt2, t');
+          check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
+          check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
+          /*END_DEBUG*/
+          var x = pt1.x + (pt2.x - pt1.x) * t,
+              y = pt1.y + (pt2.y - pt1.y) * t;
+          return Point(x, y);
 
-            /* correct version?
-               var nx = pt2.x - pt1.x;
-               var ny = pt2.y - pt1.y;
-               var angle = Math.atan2(ny , nx);
-               var dis = Math.sqrt(x * nx + ny * ny) * t;
-               var sx = pt2.x - Math.cos(angle) * dis;
-               var sy = pt2.y - Math.sin(angle) * dis;
-               return Object.create(point).compose(sx, sy);
-            */
-          }
+          /* correct version?
+             var nx = pt2.x - pt1.x;
+             var ny = pt2.y - pt1.y;
+             var angle = Math.atan2(ny , nx);
+             var dis = Math.sqrt(x * nx + ny * ny) * t;
+             var sx = pt2.x - Math.cos(angle) * dis;
+             var sy = pt2.y - Math.sin(angle) * dis;
+             return Object.create(point).compose(sx, sy);
+          */
         }
       },
 
@@ -284,11 +292,13 @@
         writable: false,
         configurable: false,
         value: function (len, angle) {
-          if (check_number_type(arguments, this+'.polar')) {
-            var x = len * Math.cos(angle),
-                y = len * Math.sin(angle);
-            return Point(x, y);
-          }
+          /*DEBUG*/
+          check_number_type(len, this+'.polar', '*len*, angle');
+          check_number_type(angle, this+'.polar', 'len, *angle*');
+          /*END_DEBUG*/
+          var x = len * Math.cos(angle),
+              y = len * Math.sin(angle);
+          return Point(x, y);
         }
       },
 
@@ -302,11 +312,12 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          if (check_point_type(pt, this+'.add')) {
-            var x = this.x + pt.x,
-                y = this.y + pt.y;
-            return Point(x, y);
-          }
+          /*DEBUG*/
+          check_point_type(pt, this+'.add', '*point*');
+          /*END_DEBUG*/
+          var x = this.x + pt.x,
+              y = this.y + pt.y;
+          return Point(x, y);
         }
       },
 
@@ -320,11 +331,12 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          if (check_point_type(pt, this+'.subtract')) {
-            var x = this.x - pt.x,
-                y = this.y - pt.y;
-            return Point(x, y);
-          }
+          /*DEBUG*/
+          check_point_type(pt, this+'.subtract', '*point*');
+          /*END_DEBUG*/
+          var x = this.x - pt.x,
+              y = this.y - pt.y;
+          return Point(x, y);
         }
       },
 
@@ -333,10 +345,12 @@
         writable: false,
         configurable: false,
         value: function (dx, dy) {
-          if (check_number_type(arguments, this+'.offset')) {
-            this.x += dx;
-            this.y += dy;
-          }
+          /*DEBUG*/
+          check_number_type(dx, this+'.offset', '*dx*, dy');
+          check_number_type(dy, this+'.offset', 'dx, *dy*');
+          /*END_DEBUG*/
+          this.x += dx;
+          this.y += dy;
           return this;
         }
       }

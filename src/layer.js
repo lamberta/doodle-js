@@ -21,7 +21,7 @@
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
-			id = undefined;
+      id = undefined;
     } else if (arg_len > 2) {
       throw new SyntaxError("[object Layer]: Invalid number of parameters.");
     }
@@ -34,15 +34,17 @@
           return element;
         },
         set: function (canvas) {
+          /*DEBUG*/
           check_canvas_type(canvas, this+'.element');
+          /*END_DEBUG*/
           element = canvas;
         }
       }
     });
 
-		//init
+    //init
     layer.element = element || document.createElement('canvas');
-		//need to stack canvas elements inside div
+    //need to stack canvas elements inside div
     layer.element.style.position = "absolute";
 
     //passed an initialization object: function
@@ -50,10 +52,10 @@
       initializer.call(layer);
     }
 
-		if (!layer.id) {
-			layer.id = (typeof id === 'string') ? id : "layer" + String('00'+layer_count).slice(-2);
-			layer_count += 1;
-		}
+    if (!layer.id) {
+      layer.id = (typeof id === 'string') ? id : "layer" + String('00'+layer_count).slice(-2);
+      layer_count += 1;
+    }
 
     return layer;
   };

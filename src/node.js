@@ -39,10 +39,11 @@
         enumerable: true,
         configurable: false,
         get: function () { return id; },
-        set: function (s) {
-          if (check_string_type(s, this+'.id')) {
-            id = s;
-          }
+        set: function (idArg) {
+          /*DEBUG*/
+          check_string_type(idArg, this+'.id');
+          /*END_DEBUG*/
+          id = idArg;
         }
       },
       
@@ -51,11 +52,14 @@
         configurable: false,
         get: function () { return root; },
         set: function (node) {
+          /*DEBUG*/
           if (node === null || inheritsNode(node)) {
-            root = node;
+            true;
           } else {
             throw new TypeError(this+".root: Parameter must be a node.");
           }
+          /*END_DEBUG*/
+          root = node;
         }
       },
       
@@ -64,11 +68,14 @@
         configurable: false,
         get: function () { return parent; },
         set: function (node) {
+          /*DEBUG*/
           if (node === null || inheritsNode(node)) {
-            parent = node;
+            true;
           } else {
             throw new TypeError(this+".parent: Parameter must be a node.");
           }
+          /*END_DEBUG*/
+          parent = node;
         }
       },
       
@@ -87,9 +94,10 @@
           return transform;
         },
         set: function (matrix) {
-          if (check_matrix_type(matrix, this+'.transform')) {
-            transform = matrix;
-          }
+          /*DEBUG*/
+          check_matrix_type(matrix, this+'.transform');
+          /*END_DEBUG*/
+          transform = matrix;
         }
       },
 
@@ -100,7 +108,9 @@
           configurable: false,
           get: function () { return visible; },
           set: function (isVisible) {
+            /*DEBUG*/
             check_boolean_type(isVisible, node+'.visible');
+            /*END_DEBUG*/
             visible = isVisible;
           }
         };
@@ -113,7 +123,9 @@
           configurable: false,
           get: function () { return alpha; },
           set: function (alphaValue) {
+            /*DEBUG*/
             check_number_type(alphaValue, node+'.alpha');
+            /*END_DEBUG*/
             //alpha is between 0 and 1
             alpha = (alphaValue > 1) ? 1 : ((alphaValue < 0) ? 0 : alphaValue);
           }
@@ -126,7 +138,7 @@
       node.id = "node" + String('000'+node_count).slice(-3);
       initializer.call(node);
     } else {
-      node.id = id || "node" + String('000'+node_count).slice(-3);
+      node.id = (id !== undefined) ? id : "node"+ String('000'+node_count).slice(-3);
     }
     node_count += 1;
 
@@ -226,7 +238,9 @@
           return this.transform.tx;
         },
         set: function (d) {
+          /*DEBUG*/
           check_number_type(d, this+'.x');
+          /*END_DEBUG*/
           this.transform.tx = d;
         }
       },
@@ -238,7 +252,9 @@
           return this.transform.ty;
         },
         set: function (d) {
+          /*DEBUG*/
           check_number_type(d, this+'.y');
+          /*END_DEBUG*/
           this.transform.ty = d;
         }
       },
@@ -251,7 +267,9 @@
 
       'rotate': { //around external point?
         value: function (deg) {
-          check_number_type(deg, this+'.rotate');
+          /*DEBUG*/
+          check_number_type(deg, this+'.rotate', '*degrees*');
+          /*END_DEBUG*/
 
           if (this.axis.x !== undefined && this.axis.y !== undefined) {
             this.transform.rotateAroundInternalPoint(this.axis, deg*to_radians);
@@ -274,11 +292,13 @@
         enumerable: true,
         configurable: false,
         get: function () {
-          return this.transform.rotation * to_degrees; //return degress
+          return this.transform.rotation * to_degrees;
         },
         set: function (deg) {
-          check_number_type(deg, this+'.rotation');
-          this.transform.rotation = deg*to_radians; //deg-to-rad
+          /*DEBUG*/
+          check_number_type(deg, this+'.rotation', '*degrees*');
+          /*END_DEBUG*/
+          this.transform.rotation = deg*to_radians;
         }
       },
 
@@ -289,7 +309,9 @@
           return this.transform.a;
         },
         set: function (sx) {
+          /*DEBUG*/
           check_number_type(sx, this+'.scaleX');
+          /*END_DEBUG*/
           this.transform.a = sx;
         }
       },
@@ -301,7 +323,9 @@
           return this.transform.d;
         },
         set: function (sy) {
+          /*DEBUG*/
           check_number_type(sy, this+'.scaleY');
+          /*END_DEBUG*/
           this.transform.d = sy;
         }
       },
@@ -331,9 +355,11 @@
           if (this.children.indexOf(node) !== -1) {
             return false;
           }
-          //type check
-          check_node_type(node, this+'.addChildAt');
-          check_number_type(index, this+'.addChildAt');
+
+          /*DEBUG*/
+          check_node_type(node, this+'.addChildAt', '*node*, index');
+          check_number_type(index, this+'.addChildAt', 'node, *index*');
+          /*END_DEBUG*/
           
           //make sure parent/child share same root
           if (node.root !== this.root) {
@@ -361,6 +387,9 @@
         writable: false,
         configurable: false,
         value: function (node) {
+          /*DEBUG*/
+          check_node_type(node, this+'.addChild', '*node*');
+          /*END_DEBUG*/
           return this.addChildAt(node, this.children.length);
         }
       },
@@ -370,7 +399,9 @@
         writable: false,
         configurable: false,
         value: function (index) {
-          check_number_type(index, this+'.removeChildAt');
+          /*DEBUG*/
+          check_number_type(index, this+'.removeChildAt', '*index*');
+          /*END_DEBUG*/
           var node = this.children[index],
               ctx = node.context,
               node_bounds;
@@ -405,6 +436,9 @@
         writable: false,
         configurable: false,
         value: function (node) {
+          /*DEBUG*/
+          check_node_type(node, this+'.removeChild', '*node*');
+          /*END_DEBUG*/
           this.removeChildAt(this.children.indexOf(node));
         }
       },
@@ -414,6 +448,9 @@
         writable: false,
         configurable: false,
         value: function (id) {
+          /*DEBUG*/
+          check_string_type(id, this+'.removeChildById', '*id*');
+          /*END_DEBUG*/
           this.removeChild(this.getChildById(id));
         }
       },
@@ -436,6 +473,9 @@
         writable: false,
         configurable: false,
         value: function (id) {
+          /*DEBUG*/
+          check_string_type(id, this+'.getChildById', '*id*');
+          /*END_DEBUG*/
           return this.children.filter(function (child) {
             return child.id === id;
           })[0];
@@ -447,8 +487,10 @@
         writable: false,
         configurable: false,
         value: function (child, index) {
+          /*DEBUG*/
           check_node_type(child, this+'.setChildIndex', '*child*, index');
           check_number_type(index, this+'.setChildIndex', 'child, *index*')
+          /*END_DEBUG*/
           var children = this.children,
               len = children.length,
               pos = children.indexOf(child);
@@ -468,10 +510,12 @@
         writable: false,
         configurable: false,
         value: function (index1, index2) {
-          if (check_number_type(arguments, this+'.swapChildrenAt')) {
-            var a = this.children;
-            a[index1] = a.splice(index2, 1, a[index1])[0];
-          }
+          /*DEBUG*/
+          check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
+          check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
+          /*END_DEBUG*/
+          var a = this.children;
+          a[index1] = a.splice(index2, 1, a[index1])[0];
         }
       },
       
@@ -480,6 +524,10 @@
         writable: false,
         configurable: false,
         value: function (node1, node2) {
+          /*DEBUG*/
+          check_node_type(node1, this+'.swapChildren', '*node1*, node2');
+          check_node_type(node2, this+'.swapChildren', 'node1, *node2*');
+          /*END_DEBUG*/
           this.swapChildrenAt(this.children.indexOf(node1), this.children.indexOf(node2));
         }
       },
@@ -490,6 +538,9 @@
         writable: false,
         configurable: false,
         value: function I(node) {
+          /*DEBUG*/
+          check_node_type(node, this+'.swapDepths', '*node*');
+          /*END_DEBUG*/
           var parent = this.parent;
           if (!parent || !Array.isArray(parent.children)) {
             throw new Error(this+".swapDepths: no parent found.");
@@ -504,13 +555,14 @@
         writable: false,
         configurable: false,
         value: function (index) {
-          if (check_number_type(index, this+'.swapDepthAt')) {
-            var parent = this.parent;
-            if (!parent || !Array.isArray(parent.children)) {
-              throw new Error(this+".swapDepthAt: no parent found.");
-            } else {
-              parent.swapChildrenAt(index, parent.children.indexOf(this));
-            }
+          /*DEBUG*/
+          check_number_type(index, this+'.swapDepthAt', '*index*');
+          /*END_DEBUG*/
+          var parent = this.parent;
+          if (!parent || !Array.isArray(parent.children)) {
+            throw new Error(this+".swapDepthAt: no parent found.");
+          } else {
+            parent.swapChildrenAt(index, parent.children.indexOf(this));
           }
         }
       },
@@ -538,7 +590,9 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          check_point_type(pt, this+'.localToGlobal', 'point');
+          /*DEBUG*/
+          check_point_type(pt, this+'.localToGlobal', '*point*');
+          /*END_DEBUG*/
           var node = this;
           while (node) {
             pt = node.transform.transformPoint(pt);
@@ -553,7 +607,9 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          check_point_type(pt, this+'.globalToLocal', 'point');
+          /*DEBUG*/
+          check_point_type(pt, this+'.globalToLocal', '*point*');
+          /*END_DEBUG*/
           var global_pos = this.localToGlobal({x: 0, y: 0});
           return Point(pt.x - global_pos.x, pt.y - global_pos.y);
         }

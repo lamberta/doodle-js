@@ -67,9 +67,13 @@
       bubbles = bubbles === true; //false
       cancelable = cancelable === true;
       view = (view === undefined) ? null : view;
-      check_string_type(type, '[object KeyboardEvent].constructor', 'type');
-      check_boolean_type(bubbles, '[object KeyboardEvent].constructor', 'bubbles');
-      check_boolean_type(cancelable, '[object KeyboardEvent].constructor', 'cancelable');
+      
+      /*DEBUG*/
+      check_string_type(type, '[object KeyboardEvent].constructor', '*type*');
+      check_boolean_type(bubbles, '[object KeyboardEvent].constructor', '*bubbles*');
+      check_boolean_type(cancelable, '[object KeyboardEvent].constructor', '*cancelable*');
+      /*END_DEBUG*/
+      
       keyboardevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
     }
     
@@ -135,7 +139,8 @@
           keyLocation = (keyLocationArg === undefined) ? 0 : keyLocationArg;
           modifiersList = (modifiersListArg === undefined) ? "" : modifiersListArg;
           repeat = repeatArg === true;
-          //type-check
+
+          /*DEBUG*/
           check_string_type(type, this+'.initKeyboardEvent', 'type');
           check_boolean_type(bubbles, this+'.initKeyboardEvent', 'bubbles');
           check_boolean_type(cancelable, this+'.initKeyboardEvent', 'cancelable');
@@ -143,6 +148,7 @@
           check_number_type(keyLocation, this+'.initKeyboardEvent', 'keyLocation');
           check_string_type(modifiersList, this+'.initKeyboardEvent', 'modifiersList');
           check_boolean_type(repeat, this+'.initKeyboardEvent', 'repeat');
+          /*END_DEBUG*/
 
           //parse string of white-space separated list of modifier key identifiers
           modifiersList.split(" ").forEach(function (modifier) {

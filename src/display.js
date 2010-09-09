@@ -49,9 +49,12 @@
               type,
               w, h;
           
-          if (check_block_element(e, this+'.element')) {
-            element = e;
-          }
+          /*DEBUG*/
+          check_block_element(e, this+'.element');
+          /*END_DEBUG*/
+          
+          element = e;
+
           //we need to stack the canvas elements on top of each other
           element.style.position = "relative";
           //init rest - can you transfer layers to another div?
@@ -137,7 +140,9 @@
               return debug_stats ? true : false;
             },
             set: function (useStats) {
+              /*DEBUG*/
               check_boolean_type(useStats, display+'.debug.stats');
+              /*END_DEBUG*/
               if (useStats && !debug_stats) {
                 //fps counter from http://github.com/mrdoob/stats.js
                 debug_stats = new Stats();
@@ -155,7 +160,9 @@
               return debug_bounding_box;
             },
             set: function (showBoundingBox) {
+              /*DEBUG*/
               check_boolean_type(showBoundingBox, display+'.debug.boundingBox');
+              /*END_DEBUG*/
               debug_bounding_box = showBoundingBox;
             }
           }
@@ -411,7 +418,9 @@
           return parseInt(this.element.style.width);
         },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.width');
+          /*END_DEBUG*/
           this.element.style.width = n + "px"; //css style takes a string
           //re-adjust all layer child nodes as well
           this.children.forEach(function (layer) {
@@ -425,7 +434,9 @@
           return parseInt(this.element.style.height);
         },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.height');
+          /*END_DEBUG*/
           this.element.style.height = n + "px";
           this.children.forEach(function (layer) {
             layer.height = n;
@@ -488,8 +499,10 @@
 
       'addChildAt': {
         value: function (layer, index) {
-          check_layer_type(layer, this+'.addChildAt');
-          check_number_type(index, this+'.addChildAt');
+          /*DEBUG*/
+          check_layer_type(layer, this+'.addChildAt', '*layer*, index');
+          check_number_type(index, this+'.addChildAt', 'layer, *index*');
+          /*END_DEBUG*/
           
           //if has previous parent, remove from it's children
           if (layer.parent !== null && layer.parent !== this) {
@@ -514,7 +527,9 @@
         writable: false,
         configurable: false,
         value: function (index) {
-          check_number_type(index, this+'.removeChildAt');
+          /*DEBUG*/
+          check_number_type(index, this+'.removeChildAt', '*index*');
+          /*END_DEBUG*/
           var layer = this.children[index];
           layer.root = null;
           layer.parent = null;
@@ -530,7 +545,10 @@
         writable: false,
         configurable: false,
         value: function (index1, index2) {
-          check_number_type(arguments, this+'.swapChildrenAt');
+          /*DEBUG*/
+          check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
+          check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
+          /*END_DEBUG*/
           var a = this.children;
           a[index1] = a.splice(index2, 1, a[index1])[0];
           //swap dom elements
@@ -554,7 +572,9 @@
 
       'removeLayer': {
         value: function (id) {
-          check_string_type(id, this+'.removeLayer');
+          /*DEBUG*/
+          check_string_type(id, this+'.removeLayer', '*id*');
+          /*END_DEBUG*/
           this.removeChildById(id);
         }
       }
