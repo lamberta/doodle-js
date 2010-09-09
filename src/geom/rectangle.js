@@ -29,9 +29,10 @@
         configurable: false,
         get: function () { return x; },
         set: function (n) {
-          if (check_number_type(n, this+'.x')) {
-            x = n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.x');
+          /*END_DEBUG*/
+          x = n;
         }
       },
       
@@ -40,9 +41,10 @@
         configurable: false,
         get: function () { return y; },
         set: function (n) {
-          if (check_number_type(n, this+'.y')) {
-            y = n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.y');
+          /*END_DEBUG*/
+          y = n;
         }
       },
       
@@ -51,9 +53,10 @@
         configurable: false,
         get: function () { return width; },
         set: function (n) {
-          if (check_number_type(n, this+'.width')) {
-            width = n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.width');
+          /*END_DEBUG*/
+          width = n;
         }
       },
       
@@ -62,9 +65,10 @@
         configurable: false,
         get: function () { return height; },
         set: function (n) {
-          if (check_number_type(n, this+'.height')) {
-            height = n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.height');
+          /*END_DEBUG*/
+          height = n;
         }
       }
     });
@@ -135,10 +139,11 @@
           return this.y;
         },
         set: function (n) {
-          if (check_number_type(n, this+'.top')) {
-            this.y = n;
-            this.height -= n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.top');
+          /*END_DEBUG*/
+          this.y = n;
+          this.height -= n;
         }
       },
       
@@ -149,9 +154,10 @@
           return this.x + this.width;
         },
         set: function (n) {
-          if (check_number_type(n, this+'.right')) {
-            this.width = n - this.x;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.right');
+          /*END_DEBUG*/
+          this.width = n - this.x;
         }
       },
       
@@ -162,9 +168,10 @@
           return this.y + this.height;
         },
         set: function (n) {
-          if (check_number_type(n, this+'.bottom')) {
-            this.height = n - this.y;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.bottom');
+          /*END_DEBUG*/
+          this.height = n - this.y;
         }
       },
       
@@ -175,10 +182,11 @@
           return this.x;
         },
         set: function (n) {
-          if (check_number_type(n, this+'.left')) {
-            this.x = n;
-            this.width -= n;
-          }
+          /*DEBUG*/
+          check_number_type(n, this+'.left');
+          /*END_DEBUG*/
+          this.x = n;
+          this.width -= n;
         }
       },
       
@@ -225,13 +233,17 @@
         writable: false,
         configurable: false,
         value: function (x, y, width, height) {
-          if (check_number_type(arguments, this+'.compose')) {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-            return this;
-          }
+          /*DEBUG*/
+          check_number_type(x, this+'.compose', '*x*, y, width, height');
+          check_number_type(y, this+'.compose', 'x, *y*, width, height');
+          check_number_type(width, this+'.compose', 'x, y, *width*, height');
+          check_number_type(height, this+'.compose', 'x, y, width, *height*');
+          /*END_DEBUG*/
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+          return this;
         }
       },
 
@@ -245,11 +257,13 @@
         writable: false,
         configurable: false,
         value: function (dx, dy) {
-          if (check_number_type(arguments, this+'.offset')) {
-            this.x += dx;
-            this.y += dy;
-            return this;
-          }
+          /*DEBUG*/
+          check_number_type(dx, this+'.offset', '*dx*, dy');
+          check_number_type(dy, this+'.offset', 'dx, *dy*');
+          /*END_DEBUG*/
+          this.x += dx;
+          this.y += dy;
+          return this;
         }
       },
 
@@ -265,13 +279,15 @@
         writable: false,
         configurable: false,
         value: function (dx, dy) {
-          if (check_number_type(arguments, this+'.inflate')) {
-            this.x -= dx;
-            this.width += 2 * dx;
-            this.y -= dy;
-            this.height += 2 * dy;
-            return this;
-          }
+          /*DEBUG*/
+          check_number_type(dx, this+'.inflate', '*dx*, dy');
+          check_number_type(dy, this+'.inflate', 'dx, *dy*');
+          /*END_DEBUG*/
+          this.x -= dx;
+          this.width += 2 * dx;
+          this.y -= dy;
+          this.height += 2 * dy;
+          return this;
         }
       },
 
@@ -284,10 +300,11 @@
         writable: false,
         configurable: false,
         value: function (rect) {
-          if (check_rect_type(rect, this+'.equals')) {
-            return (this.x === rect.x && this.y === rect.y &&
-                    this.width === rect.width && this.height === rect.height);
-          }
+          /*DEBUG*/
+          check_rect_type(rect, this+'.equals', '*rect*');
+          /*END_DEBUG*/
+          return (this.x === rect.x && this.y === rect.y &&
+                  this.width === rect.width && this.height === rect.height);
         }
       },
 
@@ -311,12 +328,13 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          if (check_point_type(pt, this+'.containsPoint')) {
-            var x = pt.x,
-            y = pt.y;
-            return (x >= this.left && x <= this.right &&
-                    y >= this.top && y <= this.bottom);
-          }
+          /*DEBUG*/
+          check_point_type(pt, this+'.containsPoint', '*point*');
+          /*END_DEBUG*/
+          var x = pt.x,
+              y = pt.y;
+          return (x >= this.left && x <= this.right &&
+                  y >= this.top && y <= this.bottom);
         }
       },
 
@@ -329,13 +347,14 @@
         writable: false,
         configurable: false,
         value: function (rect) {
-          if (check_rect_type(rect, this+'.containsRect')) {
-            //check each corner
-            return (this.containsPoint({x: rect.x, y: rect.y}) &&           //top-left
-                    this.containsPoint({x: rect.right, y: rect.y}) &&       //top-right
-                    this.containsPoint({x: rect.right, y: rect.bottom}) &&  //bot-right
-                    this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
-          }
+          /*DEBUG*/
+          check_rect_type(rect, this+'.containsRect', '*rect*');
+          /*END_DEBUG*/
+          //check each corner
+          return (this.containsPoint({x: rect.x, y: rect.y}) &&           //top-left
+                  this.containsPoint({x: rect.right, y: rect.y}) &&       //top-right
+                  this.containsPoint({x: rect.right, y: rect.bottom}) &&  //bot-right
+                  this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
         }
       },
 
@@ -348,13 +367,14 @@
         writable: false,
         configurable: false,
         value: function (rect) {
-          if (check_rect_type(rect, this+'.intersects')) {
-            //check each corner
-            return (this.containsPoint({x: rect.x, y: rect.y}) ||           //top-left
-                    this.containsPoint({x: rect.right, y: rect.y}) ||       //top-right
-                    this.containsPoint({x: rect.right, y: rect.bottom}) ||  //bot-right
-                    this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
-          }
+          /*DEBUG*/
+          check_rect_type(rect, this+'.intersects', '*rect*');
+          /*END_DEBUG*/
+          //check each corner
+          return (this.containsPoint({x: rect.x, y: rect.y}) ||           //top-left
+                  this.containsPoint({x: rect.right, y: rect.y}) ||       //top-right
+                  this.containsPoint({x: rect.right, y: rect.bottom}) ||  //bot-right
+                  this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
         }
       },
 
@@ -370,16 +390,17 @@
         writable: false,
         configurable: false,
         value: function (rect) {
-          if (check_rect_type(rect, this+'.intersection')) {
-            var r = Rectangle();
-            if (this.intersects(rect)) {
-              r.left = Math.max(this.left, rect.left);
-              r.top = Math.max(this.top, rect.top);
-              r.right = Math.min(this.right, rect.right);
-              r.bottom = Math.min(this.bottom, rect.bottom);
-            }
-            return r;
+          /*DEBUG*/
+          check_rect_type(rect, this+'.intersection', '*rect*');
+          /*END_DEBUG*/
+          var r = Rectangle();
+          if (this.intersects(rect)) {
+            r.left = Math.max(this.left, rect.left);
+            r.top = Math.max(this.top, rect.top);
+            r.right = Math.min(this.right, rect.right);
+            r.bottom = Math.min(this.bottom, rect.bottom);
           }
+          return r;
         }
       },
 
@@ -393,14 +414,15 @@
         writable: false,
         configurable: false,
         value: function (rect) {
-          if (check_rect_type(rect, this+'.union')) {
-            var r = Rectangle();
-            r.left = Math.min(this.left, rect.left);
-            r.top = Math.min(this.top, rect.top);
-            r.right = Math.max(this.right, rect.right);
-            r.bottom = Math.max(this.bottom, rect.bottom);
-            return r;
-          }
+          /*DEBUG*/
+          check_rect_type(rect, this+'.union', '*rect*');
+          /*END_DEBUG*/
+          var r = Rectangle();
+          r.left = Math.min(this.left, rect.left);
+          r.top = Math.min(this.top, rect.top);
+          r.right = Math.max(this.right, rect.right);
+          r.bottom = Math.max(this.bottom, rect.bottom);
+          return r;
         }
       }
       
