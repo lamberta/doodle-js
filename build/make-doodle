@@ -1,40 +1,98 @@
 #!/bin/bash
 
+function print_help_and_exit {
+    echo "Usage: $(basename $0) [options]"
+    echo "  -h    Show this usage guide."
+    echo "  -d    Also build debug version."
+    echo "  -D    Only build debug version."
+    echo "  -C    Clean."
+    exit 0
+}
+
+#using a relative path.
 #this script is in the ./build dir
 cd "$(dirname $(readlink -f $0))"
 cd ..
 PROJECT_HOME="$PWD"
-OUT_FILE="$PROJECT_HOME/build/doodle.js"
+DEBUG_OUT_FILE="$PROJECT_HOME/build/doodle-debug.js"
+MIN_OUT_FILE="$PROJECT_HOME/build/doodle.js"
 
-cat ./src/compat/es5.js > "$OUT_FILE"
+function build_full {
+    cat ./src/compat/es5.js > "$DEBUG_OUT_FILE"
 
-cat ./build/prologue.js >> "$OUT_FILE"
-cat ./src/utils.js >> "$OUT_FILE"
+    cat ./build/prologue.js >> "$DEBUG_OUT_FILE"
+    cat ./src/utils.js >> "$DEBUG_OUT_FILE"
 
-cat ./lib/Stats.js >> "$OUT_FILE"
+    cat ./lib/Stats.js >> "$DEBUG_OUT_FILE"
 
-#constants
-cat ./src/constants/keyboard.js >> "$OUT_FILE"
-cat ./src/constants/gradienttype.js >> "$OUT_FILE"
-cat ./src/constants/pattern.js >> "$OUT_FILE"
-cat ./src/constants/linecap.js >> "$OUT_FILE"
-cat ./src/constants/linejoin.js >> "$OUT_FILE"
+    #constants
+    cat ./src/constants/keyboard.js >> "$DEBUG_OUT_FILE"
+    cat ./src/constants/gradienttype.js >> "$DEBUG_OUT_FILE"
+    cat ./src/constants/pattern.js >> "$DEBUG_OUT_FILE"
+    cat ./src/constants/linecap.js >> "$DEBUG_OUT_FILE"
+    cat ./src/constants/linejoin.js >> "$DEBUG_OUT_FILE"
 
-cat ./src/events/event.js >> "$OUT_FILE"
-cat ./src/events/uievent.js >> "$OUT_FILE"
-cat ./src/events/mouseevent.js >> "$OUT_FILE"
-cat ./src/events/textevent.js >> "$OUT_FILE"
-cat ./src/events/keyboardevent.js >> "$OUT_FILE"
-cat ./src/events/constants.js >> "$OUT_FILE"
+    cat ./src/events/event.js >> "$DEBUG_OUT_FILE"
+    cat ./src/events/uievent.js >> "$DEBUG_OUT_FILE"
+    cat ./src/events/mouseevent.js >> "$DEBUG_OUT_FILE"
+    cat ./src/events/textevent.js >> "$DEBUG_OUT_FILE"
+    cat ./src/events/keyboardevent.js >> "$DEBUG_OUT_FILE"
+    cat ./src/events/constants.js >> "$DEBUG_OUT_FILE"
 
-cat ./src/geom/point.js >> "$OUT_FILE"
-cat ./src/geom/matrix.js >> "$OUT_FILE"
-cat ./src/geom/rectangle.js >> "$OUT_FILE"
+    cat ./src/geom/point.js >> "$DEBUG_OUT_FILE"
+    cat ./src/geom/matrix.js >> "$DEBUG_OUT_FILE"
+    cat ./src/geom/rectangle.js >> "$DEBUG_OUT_FILE"
 
-cat ./src/eventdispatcher.js >> "$OUT_FILE"
-cat ./src/node.js >> "$OUT_FILE"
-cat ./src/sprite.js >> "$OUT_FILE"
+    cat ./src/eventdispatcher.js >> "$DEBUG_OUT_FILE"
+    cat ./src/node.js >> "$DEBUG_OUT_FILE"
+    cat ./src/sprite.js >> "$DEBUG_OUT_FILE"
 
-cat ./src/elementnode.js >> "$OUT_FILE"
-cat ./src/layer.js >> "$OUT_FILE"
-cat ./src/display.js >> "$OUT_FILE"
+    cat ./src/elementnode.js >> "$DEBUG_OUT_FILE"
+    cat ./src/layer.js >> "$DEBUG_OUT_FILE"
+    cat ./src/display.js >> "$DEBUG_OUT_FILE"
+}
+
+function strip_debugging {
+    sed '/\/\*DEBUG\*\//,/\/\*END_DEBUG\*\//d' "$DEBUG_OUT_FILE" > "$MIN_OUT_FILE"
+}
+
+function clean_up {
+    echo "Clean:"
+    if [ -f "$MIN_OUT_FILE" ]; then
+        rm "$MIN_OUT_FILE"
+        echo -e "\tRemoved $MIN_OUT_FILE"
+    fi
+    if [ -f "$DEBUG_OUT_FILE" ]; then
+        rm "$DEBUG_OUT_FILE"
+        echo -e "\tRemoved $DEBUG_OUT_FILE"
+    fi
+}
+
+
+#parse args
+while getopts "hdDC" option; do
+    case $option in
+        d) BUILD_DEBUG=1;;
+        D) BUILD_DEBUG=1; BUILD_DEBUG_ONLY=1;;
+        C) clean_up; exit 0;;
+        h) print_help_and_exit;;
+        \?) print_help_and_exit;;
+    esac
+done
+
+echo "Build:"
+#creates debug version
+build_full
+
+#create min version
+if [ -z "$BUILD_DEBUG_ONLY" ]; then
+    strip_debugging
+    echo -e "\tCreated $MIN_OUT_FILE"
+fi
+
+#cleanup
+if [ -z "$BUILD_DEBUG" ]; then
+    rm "$DEBUG_OUT_FILE"
+else
+    echo -e "\tCreated $DEBUG_OUT_FILE"
+fi
