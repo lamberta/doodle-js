@@ -83,10 +83,14 @@
       cancelable = cancelable === true;
       view = (view === undefined) ? null : view;
       detail = (detail === undefined) ? 0 : detail;
-      check_string_type(type, '[object MouseEvent].constructor', 'type');
-      check_boolean_type(bubbles, '[object MouseEvent].constructor', 'bubbles');
-      check_boolean_type(cancelable, '[object MouseEvent].constructor', 'cancelable');
-      check_number_type(detail, '[object MouseEvent].constructor', 'detail');
+
+      /*DEBUG*/
+      check_string_type(type, '[object MouseEvent].constructor', '*type*');
+      check_boolean_type(bubbles, '[object MouseEvent].constructor', '*bubbles*');
+      check_boolean_type(cancelable, '[object MouseEvent].constructor', '*cancelable*');
+      check_number_type(detail, '[object MouseEvent].constructor', '*detail*');
+      /*END_DEBUG*/
+      
       mouseevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
@@ -206,20 +210,21 @@
           button = (buttonArg === undefined) ? 0 : buttonArg;
           relatedTarget = (relatedTargetArg === undefined) ? null : relatedTargetArg;
           
-          //type-check
-          check_string_type(type, this+'.initMouseEvent', 'type');
-          check_boolean_type(bubbles, this+'.initMouseEvent', 'bubbles');
-          check_boolean_type(cancelable, this+'.initMouseEvent', 'cancelable');
-          check_number_type(detail, this+'.initMouseEvent', 'detail');
-          check_number_type(screenX, this+'.initMouseEvent', 'screenX');
-          check_number_type(screenY, this+'.initMouseEvent', 'screenY');
-          check_number_type(clientX, this+'.initMouseEvent', 'clientX');
-          check_number_type(clientY, this+'.initMouseEvent', 'clientY');
-          check_boolean_type(ctrlKey, this+'.initMouseEvent', 'ctrlKey');
-          check_boolean_type(altKey, this+'.initMouseEvent', 'altKey');
-          check_boolean_type(shiftKey, this+'.initMouseEvent', 'shiftKey');
-          check_boolean_type(metaKey, this+'.initMouseEvent', 'metaKey');
-          check_number_type(button, this+'.initMouseEvent', 'button');
+          /*DEBUG*/
+          check_string_type(type, this+'.initMouseEvent', '*type*');
+          check_boolean_type(bubbles, this+'.initMouseEvent', '*bubbles*');
+          check_boolean_type(cancelable, this+'.initMouseEvent', '*cancelable*');
+          check_number_type(detail, this+'.initMouseEvent', '*detail*');
+          check_number_type(screenX, this+'.initMouseEvent', '*screenX*');
+          check_number_type(screenY, this+'.initMouseEvent', '*screenY*');
+          check_number_type(clientX, this+'.initMouseEvent', '*clientX*');
+          check_number_type(clientY, this+'.initMouseEvent', '*clientY*');
+          check_boolean_type(ctrlKey, this+'.initMouseEvent', '*ctrlKey*');
+          check_boolean_type(altKey, this+'.initMouseEvent', '*altKey*');
+          check_boolean_type(shiftKey, this+'.initMouseEvent', '*shiftKey*');
+          check_boolean_type(metaKey, this+'.initMouseEvent', '*metaKey*');
+          check_number_type(button, this+'.initMouseEvent', '*button*');
+          /*END_DEBUG*/
           
           this.initUIEvent(type, bubbles, cancelable, view, detail);
           return this;
