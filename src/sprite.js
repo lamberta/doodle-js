@@ -84,7 +84,9 @@
             return width;
           },
           set: function (n) {
+            /*DEBUG*/
             check_number_type(n, this+'.width');
+            /*END_DEBUG*/
             width = n;
           }
         };
@@ -102,7 +104,9 @@
             return height;
           },
           set: function (n) {
+            /*DEBUG*/
             check_number_type(n, this+'.height');
+            /*END_DEBUG*/
             height = n;
           }
         };
@@ -117,9 +121,11 @@
         writable: true,
         configurable: false,
         value: function (targetCoordSpace) {
+          /*DEBUG*/
           if (!inheritsNode(targetCoordSpace)) {
             throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
           }
+          /*END_DEBUG*/
           var bounding_box = Rectangle(),
               w = this.width,
               h = this.height,
@@ -158,11 +164,14 @@
             }
           },
           set: function (rect) {
+            //accepts null/false or rectangle area for now
             rect = (rect === false) ? null : rect;
-            //accepts null or rectangle area for now
-            if (rect === null || check_rect_type(rect, this+'.hitArea')) {
-              hit_area = rect;
+            /*DEBUG*/
+            if (rect !== null) {
+              check_rect_type(rect, this+'.hitArea');
             }
+            /*END_DEBUG*/
+            hit_area = rect;
           }
         };
       }()),
@@ -172,7 +181,9 @@
         writable: true,
         configurable: false,
         value: function (obj) {
+          /*DEBUG*/
           check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
+          /*END_DEBUG*/
           return this.getBounds(this).intersects(obj.getBounds(this));
         }
       },
@@ -182,7 +193,9 @@
         writable: true,
         configurable: false,
         value: function (pt) {
+          /*DEBUG*/
           check_point_type(pt, this+'.hitTestPoint', '*point*');
+          /*END_DEBUG*/
           return this.getBounds(this).containsPoint(this.globalToLocal(pt));
         }
       },
@@ -220,9 +233,13 @@
         writable: false,
         configurable: false,
         value: function (ctx) {
-          check_context_type(ctx, this+'.__draw', 'context');
+          /*DEBUG*/
+          check_context_type(ctx, this+'.__draw', '*context*');
+          /*END_DEBUG*/
           draw_commands.forEach(function (cmd) {
-            check_function_type(cmd, sprite+'.__draw: [draw_commands]::', 'command');
+            /*DEBUG*/
+            check_function_type(cmd, sprite+'.__draw: [draw_commands]::', '*command*');
+            /*END_DEBUG*/
             cmd.call(sprite, ctx);
           });
         }
@@ -276,7 +293,9 @@
             writable: false,
             configurable: false,
             value: (function (fn) {
-              check_function_type(fn, this+'.graphics.draw', 'function');
+              /*DEBUG*/
+              check_function_type(fn, this+'.graphics.draw', '*function*');
+              /*END_DEBUG*/
               draw_commands.push(fn);
             }).bind(sprite)
           },
@@ -314,7 +333,12 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height) {
-              check_number_type(arguments, this+'.graphics.rect', 'x,y,width,height');
+              /*DEBUG*/
+              check_number_type(x, this+'.graphics.rect', '*x*, y, width, height');
+              check_number_type(y, this+'.graphics.rect', 'x, *y*, width, height');
+              check_number_type(width, this+'.graphics.rect', 'x, y, *width*, height');
+              check_number_type(height, this+'.graphics.rect', 'x, y, width, *height*');
+              /*END_DEBUG*/
 
               //update extremas
               bounds_min_x = Math.min(0, x, bounds_min_x);
@@ -346,7 +370,11 @@
             writable: false,
             configurable: false,
             value: (function (x, y, radius) {
-              check_number_type(arguments, this+'.graphics.circle', 'x,y,radius');
+              /*DEBUG*/
+              check_number_type(x, this+'.graphics.circle', '*x*, y, radius');
+              check_number_type(y, this+'.graphics.circle', 'x, *y*, radius');
+              check_number_type(radius, this+'.graphics.circle', 'x, y, *radius*');
+              /*END_DEBUG*/
 
               //update extremas
               bounds_min_x = Math.min(0, -radius+x, bounds_min_x);
@@ -380,8 +408,13 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height) {
-              height = height || width; //default to circle
-              check_number_type(arguments, this+'.graphics.ellipse', 'x,y,width,height');
+              height = (height === undefined) ? width : height; //default to circle
+              /*DEBUG*/
+              check_number_type(x, this+'.graphics.ellipse', '*x*, y, width, height');
+              check_number_type(y, this+'.graphics.ellipse', 'x, *y*, width, height');
+              check_number_type(width, this+'.graphics.ellipse', 'x, y, *width*, height');
+              check_number_type(height, this+'.graphics.ellipse', 'x, y, width, *height*');
+              /*END_DEBUG*/
               var rx = width / 2,
                   ry = height / 2,
                   krx = 0.5522847498 * rx, //kappa * radius_x
@@ -425,9 +458,16 @@
             writable: false,
             configurable: false,
             value: (function (x, y, width, height, rx, ry) {
-              rx = rx || 0; //default to rectangle
-              ry = ry || 0;
-              check_number_type(arguments, this+'.graphics.roundRect', 'x,y,width,height,rx,ry');
+              rx = (rx === undefined) ? 0 : rx; //default to rectangle
+              ry = (ry === undefined) ? 0 : ry;
+              /*DEBUG*/
+              check_number_type(x, this+'.graphics.roundRect', '*x*, y, width, height, rx, ry');
+              check_number_type(y, this+'.graphics.roundRect', 'x, *y*, width, height, rx, ry');
+              check_number_type(width, this+'.graphics.roundRect', 'x, y, *width*, height, rx, ry');
+              check_number_type(height, this+'.graphics.roundRect', 'x, y, width, *height*, rx, ry');
+              check_number_type(rx, this+'.graphics.roundRect', 'x, y, width, height, *rx*, ry');
+              check_number_type(ry, this+'.graphics.roundRect', 'x, y, width, height, rx, *ry*');
+              /*END_DEBUG*/
               var x3 = x + width,
                   x2 = x3 - rx,
                   x1 = x + rx,
@@ -474,7 +514,10 @@
             writable: false,
             configurable: false,
             value: (function (x, y) {
-              check_number_type(arguments, this+'.graphics.moveTo', 'x,y');
+              /*DEBUG*/
+              check_number_type(x, this+'.graphics.moveTo', '*x*, y');
+              check_number_type(y, this+'.graphics.moveTo', 'x, *y*');
+              /*END_DEBUG*/
               draw_commands.push(function (ctx) {
                 ctx.moveTo(x, y);
               });
@@ -494,7 +537,10 @@
             writable: false,
             configurable: false,
             value: (function (x, y) {
-              check_number_type(arguments, this+'.graphics.lineTo', 'x,y');
+              /*DEBUG*/
+              check_number_type(x, this+'.graphics.lineTo', '*x*, y');
+              check_number_type(y, this+'.graphics.lineTo', 'x, *y*');
+              /*END_DEBUG*/
 
               //update extremas
               bounds_min_x = Math.min(0, x, graphics_cursor_x, bounds_min_x);
@@ -526,9 +572,10 @@
             writable: false,
             configurable: false,
             value: (function (pt1, pt2) {
-              check_point_type(pt1, this+'.graphics.curveTo', '*ctl_point*,point');
-              check_point_type(pt2, this+'.graphics.curveTo', 'ctl_point,*point*');
-
+              /*DEBUG*/
+              check_point_type(pt1, this+'.graphics.curveTo', '*ctl_point*, point');
+              check_point_type(pt2, this+'.graphics.curveTo', 'ctl_point, *point*');
+              /*END_DEBUG*/
               var x0 = graphics_cursor_x,
                   y0 = graphics_cursor_y,
                   x1 = pt1.x,
@@ -582,10 +629,11 @@
             writable: false,
             configurable: false,
             value: (function (pt1, pt2, pt3) {
-              check_point_type(pt1, this+'.graphics.bezierCurveTo', '*ctl_point1*,ctl_point2,point');
-              check_point_type(pt2, this+'.graphics.bezierCurveTo', 'ctl_point1,*ctl_point2*,point');
-              check_point_type(pt3, this+'.graphics.bezierCurveTo', 'ctl_point1,ctl_point2,*point*');
-
+              /*DEBUG*/
+              check_point_type(pt1, this+'.graphics.bezierCurveTo', '*ctl_point1*, ctl_point2, point');
+              check_point_type(pt2, this+'.graphics.bezierCurveTo', 'ctl_point1, *ctl_point2*, point');
+              check_point_type(pt3, this+'.graphics.bezierCurveTo', 'ctl_point1, ctl_point2, *point*');
+              /*END_DEBUG*/
               var pow = Math.pow,
                   max = Math.max,
                   min = Math.min,
@@ -654,9 +702,10 @@
             writable: false,
             configurable: false,
             value: (function (color, alpha) {
-              alpha = alpha ? alpha : 1.0;
+              alpha = (alpha === undefined) ? 1 : alpha;
+              /*DEBUG*/
               check_number_type(alpha, this+'.graphics.beginFill', 'color, *alpha*');
-              
+              /*END_DEBUG*/
               draw_commands.push(function (ctx) {
                 ctx.fillStyle = hex_to_rgb_str(color, alpha);
               });
@@ -668,17 +717,18 @@
             writable: false,
             configurable: false,
             value: (function () {
-              var check_point_type = doodle.utils.types.check_point_type,
-                  LINEAR = doodle.GradientType.LINEAR,
+              var LINEAR = doodle.GradientType.LINEAR,
                   RADIAL = doodle.GradientType.RADIAL;
               
               return (function (type, pt1, pt2, ratios, colors, alphas) {
-                check_point_type(pt1, this+'.graphics.beginGradientFill', 'type,*point1*,point2,ratios,colors,alphas');
-                check_point_type(pt2, this+'.graphics.beginGradientFill', 'type,point1,*point2*,ratios,colors,alphas');
-                check_array_type(ratios, this+'.graphics.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
-                check_number_type(ratios, this+'.graphics.beginGradientFill', 'type,point1,point2,*ratios*,colors,alphas');
-                check_array_type(colors, this+'.graphics.beginGradientFill', 'type,point1,point2,ratios,*colors*,alphas');
-                check_array_type(alphas, this+'.graphics.beginGradientFill', 'type,point1,point2,ratios,colors,*alphas*');
+                /*DEBUG*/
+                check_point_type(pt1, this+'.graphics.beginGradientFill', 'type, *point1*, point2, ratios, colors, alphas');
+                check_point_type(pt2, this+'.graphics.beginGradientFill', 'type, point1, *point2*, ratios, colors, alphas');
+                check_array_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
+                check_number_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
+                check_array_type(colors, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, *colors*, alphas');
+                check_array_type(alphas, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, colors, *alphas*');
+                /*END_DEBUG*/
                 
                 draw_commands.push(function (ctx) {
                   var hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
@@ -690,12 +740,14 @@
                     gradient = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
                     
                   } else if (type === RADIAL) {
-                    check_number_type(pt1.radius, this+'.graphics.beginGradientFill', 'type,*circle1.radius*,circle2,ratios,colors,alphas');
-                    check_number_type(pt2.radius, this+'.graphics.beginGradientFill', 'type,circle1,*circle2.radius*,ratios,colors,alphas');
+                    /*DEBUG*/
+                    check_number_type(pt1.radius, this+'.graphics.beginGradientFill', 'type, *circle1.radius*, circle2, ratios, colors, alphas');
+                    check_number_type(pt2.radius, this+'.graphics.beginGradientFill', 'type, circle1, *circle2.radius*, ratios, colors, alphas');
+                    /*END_DEBUG*/
                     gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
                                                         pt2.x, pt2.y, pt2.radius);
                   } else {
-                    throw new TypeError(this+'.graphics.beginGradientFill(*type*,point1,point2,ratios,colors,alphas): Unknown gradient type.');
+                    throw new TypeError(this+'.graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.');
                   }
                   //add color ratios to our gradient
                   for (; i < len; i+=1) {
@@ -719,8 +771,10 @@
                   Pattern = doodle.Pattern,
                   Event = doodle.Event;
               
-              repeat = repeat || Pattern.REPEAT;
+              repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
+              /*DEBUG*/
               check_string_type(repeat, this+'.graphics.beginPatternFill', 'image,*repeat*');
+              /*END_DEBUG*/
               if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
                   repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
                 throw new SyntaxError(this+'.graphics.beginPatternFill(image,*repeat*): Invalid pattern repeat type.');
@@ -774,17 +828,21 @@
             configurable: false,
             value: (function (thickness, color, alpha, caps, joints, miterLimit) {
               //defaults
-              thickness = thickness || 1;
-              color = color || "#000000";
-              alpha = alpha || 1;
-              caps = caps || doodle.LineCap.BUTT;
-              joints = joints || doodle.LineJoin.MITER;
-              miterLimit = miterLimit || 10;
-              check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*,color,alpha,caps,joints,miterLimit');
-              check_number_type(alpha, this+'.graphics.lineStyle', 'thickness,color,*alpha*,caps,joints,miterLimit');
-              check_string_type(caps, this+'.graphics.lineStyle', 'thickness,color,alpha,*caps*,joints,miterLimit');
-              check_string_type(joints, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,*joints*,miterLimit');
-              check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness,color,alpha,caps,joints,*miterLimit*');
+              thickness = (thickness === undefined) ? 1 : thickness;
+              color = (color === undefined) ? "#000000" : color;
+              alpha = (alpha === undefined) ? 1 : alpha;
+              caps = (caps === undefined) ? doodle.LineCap.BUTT : caps;
+              joints = (joints === undefined) ? doodle.LineJoin.MITER : joints;
+              miterLimit = (miterLimit === undefined) ? 10 : miterLimit;
+              
+              /*DEBUG*/
+              check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*, color, alpha, caps, joints, miterLimit');
+              check_number_type(alpha, this+'.graphics.lineStyle', 'thickness, color, *alpha*, caps, joints, miterLimit');
+              check_string_type(caps, this+'.graphics.lineStyle', 'thickness, color, alpha, *caps*, joints, miterLimit');
+              check_string_type(joints, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, *joints*, miterLimit');
+              check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, joints, *miterLimit*');
+              /*END_DEBUG*/
+              
               //convert color to canvas rgb() format
               if (typeof color === 'string' || typeof color === 'number') {
                 color = hex_to_rgb_str(color, alpha);
@@ -920,13 +978,10 @@
           return this.transform.rotation * 180/Math.PI; //return degress
         },
         set: function (deg) {
-          if (check_number_type(deg, this+'.rotation')) {
-            this.transform.rotation = deg * Math.PI/180; //deg-to-rad
-          }
-
-          //re-calc bounding box
-          new_xy = this.transform.transformPoint({x: this.x, y: this.y});
-          
+          /*DEBUG*/
+          check_number_type(deg, this+'.rotation', '*degrees*');
+          /*END_DEBUG*/
+          this.transform.rotation = deg * Math.PI/180; //deg-to-rad
         }
       },
 
@@ -958,7 +1013,12 @@
         writable: false,
         configurable: false,
         value: function (x, y, width, height) {
-          check_number_type(arguments, this+'.compose')
+          /*DEBUG*/
+          check_number_type(x, this+'.compose', '*x*, y, width, height');
+          check_number_type(y, this+'.compose', 'x, *y*, width, height');
+          check_number_type(width, this+'.compose', 'x, y, *width*, height');
+          check_number_type(height, this+'.compose', 'x, y, width, *height*');
+          /*END_DEBUG*/
           this.x = x;
           this.y = y;
           this.width = width;
