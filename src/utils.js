@@ -42,7 +42,7 @@
     },
 
     hex_to_rgb_str: function (color, alpha) {
-      alpha = alpha || 1;
+      alpha = (alpha === undefined) ? 1 : alpha;
       if (typeof alpha !== 'number') {
          throw new TypeError("hex_to_rgb_str(color,*alpha*): Parameter must be a number.");
       }

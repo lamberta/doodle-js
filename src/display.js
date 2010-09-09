@@ -24,7 +24,8 @@
         frame_count = 0,
         mouseX = 0,
         mouseY = 0,
-        debug_stats = null; //stats object
+        debug_stats = null, //stats object
+        debug_bounding_box = false;
 
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
@@ -123,6 +124,8 @@
         }
       },
 
+      /* For debugging
+       */
       'debug': {
         enumerable: true,
         configurable: false,
@@ -143,6 +146,17 @@
                 display.element.removeChild(debug_stats.domElement);
                 debug_stats = null;
               }
+            }
+          },
+          'boundingBox': {
+            enumerable: true,
+            configurable: false,
+            get: function () {
+              return debug_bounding_box;
+            },
+            set: function (showBoundingBox) {
+              check_boolean_type(showBoundingBox, display+'.debug.boundingBox');
+              debug_bounding_box = showBoundingBox;
             }
           }
         })
@@ -245,6 +259,11 @@
           m = child.transform.toArray();
           context.save();
           context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+
+          if (debug_bounding_box) {
+            draw_bounding_box(child, context);
+          }
+          
           //apply alpha to node and it's children
           if (child.alpha !== 1) {
             context.globalAlpha = child.alpha;
@@ -253,9 +272,6 @@
           if (typeof child.__draw === 'function') {
             child.__draw(context);
           };
-          if (true) { //debug
-            draw_bounding_box(child, context);
-          }
           
           draw_scene_graph(child, context); //recursive
           context.restore();
@@ -266,15 +282,14 @@
     function draw_bounding_box (sprite, context) {
       if (typeof sprite.getBounds === 'function') {
         //calculate bounding box relative to parent
-        var bounding_box = sprite.getBounds(display);
+        var bbox = sprite.getBounds(display);
         
         context.save();
         context.setTransform(1, 0, 0, 1, 0, 0); //reset
         //bounding box
         context.lineWidth = 0.5;
-        context.strokeStyle = "#0000ff";
-        context.strokeRect(bounding_box.x, bounding_box.y,
-                           bounding_box.width, bounding_box.height);
+        context.strokeStyle = sprite.debug.boundingBox;
+        context.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
         context.restore();
       }
     }
@@ -343,12 +358,12 @@
           }
           
         } else if (obj.hasEventListener(evt_type)) {
-					//if in queue and not sprite, could be ElementNode - display, layer
-					//don't want these going off if sprite is in front
-					evt.__setTarget(null);
-					obj.dispatchEvent(evt);
-					evt_dispatched_p = true;
-				}
+          //if in queue and not sprite, could be ElementNode - display, layer
+          //don't want these going off if sprite is in front
+          evt.__setTarget(null);
+          obj.dispatchEvent(evt);
+          evt_dispatched_p = true;
+        }
       });
 
       //dispatch to display if no other object under cursor has

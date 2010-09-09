@@ -19,6 +19,7 @@
       check_sprite_type,
       hex_to_rgb = doodle.utils.hex_to_rgb,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
@@ -225,6 +226,28 @@
             cmd.call(sprite, ctx);
           });
         }
+      },
+
+      /* Debug
+       */
+      'debug': {
+        enumerable: true,
+        configurable: false,
+        value: Object.create(null, {
+          'boundingBox': (function () {
+            var debug_boundingBox = "rgb(0, 0, 255)";
+            return {
+              enumerable: true,
+              configurable: false,
+              get: function () {
+                return rgb_str_to_hex(debug_boundingBox);
+              },
+              set: function (color) {
+                debug_boundingBox = hex_to_rgb_str(color);
+              }
+            };
+          }())
+        })
       },
 
       /*
@@ -632,7 +655,7 @@
             configurable: false,
             value: (function (color, alpha) {
               alpha = alpha ? alpha : 1.0;
-              check_number_type(alpha, this+'.graphics.beginFill', 'color, alpha');
+              check_number_type(alpha, this+'.graphics.beginFill', 'color, *alpha*');
               
               draw_commands.push(function (ctx) {
                 ctx.fillStyle = hex_to_rgb_str(color, alpha);
