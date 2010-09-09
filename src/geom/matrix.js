@@ -35,7 +35,9 @@
         configurable: false,
         get: function () { return a; },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.a');
+          /*END_DEBUG*/
           a = n;
         }
       },
@@ -49,7 +51,9 @@
         configurable: false,
         get: function () { return b; },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.b');
+          /*END_DEBUG*/
           b = n;
         }
       },
@@ -63,7 +67,9 @@
         configurable: false,
         get: function () { return c; },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.c');
+          /*END_DEBUG*/
           c = n;
         }
       },
@@ -77,7 +83,9 @@
         configurable: false,
         get: function () { return d; },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.d');
+          /*END_DEBUG*/
           d = n;
         }
       },
@@ -90,7 +98,9 @@
         configurable: false,
         get: function () { return tx; },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.tx');
+          /*END_DEBUG*/
           tx = n;
         }
       },
@@ -103,7 +113,9 @@
         configurable: false,
         get: function () { return ty; },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.ty');
+          /*END_DEBUG*/
           ty = n;
         }
       }
@@ -191,7 +203,14 @@
         writable: false,
         configurable: false,
         value: function (a, b, c, d, tx, ty) {
-          check_number_type(arguments, this+'.compose');
+          /*DEBUG*/
+          check_number_type(a, this+'.compose', '*a*, b, c, d, tx, ty');
+          check_number_type(b, this+'.compose', 'a, *b*, c, d, tx, ty');
+          check_number_type(c, this+'.compose', 'a, b, *c*, d, tx, ty');
+          check_number_type(d, this+'.compose', 'a, b, c, *d*, tx, ty');
+          check_number_type(tx, this+'.compose', 'a, b, c, d, *tx*, ty');
+          check_number_type(ty, this+'.compose', 'a, b, c, d, tx, *ty*');
+          /*END_DEBUG*/
           this.a  = a;
           this.b  = b;
           this.c  = c;
@@ -243,7 +262,9 @@
         writable: false,
         configurable: false,
         value: function (m) {
-          check_matrix_type(m, this+'.equals');
+          /*DEBUG*/
+          check_matrix_type(m, this+'.equals', '*matrix*');
+          /*END_DEBUG*/
           return ((this && m && 
                    this.a  === m.a &&
                    this.b  === m.b &&
@@ -296,8 +317,9 @@
         writable: false,
         configurable: false,
         value: function (m) {
-          check_matrix_type(m, this+'.multiply');
-          
+          /*DEBUG*/
+          check_matrix_type(m, this+'.multiply', '*matrix*');
+          /*END_DEBUG*/
           var a  = this.a * m.a  + this.c * m.b,
               b  = this.b * m.a  + this.d * m.b,
               c  = this.a * m.c  + this.c * m.d,
@@ -318,7 +340,9 @@
         writable: false,
         configurable: false,
         value: function (radians) {
-          check_number_type(radians, this+'.rotate');
+          /*DEBUG*/
+          check_number_type(radians, this+'.rotate', '*radians*');
+          /*END_DEBUG*/
           var c = cos(radians),
               s = sin(radians),
               m = Matrix(c, s, -s, c, 0, 0);
@@ -335,7 +359,9 @@
         writable: false,
         configurable: false,
         value: function (radians) {
-          check_number_type(radians, this+'.deltaRotate');
+          /*DEBUG*/
+          check_number_type(radians, this+'.deltaRotate', '*radians*');
+          /*END_DEBUG*/
           var x = this.tx,
               y = this.ty;
           this.rotate(radians);
@@ -359,7 +385,9 @@
          * @return {Matrix}
          */
         set: function (radians) {
-          check_number_type(radians, this+'.rotation');
+          /*DEBUG*/
+          check_number_type(radians, this+'.rotation', '*radians*');
+          /*END_DEBUG*/
           var c = cos(radians),
               s = sin(radians);
           return this.compose(c, s, -s, c, this.tx, this.ty);
@@ -376,7 +404,10 @@
         writable: false,
         configurable: false,
         value: function (sx, sy) {
-          check_number_type(arguments, this+'.scale');
+          /*DEBUG*/
+          check_number_type(sx, this+'.scale', '*sx*, sy');
+          check_number_type(sy, this+'.scale', 'sx, *sy*');
+          /*END_DEBUG*/
           var m = Matrix(sx, 0, 0, sy, 0, 0);
           return this.multiply(m);
         }
@@ -392,7 +423,10 @@
         writable: false,
         configurable: false,
         value: function (sx, sy) {
-          check_number_type(arguments, this+'.deltaScale');
+          /*DEBUG*/
+          check_number_type(sx, this+'.deltaScale', '*sx*, sy');
+          check_number_type(sy, this+'.deltaScale', 'sx, *sy*');
+          /*END_DEBUG*/
           var x = this.tx,
               y = this.ty;
           this.scale(sx, sy);
@@ -412,7 +446,10 @@
         writable: false,
         configurable: false,
         value: function (dx, dy) {
-          check_number_type(arguments, this+'.translate');
+          /*DEBUG*/
+          check_number_type(dx, this+'.translate', '*dx*, dy');
+          check_number_type(dy, this+'.translate', 'dx, *dy*');
+          /*END_DEBUG*/
           this.tx += dx;
           this.ty += dy;
           return this;
@@ -429,7 +466,10 @@
         writable: false,
         configurable: false,
         value: function (skewX, skewY) {
-          check_number_type(arguments, this+'.skew');
+          /*DEBUG*/
+          check_number_type(skewX, this+'.skew', '*skewX*, skewY');
+          check_number_type(skewY, this+'.skew', 'skewX, *skewY*');
+          /*END_DEBUG*/
           var sx = tan(skewX),
               sy = tan(skewY),
               m = Matrix(1, sy, sx, 1, 0, 0);
@@ -447,7 +487,10 @@
         writable: false,
         configurable: false,
         value: function (skewX, skewY) {
-          check_number_type(arguments, this+'.deltaSkew');
+          /*DEBUG*/
+          check_number_type(skewX, this+'.deltaSkew', '*skewX*, skewY');
+          check_number_type(skewY, this+'.deltaSkew', 'skewX, *skewY*');
+          /*END_DEBUG*/
           var x = this.tx,
               y = this.ty;
           this.skew(skewX, skewY);
@@ -466,7 +509,9 @@
         writable: false,
         configurable: false,
         value: function (m) {
-          check_matrix_type(m, this+'.add');
+          /*DEBUG*/
+          check_matrix_type(m, this+'.add', '*matrix*');
+          /*END_DEBUG*/
           this.a  += m.a;
           this.b  += m.b;
           this.c  += m.c;
@@ -506,7 +551,9 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          check_point_type(pt, this+'.transformPoint');
+          /*DEBUG*/
+          check_point_type(pt, this+'.transformPoint', '*point*');
+          /*END_DEBUG*/
           return Point(this.a * pt.x + this.c * pt.y + this.tx,
                        this.b * pt.x + this.d * pt.y + this.ty);
         }
@@ -523,7 +570,9 @@
         writable: false,
         configurable: false,
         value: function (pt) {
-          check_point_type(pt, this+'.deltaTransformPoint');
+          /*DEBUG*/
+          check_point_type(pt, this+'.deltaTransformPoint', '*point*');
+          /*END_DEBUG*/
           return Point(this.a * pt.x + this.c * pt.y,
                        this.b * pt.x + this.d * pt.y);
           }
@@ -534,10 +583,10 @@
         writable: false,
         configurable: false,
         value: function (pt, radians) {
-          /*DEBUG_START*/
-          check_point_type(pt, this+'.rotateAroundExternalPoint', 'point,radians');
-          check_number_type(radians, this+'.rotateAroundExternalPoint', 'point,radians');
-          /*DEBUG_END*/
+          /*DEBUG*/
+          check_point_type(pt, this+'.rotateAroundExternalPoint', '*point*, radians');
+          check_number_type(radians, this+'.rotateAroundExternalPoint', 'point, *radians*');
+          /*END_DEBUG*/
           var parent_matrix = Matrix().rotate(radians), //global space
               reg_pt, //new registration point
               dx = pt.x,
@@ -558,8 +607,10 @@
         writable: false,
         configurable: false,
         value: function (pt, radians) {
-          check_point_type(pt, this+'.rotateAroundInternalPoint', 'point,radians');
-          check_number_type(radians, this+'.rotateAroundInternalPoint', 'point,radians');
+          /*DEBUG*/
+          check_point_type(pt, this+'.rotateAroundInternalPoint', '*point*, radians');
+          check_number_type(radians, this+'.rotateAroundInternalPoint', 'point, *radians*');
+          /*END_DEBUG*/
           var p = this.transformPoint(pt);
           return this.rotateAroundExternalPoint(p, radians);
         }
@@ -570,8 +621,10 @@
         writable: false,
         configurable: false,
         value: function (pt_int, pt_ext) {
-          check_point_type(pt_int, this+'.matchInternalPointWithExternal');
-          check_point_type(pt_ext, this+'.matchInternalPointWithExternal');
+          /*DEBUG*/
+          check_point_type(pt_int, this+'.matchInternalPointWithExternal', '*pt_int*, pt_ext');
+          check_point_type(pt_ext, this+'.matchInternalPointWithExternal', 'pt_int, *pt_ext*');
+          /*END_DEBUG*/
           var pt = this.transformPoint(pt_int),
               dx = pt_ext.x - pt.x,
               dy = pt_ext.y - pt.y;
@@ -588,8 +641,10 @@
         writable: false,
         configurable: false,
         value: function (m, t) {
-          check_matrix_type(m, this+'.interpolate');
-          check_number_type(t, this+'.interpolate');
+          /*DEBUG*/
+          check_matrix_type(m, this+'.interpolate', '*matrix*, t');
+          check_number_type(t, this+'.interpolate', 'matrix, *t*');
+          /*END_DEBUG*/
           this.a  = this.a  + (m.a  - this.a)  * t;
           this.b  = this.b  + (m.b  - this.b)  * t;
           this.c  = this.c  + (m.c  - this.c)  * t;
