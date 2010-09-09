@@ -6,7 +6,6 @@ function print_help_and_exit {
     echo "  -d      Also build debug version."
     echo "  -D      Only build debug version."
     echo "  -c      Clean."
-
     echo "  -C=jar  Location of the Closure compiler."
     exit 0
 }
