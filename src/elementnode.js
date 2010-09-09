@@ -29,7 +29,6 @@
           return element;
         },
         set: function (elem) {
-          //check_canvas_type(canvas, this+'.element');
           element = elem;
         }
       }
@@ -47,7 +46,7 @@
   (function () {
     var check_number_type = doodle.utils.types.check_number_type,
         check_string_type = doodle.utils.types.check_string_type,
-				check_boolean_type = doodle.utils.types.check_boolean_type,
+        check_boolean_type = doodle.utils.types.check_boolean_type,
         get_style_property = doodle.utils.get_style_property;
     
     elementnode_properties = {
@@ -60,7 +59,9 @@
           return this.element.id;
         },
         set: function (name) {
+          /*DEBUG*/
           check_string_type(name, this+'.id');
+          /*END_DEBUG*/
           this.element.id = name;
         }
       },
@@ -70,7 +71,9 @@
           return this.element.width;
         },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.width');
+          /*END_DEBUG*/
           this.element.width = n;
         }
       },
@@ -80,7 +83,9 @@
           return this.element.height;
         },
         set: function (n) {
+          /*DEBUG*/
           check_number_type(n, this+'.height');
+          /*END_DEBUG*/
           this.element.height = n;
         }
       },
@@ -96,10 +101,12 @@
           return alpha;
         },
         set: function (alpha) {
+          /*DEBUG*/
           check_number_type(alpha, this+'.alpha');
+          /*END_DEBUG*/
+          
           //is color ever stored as hex?
           var rgb = this.element.style.backgroundColor.match(/(\d{1,3})/g);
-          
           this.element.style.backgroundColor = "rgba("+ rgb[0] +","+ rgb[1] +","+ rgb[2] +"," + alpha +")";
         }
       },
@@ -120,7 +127,9 @@
           }
         },
         set: function (isVisible) {
+          /*DEBUG*/
           check_boolean_type(isVisible, this+'.visible');
+          /*END_DEBUG*/
           if (isVisible) {
             this.element.style.visibility = 'visible';
           } else {
