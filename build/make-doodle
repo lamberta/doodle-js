@@ -18,11 +18,9 @@ DEBUG_OUT_FILE="$PROJECT_HOME/build/doodle-debug.js"
 MIN_OUT_FILE="$PROJECT_HOME/build/doodle.js"
 
 function build_full {
-    cat ./src/compat/es5.js > "$DEBUG_OUT_FILE"
-
     cat ./build/prologue.js >> "$DEBUG_OUT_FILE"
+    cat ./src/compat/es5.js > "$DEBUG_OUT_FILE"
     cat ./src/utils.js >> "$DEBUG_OUT_FILE"
-
     cat ./lib/Stats.js >> "$DEBUG_OUT_FILE"
 
     #constants

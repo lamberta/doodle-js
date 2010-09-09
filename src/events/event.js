@@ -174,14 +174,14 @@
         configurable: false,
         get: function () { return type; }
       },
-			
-			'__setType': {
-				enumerable: false,
+      
+      '__setType': {
+        enumerable: false,
         value: function (typeArg) {
           check_string_type(typeArg);
           type = typeArg;
         }
-			},
+      },
 
       'returnValue': {
         enumerable: true,
@@ -205,9 +205,9 @@
           check_boolean_type(canBubbleArg, this+'.initEvent', 'type,*bubbles*,cancelable');
           check_boolean_type(cancelableArg, this+'.initEvent', 'type,bubbles,*cancelable*');
 
-					type = typeArg;
-					bubbles = canBubbleArg;
-					cancelable = cancelableArg;
+          type = typeArg;
+          bubbles = canBubbleArg;
+          cancelable = cancelableArg;
           
           return this;
         }
@@ -218,7 +218,7 @@
         configurable: false,
         value: function () {
           defaultPrevented = true;
-        },
+        }
       },
 
       'stopPropagation': {

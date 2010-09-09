@@ -1,9 +1,9 @@
+"use strict";
+
 /* Intro
  *
  */
 
-//just in case this gets implemented
-"use strict";
 //the global object
 var doodle = {};
 //packages
