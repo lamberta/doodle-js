@@ -177,12 +177,13 @@
     return false;
   };
 
-  doodle.utils.types.check_node_type = function (node, caller_name) {
-    if (!inheritsNode(node)) {
-      caller_name = (caller_name === undefined) ? "check_node_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a node.");
-    } else {
+  doodle.utils.types.check_node_type = function (node, caller, param) {
+    if (inheritsNode(node)) {
       return true;
+    } else {
+      caller = (caller === undefined) ? "check_node_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Node.");
     }
   };
 
@@ -202,12 +203,11 @@
 
   (function () {
 
-    var Point = doodle.geom.Point,
-        isPoint = Point.isPoint,
-        Event = doodle.Event,
+    var doodle_Point = doodle.geom.Point,
+        doodle_Event = doodle.Event,
         check_number_type = doodle.utils.types.check_number_type,
         check_point_type = doodle.utils.types.check_point_type,
-        check_node_type = doodle.utils.types.check_node_type,a
+        check_node_type = doodle.utils.types.check_node_type,
         to_degrees = 180/Math.PI,
         to_radians = Math.PI/180;
 
@@ -221,7 +221,7 @@
         if (typeof child_action === 'function') {
           child_action(child);
         }
-        child.dispatchEvent(Event(event_type, true));
+        child.dispatchEvent(doodle_Event(event_type, true));
         children_dispatch_event(child, event_type, child_action);
       });
     }
@@ -374,8 +374,8 @@
           
           //is the node now a part of the display list?
           if (inDisplayList(node)) {
-            node.dispatchEvent(Event(Event.ADDED, true));
-            children_dispatch_event(node, Event.ADDED);
+            node.dispatchEvent(doodle_Event(doodle_Event.ADDED, true));
+            children_dispatch_event(node, doodle_Event.ADDED);
           }
 
           return node;
@@ -398,37 +398,40 @@
         enumerable: false,
         writable: false,
         configurable: false,
-        value: function (index) {
-          /*DEBUG*/
-          check_number_type(index, this+'.removeChildAt', '*index*');
-          /*END_DEBUG*/
-          var node = this.children[index],
-              ctx = node.context,
-              node_bounds;
-          
-          this.children.splice(index, 1);
-
-          //is it no longer a part of the display list?
-          if (ctx) {
-            clear_node_bounds(node);
-            node.dispatchEvent(Event(Event.REMOVED, true));
-            children_dispatch_event(node, Event.REMOVED, clear_node_bounds);
-          }
-          //these are needed for final transversal
-          node.root = null;
-          node.parent = null;
-
+        value: (function () {
           /* Called on every child of removed node with a context.
            * Ensures it's old bounds are cleared before being re-parented.
            */
-          function clear_node_bounds (child) {
+          function clear_node_bounds (child, context) {
             var bounds = child.getBounds(child.root);
-            if (ctx) {
-              ctx.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            if (context) {
+              context.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
             }
             child.root = null;
           }
-        }
+          
+          return function (index) {
+            /*DEBUG*/
+            check_number_type(index, this+'.removeChildAt', '*index*');
+            /*END_DEBUG*/
+            var node = this.children[index],
+                ctx = node.context;
+            
+            this.children.splice(index, 1);
+
+            //is it no longer a part of the display list?
+            if (ctx) {
+              clear_node_bounds(node, ctx);
+              node.dispatchEvent(doodle_Event(doodle_Event.REMOVED, true));
+              children_dispatch_event(node, doodle_Event.REMOVED, function (child) {
+                clear_node_bounds(child, ctx);
+              });
+            }
+            //these are needed for final transversal
+            node.root = null;
+            node.parent = null;
+          };
+        }())
       },
       
       'removeChild': {
@@ -489,7 +492,7 @@
         value: function (child, index) {
           /*DEBUG*/
           check_node_type(child, this+'.setChildIndex', '*child*, index');
-          check_number_type(index, this+'.setChildIndex', 'child, *index*')
+          check_number_type(index, this+'.setChildIndex', 'child, *index*');
           /*END_DEBUG*/
           var children = this.children,
               len = children.length,
@@ -611,7 +614,7 @@
           check_point_type(pt, this+'.globalToLocal', '*point*');
           /*END_DEBUG*/
           var global_pos = this.localToGlobal({x: 0, y: 0});
-          return Point(pt.x - global_pos.x, pt.y - global_pos.y);
+          return doodle_Point(pt.x - global_pos.x, pt.y - global_pos.y);
         }
       }
       

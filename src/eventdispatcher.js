@@ -68,12 +68,13 @@
     return false;
   };
 
-  doodle.utils.types.check_eventdispatcher_type = function (obj, caller_name) {
-    if (!inheritsEventDispatcher(obj)) {
-      caller_name = (caller_name === undefined) ? "check_eventdispatcher_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be an eventdispatcher.");
-    } else {
+  doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
+    if (doodle.EventDispatcher.inheritsEventDispatcher(obj)) {
       return true;
+    } else {
+      caller = (caller === undefined) ? "check_eventdispatcher_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an EventDispatcher.");
     }
   };
 
@@ -256,8 +257,7 @@
               node,
               node_path = [],
               len, //count of nodes up to root
-              i, //counter
-              rv; //return value of event listener
+              i; //counter
 
           /*DEBUG*/
           check_event_type(event, this+'.dispatchEvent', '*event*');
