@@ -9,23 +9,59 @@ doodle.utils = {
     return '#'+ String('000000'+hex_color).slice(-6); //pad out
   },
 
-  rgb_str_to_hex: (function () {
-    var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?.*\\)$");
-    return function (rgb_str) {
+  rgb_str_to_hex: function (rgb_str) {
+    /*DEBUG*/
+    if (typeof rgb_str !== 'string') {
+      throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
+    }
+    /*END_DEBUG*/
+    
+    var rgb = this.rgb_str_to_rgb(rgb_str);
+    
+    /*DEBUG*/
+    if (!Array.isArray(rgb)) {
+      throw new SyntaxError('rgb_str_to_hex(rgb_str): Parameter must be in the format: "rgb(n, n, n)".');
+    }
+    /*END_DEBUG*/
+    return this.rgb_to_hex(parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10));
+  },
+  
+  rgb_to_rgb_str: function (r, g, b, a) {
+    a = (a === undefined) ? 1 : a;
+    /*DEBUG*/
+    doodle.utils.types.check_number_type(r, 'rgb_to_rgb_str', '*r*, g, b, a');
+    doodle.utils.types.check_number_type(g, 'rgb_to_rgb_str', 'r, *g*, b, a');
+    doodle.utils.types.check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
+    doodle.utils.types.check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
+    /*END_DEBUG*/
+		a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
+    if (a === 1) {
+      return "rgb("+ r +","+ g +","+ b +")";
+    } else {
+      return "rgba("+ r +","+ g +","+ b +","+ a +")";
+    }
+  },
+
+  rgb_str_to_rgb: (function () {
+    var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?(.*)\\)$");
+    return function (color) {
       /*DEBUG*/
-      if (typeof rgb_str !== 'string') {
-        throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
+      doodle.utils.types.check_string_type(color, 'rgb_str_to_rgb', '*color*');
+      /*END_DEBUG*/
+      color = color.trim().match(rgb_regexp);
+      /*DEBUG*/
+      if (!Array.isArray(color)) {
+        throw new SyntaxError('rgb_str_to_rgb(color): Parameter must be in the format: "rgba(n, n, n, n)".');
       }
       /*END_DEBUG*/
-      rgb_str = rgb_str.trim().match(rgb_regexp);
-      
-      if (Array.isArray(rgb_str)) {
-        return this.rgb_to_hex(parseInt(rgb_str[1], 10),
-                               parseInt(rgb_str[2], 10),
-                               parseInt(rgb_str[3], 10));
-      } else {
-        throw new SyntaxError('rgb_str_to_hex(rgb_str): Parameter must be in the format: "rgb(n, n, n)".');
+      var rgb = [parseInt(color[1], 10),
+                 parseInt(color[2], 10),
+                 parseInt(color[3], 10)],
+          alpha = parseFloat(color[4]);
+      if (typeof alpha === 'number' && !isNaN(alpha)) {
+        rgb.push(alpha);
       }
+      return rgb;
     };
   }()),
   
@@ -50,13 +86,8 @@ doodle.utils = {
       throw new TypeError("hex_to_rgb_str(color, *alpha*): Parameter must be a number.");
     }
     /*END_DEBUG*/
-    alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
     color = doodle.utils.hex_to_rgb(color);
-    if (alpha === 1) {
-      return "rgb("+ color[0] +","+ color[1] +","+ color[2] +")";
-    } else {
-      return "rgba("+ color[0] +","+ color[1] +","+ color[2] +","+ alpha +")";
-    }
+		return doodle.utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
   }
 };
 

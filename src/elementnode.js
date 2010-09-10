@@ -2,7 +2,6 @@
 (function () {
 
   var elementnode_properties;
-
   
   /* Super constructor
    * @param {String|Function} id|initializer
@@ -47,6 +46,8 @@
     var check_number_type = doodle.utils.types.check_number_type,
         check_string_type = doodle.utils.types.check_string_type,
         check_boolean_type = doodle.utils.types.check_boolean_type,
+        rgb_str_to_rgb = doodle.utils.rgb_str_to_rgb,
+        rgb_to_rgb_str = doodle.utils.rgb_to_rgb_str,
         get_style_property = doodle.utils.get_style_property;
     
     elementnode_properties = {
@@ -90,24 +91,23 @@
         }
       },
 
+      /* Layer must have it's own alpha since a canvas by
+       * default is rgba(0,0,0,0)
+       */
       'alpha': {
         get: function () {
-          var color = this.element.style.backgroundColor,
-              alpha = 1.0;
-          if (/rgba\(.*\)/.test(color)) {
-            //i really hate javascript numbers
-            alpha = parseFloat(parseFloat(color.split(/,/g)[3]).toFixed(2));
-          }
-          return alpha;
+          var color = rgb_str_to_rgb(get_style_property(this.element, 'backgroundColor')),
+              alpha = color[3];
+          return (typeof alpha === 'number') ? alpha : 1;
         },
         set: function (alpha) {
           /*DEBUG*/
           check_number_type(alpha, this+'.alpha');
           /*END_DEBUG*/
-          
-          //is color ever stored as hex?
-          var rgb = this.element.style.backgroundColor.match(/(\d{1,3})/g);
-          this.element.style.backgroundColor = "rgba("+ rgb[0] +","+ rgb[1] +","+ rgb[2] +"," + alpha +")";
+          var color = get_style_property(this.element, 'backgroundColor'),
+              rgb = rgb_str_to_rgb(color),
+              rgba_str = rgb_to_rgb_str(rgb[0], rgb[1], rgb[2], alpha);
+          this.element.style.backgroundColor = rgba_str;
         }
       },
 
