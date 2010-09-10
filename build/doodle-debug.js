@@ -6361,23 +6361,16 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Layer must have it's own alpha since a canvas by
-     * default is rgba(0,0,0,0)
-     */
-    'alpha': {
+		'alpha': {
       get: function () {
-        var color = rgb_str_to_rgb(get_style_property(this.element, 'backgroundColor')),
-        alpha = color[3];
-        return (typeof alpha === 'number') ? alpha : 1;
+        return get_element_property(this.element, 'opacity', 'float');
       },
       set: function (alpha) {
         /*DEBUG*/
         check_number_type(alpha, this+'.alpha');
+				alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
         /*END_DEBUG*/
-        var color = get_style_property(this.element, 'backgroundColor'),
-        rgb = rgb_str_to_rgb(color),
-        rgba_str = rgb_to_rgb_str(rgb[0], rgb[1], rgb[2], alpha);
-        this.element.style.backgroundColor = rgba_str;
+        return set_element_property(this.element, 'opacity', alpha);
       }
     },
 
@@ -6423,16 +6416,13 @@ Object.defineProperties(doodle.TextEvent, {
     
   };//end node_static_properties
 }());//end class closure
-
 (function () {
-
-  var layer_properties,
+  var layer_static_properties,
       layer_count = 0,
       check_number_type = doodle.utils.types.check_number_type,
       check_canvas_type = doodle.utils.types.check_canvas_type,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property;
-
   
   /* Super constructor
    * @param {String|Function} id|initializer
@@ -6452,7 +6442,7 @@ Object.defineProperties(doodle.TextEvent, {
       throw new SyntaxError("[object Layer]: Invalid number of parameters.");
     }
 
-    Object.defineProperties(layer, layer_properties);
+    Object.defineProperties(layer, layer_static_properties);
     //properties that require privacy
     Object.defineProperties(layer, {
       'element': {
@@ -6465,23 +6455,7 @@ Object.defineProperties(doodle.TextEvent, {
           /*END_DEBUG*/
           element = canvas;
         }
-      },
-
-      /* Layer has it's own alpha since canvas backgroundColor default is rgba(0,0,0,0)
-       * What happens when I change it's background?
-       */
-      'alpha': (function () {
-        var alpha = 1;
-        return {
-          get: function () { return alpha; },
-          set: function (n) {
-            /*DEBUG*/
-            check_number_type(n, this+'.alpha');
-            /*END_DEBUG*/
-            alpha = (n < 0) ? 0 : ((n > 1) ? 1 : n);
-          }
-        };
-      }())
+      }
     });
 
     //init
@@ -6546,10 +6520,9 @@ Object.defineProperties(doodle.TextEvent, {
     
   }());
 
-  layer_properties = {
-    /*
-     * PROPERTIES
-     */
+  /* STATIC PROPERTIES
+   */
+  layer_static_properties = {
     'context': {
       get: function () {
         return this.element.getContext('2d');
@@ -6584,10 +6557,6 @@ Object.defineProperties(doodle.TextEvent, {
         }
       },
 
-    /*
-     * METHODS
-     */
-
     /* Returns the string representation of the specified object.
      * @return {String}
      */
@@ -6600,7 +6569,7 @@ Object.defineProperties(doodle.TextEvent, {
       }
     }
     
-  };//end layer_properties
+  };//end layer_static_properties
   
 }());//end class closure
 (function () {
@@ -6611,6 +6580,7 @@ Object.defineProperties(doodle.TextEvent, {
       check_layer_type = doodle.utils.types.check_layer_type,
       check_context_type = doodle.utils.types.check_context_type,
       check_block_element = doodle.utils.types.check_block_element,
+      isLayer = doodle.Layer.isLayer,
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property
@@ -6880,8 +6850,10 @@ Object.defineProperties(doodle.TextEvent, {
           }
           
           //apply alpha to node and it's children
-          if (child.alpha !== 1) {
-            context.globalAlpha = child.alpha;
+          if (!isLayer(child)) {
+            if (child.alpha !== 1) {
+              context.globalAlpha = child.alpha;
+            }
           }
           
           if (typeof child.__draw === 'function') {
