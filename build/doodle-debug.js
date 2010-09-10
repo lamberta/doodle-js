@@ -32,20 +32,21 @@ doodle.utils = {
   },
 
   rgb_str_to_hex: function (rgb_str) {
+    var utils = doodle.utils;
     /*DEBUG*/
     if (typeof rgb_str !== 'string') {
       throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
     }
     /*END_DEBUG*/
     
-    var rgb = this.rgb_str_to_rgb(rgb_str);
+    var rgb = utils.rgb_str_to_rgb(rgb_str);
     
     /*DEBUG*/
     if (!Array.isArray(rgb)) {
       throw new SyntaxError('rgb_str_to_hex(rgb_str): Parameter must be in the format: "rgb(n, n, n)".');
     }
     /*END_DEBUG*/
-    return this.rgb_to_hex(parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10));
+    return utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
   },
   
   rgb_to_rgb_str: function (r, g, b, a) {
@@ -56,7 +57,7 @@ doodle.utils = {
     doodle.utils.types.check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
     doodle.utils.types.check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
     /*END_DEBUG*/
-		a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
+    a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
     if (a === 1) {
       return "rgb("+ r +","+ g +","+ b +")";
     } else {
@@ -102,14 +103,15 @@ doodle.utils = {
   },
 
   hex_to_rgb_str: function (color, alpha) {
+    var utils = doodle.utils;
     alpha = (alpha === undefined) ? 1 : alpha;
     /*DEBUG*/
     if (typeof alpha !== 'number') {
       throw new TypeError("hex_to_rgb_str(color, *alpha*): Parameter must be a number.");
     }
     /*END_DEBUG*/
-    color = doodle.utils.hex_to_rgb(color);
-		return doodle.utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
+    color = utils.hex_to_rgb(color);
+    return utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
   }
 };
 
@@ -226,6 +228,58 @@ doodle.utils.get_style_property = function (element, property) {
   } catch (e) {
     throw new ReferenceError("get_style_property: Cannot read property '"+property+"' of "+element+".");
   }
+};
+
+/* Returns property of an element.
+ * CSS properties take precedence over HTML attributes.
+ * @param type {String} 'int'|'float' Return type.
+ */
+doodle.utils.get_element_property = function (element, property, type) {
+  try {
+    var val = doodle.utils.get_style_property(element, property);
+  } catch (e) {
+    val = undefined;
+  }
+  if (val === undefined || val === null) {
+    val = element.getAttribute(property);
+  }
+  if (type !== undefined) {
+    switch (type) {
+    case 'int':
+      val = parseInt(val, 10);
+      val = isNaN(val) ? null : val;
+      break;
+    case 'float':
+      val = parseFloat(val);
+      val = isNaN(val) ? null : val;
+      break;
+    default:
+      break;
+    }
+  }
+  return val;
+};
+
+/*
+ * @param type {String} 'css'|'html' Set CSS property or HTML attribute.
+ */
+doodle.utils.set_element_property = function (element, property, value, type) {
+  type = (type === undefined) ? 'css' : type;
+  /*DEBUG*/
+  doodle.utils.types.check_string_type(property, 'set_element_property', 'element, *property*, value, type');
+  doodle.utils.types.check_string_type(type, 'set_element_property', 'element, property, value, *type*');
+  /*END_DEBUG*/
+  switch (type) {
+  case 'css':
+    element.style[property] = value;
+    break;
+  case 'html':
+    element.setAttribute(property, value);
+    break;
+  default:
+    throw new SyntaxError("set_element_property: type must be 'css' property or 'html' attribute.");
+  }
+  return value;
 };
 /*
  * stats.js r4
@@ -6147,10 +6201,20 @@ Object.defineProperties(doodle.TextEvent, {
     
   }());
 }());//end class closure
-
 (function () {
-
-  var elementnode_properties;
+  var node_static_properties,
+      doodle_utils = doodle.utils,
+      check_number_type = doodle_utils.types.check_number_type,
+      check_string_type = doodle_utils.types.check_string_type,
+      check_boolean_type = doodle_utils.types.check_boolean_type,
+      rgb_str_to_hex = doodle_utils.rgb_str_to_hex,
+      rgb_str_to_rgb = doodle_utils.rgb_str_to_rgb,
+      rgb_to_rgb_str = doodle_utils.rgb_to_rgb_str,
+      hex_to_rgb_str = doodle_utils.hex_to_rgb_str,
+      get_element = doodle_utils.get_element,
+      get_style_property = doodle_utils.get_style_property,
+      get_element_property = doodle_utils.get_element_property,
+      set_element_property = doodle_utils.set_element_property;
   
   /* Super constructor
    * @param {String|Function} id|initializer
@@ -6169,7 +6233,7 @@ Object.defineProperties(doodle.TextEvent, {
       throw new SyntaxError("[object ElementNode]: Invalid number of parameters.");
     }
 
-    Object.defineProperties(element_node, elementnode_properties);
+    Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
     Object.defineProperties(element_node, {
       'element': {
@@ -6190,121 +6254,174 @@ Object.defineProperties(doodle.TextEvent, {
     return element_node;
   };
 
-
-  (function () {
-    var check_number_type = doodle.utils.types.check_number_type,
-        check_string_type = doodle.utils.types.check_string_type,
-        check_boolean_type = doodle.utils.types.check_boolean_type,
-        rgb_str_to_rgb = doodle.utils.rgb_str_to_rgb,
-        rgb_to_rgb_str = doodle.utils.rgb_to_rgb_str,
-        get_style_property = doodle.utils.get_style_property;
-    
-    elementnode_properties = {
-      /*
-       * PROPERTIES
-       */
-
-      'id': {
-        get: function () {
-          return this.element.id;
-        },
-        set: function (name) {
-          /*DEBUG*/
-          check_string_type(name, this+'.id');
-          /*END_DEBUG*/
-          this.element.id = name;
-        }
+  
+  node_static_properties = {
+    'id': {
+      get: function () {
+        return get_element_property(this.element, 'id');
       },
-
-      'width': {
-        get: function () {
-          return this.element.width;
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.width');
-          /*END_DEBUG*/
-          this.element.width = n;
-        }
-      },
-      
-      'height': {
-        get: function () {
-          return this.element.height;
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.height');
-          /*END_DEBUG*/
-          this.element.height = n;
-        }
-      },
-
-      /* Layer must have it's own alpha since a canvas by
-       * default is rgba(0,0,0,0)
-       */
-      'alpha': {
-        get: function () {
-          var color = rgb_str_to_rgb(get_style_property(this.element, 'backgroundColor')),
-              alpha = color[3];
-          return (typeof alpha === 'number') ? alpha : 1;
-        },
-        set: function (alpha) {
-          /*DEBUG*/
-          check_number_type(alpha, this+'.alpha');
-          /*END_DEBUG*/
-          var color = get_style_property(this.element, 'backgroundColor'),
-              rgb = rgb_str_to_rgb(color),
-              rgba_str = rgb_to_rgb_str(rgb[0], rgb[1], rgb[2], alpha);
-          this.element.style.backgroundColor = rgba_str;
-        }
-      },
-
-      /*
-       * @param {Boolean}
-       * @return {Boolean}
-       */
-      'visible': {
-        get: function () {
-          switch (get_style_property(this.element, 'visibility')) {
-          case 'visible':
-            return true;
-          case 'hidden':
-            return false;
-          default:
-            throw new Error(this+".visible: Unable to determine visibility.");
-          }
-        },
-        set: function (isVisible) {
-          /*DEBUG*/
-          check_boolean_type(isVisible, this+'.visible');
-          /*END_DEBUG*/
-          if (isVisible) {
-            this.element.style.visibility = 'visible';
-          } else {
-            this.element.style.visibility = 'hidden';
-          }
-        }
-      },
-
-      /*
-       * METHODS
-       */
-
-      /* Returns the string representation of the specified object.
-       * @return {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object ElementNode]";
-        }
+      set: function (name) {
+        /*DEBUG*/
+        check_string_type(name, this+'.id');
+        /*END_DEBUG*/
+        return set_element_property(this.element, 'id', name, 'html');
       }
-      
-    };//end layer_properties
-  }());
+    },
+    
+    'width': {
+      get: function () {
+        return get_element_property(this.element, 'width', 'int');
+      },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.width');
+        /*END_DEBUG*/
+        set_element_property(this.element, 'width', n+"px");
+        return n;
+      }
+    },
+    
+    'height': {
+      get: function () {
+        return get_element_property(this.element, 'height', 'int');
+      },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.height');
+        /*END_DEBUG*/
+        set_element_property(this.element, 'height', n+"px");
+        return n;
+      }
+    },
+
+    'backgroundColor': {
+      get: function () {
+        return rgb_str_to_hex(get_element_property(this.element, 'backgroundColor'));
+      },
+      set: function (color) {
+        if (typeof color === 'number') {
+          color = hex_to_rgb_str(color);
+        }
+        return set_element_property(this.element, 'backgroundColor', color);
+      }
+    },
+
+    'backgroundImage': (function () {
+      var url_regexp = new RegExp("^url\\((.*)\\)");
+      return {
+        get: function () {
+          var url = get_element_property(this.element, 'backgroundImage');
+          url = (url === "none") ? null : url.match(url_regexp);
+          //returns the captured substring match
+          return url ? url[1] : null;
+        },
+        set: function (image) {
+          if (!image) {
+            return set_element_property(this.element, 'backgroundImage', null);
+          }
+          //a string can be a page element or url
+          if (typeof image === 'string') {
+            if (image[0] === '#') {
+              image = get_element(image).src;
+            }
+          } else if (image && image.tagName === 'IMG') {
+            //passed an image element
+            image = image.src;
+          }
+          /*DEBUG*/
+          check_string_type(image, this+'.backgroundImage');
+          /*END_DEBUG*/
+
+          //url path at this point, make sure it's in the proper format
+          if (!url_regexp.test(image)) {
+            image = "url("+ encodeURI(image) +")";
+          }
+          return set_element_property(this.element, 'backgroundImage', image);
+        }
+      };
+    }()),
+
+    /* Default is repeat.
+     */
+    'backgroundRepeat': {
+      get: function () {
+        return get_element_property(this.element, 'backgroundRepeat');
+      },
+      set: function (repeat) {
+        /*DEBUG*/
+        check_string_type(repeat, this+'.backgroundRepeat');
+        if (repeat === 'repeat' || repeat === 'repeat-x' || repeat === 'repeat-y' ||
+            repeat === 'no-repeat' || repeat === 'inherit' ){
+          true;
+        } else {
+          throw new SyntaxError(this+'.backgroundRepeat: Invalid CSS value.');
+        }
+        /*END_DEBUG*/
+        return set_element_property(this.element, 'backgroundRepeat', repeat);
+      }
+    },
+
+    /* Layer must have it's own alpha since a canvas by
+     * default is rgba(0,0,0,0)
+     */
+    'alpha': {
+      get: function () {
+        var color = rgb_str_to_rgb(get_style_property(this.element, 'backgroundColor')),
+        alpha = color[3];
+        return (typeof alpha === 'number') ? alpha : 1;
+      },
+      set: function (alpha) {
+        /*DEBUG*/
+        check_number_type(alpha, this+'.alpha');
+        /*END_DEBUG*/
+        var color = get_style_property(this.element, 'backgroundColor'),
+        rgb = rgb_str_to_rgb(color),
+        rgba_str = rgb_to_rgb_str(rgb[0], rgb[1], rgb[2], alpha);
+        this.element.style.backgroundColor = rgba_str;
+      }
+    },
+
+    'visible': {
+      get: function () {
+        switch (get_element_property(this.element, 'visibility')) {
+        case 'visible':
+          return true;
+        case 'hidden':
+          return false;
+        default:
+          throw new ReferenceError(this+".visible: Unable to determine visibility.");
+        }
+      },
+      set: function (isVisible) {
+        /*DEBUG*/
+        check_boolean_type(isVisible, this+'.visible');
+        /*END_DEBUG*/
+        if (isVisible) {
+          set_element_property(this.element, 'visibility', 'visible');
+        } else {
+          set_element_property(this.element, 'visibility', 'hidden');
+        }
+        return isVisible;
+      }
+    },
+
+    /*
+     * METHODS
+     */
+
+    /* Returns the string representation of the specified object.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object ElementNode]";
+      }
+    }
+    
+  };//end node_static_properties
 }());//end class closure
 
 (function () {
@@ -6312,7 +6429,9 @@ Object.defineProperties(doodle.TextEvent, {
   var layer_properties,
       layer_count = 0,
       check_number_type = doodle.utils.types.check_number_type,
-      check_canvas_type = doodle.utils.types.check_canvas_type;
+      check_canvas_type = doodle.utils.types.check_canvas_type,
+      get_element_property = doodle.utils.get_element_property,
+      set_element_property = doodle.utils.set_element_property;
 
   
   /* Super constructor
@@ -6437,6 +6556,34 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /* Canvas dimensions need to apply to HTML attributes.
+     */
+    'width': {
+        get: function () {
+          return get_element_property(this.element, 'width', 'int');
+        },
+        set: function (n) {
+          /*DEBUG*/
+          check_number_type(n, this+'.width');
+          /*END_DEBUG*/
+          set_element_property(this.element, 'width', n, 'html');
+          return n;
+        }
+      },
+      
+      'height': {
+        get: function () {
+          return get_element_property(this.element, 'height', 'int');
+        },
+        set: function (n) {
+          /*DEBUG*/
+          check_number_type(n, this+'.height');
+          /*END_DEBUG*/
+          set_element_property(this.element, 'height', n, 'html');
+          return n;
+        }
+      },
+
     /*
      * METHODS
      */
@@ -6456,19 +6603,22 @@ Object.defineProperties(doodle.TextEvent, {
   };//end layer_properties
   
 }());//end class closure
-
 (function () {
-
-  var display_properties,
+  var display_static_properties,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
+      check_string_type = doodle.utils.types.check_string_type,
+      check_layer_type = doodle.utils.types.check_layer_type,
+      check_context_type = doodle.utils.types.check_context_type,
       check_block_element = doodle.utils.types.check_block_element,
       get_element = doodle.utils.get_element,
-      check_context_type = doodle.utils.types.check_context_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
+      get_element_property = doodle.utils.get_element_property,
+      set_element_property = doodle.utils.set_element_property
       inheritsSprite = doodle.Sprite.inheritsSprite,
-      Event = doodle.Event,
-      MouseEvent = doodle.MouseEvent,
-      ENTER_FRAME = Event.ENTER_FRAME,
-      enterFrame = Event(ENTER_FRAME),
+      doodle_Event = doodle.Event,
+      doodle_MouseEvent = doodle.MouseEvent,
+      ENTER_FRAME = doodle_Event.ENTER_FRAME,
+      enterFrame = doodle_Event(ENTER_FRAME),
       dispatcher_queue = doodle.EventDispatcher.dispatcher_queue;
   
   /* Super constructor
@@ -6493,7 +6643,7 @@ Object.defineProperties(doodle.TextEvent, {
       throw new SyntaxError("[object Display]: Invalid number of parameters.");
     }
 
-    Object.defineProperties(display, display_properties);
+    Object.defineProperties(display, display_static_properties);
     //properties that require privacy
     Object.defineProperties(display, {
       'element': {
@@ -6525,11 +6675,11 @@ Object.defineProperties(doodle.TextEvent, {
           if (h) { this.height = parseInt(h); }
 
           //add listeners to dom events that we'll re-dispatch to the scene graph
-          for (type in doodle.MouseEvent) {
-            element.addEventListener(doodle.MouseEvent[type], dispatch_mouse_event, false);
+          for (type in doodle_MouseEvent) {
+            element.addEventListener(doodle_MouseEvent[type], dispatch_mouse_event, false);
           }
 
-          element.addEventListener(doodle.MouseEvent.MOUSE_MOVE, function (evt) {
+          element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, function (evt) {
             mouseX = evt.offsetX;
             mouseY = evt.offsetY;
           });
@@ -6643,8 +6793,8 @@ Object.defineProperties(doodle.TextEvent, {
 
     /* Redraw scene graph when children are added and removed.
      */
-    display.addEventListener(Event.ADDED, redraw_scene_graph);
-    display.addEventListener(Event.REMOVED, redraw_scene_graph);
+    display.addEventListener(doodle_Event.ADDED, redraw_scene_graph);
+    display.addEventListener(doodle_Event.REMOVED, redraw_scene_graph);
 
     //draw_scene_graph(display);
     redraw_scene_graph();
@@ -6773,11 +6923,10 @@ Object.defineProperties(doodle.TextEvent, {
       //offset is relative to div, however this implementation adds 1 to y?
       var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
           dq_len = dispatcher_queue.length,
-          MouseEvent = doodle.MouseEvent,
-          MOUSE_OVER = MouseEvent.MOUSE_OVER,
-          MOUSE_OUT = MouseEvent.MOUSE_OUT,
-          MOUSE_MOVE = MouseEvent.MOUSE_MOVE,
-          evt = MouseEvent(event), //wrap dom event in doodle event
+          MOUSE_OVER = doodle_MouseEvent.MOUSE_OVER,
+          MOUSE_OUT = doodle_MouseEvent.MOUSE_OUT,
+          MOUSE_MOVE = doodle_MouseEvent.MOUSE_MOVE,
+          evt = doodle_MouseEvent(event), //wrap dom event in doodle event
           evt_type = evt.type,
           local_pt;
 
@@ -6860,183 +7009,140 @@ Object.defineProperties(doodle.TextEvent, {
   };//end doodle.Display
 
   
-  (function () {
-    var check_string_type = doodle.utils.types.check_string_type,
-        check_number_type = doodle.utils.types.check_number_type,
-        check_layer_type = doodle.utils.types.check_layer_type;
-    
-    display_properties = {
-      /*
-       * PROPERTIES
-       */
-
-      'width': {
-        get: function () {
-          //just using css style properties for now
-          return parseInt(this.element.style.width);
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.width');
-          /*END_DEBUG*/
-          this.element.style.width = n + "px"; //css style takes a string
-          //re-adjust all layer child nodes as well
-          this.children.forEach(function (layer) {
-            layer.width = n;
-          });
-        }
+  display_static_properties = {
+    'width': {
+      get: function () {
+        return get_element_property(this.element, 'width', 'int');
       },
-      
-      'height': {
-        get: function () {
-          return parseInt(this.element.style.height);
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.height');
-          /*END_DEBUG*/
-          this.element.style.height = n + "px";
-          this.children.forEach(function (layer) {
-            layer.height = n;
-          });
-        }
-      },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.width');
+        /*END_DEBUG*/
+        set_element_property(this.element, 'width', n+"px");
+        //cascade down to our canvas layers
+        this.children.forEach(function (layer) {
+          layer.width = n;
+        });
+        return n;
+      }
+    },
 
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object Display]";
-        }
+    'height': {
+      get: function () {
+        return get_element_property(this.element, 'height', 'int');
       },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.height');
+        /*END_DEBUG*/
+        set_element_property(this.element, 'height', n+"px");
+        //cascade down to our canvas layers
+        this.children.forEach(function (layer) {
+          layer.height = n;
+        });
+        return n;
+      }
+    },
 
-      'toDataUrl': {
-        value: function () {
-          //iterate over each canvas layer,
-          //output image data and merge in new file
-          //output that image data
-          return;
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Display]";
+      }
+    },
+
+    'toDataUrl': {
+      value: function () {
+        //iterate over each canvas layer,
+        //output image data and merge in new file
+        //output that image data
+        return;
+      }
+    },
+
+    'addChildAt': {
+      value: function (layer, index) {
+        /*DEBUG*/
+        check_layer_type(layer, this+'.addChildAt', '*layer*, index');
+        check_number_type(index, this+'.addChildAt', 'layer, *index*');
+        /*END_DEBUG*/
+        
+        //if has previous parent, remove from it's children
+        if (layer.parent !== null && layer.parent !== this) {
+          layer.parent.removeChild(node);
         }
-      },
+        //set ancestry
+        layer.root = this;
+        layer.parent = this;
+        //set layer size to display size
+        layer.width = this.width;
+        layer.height = this.height;
+        //add to children
+        this.children.splice(index, 0, layer);
+        //add dom element
+        this.element.appendChild(layer.element);
+        return this;
+      }
+    },
 
-      'backgroundColor': {
-        get: function () {
-          var color = this.element.style.backgroundColor;
-          if (/rgba?.*/.test(color)) {
-            color = doodle.utils.rgb_str_to_hex(color);
-          }
-          return color;
-        },
-        set: function (color) {
-          if (typeof color === 'number') {
-            color = doodle.utils.hex_to_rgb_str(color);
-          }
-          this.element.style.backgroundColor = color;
-        }
-      },
+    'removeChildAt': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (index) {
+        /*DEBUG*/
+        check_number_type(index, this+'.removeChildAt', '*index*');
+        /*END_DEBUG*/
+        var layer = this.children[index];
+        layer.root = null;
+        layer.parent = null;
+        //remove from children
+        this.children.splice(index, 1);
+        //remove from dom
+        this.element.removeChild(layer.element);
+      }
+    },
 
-      'backgroundImage': {
-        get: function () {
-          //returns the captured substring match
-          var image_url = this.element.style.backgroundImage.match(/^url\((.*)\)$/);
-          return image_url ? image_url[1] : false;
-        },
-        set: function (image_url) {
-          //check image
-          //defaults to no-repeat, top-left
-          //other options must change the element.style.background- properties
-          var element_style = this.element.style;
-          if (!element_style.backgroundRepeat ||
-              /(\srepeat\s)|(\srepeat-[xy]\s)/.test(element_style.background)) {
-            element_style.backgroundRepeat = 'no-repeat';
-          }
-          element_style.backgroundImage = "url(" + image_url + ")";
-        }
-      },
-
-      'addChildAt': {
-        value: function (layer, index) {
-          /*DEBUG*/
-          check_layer_type(layer, this+'.addChildAt', '*layer*, index');
-          check_number_type(index, this+'.addChildAt', 'layer, *index*');
-          /*END_DEBUG*/
-          
-          //if has previous parent, remove from it's children
-          if (layer.parent !== null && layer.parent !== this) {
-            layer.parent.removeChild(node);
-          }
-          //set ancestry
-          layer.root = this;
-          layer.parent = this;
-          //set layer size to display size
-          layer.width = this.width;
-          layer.height = this.height;
-          //add to children
-          this.children.splice(index, 0, layer);
-          //add dom element
-          this.element.appendChild(layer.element);
-          return this;
-        }
-      },
-
-      'removeChildAt': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (index) {
-          /*DEBUG*/
-          check_number_type(index, this+'.removeChildAt', '*index*');
-          /*END_DEBUG*/
-          var layer = this.children[index];
-          layer.root = null;
-          layer.parent = null;
-          //remove from children
-          this.children.splice(index, 1);
-          //remove from dom
-          this.element.removeChild(layer.element);
-        }
-      },
-
-      'swapChildrenAt': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (index1, index2) {
-          /*DEBUG*/
-          check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
-          check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
-          /*END_DEBUG*/
-          var a = this.children;
-          a[index1] = a.splice(index2, 1, a[index1])[0];
-          //swap dom elements
-          if (index1 > index2) {
-            this.element.insertBefore(a[index2].element, a[index1].element);
-          } else {
-            this.element.insertBefore(a[index1].element, a[index2].element);
-          }
-        }
-      },
-
-      /* Convenience methods.
-       */
-      'addLayer': {
-        value: function (id) {
-          var layer = doodle.Layer(id); //layer will auto-name
-          this.addChild(layer);
-          return layer;
-        }
-      },
-
-      'removeLayer': {
-        value: function (id) {
-          /*DEBUG*/
-          check_string_type(id, this+'.removeLayer', '*id*');
-          /*END_DEBUG*/
-          this.removeChildById(id);
+    'swapChildrenAt': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (index1, index2) {
+        /*DEBUG*/
+        check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
+        check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
+        /*END_DEBUG*/
+        var a = this.children;
+        a[index1] = a.splice(index2, 1, a[index1])[0];
+        //swap dom elements
+        if (index1 > index2) {
+          this.element.insertBefore(a[index2].element, a[index1].element);
+        } else {
+          this.element.insertBefore(a[index1].element, a[index2].element);
         }
       }
-      
-    };//end display_properties
-  }());
+    },
+
+    /* Convenience methods.
+     */
+    'addLayer': {
+      value: function (id) {
+        var layer = doodle.Layer(id); //layer will auto-name
+        this.addChild(layer);
+        return layer;
+      }
+    },
+
+    'removeLayer': {
+      value: function (id) {
+        /*DEBUG*/
+        check_string_type(id, this+'.removeLayer', '*id*');
+        /*END_DEBUG*/
+        this.removeChildById(id);
+      }
+    }
+    
+  };//end display_static_properties
 }());//end class closure
