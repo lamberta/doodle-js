@@ -13,25 +13,21 @@
 (function () {
 
   var sprite_properties,
-      bounds_properties,
       isSprite,
       inheritsSprite,
       check_sprite_type,
-      hex_to_rgb = doodle.utils.hex_to_rgb,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_array_type = doodle.utils.types.check_array_type,
-      isMatrix = doodle.geom.Matrix.isMatrix,
-      check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
       inheritsNode = doodle.Node.inheritsNode,
       get_element = doodle.utils.get_element,
-      Rectangle = doodle.geom.Rectangle;
+      doodle_Rectangle = doodle.geom.Rectangle;
 
 
   /* Super constructor
@@ -49,9 +45,6 @@
         bounds_max_y = 0,
         graphics_cursor_x = 0,
         graphics_cursor_y = 0;
-
-    /**for testing**/
-    dc_check = draw_commands;
     
     //inherits from doodle.Node, if string pass along id
     sprite = (typeof id === 'string') ?
@@ -126,7 +119,7 @@
             throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
           }
           /*END_DEBUG*/
-          var bounding_box = Rectangle(),
+          var bounding_box = doodle_Rectangle(),
               w = this.width,
               h = this.height,
               //transform corners to global
@@ -765,54 +758,59 @@
             writable: false,
             configurable: false,
             value: (function (image, repeat) {
-              var img = null, //image after loaded
-                  _img, //image before loaded
+              var img_loaded = null, //image after loaded
                   on_image_error,
                   Pattern = doodle.Pattern,
-                  Event = doodle.Event;
+                  doodle_Event = doodle.Event;
               
               repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
               /*DEBUG*/
-              check_string_type(repeat, this+'.graphics.beginPatternFill', 'image,*repeat*');
+              check_string_type(repeat, this+'.graphics.beginPatternFill', 'image, *repeat*');
               /*END_DEBUG*/
               if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
                   repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
-                throw new SyntaxError(this+'.graphics.beginPatternFill(image,*repeat*): Invalid pattern repeat type.');
+                throw new SyntaxError(this+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
               }
-
-              //given element id
-              if (typeof image === 'string' && image[0] === '#') {
-                image = get_element(image, this+'.beginPatternFill');
-              }
+              
               if (typeof image === 'string') {
-                //src url
-                _img = new Image();
-                _img.src = encodeURI(image);
-              } else if (image && image.tagName === 'IMG') {
-                _img = image;
-              } else {
-                throw new TypeError(this+'.graphics.beginPatternFill(*image*,repeat): Parameter must be an src url, image object, or element id.');
+                //element id
+                if (image[0] === '#') {
+                  image = get_element(image, this+'.beginPatternFill');
+                } else {
+                  //url
+                  (function () {
+                    var img_url = encodeURI(image);
+                    image = new Image();
+                    image.src = img_url;
+                  }());
+                }
               }
+              
+              /*DEBUG*/
+              if (image && image.tagName !== 'IMG') {
+                throw new TypeError(this+'.graphics.beginPatternFill(*image*, repeat): Parameter must be an src url, image object, or element id.');
+              }
+              /*END_DEBUG*/
 
               //check if image has already been loaded
-              if (_img.complete) {
-                img = _img;
+              if (image.complete) {
+                img_loaded = image;
               } else {
                 //if not, assign load handlers
-                _img.onload = (function () {
-                  img = _img;
-                  this.dispatchEvent(Event(Event.LOAD));
+                image.onload = (function () {
+                  img_loaded = image;
+                  this.dispatchEvent(doodle_Event(doodle_Event.LOAD));
                 }).bind(this);
                 on_image_error = (function () {
-                  throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + _img.src);
+                  throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + image.src);
                 }).bind(this);
-                _img.onerror = on_image_error;
-                _img.onabort = on_image_error;
+                image.onerror = on_image_error;
+                image.onabort = on_image_error;
               }
               
               draw_commands.push(function (ctx) {
-                if (img) {
-                  ctx.fillStyle = ctx.createPattern(img, repeat);
+                if (img_loaded) {
+                  ctx.fillStyle = ctx.createPattern(img_loaded, repeat);
                 } else {
                   //use transparent fill until image is loaded
                   ctx.fillStyle = 'rgba(0,0,0,0)';
