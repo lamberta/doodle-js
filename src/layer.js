@@ -2,9 +2,8 @@
 (function () {
 
   var layer_properties,
-      isLayer,
-      inheritsLayer,
       layer_count = 0,
+      check_number_type = doodle.utils.types.check_number_type,
       check_canvas_type = doodle.utils.types.check_canvas_type;
 
   
@@ -39,7 +38,23 @@
           /*END_DEBUG*/
           element = canvas;
         }
-      }
+      },
+
+      /* Layer has it's own alpha since canvas backgroundColor default is rgba(0,0,0,0)
+       * What happens when I change it's background?
+       */
+      'alpha': (function () {
+        var alpha = 1;
+        return {
+          get: function () { return alpha; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.alpha');
+            /*END_DEBUG*/
+            alpha = (n < 0) ? 0 : ((n > 1) ? 1 : n);
+          }
+        };
+      }())
     });
 
     //init
@@ -60,79 +75,76 @@
     return layer;
   };
 
-  
-  /*
-   * CLASS METHODS
-   */
+  (function () {
+    /*
+     * CLASS METHODS
+     */
 
-  /* Test if an object is an node.
-   * Not the best way to test object, but it'll do for now.
-   * @param {Object} obj
-   * @return {Boolean}
-   */
-  isLayer = doodle.Layer.isLayer = function (obj) {
-    return obj.toString() === '[object Layer]';
-  };
+    /* Test if an object is an node.
+     * Not the best way to test object, but it'll do for now.
+     * @param {Object} obj
+     * @return {Boolean}
+     */
+    var isLayer = doodle.Layer.isLayer = function (obj) {
+      return obj.toString() === '[object Layer]';
+    };
 
-  /* Check if object inherits from node.
-   * @param {Object} obj
-   * @return {Boolean}
-   */
-  inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
-    while (obj) {
-      if (isLayer(obj)) {
+    /* Check if object inherits from node.
+     * @param {Object} obj
+     * @return {Boolean}
+     */
+    var inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
+      while (obj) {
+        if (isLayer(obj)) {
+          return true;
+        } else {
+          if (typeof obj !== 'object') {
+            return false;
+          }
+          obj = Object.getPrototypeOf(obj);
+        }
+      }
+      return false;
+    };
+
+    doodle.utils.types.check_layer_type = function (layer, caller, param) {
+      if (inheritsLayer(layer)) {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
-        obj = Object.getPrototypeOf(obj);
+        caller = (caller === undefined) ? "check_layer_type" : caller;
+        param = (param === undefined) ? "" : '('+param+')';
+        throw new TypeError(caller + param +": Parameter must be a Layer.");
       }
-    }
-    return false;
-  };
-
-  doodle.utils.types.check_layer_type = function (layer, caller_name) {
-    if (!inheritsLayer(layer)) {
-      caller_name = (caller_name === undefined) ? "check_layer_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a layer.");
-    } else {
-      return true;
-    }
-  };
-
-
-  (function () {
-    var check_number_type = doodle.utils.types.check_number_type,
-        check_string_type = doodle.utils.types.check_string_type;
+    };
     
-    layer_properties = {
-      /*
-       * PROPERTIES
-       */
-
-      'context': {
-        get: function () {
-          return this.element.getContext('2d');
-        }
-      },
-
-      /*
-       * METHODS
-       */
-
-      /* Returns the string representation of the specified object.
-       * @return {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object Layer]";
-        }
-      }
-      
-    };//end layer_properties
   }());
+
+  layer_properties = {
+    /*
+     * PROPERTIES
+     */
+    'context': {
+      get: function () {
+        return this.element.getContext('2d');
+      }
+    },
+
+    /*
+     * METHODS
+     */
+
+    /* Returns the string representation of the specified object.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Layer]";
+      }
+    }
+    
+  };//end layer_properties
+  
 }());//end class closure
