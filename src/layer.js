@@ -4,7 +4,9 @@
   var layer_properties,
       layer_count = 0,
       check_number_type = doodle.utils.types.check_number_type,
-      check_canvas_type = doodle.utils.types.check_canvas_type;
+      check_canvas_type = doodle.utils.types.check_canvas_type,
+      get_element_property = doodle.utils.get_element_property,
+      set_element_property = doodle.utils.set_element_property;
 
   
   /* Super constructor
@@ -128,6 +130,34 @@
         return this.element.getContext('2d');
       }
     },
+
+    /* Canvas dimensions need to apply to HTML attributes.
+     */
+    'width': {
+        get: function () {
+          return get_element_property(this.element, 'width', 'int');
+        },
+        set: function (n) {
+          /*DEBUG*/
+          check_number_type(n, this+'.width');
+          /*END_DEBUG*/
+          set_element_property(this.element, 'width', n, 'html');
+          return n;
+        }
+      },
+      
+      'height': {
+        get: function () {
+          return get_element_property(this.element, 'height', 'int');
+        },
+        set: function (n) {
+          /*DEBUG*/
+          check_number_type(n, this+'.height');
+          /*END_DEBUG*/
+          set_element_property(this.element, 'height', n, 'html');
+          return n;
+        }
+      },
 
     /*
      * METHODS

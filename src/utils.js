@@ -10,20 +10,21 @@ doodle.utils = {
   },
 
   rgb_str_to_hex: function (rgb_str) {
+    var utils = doodle.utils;
     /*DEBUG*/
     if (typeof rgb_str !== 'string') {
       throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
     }
     /*END_DEBUG*/
     
-    var rgb = this.rgb_str_to_rgb(rgb_str);
+    var rgb = utils.rgb_str_to_rgb(rgb_str);
     
     /*DEBUG*/
     if (!Array.isArray(rgb)) {
       throw new SyntaxError('rgb_str_to_hex(rgb_str): Parameter must be in the format: "rgb(n, n, n)".');
     }
     /*END_DEBUG*/
-    return this.rgb_to_hex(parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10));
+    return utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
   },
   
   rgb_to_rgb_str: function (r, g, b, a) {
@@ -34,7 +35,7 @@ doodle.utils = {
     doodle.utils.types.check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
     doodle.utils.types.check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
     /*END_DEBUG*/
-		a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
+    a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
     if (a === 1) {
       return "rgb("+ r +","+ g +","+ b +")";
     } else {
@@ -80,14 +81,15 @@ doodle.utils = {
   },
 
   hex_to_rgb_str: function (color, alpha) {
+    var utils = doodle.utils;
     alpha = (alpha === undefined) ? 1 : alpha;
     /*DEBUG*/
     if (typeof alpha !== 'number') {
       throw new TypeError("hex_to_rgb_str(color, *alpha*): Parameter must be a number.");
     }
     /*END_DEBUG*/
-    color = doodle.utils.hex_to_rgb(color);
-		return doodle.utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
+    color = utils.hex_to_rgb(color);
+    return utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
   }
 };
 
@@ -204,4 +206,56 @@ doodle.utils.get_style_property = function (element, property) {
   } catch (e) {
     throw new ReferenceError("get_style_property: Cannot read property '"+property+"' of "+element+".");
   }
+};
+
+/* Returns property of an element.
+ * CSS properties take precedence over HTML attributes.
+ * @param type {String} 'int'|'float' Return type.
+ */
+doodle.utils.get_element_property = function (element, property, type) {
+  try {
+    var val = doodle.utils.get_style_property(element, property);
+  } catch (e) {
+    val = undefined;
+  }
+  if (val === undefined || val === null) {
+    val = element.getAttribute(property);
+  }
+  if (type !== undefined) {
+    switch (type) {
+    case 'int':
+      val = parseInt(val, 10);
+      val = isNaN(val) ? null : val;
+      break;
+    case 'float':
+      val = parseFloat(val);
+      val = isNaN(val) ? null : val;
+      break;
+    default:
+      break;
+    }
+  }
+  return val;
+};
+
+/*
+ * @param type {String} 'css'|'html' Set CSS property or HTML attribute.
+ */
+doodle.utils.set_element_property = function (element, property, value, type) {
+  type = (type === undefined) ? 'css' : type;
+  /*DEBUG*/
+  doodle.utils.types.check_string_type(property, 'set_element_property', 'element, *property*, value, type');
+  doodle.utils.types.check_string_type(type, 'set_element_property', 'element, property, value, *type*');
+  /*END_DEBUG*/
+  switch (type) {
+  case 'css':
+    element.style[property] = value;
+    break;
+  case 'html':
+    element.setAttribute(property, value);
+    break;
+  default:
+    throw new SyntaxError("set_element_property: type must be 'css' property or 'html' attribute.");
+  }
+  return value;
 };
