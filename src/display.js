@@ -6,6 +6,7 @@
       check_layer_type = doodle.utils.types.check_layer_type,
       check_context_type = doodle.utils.types.check_context_type,
       check_block_element = doodle.utils.types.check_block_element,
+      isLayer = doodle.Layer.isLayer,
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property
@@ -275,8 +276,10 @@
           }
           
           //apply alpha to node and it's children
-          if (child.alpha !== 1) {
-            context.globalAlpha = child.alpha;
+          if (!isLayer(child)) {
+            if (child.alpha !== 1) {
+              context.globalAlpha = child.alpha;
+            }
           }
           
           if (typeof child.__draw === 'function') {

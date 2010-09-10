@@ -158,23 +158,16 @@
       }
     },
 
-    /* Layer must have it's own alpha since a canvas by
-     * default is rgba(0,0,0,0)
-     */
-    'alpha': {
+		'alpha': {
       get: function () {
-        var color = rgb_str_to_rgb(get_style_property(this.element, 'backgroundColor')),
-        alpha = color[3];
-        return (typeof alpha === 'number') ? alpha : 1;
+        return get_element_property(this.element, 'opacity', 'float');
       },
       set: function (alpha) {
         /*DEBUG*/
         check_number_type(alpha, this+'.alpha');
+				alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
         /*END_DEBUG*/
-        var color = get_style_property(this.element, 'backgroundColor'),
-        rgb = rgb_str_to_rgb(color),
-        rgba_str = rgb_to_rgb_str(rgb[0], rgb[1], rgb[2], alpha);
-        this.element.style.backgroundColor = rgba_str;
+        return set_element_property(this.element, 'opacity', alpha);
       }
     },
 
