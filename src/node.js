@@ -210,11 +210,10 @@
       value: {x: this.x, y: this.y}
     },
 
+    /*
     'rotate': { //around external point?
       value: function (deg) {
-        /*DEBUG*/
         check_number_type(deg, this+'.rotate', '*degrees*');
-        /*END_DEBUG*/
 
         if (this.axis.x !== undefined && this.axis.y !== undefined) {
           this.transform.rotateAroundInternalPoint(this.axis, deg*to_radians);
@@ -223,15 +222,14 @@
         }
       }
     },
-
-    /*
-      'rotate': { //around external point?
-      value: function (deg) {
-      check_number_type(deg, this+'.rotate');
-      this.transform.rotate(deg * to_radians);
-      }
-      },
     */
+
+    'rotate': { //around external point?
+      value: function (deg) {
+        check_number_type(deg, this+'.rotate');
+        this.transform.rotate(deg * to_radians);
+      }
+    },
     
     'rotation': {
       enumerable: true,

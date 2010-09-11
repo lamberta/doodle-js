@@ -2,7 +2,6 @@
   var matrix_static_properties,
       isMatrix,
       check_matrix_type,
-      doodle_Matrix = doodle.geom.Matrix,
       doodle_Point = doodle.geom.Point,
       check_number_type = doodle.utils.types.check_number_type,
       check_point_type = doodle.utils.types.check_point_type,
@@ -15,7 +14,7 @@
    * @param {Number|Array|Matrix|Function} (a, b, c, d, tx, ty)|initializer
    * @return {Object}
    */
-  doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
+  doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
         arg_len = arguments.length,
         init_obj; //function, array, matrix
