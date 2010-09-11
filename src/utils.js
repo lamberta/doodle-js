@@ -1,3 +1,4 @@
+/*globals doodle, document*/
 doodle.utils = {
   rgb_to_hex: function (r, g, b) {
     /*DEBUG*/
@@ -173,21 +174,14 @@ doodle.utils.types = (function () {
 
 /* Returns HTML element from id name or element itself.
  */
-doodle.utils.get_element = function (id, caller) {
-  var element;
+doodle.utils.get_element = function (id) {
   if (typeof id === 'string') {
     //lop off pound-sign if given
     id = (id[0] === '#') ? id.slice(1) : id;
-    element = document.getElementById(id);
   } else {
-    //there's gotta be some checking I could do, right?
-    element = id;
+    id = (id && id.id) ? id.id : null;
   }
-  if (!element) {
-    caller = (caller === undefined) ? "get_element" : caller;
-    throw new ReferenceError(caller + ": Unable to get HTML element: " + id);
-  }
-  return element;
+  return document.getElementById(id);
 };
 
 /* Returns css property of element, it's own or inherited.
@@ -213,8 +207,9 @@ doodle.utils.get_style_property = function (element, property) {
  * @param type {String} 'int'|'float' Return type.
  */
 doodle.utils.get_element_property = function (element, property, type) {
+  var val;
   try {
-    var val = doodle.utils.get_style_property(element, property);
+    val = doodle.utils.get_style_property(element, property);
   } catch (e) {
     val = undefined;
   }
