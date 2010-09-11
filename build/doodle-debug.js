@@ -4124,48 +4124,391 @@ Object.defineProperties(doodle.TextEvent, {
     };//end rect_properties definition
   }());
 }());//end class closure
-
 (function () {
-  var evtdisp_properties,
-      isEventDispatcher;
+  var evtDisp_static_properties,
+      dispatcher_queue,
+      isEventDispatcher,
+      inheritsEventDispatcher,
+      check_string_type = doodle.utils.types.check_string_type,
+      check_function_type = doodle.utils.types.check_function_type,
+      check_event_type = doodle.utils.types.check_event_type;
   
   /* Super constructor
    * @param {Function} initializer
    * @return {Object}
    */
   doodle.EventDispatcher = function () {
-    var arg_len = arguments.length,
-        initializer,
-        evt_disp = {},
-        eventListeners = {};
-    
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-    } else if (arg_len > 0) {
-      throw new SyntaxError("[object EventDispatcher]: Invalid number of parameters.");
-    }
+    var evt_disp = {};
 
-    Object.defineProperties(evt_disp, evtdisp_properties);
+    /*DEBUG*/
+    if (typeof arguments[0] !== 'function') {
+      if (arguments.length > 0) {
+        throw new SyntaxError("[object EventDispatcher]: Invalid number of parameters.");
+      }
+    }
+    /*END_DEBUG*/
+
+    Object.defineProperties(evt_disp, evtDisp_static_properties);
     //properties that require privacy
     Object.defineProperties(evt_disp, {
-      'eventListeners': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return eventListeners; }
-      }
-    });
+      'eventListeners': (function () {
+        var event_listeners = {};
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return event_listeners; }
+        };
+      }())
+    });//end defineProperties
 
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(evt_disp);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      arguments[0].call(evt_disp);
     }
 
     return evt_disp;
   };
 
+  
+  evtDisp_static_properties = {
+    /* Returns the string representation of the specified object.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object EventDispatcher]";
+      }
+    },
+
+    /* Call function passing object as 'this'.
+     * @param {Function} fn
+     * @return {Object}
+     */
+    'modify': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (fn) {
+        /*DEBUG*/
+        check_function_type(fn, this+'.modify', '*function*');
+        /*END_DEBUG*/
+        fn.call(this);
+        return this;
+      }
+    },
+
+    /* Registers an event listener object with an EventDispatcher object
+     * so that the listener receives notification of an event.
+     * @param {String} type
+     * @param {Function} listener
+     * @param {Boolean} useCapture
+     */
+    'addEventListener': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (type, listener, useCapture) {
+        useCapture = useCapture === true; //default to false, bubble event
+        /*DEBUG*/
+        check_string_type(type, this+'.addEventListener', '*type*, listener, useCapture');
+        check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
+        /*END_DEBUG*/
+        
+        var self = this;
+        //if new event type, create it's array to store callbacks
+        if (!this.eventListeners[type]) {
+          this.eventListeners[type] = {capture:[], bubble:[]};
+        }
+        this.eventListeners[type][useCapture ? 'capture':'bubble'].push(listener);
+        
+        //object ready for events, add to receivers if not already there
+        if (dispatcher_queue.every(function(obj) { return self !== obj; })) {
+          dispatcher_queue.push(self);
+        }
+      }
+    },
+
+    /* Removes a listener from the EventDispatcher object.
+     * @param {String} type
+     * @param {Function} listener
+     * @param {Boolean} useCapture
+     */
+    'removeEventListener': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (type, listener, useCapture) {
+        useCapture = useCapture === true; //default to false, bubble event
+        /*DEBUG*/
+        check_string_type(type, this+'.removeEventListener', '*type*, listener, useCapture');
+        check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
+        /*END_DEBUG*/
+        
+        //make sure event type exists
+        if (this.eventListeners[type]) {
+          //grab our event type array and remove the callback function
+          var evt_type = this.eventListeners[type],
+          listeners = evt_type[useCapture ? 'capture':'bubble'];
+
+          listeners.splice(listeners.indexOf(listener), 1);
+          
+          //if none left, remove event type
+          if (evt_type.capture.length === 0 && evt_type.bubble.length === 0) {
+            delete this.eventListeners[type];
+          }
+          //if no more listeners, remove from object queue
+          if (Object.keys(this.eventListeners).length === 0) {
+            dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
+          }
+        }
+      }
+    },
+
+    /* Lookup and call listener if registered for specific event type.
+     * @param {Event} event
+     * @return {Boolean} true if node has listeners of event type.
+     */
+    'handleEvent': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (event) {
+        /*DEBUG*/
+        check_event_type(event, this+'.handleEvent');
+        /*END_DEBUG*/
+        
+        //check for listeners that match event type
+        //if capture not set, using bubble listeners - like for AT_TARGET phase
+        var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
+            listeners = this.eventListeners[event.type], //obj
+            count = 0, //listener count
+            rv,  //return value of handler
+            i; //counter
+
+        listeners = listeners && listeners[phase];
+        if (listeners && listeners.length > 0) {
+          //currentTarget is the object with addEventListener
+          event.__setCurrentTarget(this);
+          
+          //if we have any, call each handler with event object
+          count = listeners.length;
+          for (i = 0; i < count; i += 1) {
+            check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
+            //pass event to handler
+            rv = listeners[i].call(this, event);
+            
+            //when event.stopPropagation is called
+            //cancel event for other nodes, but check other handlers on this one
+            //returning false from handler does the same thing
+            if (rv === false || event.returnValue === false) {
+              //set event stopped if not already
+              if (!event.__cancel) {
+                event.stopPropagation();
+              }
+            }
+            //when event.stopImmediatePropagation is called
+            //ignore other handlers on this target
+            if (event.__cancelNow) {
+              break;
+            }
+          }
+        }
+        
+        //any handlers found on this node?
+        return (count > 0) ? true : false;
+      }
+    },
+    
+    /* Dispatches an event into the event flow. The event target is the
+     * EventDispatcher object upon which the dispatchEvent() method is called.
+     * @param {Event} event
+     * @return {Boolean} true if the event was successfully dispatched.
+     */
+    'dispatchEvent': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (event) {
+        //events are dispatched from the child,
+        //capturing goes down to the child, bubbling then goes back up
+        var target,
+            node,
+            node_path = [],
+            len, //count of nodes up to root
+            i; //counter
+
+        /*DEBUG*/
+        check_event_type(event, this+'.dispatchEvent', '*event*');
+        /*END_DEBUG*/
+
+        //can't dispatch an event that's already stopped
+        if (event.__cancel) {
+          return false;
+        }
+        
+        //set target to the object that dispatched it
+        //if already set, then we're re-dispatching an event for another target
+        if (!event.target) {
+          event.__setTarget(this);
+        }
+
+        target = event.target;
+        //path starts at node parent
+        node = target.parent || null;
+
+        //create path from node's parent to top of tree
+        while (node) {
+          node_path.push(node);
+          node = node.parent;
+        }
+
+        //enter capture phase: down the tree
+        event.__setEventPhase(event.CAPTURING_PHASE);
+        i = len = node_path.length;
+        while ((i=i-1) >= 0) {
+          node_path[i].handleEvent(event);
+          //was the event stopped inside the handler?
+          if (event.__cancel) {
+            return true;
+          }
+        }
+
+        //enter target phase
+        event.__setEventPhase(event.AT_TARGET);
+        target.handleEvent(event);
+        //was the event stopped inside the handler?
+        if (event.__cancel) {
+          return true;
+        }
+
+        //does event bubble, or bubbling cancelled in capture/target phase?
+        if (!event.bubbles || event.cancelBubble) {
+          return true;
+        }
+
+        //enter bubble phase: back up the tree
+        event.__setEventPhase(event.BUBBLING_PHASE);
+        for (i = 0; i < len; i = i+1) {
+          node_path[i].handleEvent(event);
+          //was the event stopped inside the handler?
+          if (event.__cancel || event.cancelBubble) {
+            return true;
+          }
+        }
+
+        return true; //dispatched successfully
+      }
+    },
+
+    /* Dispatches an event to every object with an active listener.
+     * Ignores propagation path, objects come from 
+     * @param {Event} event
+     * @return {Boolean} true if the event was successfully dispatched.
+     */
+    'broadcastEvent': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (event) {
+        var receivers, //event listeners of correct type
+            len, //count of event listeners
+            i; //counter
+        
+        /*DEBUG*/
+        check_event_type(event, this+'.broadcastEvent', '*event*');
+        /*END_DEBUG*/
+
+        if (event.__cancel) {
+          throw new Error(this+'.broadcastEvent: Can not dispatch a cancelled event.');
+        }
+        
+        //set target to the object that dispatched it
+        //if already set, then we're re-dispatching an event for another target
+        if (!event.target) {
+          event.__setTarget(this);
+        }
+        
+        //pare down to eligible receivers with event type listener
+        receivers = dispatcher_queue.filter(function (obj) {
+          return obj.hasEventListener(event.type);
+        });
+        
+        //and call each
+        for (i = 0, len = receivers.length; i < len; i=i+1) {
+          receivers[i].handleEvent(event);
+          //event cancelled in listener?
+          if (event.__cancel) {
+            break;
+          }
+        }
+        
+        return true;
+      }
+    },
+
+    /* Checks whether the EventDispatcher object has any listeners
+     * registered for a specific type of event.
+     * @param {String} type
+     * @return {Boolean}
+     */
+    'hasEventListener': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (type) {
+        /*DEBUG*/
+        check_string_type(type, this+'.hasEventListener', '*type*');
+        /*END_DEBUG*/
+        return this.eventListeners !== null && this.eventListeners.hasOwnProperty(type);
+      }
+    },
+
+    /* Checks whether an event listener is registered with this EventDispatcher object
+     * or any of its ancestors for the specified event type.
+     * The difference between the hasEventListener() and the willTrigger() methods is
+     * that hasEventListener() examines only the object to which it belongs,
+     * whereas the willTrigger() method examines the entire event flow for the
+     * event specified by the type parameter.
+     * @param {String} type The type of event.
+     * @return {Boolean}
+     */
+    'willTrigger': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (type) {
+        /*DEBUG*/
+        check_string_type(type, this+'.willTrigger', '*type*');
+        /*END_DEBUG*/
+        
+        if (this.hasEventListener(type)) {
+          return true;
+        } else if (!this.children || this.children.length === 0) {
+          //requires scene graph be in place to proceed down the tree
+          return false;
+        } else {
+          for (var i in this.children) {
+            if (this.children[i].willTrigger(type)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
+    
+  };//end evtDisp_static_properties definition
+
+  
+  /*
+   * CLASS PROPERTIES
+   */
+  
   //holds all objects with event listeners
-  doodle.EventDispatcher.dispatcher_queue = [];
+  dispatcher_queue = doodle.EventDispatcher.dispatcher_queue = [];
 
   /* Test if an object is an event dispatcher.
    * Not the best way to test object, but it'll do for now.
@@ -4180,7 +4523,7 @@ Object.defineProperties(doodle.TextEvent, {
    * @param {Object} obj
    * @return {Boolean}
    */
-  doodle.EventDispatcher.inheritsEventDispatcher = function (obj) {
+  inheritsEventDispatcher = doodle.EventDispatcher.inheritsEventDispatcher = function (obj) {
     while (obj) {
       if (isEventDispatcher(obj)) {
         return true;
@@ -4195,7 +4538,7 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
-    if (doodle.EventDispatcher.inheritsEventDispatcher(obj)) {
+    if (inheritsEventDispatcher(obj)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_eventdispatcher_type" : caller;
@@ -4203,453 +4546,120 @@ Object.defineProperties(doodle.TextEvent, {
       throw new TypeError(caller + param +": Parameter must be an EventDispatcher.");
     }
   };
-
   
-  (function () {
-    var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-        check_string_type = doodle.utils.types.check_string_type,
-        check_function_type = doodle.utils.types.check_function_type,
-        check_event_type = doodle.utils.types.check_event_type;
-
-    evtdisp_properties = {
-      /*
-       * METHODS
-       */
-
-      /* Returns the string representation of the specified object.
-       * @return {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object EventDispatcher]";
-        }
-      },
-
-      /* Call function passing object as 'this'.
-       * @param {Function} fn
-       * @return {Object}
-       */
-      'modify': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (fn) {
-          /*DEBUG*/
-          check_function_type(fn, this+'.modify', '*function*');
-          /*END_DEBUG*/
-          fn.call(this);
-          return this;
-        }
-      },
-
-      /* Registers an event listener object with an EventDispatcher object
-       * so that the listener receives notification of an event.
-       * @param {String} type
-       * @param {Function} listener
-       * @param {Boolean} useCapture
-       */
-      'addEventListener': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (type, listener, useCapture) {
-          useCapture = useCapture === true; //default to false, bubble event
-          /*DEBUG*/
-          check_string_type(type, this+'.addEventListener', '*type*, listener, useCapture');
-          check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
-          /*END_DEBUG*/
-          
-          var self = this;
-          //if new event type, create it's array to store callbacks
-          if (!this.eventListeners[type]) {
-            this.eventListeners[type] = {capture:[], bubble:[]};
-          }
-          this.eventListeners[type][useCapture ? 'capture':'bubble'].push(listener);
-          
-          //object ready for events, add to receivers if not already there
-          if (dispatcher_queue.every(function(obj) { return self !== obj; })) {
-            dispatcher_queue.push(self);
-          }
-        }
-      },
-
-      /* Removes a listener from the EventDispatcher object.
-       * @param {String} type
-       * @param {Function} listener
-       * @param {Boolean} useCapture
-       */
-      'removeEventListener': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (type, listener, useCapture) {
-          useCapture = useCapture === true; //default to false, bubble event
-          /*DEBUG*/
-          check_string_type(type, this+'.removeEventListener', '*type*, listener, useCapture');
-          check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
-          /*END_DEBUG*/
-          
-          //make sure event type exists
-          if (this.eventListeners[type]) {
-            //grab our event type array and remove the callback function
-            var evt_type = this.eventListeners[type],
-                listeners = evt_type[useCapture ? 'capture':'bubble'];
-
-            listeners.splice(listeners.indexOf(listener), 1);
-            
-            //if none left, remove event type
-            if (evt_type.capture.length === 0 && evt_type.bubble.length === 0) {
-              delete this.eventListeners[type];
-            }
-            //if no more listeners, remove from object queue
-            if (Object.keys(this.eventListeners).length === 0) {
-              dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
-            }
-          }
-        }
-      },
-
-      /* Lookup and call listener if registered for specific event type.
-       * @param {Event} event
-       * @return {Boolean} true if node has listeners of event type.
-       */
-      'handleEvent': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (event) {
-          /*DEBUG*/
-          check_event_type(event, this+'.handleEvent');
-          /*END_DEBUG*/
-          
-          //check for listeners that match event type
-          //if capture not set, using bubble listeners - like for AT_TARGET phase
-          var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
-              listeners = this.eventListeners[event.type], //obj
-              count = 0, //listener count
-              rv,  //return value of handler
-              i; //counter
-
-          listeners = listeners && listeners[phase];
-          if (listeners && listeners.length > 0) {
-            //currentTarget is the object with addEventListener
-            event.__setCurrentTarget(this);
-            
-            //if we have any, call each handler with event object
-            count = listeners.length;
-            for (i = 0; i < count; i += 1) {
-              check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
-              //pass event to handler
-              rv = listeners[i].call(this, event);
-              
-              //when event.stopPropagation is called
-              //cancel event for other nodes, but check other handlers on this one
-              //returning false from handler does the same thing
-              if (rv === false || event.returnValue === false) {
-                //set event stopped if not already
-                if (!event.__cancel) {
-                  event.stopPropagation();
-                }
-              }
-              //when event.stopImmediatePropagation is called
-              //ignore other handlers on this target
-              if (event.__cancelNow) {
-                break;
-              }
-            }
-          }
-          
-          //any handlers found on this node?
-          return (count > 0) ? true : false;
-        }
-      },
-      
-      /* Dispatches an event into the event flow. The event target is the
-       * EventDispatcher object upon which the dispatchEvent() method is called.
-       * @param {Event} event
-       * @return {Boolean} true if the event was successfully dispatched.
-       */
-      'dispatchEvent': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function (event) {
-          //events are dispatched from the child,
-          //capturing goes down to the child, bubbling then goes back up
-          var target,
-              node,
-              node_path = [],
-              len, //count of nodes up to root
-              i; //counter
-
-          /*DEBUG*/
-          check_event_type(event, this+'.dispatchEvent', '*event*');
-          /*END_DEBUG*/
-
-          //can't dispatch an event that's already stopped
-          if (event.__cancel) {
-            return false;
-          }
-          
-          //set target to the object that dispatched it
-          //if already set, then we're re-dispatching an event for another target
-          if (!event.target) {
-            event.__setTarget(this);
-          }
-
-          target = event.target;
-          //path starts at node parent
-          node = target.parent || null;
-
-          //create path from node's parent to top of tree
-          while (node) {
-            node_path.push(node);
-            node = node.parent;
-          }
-
-          //enter capture phase: down the tree
-          event.__setEventPhase(event.CAPTURING_PHASE);
-          i = len = node_path.length;
-          while ((i=i-1) >= 0) {
-            node_path[i].handleEvent(event);
-            //was the event stopped inside the handler?
-            if (event.__cancel) {
-              return true;
-            }
-          }
-
-          //enter target phase
-          event.__setEventPhase(event.AT_TARGET);
-          target.handleEvent(event);
-          //was the event stopped inside the handler?
-          if (event.__cancel) {
-            return true;
-          }
-
-          //does event bubble, or bubbling cancelled in capture/target phase?
-          if (!event.bubbles || event.cancelBubble) {
-            return true;
-          }
-
-          //enter bubble phase: back up the tree
-          event.__setEventPhase(event.BUBBLING_PHASE);
-          for (i = 0; i < len; i = i+1) {
-            node_path[i].handleEvent(event);
-            //was the event stopped inside the handler?
-            if (event.__cancel || event.cancelBubble) {
-              return true;
-            }
-          }
-
-          return true; //dispatched successfully
-        }
-      },
-
-      /* Dispatches an event to every object with an active listener.
-       * Ignores propagation path, objects come from 
-       * @param {Event} event
-       * @return {Boolean} true if the event was successfully dispatched.
-       */
-      'broadcastEvent': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function (event) {
-          var receivers, //event listeners of correct type
-              len, //count of event listeners
-              i; //counter
-          
-          /*DEBUG*/
-          check_event_type(event, this+'.broadcastEvent', '*event*');
-          /*END_DEBUG*/
-
-          if (event.__cancel) {
-            throw new Error(this+'.broadcastEvent: Can not dispatch a cancelled event.');
-          }
-          
-          //set target to the object that dispatched it
-          //if already set, then we're re-dispatching an event for another target
-          if (!event.target) {
-            event.__setTarget(this);
-          }
-      
-          //pare down to eligible receivers with event type listener
-          receivers = dispatcher_queue.filter(function (obj) {
-            return obj.hasEventListener(event.type);
-          });
-          
-          //and call each
-          for (i = 0, len = receivers.length; i < len; i=i+1) {
-            receivers[i].handleEvent(event);
-            //event cancelled in listener?
-            if (event.__cancel) {
-              break;
-            }
-          }
-          
-          return true;
-        }
-      },
-
-      /* Checks whether the EventDispatcher object has any listeners
-       * registered for a specific type of event.
-       * @param {String} type
-       * @return {Boolean}
-       */
-      'hasEventListener': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (type) {
-          /*DEBUG*/
-          check_string_type(type, this+'.hasEventListener', '*type*');
-          /*END_DEBUG*/
-          return this.eventListeners !== null && this.eventListeners.hasOwnProperty(type);
-        }
-      },
-
-      /* Checks whether an event listener is registered with this EventDispatcher object
-       * or any of its ancestors for the specified event type.
-       * The difference between the hasEventListener() and the willTrigger() methods is
-       * that hasEventListener() examines only the object to which it belongs,
-       * whereas the willTrigger() method examines the entire event flow for the
-       * event specified by the type parameter.
-       * @param {String} type The type of event.
-       * @return {Boolean}
-       */
-      'willTrigger': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (type) {
-          /*DEBUG*/
-          check_string_type(type, this+'.willTrigger', '*type*');
-          /*END_DEBUG*/
-          
-          if (this.hasEventListener(type)) {
-            return true;
-          } else if (!this.children || this.children.length === 0) {
-            //requires scene graph be in place to proceed down the tree
-            return false;
-          } else {
-            for (var i in this.children) {
-              if (this.children[i].willTrigger(type)) {
-                return true;
-              }
-            }
-          }
-          return false;
-        }
-      }
-      
-    };//end evtdisp_properties definition
-  }());
 }());//end class closure
-
 (function () {
-  var node_properties,
-      node_count = 0,
+  var node_count = 0,
+      node_static_properties,
       isNode,
       inheritsNode,
+      check_node_type,
       inDisplayList,
-      check_matrix_type = doodle.utils.types.check_matrix_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      check_matrix_type = doodle.utils.types.check_matrix_type,
+      check_point_type = doodle.utils.types.check_point_type,
+      doodle_Point = doodle.geom.Point,
+      doodle_Event = doodle.Event,
+      to_degrees = 180 / Math.PI,
+      to_radians = Math.PI / 180;
   
   /* Super constructor
-   * @param {Function} initializer
+   * @param {Function} init_fn
    * @return {Object}
    */
   doodle.Node = function (id) {
-    var arg_len = arguments.length,
-        initializer,
-        node = Object.create(doodle.EventDispatcher()),
-        children = [],
-        transform = doodle.geom.Matrix(),
-        root = null,
-        parent = null;
+    var node = Object.create(doodle.EventDispatcher());
     
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      id = undefined;
-    } else if (arg_len > 1) {
-      throw new SyntaxError("[object Node]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arguments.length > 1) {
+      throw new SyntaxError("[object Node](*id*): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
-    Object.defineProperties(node, node_properties);
+    Object.defineProperties(node, node_static_properties);
     //properties that require privacy
     Object.defineProperties(node, {
       
-      'id': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return id; },
-        set: function (idArg) {
-          /*DEBUG*/
-          check_string_type(idArg, this+'.id');
-          /*END_DEBUG*/
-          id = idArg;
-        }
-      },
-      
-      'root': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return root; },
-        set: function (node) {
-          /*DEBUG*/
-          if (node === null || inheritsNode(node)) {
-            true;
-          } else {
-            throw new TypeError(this+".root: Parameter must be a node.");
+      'id': (function () {
+        var node_id;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return node_id; },
+          set: function (idArg) {
+            /*DEBUG*/
+            check_string_type(idArg, this+'.id');
+            /*END_DEBUG*/
+            node_id = idArg;
           }
-          /*END_DEBUG*/
-          root = node;
-        }
-      },
+        };
+      }()),
       
-      'parent': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return parent; },
-        set: function (node) {
-          /*DEBUG*/
-          if (node === null || inheritsNode(node)) {
-            true;
-          } else {
-            throw new TypeError(this+".parent: Parameter must be a node.");
+      'root': (function () {
+        var root = null;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return root; },
+          set: function (node) {
+            /*DEBUG*/
+            if (node !== null) {
+              if (!inheritsNode(node)) {
+                throw new TypeError(this+".root: Parameter must be a node.");
+              }
+            }
+            /*END_DEBUG*/
+            root = node;
           }
-          /*END_DEBUG*/
-          parent = node;
-        }
-      },
+        };
+      }()),
       
-      'children': {
-        enumerable: false,
-        configurable: false,
-        get: function () {
-          return children;
-        }
-      },
+      'parent': (function () {
+        var parent = null;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return parent; },
+          set: function (node) {
+            /*DEBUG*/
+            if (node !== null) {
+              if (!inheritsNode(node)) {
+                throw new TypeError(this+".parent: Parameter must be a node.");
+              }
+            }
+            /*END_DEBUG*/
+            parent = node;
+          }
+        };
+      }()),
       
-      'transform': {
-        enumerable: false,
-        configurable: false,
-        get: function () {
-          return transform;
-        },
-        set: function (matrix) {
-          /*DEBUG*/
-          check_matrix_type(matrix, this+'.transform');
-          /*END_DEBUG*/
-          transform = matrix;
-        }
-      },
+      'children': (function () {
+        var children = [];
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () {
+            return children;
+          }
+        };
+      }()),
+      
+      'transform': (function () {
+        var transform = doodle.geom.Matrix();
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return transform; },
+          set: function (matrix) {
+            /*DEBUG*/
+            check_matrix_type(matrix, this+'.transform');
+            /*END_DEBUG*/
+            transform = matrix;
+          }
+        };
+      }()),
 
       'visible': (function () {
         var visible = true;
@@ -4681,20 +4691,431 @@ Object.defineProperties(doodle.TextEvent, {
           }
         };
       }())
-    });
+    });//end defineProperties
 
-    //passed an initialization object: function
-    if (initializer) {
-      node.id = "node" + String('000'+node_count).slice(-3);
-      initializer.call(node);
-    } else {
-      node.id = (id !== undefined) ? id : "node"+ String('000'+node_count).slice(-3);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      arguments[0].call(node);
+      id = undefined;
     }
-    node_count += 1;
+
+    //node defaults
+    if (node.id === undefined) {
+      node.id = (id !== undefined) ? id : "node"+ String('000'+node_count).slice(-3);
+      node_count += 1;
+    }
 
     return node;
   };
 
+  
+  /* Dispatches and event type from all of a nodes children and grandchildren.
+   * @param {Node} node
+   * @param {String} event_type
+   * @param {Function} child_action
+   */
+  function children_dispatch_event (node, event_type, child_action) {
+    node.children.forEach(function (child) {
+      if (typeof child_action === 'function') {
+        child_action(child);
+      }
+      child.dispatchEvent(doodle_Event(event_type, true));
+      children_dispatch_event(child, event_type, child_action);
+    });
+  }
+
+  node_static_properties = {
+    
+    'x': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.transform.tx;
+      },
+      set: function (d) {
+        /*DEBUG*/
+        check_number_type(d, this+'.x');
+        /*END_DEBUG*/
+        this.transform.tx = d;
+      }
+    },
+    
+    'y': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.transform.ty;
+      },
+      set: function (d) {
+        /*DEBUG*/
+        check_number_type(d, this+'.y');
+        /*END_DEBUG*/
+        this.transform.ty = d;
+      }
+    },
+
+    //registration point
+    'axis': {
+      //temp value
+      value: {x: this.x, y: this.y}
+    },
+
+    'rotate': { //around external point?
+      value: function (deg) {
+        /*DEBUG*/
+        check_number_type(deg, this+'.rotate', '*degrees*');
+        /*END_DEBUG*/
+
+        if (this.axis.x !== undefined && this.axis.y !== undefined) {
+          this.transform.rotateAroundInternalPoint(this.axis, deg*to_radians);
+        } else {
+          this.transform.rotate(deg * to_radians);
+        }
+      }
+    },
+
+    /*
+      'rotate': { //around external point?
+      value: function (deg) {
+      check_number_type(deg, this+'.rotate');
+      this.transform.rotate(deg * to_radians);
+      }
+      },
+    */
+    
+    'rotation': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.transform.rotation * to_degrees;
+      },
+      set: function (deg) {
+        /*DEBUG*/
+        check_number_type(deg, this+'.rotation', '*degrees*');
+        /*END_DEBUG*/
+        this.transform.rotation = deg * to_radians;
+      }
+    },
+
+    'scaleX': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.transform.a;
+      },
+      set: function (sx) {
+        /*DEBUG*/
+        check_number_type(sx, this+'.scaleX');
+        /*END_DEBUG*/
+        this.transform.a = sx;
+      }
+    },
+    
+    'scaleY': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.transform.d;
+      },
+      set: function (sy) {
+        /*DEBUG*/
+        check_number_type(sy, this+'.scaleY');
+        /*END_DEBUG*/
+        this.transform.d = sy;
+      }
+    },
+
+    /*
+     * METHODS
+     */
+
+    /* Returns the string representation of the specified object.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Node]";
+      }
+    },
+
+    'addChildAt': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (node, index) {
+        //if already a child then ignore
+        if (this.children.indexOf(node) !== -1) {
+          return false;
+        }
+
+        /*DEBUG*/
+        check_node_type(node, this+'.addChildAt', '*node*, index');
+        check_number_type(index, this+'.addChildAt', 'node, *index*');
+        /*END_DEBUG*/
+        
+        //make sure parent/child share same root
+        if (node.root !== this.root) {
+          node.root = this.root;
+        }
+        //if has previous parent, remove from it's children
+        if (node.parent !== null && node.parent !== this) {
+          node.parent.removeChild(node);
+        }
+        node.parent = this;
+        this.children.splice(index, 0, node);
+        
+        //is the node now a part of the display list?
+        if (inDisplayList(node)) {
+          node.dispatchEvent(doodle_Event(doodle_Event.ADDED, true));
+          children_dispatch_event(node, doodle_Event.ADDED);
+        }
+
+        return node;
+      }
+    },
+    
+    'addChild': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (node) {
+        /*DEBUG*/
+        check_node_type(node, this+'.addChild', '*node*');
+        /*END_DEBUG*/
+        return this.addChildAt(node, this.children.length);
+      }
+    },
+    
+    'removeChildAt': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: (function () {
+        /* Called on every child of removed node with a context.
+         * Ensures it's old bounds are cleared before being re-parented.
+         */
+        function clear_node_bounds (child, context) {
+          var bounds = child.getBounds(child.root);
+          if (context) {
+            context.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
+          }
+          child.root = null;
+        }
+        
+        return function (index) {
+          /*DEBUG*/
+          check_number_type(index, this+'.removeChildAt', '*index*');
+          /*END_DEBUG*/
+          var node = this.children[index],
+          ctx = node.context;
+          
+          this.children.splice(index, 1);
+
+          //is it no longer a part of the display list?
+          if (ctx) {
+            clear_node_bounds(node, ctx);
+            node.dispatchEvent(doodle_Event(doodle_Event.REMOVED, true));
+            children_dispatch_event(node, doodle_Event.REMOVED, function (child) {
+              clear_node_bounds(child, ctx);
+            });
+          }
+          //these are needed for final transversal
+          node.root = null;
+          node.parent = null;
+        };
+      }())
+    },
+    
+    'removeChild': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (node) {
+        /*DEBUG*/
+        check_node_type(node, this+'.removeChild', '*node*');
+        /*END_DEBUG*/
+        this.removeChildAt(this.children.indexOf(node));
+      }
+    },
+    
+    'removeChildById': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (id) {
+        /*DEBUG*/
+        check_string_type(id, this+'.removeChildById', '*id*');
+        /*END_DEBUG*/
+        this.removeChild(this.getChildById(id));
+      }
+    },
+    
+    'removeAllChildren': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        //just assign an empty array to this.children?
+        var i = this.children.length;
+        while ((i -= 1) >= 0) {
+          this.removeChildAt(i);
+        }
+      }
+    },
+    
+    'getChildById': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (id) {
+        /*DEBUG*/
+        check_string_type(id, this+'.getChildById', '*id*');
+        /*END_DEBUG*/
+        return this.children.filter(function (child) {
+          return child.id === id;
+        })[0];
+      }
+    },
+
+    'setChildIndex': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (child, index) {
+        /*DEBUG*/
+        check_node_type(child, this+'.setChildIndex', '*child*, index');
+        check_number_type(index, this+'.setChildIndex', 'child, *index*');
+        /*END_DEBUG*/
+        var children = this.children,
+        len = children.length,
+        pos = children.indexOf(child);
+        if (pos === -1) {
+          throw new ReferenceError(this+'.setChildIndex(*child*, index): ' + child + ' does not exist on child list.');
+        }
+        if (index > len || index < -len) {
+          throw new RangeError(this+'.setChildIndex(child, *index*): ' + index + ' does not exist on child list.');
+        }
+        children.splice(pos, 1); //remove element
+        children.splice(index, 0, child); //set new position
+      }
+    },
+    
+    'swapChildrenAt': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (index1, index2) {
+        /*DEBUG*/
+        check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
+        check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
+        /*END_DEBUG*/
+        var a = this.children;
+        a[index1] = a.splice(index2, 1, a[index1])[0];
+      }
+    },
+    
+    'swapChildren': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (node1, node2) {
+        /*DEBUG*/
+        check_node_type(node1, this+'.swapChildren', '*node1*, node2');
+        check_node_type(node2, this+'.swapChildren', 'node1, *node2*');
+        /*END_DEBUG*/
+        var children = this.children;
+        this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
+      }
+    },
+
+    //change this nodes depth in parent
+    'swapDepths': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function I(node) {
+        /*DEBUG*/
+        check_node_type(node, this+'.swapDepths', '*node*');
+        /*END_DEBUG*/
+        var parent = this.parent;
+        if (!parent || !Array.isArray(parent.children)) {
+          throw new Error(this+".swapDepths: no parent found.");
+        } else {
+          parent.swapChildren(this, node);
+        }
+      }
+    },
+
+    'swapDepthAt': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (index) {
+        /*DEBUG*/
+        check_number_type(index, this+'.swapDepthAt', '*index*');
+        /*END_DEBUG*/
+        var parent = this.parent;
+        if (!parent || !Array.isArray(parent.children)) {
+          throw new Error(this+".swapDepthAt: no parent found.");
+        } else {
+          parent.swapChildrenAt(index, parent.children.indexOf(this));
+        }
+      }
+    },
+    
+    /* Determine if node is among it's children, grandchildren, etc.
+     * @return {Boolean}
+     *
+     * THIS ONLY CHECKS PARENTS / GRANDPARENTS
+     */
+    'contains': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (node) {
+        while (node) {
+          if (node === this) {
+            return true;
+          }
+          node = node.parent;
+        }
+        return false;
+      }
+    },
+
+    'localToGlobal': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.localToGlobal', '*point*');
+        /*END_DEBUG*/
+        var node = this;
+        while (node) {
+          pt = node.transform.transformPoint(pt);
+          node = node.parent;
+        }
+        return pt;
+      }
+    },
+
+    'globalToLocal': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.globalToLocal', '*point*');
+        /*END_DEBUG*/
+        var global_pos = this.localToGlobal({x: 0, y: 0});
+        return doodle_Point(pt.x - global_pos.x, pt.y - global_pos.y);
+      }
+    }
+  };//end node_static_properties
 
   /*
    * CLASS METHODS
@@ -4727,7 +5148,7 @@ Object.defineProperties(doodle.TextEvent, {
     return false;
   };
 
-  doodle.utils.types.check_node_type = function (node, caller, param) {
+  check_node_type = doodle.utils.types.check_node_type = function (node, caller, param) {
     if (inheritsNode(node)) {
       return true;
     } else {
@@ -4749,427 +5170,7 @@ Object.defineProperties(doodle.TextEvent, {
     }
     return false;
   };
-
-
-  (function () {
-
-    var doodle_Point = doodle.geom.Point,
-        doodle_Event = doodle.Event,
-        check_number_type = doodle.utils.types.check_number_type,
-        check_point_type = doodle.utils.types.check_point_type,
-        check_node_type = doodle.utils.types.check_node_type,
-        to_degrees = 180/Math.PI,
-        to_radians = Math.PI/180;
-
-    /* Dispatches and event type from all of a nodes children and grandchildren.
-     * @param {Node} node
-     * @param {String} event_type
-     * @param {Function} child_action
-     */
-    function children_dispatch_event (node, event_type, child_action) {
-      node.children.forEach(function (child) {
-        if (typeof child_action === 'function') {
-          child_action(child);
-        }
-        child.dispatchEvent(doodle_Event(event_type, true));
-        children_dispatch_event(child, event_type, child_action);
-      });
-    }
-
-    node_properties = {
-      /*
-       * PROPERTIES
-       */
-
-      'x': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.transform.tx;
-        },
-        set: function (d) {
-          /*DEBUG*/
-          check_number_type(d, this+'.x');
-          /*END_DEBUG*/
-          this.transform.tx = d;
-        }
-      },
-      
-      'y': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.transform.ty;
-        },
-        set: function (d) {
-          /*DEBUG*/
-          check_number_type(d, this+'.y');
-          /*END_DEBUG*/
-          this.transform.ty = d;
-        }
-      },
-
-      //registration point
-      'axis': {
-        //temp value
-        value: {x: this.x, y: this.y}
-      },
-
-      'rotate': { //around external point?
-        value: function (deg) {
-          /*DEBUG*/
-          check_number_type(deg, this+'.rotate', '*degrees*');
-          /*END_DEBUG*/
-
-          if (this.axis.x !== undefined && this.axis.y !== undefined) {
-            this.transform.rotateAroundInternalPoint(this.axis, deg*to_radians);
-          } else {
-            this.transform.rotate(deg*to_radians);
-          }
-        }
-      },
-
-      /*
-      'rotate': { //around external point?
-        value: function (deg) {
-          check_number_type(deg, this+'.rotate');
-          this.transform.rotate(deg * to_radians);
-        }
-      },
-      */
-      
-      'rotation': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.transform.rotation * to_degrees;
-        },
-        set: function (deg) {
-          /*DEBUG*/
-          check_number_type(deg, this+'.rotation', '*degrees*');
-          /*END_DEBUG*/
-          this.transform.rotation = deg*to_radians;
-        }
-      },
-
-      'scaleX': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.transform.a;
-        },
-        set: function (sx) {
-          /*DEBUG*/
-          check_number_type(sx, this+'.scaleX');
-          /*END_DEBUG*/
-          this.transform.a = sx;
-        }
-      },
-      
-      'scaleY': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.transform.d;
-        },
-        set: function (sy) {
-          /*DEBUG*/
-          check_number_type(sy, this+'.scaleY');
-          /*END_DEBUG*/
-          this.transform.d = sy;
-        }
-      },
-
-      /*
-       * METHODS
-       */
-
-      /* Returns the string representation of the specified object.
-       * @return {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object Node]";
-        }
-      },
-
-      'addChildAt': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (node, index) {
-          //if already a child then ignore
-          if (this.children.indexOf(node) !== -1) {
-            return false;
-          }
-
-          /*DEBUG*/
-          check_node_type(node, this+'.addChildAt', '*node*, index');
-          check_number_type(index, this+'.addChildAt', 'node, *index*');
-          /*END_DEBUG*/
-          
-          //make sure parent/child share same root
-          if (node.root !== this.root) {
-            node.root = this.root;
-          }
-          //if has previous parent, remove from it's children
-          if (node.parent !== null && node.parent !== this) {
-            node.parent.removeChild(node);
-          }
-          node.parent = this;
-          this.children.splice(index, 0, node);
-          
-          //is the node now a part of the display list?
-          if (inDisplayList(node)) {
-            node.dispatchEvent(doodle_Event(doodle_Event.ADDED, true));
-            children_dispatch_event(node, doodle_Event.ADDED);
-          }
-
-          return node;
-        }
-      },
-      
-      'addChild': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (node) {
-          /*DEBUG*/
-          check_node_type(node, this+'.addChild', '*node*');
-          /*END_DEBUG*/
-          return this.addChildAt(node, this.children.length);
-        }
-      },
-      
-      'removeChildAt': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: (function () {
-          /* Called on every child of removed node with a context.
-           * Ensures it's old bounds are cleared before being re-parented.
-           */
-          function clear_node_bounds (child, context) {
-            var bounds = child.getBounds(child.root);
-            if (context) {
-              context.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
-            }
-            child.root = null;
-          }
-          
-          return function (index) {
-            /*DEBUG*/
-            check_number_type(index, this+'.removeChildAt', '*index*');
-            /*END_DEBUG*/
-            var node = this.children[index],
-                ctx = node.context;
-            
-            this.children.splice(index, 1);
-
-            //is it no longer a part of the display list?
-            if (ctx) {
-              clear_node_bounds(node, ctx);
-              node.dispatchEvent(doodle_Event(doodle_Event.REMOVED, true));
-              children_dispatch_event(node, doodle_Event.REMOVED, function (child) {
-                clear_node_bounds(child, ctx);
-              });
-            }
-            //these are needed for final transversal
-            node.root = null;
-            node.parent = null;
-          };
-        }())
-      },
-      
-      'removeChild': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (node) {
-          /*DEBUG*/
-          check_node_type(node, this+'.removeChild', '*node*');
-          /*END_DEBUG*/
-          this.removeChildAt(this.children.indexOf(node));
-        }
-      },
-      
-      'removeChildById': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (id) {
-          /*DEBUG*/
-          check_string_type(id, this+'.removeChildById', '*id*');
-          /*END_DEBUG*/
-          this.removeChild(this.getChildById(id));
-        }
-      },
-      
-      'removeAllChildren': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          //just assign an empty array to this.children?
-          var i = this.children.length;
-          while ((i -= 1) >= 0) {
-            this.removeChildAt(i);
-          }
-        }
-      },
-      
-      'getChildById': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (id) {
-          /*DEBUG*/
-          check_string_type(id, this+'.getChildById', '*id*');
-          /*END_DEBUG*/
-          return this.children.filter(function (child) {
-            return child.id === id;
-          })[0];
-        }
-      },
-
-      'setChildIndex': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function (child, index) {
-          /*DEBUG*/
-          check_node_type(child, this+'.setChildIndex', '*child*, index');
-          check_number_type(index, this+'.setChildIndex', 'child, *index*');
-          /*END_DEBUG*/
-          var children = this.children,
-              len = children.length,
-              pos = children.indexOf(child);
-          if (pos === -1) {
-            throw new ReferenceError(this+'.setChildIndex(*child*, index): ' + child + ' does not exist on child list.');
-          }
-          if (index > len || index < -len) {
-            throw new RangeError(this+'.setChildIndex(child, *index*): ' + index + ' does not exist on child list.');
-          }
-          children.splice(pos, 1); //remove element
-          children.splice(index, 0, child); //set new position
-        }
-      },
-      
-      'swapChildrenAt': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (index1, index2) {
-          /*DEBUG*/
-          check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
-          check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
-          /*END_DEBUG*/
-          var a = this.children;
-          a[index1] = a.splice(index2, 1, a[index1])[0];
-        }
-      },
-      
-      'swapChildren': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (node1, node2) {
-          /*DEBUG*/
-          check_node_type(node1, this+'.swapChildren', '*node1*, node2');
-          check_node_type(node2, this+'.swapChildren', 'node1, *node2*');
-          /*END_DEBUG*/
-          this.swapChildrenAt(this.children.indexOf(node1), this.children.indexOf(node2));
-        }
-      },
-
-      //change this nodes depth in parent
-      'swapDepths': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function I(node) {
-          /*DEBUG*/
-          check_node_type(node, this+'.swapDepths', '*node*');
-          /*END_DEBUG*/
-          var parent = this.parent;
-          if (!parent || !Array.isArray(parent.children)) {
-            throw new Error(this+".swapDepths: no parent found.");
-          } else {
-            parent.swapChildren(this, node);
-          }
-        }
-      },
-
-      'swapDepthAt': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (index) {
-          /*DEBUG*/
-          check_number_type(index, this+'.swapDepthAt', '*index*');
-          /*END_DEBUG*/
-          var parent = this.parent;
-          if (!parent || !Array.isArray(parent.children)) {
-            throw new Error(this+".swapDepthAt: no parent found.");
-          } else {
-            parent.swapChildrenAt(index, parent.children.indexOf(this));
-          }
-        }
-      },
-      
-      /* Determine if node is among it's children, grandchildren, etc.
-       * @return {Boolean}
-       */
-      'contains': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (node) {
-          while (node) {
-            if (node === this) {
-              return true;
-            }
-            node = node.parent;
-          }
-          return false;
-        }
-      },
-
-      'localToGlobal': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.localToGlobal', '*point*');
-          /*END_DEBUG*/
-          var node = this;
-          while (node) {
-            pt = node.transform.transformPoint(pt);
-            node = node.parent;
-          }
-          return pt;
-        }
-      },
-
-      'globalToLocal': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.globalToLocal', '*point*');
-          /*END_DEBUG*/
-          var global_pos = this.localToGlobal({x: 0, y: 0});
-          return doodle_Point(pt.x - global_pos.x, pt.y - global_pos.y);
-        }
-      }
-      
-    };//end node_properties
-  }());
+  
 }());//end class closure
 /*not implemented
   id: null,
@@ -6201,6 +6202,7 @@ Object.defineProperties(doodle.TextEvent, {
     
   }());
 }());//end class closure
+/*globals doodle*/
 (function () {
   var node_static_properties,
       doodle_utils = doodle.utils,
@@ -6208,11 +6210,8 @@ Object.defineProperties(doodle.TextEvent, {
       check_string_type = doodle_utils.types.check_string_type,
       check_boolean_type = doodle_utils.types.check_boolean_type,
       rgb_str_to_hex = doodle_utils.rgb_str_to_hex,
-      rgb_str_to_rgb = doodle_utils.rgb_str_to_rgb,
-      rgb_to_rgb_str = doodle_utils.rgb_to_rgb_str,
       hex_to_rgb_str = doodle_utils.hex_to_rgb_str,
       get_element = doodle_utils.get_element,
-      get_style_property = doodle_utils.get_style_property,
       get_element_property = doodle_utils.get_element_property,
       set_element_property = doodle_utils.set_element_property;
   
@@ -6350,10 +6349,14 @@ Object.defineProperties(doodle.TextEvent, {
       set: function (repeat) {
         /*DEBUG*/
         check_string_type(repeat, this+'.backgroundRepeat');
-        if (repeat === 'repeat' || repeat === 'repeat-x' || repeat === 'repeat-y' ||
-            repeat === 'no-repeat' || repeat === 'inherit' ){
-          true;
-        } else {
+        switch (repeat) {
+        case 'repeat':
+        case 'repeat-x':
+        case 'repeat-y':
+        case 'no-repeat':
+        case 'inherit':
+          break;
+        default:
           throw new SyntaxError(this+'.backgroundRepeat: Invalid CSS value.');
         }
         /*END_DEBUG*/
@@ -6361,14 +6364,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-		'alpha': {
+    'alpha': {
       get: function () {
         return get_element_property(this.element, 'opacity', 'float');
       },
       set: function (alpha) {
         /*DEBUG*/
         check_number_type(alpha, this+'.alpha');
-				alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
+        alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
         /*END_DEBUG*/
         return set_element_property(this.element, 'opacity', alpha);
       }
