@@ -1,3 +1,4 @@
+/*globals doodle*/
 (function () {
   var node_static_properties,
       doodle_utils = doodle.utils,
@@ -5,11 +6,8 @@
       check_string_type = doodle_utils.types.check_string_type,
       check_boolean_type = doodle_utils.types.check_boolean_type,
       rgb_str_to_hex = doodle_utils.rgb_str_to_hex,
-      rgb_str_to_rgb = doodle_utils.rgb_str_to_rgb,
-      rgb_to_rgb_str = doodle_utils.rgb_to_rgb_str,
       hex_to_rgb_str = doodle_utils.hex_to_rgb_str,
       get_element = doodle_utils.get_element,
-      get_style_property = doodle_utils.get_style_property,
       get_element_property = doodle_utils.get_element_property,
       set_element_property = doodle_utils.set_element_property;
   
@@ -147,10 +145,14 @@
       set: function (repeat) {
         /*DEBUG*/
         check_string_type(repeat, this+'.backgroundRepeat');
-        if (repeat === 'repeat' || repeat === 'repeat-x' || repeat === 'repeat-y' ||
-            repeat === 'no-repeat' || repeat === 'inherit' ){
-          true;
-        } else {
+        switch (repeat) {
+        case 'repeat':
+        case 'repeat-x':
+        case 'repeat-y':
+        case 'no-repeat':
+        case 'inherit':
+          break;
+        default:
           throw new SyntaxError(this+'.backgroundRepeat: Invalid CSS value.');
         }
         /*END_DEBUG*/
@@ -158,14 +160,14 @@
       }
     },
 
-		'alpha': {
+    'alpha': {
       get: function () {
         return get_element_property(this.element, 'opacity', 'float');
       },
       set: function (alpha) {
         /*DEBUG*/
         check_number_type(alpha, this+'.alpha');
-				alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
+        alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
         /*END_DEBUG*/
         return set_element_property(this.element, 'opacity', alpha);
       }
