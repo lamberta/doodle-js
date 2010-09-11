@@ -16,34 +16,43 @@
    * @return {Object}
    */
   doodle.ElementNode = function (element) {
-    var arg_len = arguments.length,
-        initializer,
-        element_node = Object.create(doodle.Node());
+    var element_node = Object.create(doodle.Node());
 
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      element = undefined;
-    } else if (arg_len > 1) {
-      throw new SyntaxError("[object ElementNode]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arguments.length > 1) {
+      throw new SyntaxError("[object ElementNode](element): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
     Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
     Object.defineProperties(element_node, {
-      'element': {
-        get: function () {
-          return element;
-        },
-        set: function (elem) {
-          element = elem;
-        }
-      }
-    });
+      'element': (function () {
+        var dom_element = null;
+        return {
+          get: function () {
+            return dom_element;
+          },
+          set: function (elementArg) {
+            if (elementArg === null || elementArg === false) {
+              dom_element = null;
+            } else {
+              elementArg = get_element(elementArg);
+              /*DEBUG*/
+              if (!elementArg) {
+                throw new TypeError("[object ElementNode]: Parameter must be a DOM Element");
+              }
+              /*END_DEBUG*/
+              dom_element = elementArg;
+            }
+          }
+        };
+      }())
+    });//end defineProperties
 
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(element_node);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      arguments[0].call(element_node);
     }
 
     return element_node;
@@ -212,6 +221,6 @@
         return "[object ElementNode]";
       }
     }
-    
   };//end node_static_properties
+  
 }());//end class closure
