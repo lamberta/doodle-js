@@ -20,6 +20,7 @@ if (typeof Function.prototype.bind !== 'function') {
     };
   };
 }
+/*globals doodle, document*/
 doodle.utils = {
   rgb_to_hex: function (r, g, b) {
     /*DEBUG*/
@@ -195,21 +196,14 @@ doodle.utils.types = (function () {
 
 /* Returns HTML element from id name or element itself.
  */
-doodle.utils.get_element = function (id, caller) {
-  var element;
+doodle.utils.get_element = function (id) {
   if (typeof id === 'string') {
     //lop off pound-sign if given
     id = (id[0] === '#') ? id.slice(1) : id;
-    element = document.getElementById(id);
   } else {
-    //there's gotta be some checking I could do, right?
-    element = id;
+    id = (id && id.id) ? id.id : null;
   }
-  if (!element) {
-    caller = (caller === undefined) ? "get_element" : caller;
-    throw new ReferenceError(caller + ": Unable to get HTML element: " + id);
-  }
-  return element;
+  return document.getElementById(id);
 };
 
 /* Returns css property of element, it's own or inherited.
@@ -235,8 +229,9 @@ doodle.utils.get_style_property = function (element, property) {
  * @param type {String} 'int'|'float' Return type.
  */
 doodle.utils.get_element_property = function (element, property, type) {
+  var val;
   try {
-    var val = doodle.utils.get_style_property(element, property);
+    val = doodle.utils.get_style_property(element, property);
   } catch (e) {
     val = undefined;
   }
@@ -2672,30 +2667,29 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x09
   }  
 });
-
 (function () {
-  var point_properties,
-      check_number_type = doodle.utils.types.check_number_type,
-      isPoint;
+  var point_static_properties,
+      isPoint,
+      doodle_Point,
+      check_point_type,
+      check_number_type = doodle.utils.types.check_number_type;
   
   /* Super constructor
    * @param {Number|Array|Point|Function} (x,y)|initializer
    * @return {Object}
    */
-  doodle.geom.Point = function (x, y) {
-    var arg_len = arguments.length,
-        initializer,
-        point = {};
-    
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      x = undefined;
-    } else if (arg_len > 2) {
-      throw new SyntaxError("[object Point]: Invalid number of parameters.");
-    }
+  doodle_Point = doodle.geom.Point = function (x, y) {
+    var point = {},
+        arg_len = arguments.length,
+        init_obj; //function, array, point
 
-    Object.defineProperties(point, point_properties);
+    /*DEBUG*/
+    if (arg_len > 2) {
+      throw new SyntaxError("[object Point](x, y): Invalid number of parameters.");
+    }
+    /*END_DEBUG*/
+
+    Object.defineProperties(point, point_static_properties);
     //properties that require privacy
     Object.defineProperties(point, {
       /* The horizontal coordinate of the point.
@@ -2729,35 +2723,288 @@ Object.defineProperties(doodle.TextEvent, {
       }
     });
 
-    //passed an initialization object: array/point/function
-    if (initializer) {
-      if (typeof initializer === 'function') {
-        point.compose(0, 0);
-        initializer.call(point);
-      } else if (Array.isArray(initializer) && initializer.length === 2) {
-        point.compose.apply(point, initializer);
-      } else if (isPoint(initializer)) {
-        point.compose(initializer.x, initializer.y);
-      } else {
-        throw new SyntaxError(this+": Passed an invalid initializer object.");
-      }
+    //initialize point
+    if (arg_len === 0) {
+      //default instantiation: {x:0, y:0}
+      point.compose(0, 0);
+    } else if (arg_len === 2) {
+      //standard instantiation
+      point.compose(x, y);
     } else {
-      //initialize based on parameter count
-      switch (arg_len) {
-      case 0:
+      //passed an initialization obj
+      init_obj = arguments[0];
+      x = undefined;
+      
+      if (typeof init_obj === 'function') {
         point.compose(0, 0);
-        break;
-      case 2:
-        point.compose(x, y);
-        break;
-      default:
-        throw new SyntaxError(this+": Invalid number of parameters.");
+        init_obj.call(point);
+      }  else if (Array.isArray(init_obj)) {
+        /*DEBUG*/
+        if (init_obj.length !== 2) {
+          throw new SyntaxError("[object Point]([x, y]): Invalid array parameter.");
+        }
+        /*END_DEBUG*/
+        point.compose.apply(point, init_obj);
+      } else {
+        /*DEBUG*/
+        check_point_type(init_obj, '[object Point](point)');
+        /*END_DEBUG*/
+        point.compose(init_obj.x, init_obj.y);
       }
     }
 
     return point;
   };
 
+  
+  point_static_properties = {
+    /* The length of the line segment from (0,0) to this point.
+     * @return {Number}
+     */
+    'length': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.distance({x:0,y:0}, this);
+      }
+    },
+
+    /*
+     * METHODS
+     */
+    
+    /* Set point coordinates.
+     * @param {Number} x
+     * @param {Number} y
+     * @return {Point}
+     */
+    'compose': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (x, y) {
+        /*DEBUG*/
+        check_number_type(x, this+'.compose', '*x*, y');
+        check_number_type(y, this+'.compose', 'x, *y*');
+        /*END_DEBUG*/
+        this.x = x;
+        this.y = y;
+        return this;
+      }
+    },
+
+    /* Creates a copy of this Point object.
+     * @return {Point}
+     */
+    'clone': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return doodle_Point(this.x, this.y);
+      }
+    },
+
+    /* Returns an array that contains the values of the x and y coordinates.
+     * @return {Array}
+     */
+    'toArray': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        var a = new Array(2);
+        a[0] = this.x;
+        a[1] = this.y;
+        return a;
+      }
+    },
+    
+    /* Returns a string that contains the values of the x and y coordinates.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "(x=" + this.x + ", y=" + this.y + ")";
+      }
+    },
+
+    /* Returns the distance between pt1 and pt2.
+     * @return {Number}
+     */
+    'distance': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt1, pt2) {
+        /*DEBUG*/
+        check_point_type(pt1, this+'.distance', '*pt1*, pt2');
+        check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
+        /*END_DEBUG*/
+        var dx = pt2.x - pt1.x,
+            dy = pt2.y - pt1.x;
+        return Math.sqrt(dx*dx+dy*dy);
+      }
+    },
+
+    /* Scales the line segment between (0,0) and the
+     * current point to a set length.
+     * @param {Number} thickness The scaling value.
+     * @return {Point}
+     */
+    'normalize': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (thickness) {
+        /*DEBUG*/
+        check_number_type(thickness, this+'.normalize', '*thickness*');
+        /*END_DEBUG*/
+        var len = this.length;
+        this.x = (this.x / len) * thickness;
+        this.y = (this.y / len) * thickness;
+        return this;
+        /*correct version?
+          var angle:Number = Math.atan2(this.y, this.x);
+          this.x = Math.cos(angle) * thickness;
+          this.y = Math.sin(angle) * thickness;
+        */
+      }
+    },
+
+    /* Determines whether two points are equal.
+     * @param {Point} pt The point to be compared.
+     * @return {Boolean}
+     */
+    'equals': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.equals', '*point*');
+        /*END_DEBUG*/
+        return ((this && pt &&
+                 this.x === pt.x &&
+                 this.y === pt.y) ||
+                (!this && !pt));
+      }
+    },
+
+    /* Determines a point between two specified points.
+     * @static
+     * @param {Point} pt1 The first point.
+     * @param {Point} pt2 The second point.
+     * @param {Number} t The level of interpolation between the two points, between 0 and 1.
+     * @return {Point}
+     */
+    'interpolate': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt1, pt2, t) {
+        /*DEBUG*/
+        check_point_type(pt1, this+'.interpolate', '*pt1*, pt2, t');
+        check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
+        check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
+        /*END_DEBUG*/
+        var x = pt1.x + (pt2.x - pt1.x) * t,
+            y = pt1.y + (pt2.y - pt1.y) * t;
+        return doodle_Point(x, y);
+
+        /* correct version?
+           var nx = pt2.x - pt1.x;
+           var ny = pt2.y - pt1.y;
+           var angle = Math.atan2(ny , nx);
+           var dis = Math.sqrt(x * nx + ny * ny) * t;
+           var sx = pt2.x - Math.cos(angle) * dis;
+           var sy = pt2.y - Math.sin(angle) * dis;
+           return Object.create(point).compose(sx, sy);
+        */
+      }
+    },
+
+    /* Converts a pair of polar coordinates to a Cartesian point coordinate.
+     * @static
+     * @param {Number} len The length coordinate of the polar pair.
+     * @param {Number} angle The angle, in radians, of the polar pair.
+     * @return {Point}
+     */
+    'polar': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (len, angle) {
+        /*DEBUG*/
+        check_number_type(len, this+'.polar', '*len*, angle');
+        check_number_type(angle, this+'.polar', 'len, *angle*');
+        /*END_DEBUG*/
+        var x = len * Math.cos(angle),
+            y = len * Math.sin(angle);
+        return doodle_Point(x, y);
+      }
+    },
+
+    /* Adds the coordinates of another point to the coordinates of
+     * this point to create a new point.
+     * @param {Point} pt The point to be added.
+     * @return {Point} The new point.
+     */
+    'add': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.add', '*point*');
+        /*END_DEBUG*/
+        var x = this.x + pt.x,
+            y = this.y + pt.y;
+        return doodle_Point(x, y);
+      }
+    },
+
+    /* Subtracts the coordinates of another point from the
+     * coordinates of this point to create a new point.
+     * @param {Point} pt The point to be subtracted.
+     * @return {Point} The new point.
+     */
+    'subtract': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.subtract', '*point*');
+        /*END_DEBUG*/
+        var x = this.x - pt.x,
+            y = this.y - pt.y;
+        return doodle_Point(x, y);
+      }
+    },
+
+    'offset': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (dx, dy) {
+        /*DEBUG*/
+        check_number_type(dx, this+'.offset', '*dx*, dy');
+        check_number_type(dy, this+'.offset', 'dx, *dy*');
+        /*END_DEBUG*/
+        this.x += dx;
+        this.y += dy;
+        return this;
+      }
+    }
+  };//end point_static_properties definition
+
+  /*
+   * CLASS FUNCTIONS
+   */
 
   /* Check if a given object contains a numeric x and y property.
    * Does not check if a point is actually a doodle.geom.point.
@@ -2767,9 +3014,9 @@ Object.defineProperties(doodle.TextEvent, {
    */
   isPoint = doodle.geom.Point.isPoint = function (pt) {
     return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
-  }
+  };
 
-  doodle.utils.types.check_point_type = function (pt, caller, param) {
+  check_point_type = doodle.utils.types.check_point_type = function (pt, caller, param) {
     if (!isPoint(pt)) {
       caller = (caller === undefined) ? "check_point_type" : caller;
       param = (param === undefined) ? "" : '('+param+')';
@@ -2778,285 +3025,36 @@ Object.defineProperties(doodle.TextEvent, {
       return true;
     }
   };
-    
   
-  (function () {
-    //avoid lookups
-    var Point = doodle.geom.Point,
-        check_point_type = doodle.utils.types.check_point_type;
-
-    point_properties = {
-      /* The length of the line segment from (0,0) to this point.
-       * @return {Number}
-       */
-      'length': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.distance({x:0,y:0}, this);
-        }
-      },
-
-      /*
-       * METHODS
-       */
-      
-      /* Set point coordinates.
-       * @param {Number} x
-       * @param {Number} y
-       * @return {Point}
-       */
-      'compose': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (x, y) {
-          /*DEBUG*/
-          check_number_type(x, this+'.compose', '*x*, y');
-          check_number_type(y, this+'.compose', 'x, *y*');
-          /*END_DEBUG*/
-          this.x = x;
-          this.y = y;
-          return this;
-        }
-      },
-
-      /* Creates a copy of this Point object.
-       * @return {Point}
-       */
-      'clone': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return Point(this.x, this.y);
-        }
-      },
-
-      /* Returns an array that contains the values of the x and y coordinates.
-       * @return {Array}
-       */
-      'toArray': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          var a = new Array(2);
-          a[0] = this.x;
-          a[1] = this.y;
-          return a;
-        }
-      },
-      
-      /* Returns a string that contains the values of the x and y coordinates.
-       * @return {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "(x=" + this.x + ", y=" + this.y + ")";
-        }
-      },
-
-      /* Returns the distance between pt1 and pt2.
-       * @return {Number}
-       */
-      'distance': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt1, pt2) {
-          /*DEBUG*/
-          check_point_type(pt1, this+'.distance', '*pt1*, pt2');
-          check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
-          /*END_DEBUG*/
-          var dx = pt2.x - pt1.x,
-              dy = pt2.y - pt1.x;
-          return Math.sqrt(dx*dx+dy*dy);
-        }
-      },
-
-      /* Scales the line segment between (0,0) and the
-       * current point to a set length.
-       * @param {Number} thickness The scaling value.
-       * @return {Point}
-       */
-      'normalize': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (thickness) {
-          /*DEBUG*/
-          check_number_type(thickness, this+'.normalize', '*thickness*');
-          /*END_DEBUG*/
-          var len = this.length;
-          this.x = (this.x / len) * thickness;
-          this.y = (this.y / len) * thickness;
-          return this;
-          /*correct version?
-            var angle:Number = Math.atan2(this.y, this.x);
-            this.x = Math.cos(angle) * thickness;
-            this.y = Math.sin(angle) * thickness;
-          */
-        }
-      },
-
-      /* Determines whether two points are equal.
-       * @param {Point} pt The point to be compared.
-       * @return {Boolean}
-       */
-      'equals': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.equals', '*point*');
-          /*END_DEBUG*/
-          return ((this && point &&
-                   this.x === pt.x &&
-                   this.y === pt.y) ||
-                  (!this && !pt));
-        }
-      },
-
-      /* Determines a point between two specified points.
-       * @static
-       * @param {Point} pt1 The first point.
-       * @param {Point} pt2 The second point.
-       * @param {Number} t The level of interpolation between the two points, between 0 and 1.
-       * @return {Point}
-       */
-      'interpolate': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt1, pt2, t) {
-          /*DEBUG*/
-          check_point_type(pt1, this+'.interpolate', '*pt1*, pt2, t');
-          check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
-          check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
-          /*END_DEBUG*/
-          var x = pt1.x + (pt2.x - pt1.x) * t,
-              y = pt1.y + (pt2.y - pt1.y) * t;
-          return Point(x, y);
-
-          /* correct version?
-             var nx = pt2.x - pt1.x;
-             var ny = pt2.y - pt1.y;
-             var angle = Math.atan2(ny , nx);
-             var dis = Math.sqrt(x * nx + ny * ny) * t;
-             var sx = pt2.x - Math.cos(angle) * dis;
-             var sy = pt2.y - Math.sin(angle) * dis;
-             return Object.create(point).compose(sx, sy);
-          */
-        }
-      },
-
-      /* Converts a pair of polar coordinates to a Cartesian point coordinate.
-       * @static
-       * @param {Number} len The length coordinate of the polar pair.
-       * @param {Number} angle The angle, in radians, of the polar pair.
-       * @return {Point}
-       */
-      'polar': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (len, angle) {
-          /*DEBUG*/
-          check_number_type(len, this+'.polar', '*len*, angle');
-          check_number_type(angle, this+'.polar', 'len, *angle*');
-          /*END_DEBUG*/
-          var x = len * Math.cos(angle),
-              y = len * Math.sin(angle);
-          return Point(x, y);
-        }
-      },
-
-      /* Adds the coordinates of another point to the coordinates of
-       * this point to create a new point.
-       * @param {Point} pt The point to be added.
-       * @return {Point} The new point.
-       */
-      'add': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.add', '*point*');
-          /*END_DEBUG*/
-          var x = this.x + pt.x,
-              y = this.y + pt.y;
-          return Point(x, y);
-        }
-      },
-
-      /* Subtracts the coordinates of another point from the
-       * coordinates of this point to create a new point.
-       * @param {Point} pt The point to be subtracted.
-       * @return {Point} The new point.
-       */
-      'subtract': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.subtract', '*point*');
-          /*END_DEBUG*/
-          var x = this.x - pt.x,
-              y = this.y - pt.y;
-          return Point(x, y);
-        }
-      },
-
-      'offset': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (dx, dy) {
-          /*DEBUG*/
-          check_number_type(dx, this+'.offset', '*dx*, dy');
-          check_number_type(dy, this+'.offset', 'dx, *dy*');
-          /*END_DEBUG*/
-          this.x += dx;
-          this.y += dy;
-          return this;
-        }
-      }
-    };//end point properties definition
-  }());
-
 }());//end class closure
-
 (function () {
-  var matrix_properties,
+  var matrix_static_properties,
+      isMatrix,
+      check_matrix_type,
+      doodle_Point = doodle.geom.Point,
       check_number_type = doodle.utils.types.check_number_type,
-      isMatrix;
+      check_point_type = doodle.utils.types.check_point_type,
+      sin = Math.sin,
+      cos = Math.cos,
+      atan2 = Math.atan2,
+      tan = Math.tan;
   
   /* Super constructor
    * @param {Number|Array|Matrix|Function} (a, b, c, d, tx, ty)|initializer
    * @return {Object}
    */
-  doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
-    var arg_len = arguments.length,
-        initializer,
-        matrix = {};
+  doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
+    var matrix = {},
+        arg_len = arguments.length,
+        init_obj; //function, array, matrix
 
-    //check if passed an init function
-    if (arg_len === 1) {
-      initializer = arguments[0];
-      a = undefined;
-    } else if (arg_len > 6) {
-      throw new SyntaxError("[object Matrix]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arg_len !== 0 && arg_len !== 1 && arg_len !== 6) {
+      throw new SyntaxError("[object Matrix](a, b, c, d, tx, ty): Invalid number of parameters.");
     }
-
+    /*END_DEBUG*/
     
-    Object.defineProperties(matrix, matrix_properties);
+    Object.defineProperties(matrix, matrix_static_properties);
     //properties that require privacy
     Object.defineProperties(matrix, {
 
@@ -3153,38 +3151,517 @@ Object.defineProperties(doodle.TextEvent, {
           ty = n;
         }
       }
-    });
-    
-    //passed an initialization object: array/matrix/function
-    if (initializer) {
-      if (typeof initializer === 'function') {
-        matrix.identity();
-        initializer.call(matrix);
-      } else if (Array.isArray(initializer) && initializer.length === 6) {
-        matrix.compose.apply(matrix, initializer);
-      } else if (isMatrix(initializer)) {
-        matrix.compose(initializer.a, initializer.b, initializer.c,
-                       initializer.d, initializer.tx, initializer.ty);
-      } else {
-        throw new SyntaxError("[object Matrix]: Passed an invalid initializer object.");
-      }
+    });//end defineProperties
+
+    //initialize matrix
+    if (arg_len === 0) {
+      //default instantiation: 1,0,0,1,0,0
+      matrix.identity();
+    } else if (arg_len === 6) {
+      //standard instantiation
+      matrix.compose(a, b, c, d, tx, ty);
     } else {
-      //initialize based on parameter count
-      switch (arg_len) {
-      case 0:
+      //passed an initialization obj
+      init_obj = arguments[0];
+      a = undefined;
+      
+      if (typeof init_obj === 'function') {
         matrix.identity();
-        break;
-      case 6:
-        matrix.compose(a, b, c, d, tx, ty);
-        break;
-      default:
-        throw new SyntaxError("[object Matrix]: Invalid number of parameters.");
+        init_obj.call(matrix);
+      }  else if (Array.isArray(init_obj)) {
+        /*DEBUG*/
+        if (init_obj.length !== 6) {
+          throw new SyntaxError("[object Matrix]([a, b, c, d, tx, ty]): Invalid array parameter.");
+        }
+        /*END_DEBUG*/
+        matrix.compose.apply(matrix, init_obj);
+      } else {
+        /*DEBUG*/
+        check_matrix_type(init_obj, '[object Matrix](matrix)');
+        /*END_DEBUG*/
+        matrix.compose(init_obj.a, init_obj.b, init_obj.c,
+                       init_obj.d, init_obj.tx, init_obj.ty);
       }
     }
     
     return matrix;
   };
 
+  
+  matrix_static_properties = {
+    /* Set values of this matrix with the specified parameters.
+     * @param {Number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
+     * @param {Number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
+     * @param {Number} c The value that affects the positioning of pixels along the x axis when rotating or skewing an image.
+     * @param {Number} d The value that affects the positioning of pixels along the y axis when scaling or rotating an image.
+     * @param {Number} tx The distance by which to translate each point along the x axis.
+     * @param {Number} ty The distance by which to translate each point along the y axis.
+     * @return {Matrix}
+     */
+    'compose': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (a, b, c, d, tx, ty) {
+        /*DEBUG*/
+        check_number_type(a, this+'.compose', '*a*, b, c, d, tx, ty');
+        check_number_type(b, this+'.compose', 'a, *b*, c, d, tx, ty');
+        check_number_type(c, this+'.compose', 'a, b, *c*, d, tx, ty');
+        check_number_type(d, this+'.compose', 'a, b, c, *d*, tx, ty');
+        check_number_type(tx, this+'.compose', 'a, b, c, d, *tx*, ty');
+        check_number_type(ty, this+'.compose', 'a, b, c, d, tx, *ty*');
+        /*END_DEBUG*/
+        this.a  = a;
+        this.b  = b;
+        this.c  = c;
+        this.d  = d;
+        this.tx = tx;
+        this.ty = ty;
+        return this;
+      }
+    },
+    
+    /* Returns an array value containing the properties of the Matrix object.
+     * @return {Array}
+     */
+    'toArray': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        var a = new Array(6);
+        a[0] = this.a;
+        a[1] = this.b;
+        a[2] = this.c;
+        a[3] = this.d;
+        a[4] = this.tx;
+        a[5] = this.ty;
+        return a;
+      }
+    },
+    
+    /* Returns a text value listing the properties of the Matrix object.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return ("(a="+ this.a +", b="+ this.b +", c="+ this.c +
+                ", d="+ this.d +", tx="+ this.tx +", ty="+ this.ty +")");
+      }
+    },
+
+    /* Test if matrix is equal to this one.
+     * @param {Matrix} m
+     * @return {Boolean}
+     */
+    'equals': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (m) {
+        /*DEBUG*/
+        check_matrix_type(m, this+'.equals', '*matrix*');
+        /*END_DEBUG*/
+        return ((this && m && 
+                 this.a  === m.a &&
+                 this.b  === m.b &&
+                 this.c  === m.c &&
+                 this.d  === m.d &&
+                 this.tx === m.tx &&
+                 this.ty === m.ty) || 
+                (!this && !m));
+      }
+    },
+
+    /* Sets each matrix property to a value that causes a null transformation.
+     * @return {Matrix}
+     */
+    'identity': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value:  function () {
+        this.a  = 1;
+        this.b  = 0;
+        this.c  = 0;
+        this.d  = 1;
+        this.tx = 0;
+        this.ty = 0;
+        return this;
+      }
+    },
+
+    /* Returns a new Matrix object that is a clone of this matrix,
+     * with an exact copy of the contained object.
+     * @return {Matrix}
+     */
+    'clone': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return doodle_Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty);
+      }
+    },
+
+    /* Multiplies a matrix with the current matrix,
+     * effectively combining the geometric effects of the two.
+     * @param {Matrix} m The matrix to be concatenated to the source matrix.
+     * @return {Matrix}
+     */
+    'multiply': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (m) {
+        /*DEBUG*/
+        check_matrix_type(m, this+'.multiply', '*matrix*');
+        /*END_DEBUG*/
+        var a  = this.a * m.a  + this.c * m.b,
+            b  = this.b * m.a  + this.d * m.b,
+            c  = this.a * m.c  + this.c * m.d,
+            d  = this.b * m.c  + this.d * m.d,
+            tx = this.a * m.tx + this.c * m.ty + this.tx,
+            ty = this.b * m.tx + this.d * m.ty + this.ty;
+        
+        return this.compose(a, b, c, d, tx, ty);
+      }
+    },
+
+    /* Applies a rotation transformation to the Matrix object.
+     * @param {Number} angle The rotation angle in radians.
+     * @return {Matrix}
+     */
+    'rotate': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (radians) {
+        /*DEBUG*/
+        check_number_type(radians, this+'.rotate', '*radians*');
+        /*END_DEBUG*/
+        var c = cos(radians),
+            s = sin(radians),
+            m = doodle_Matrix(c, s, -s, c, 0, 0);
+        return this.multiply(m);
+      }
+    },
+
+    /* Applies a rotation transformation to the Matrix object, ignore translation.
+     * @param {Number} angle The rotation angle in radians.
+     * @return {Matrix}
+     */
+    'deltaRotate': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (radians) {
+        /*DEBUG*/
+        check_number_type(radians, this+'.deltaRotate', '*radians*');
+        /*END_DEBUG*/
+        var x = this.tx,
+            y = this.ty;
+        this.rotate(radians);
+        this.tx = x;
+        this.ty = y;
+        return this;
+      }
+    },
+
+    /* Return the angle of rotation in radians.
+     * @return {Number} radians
+     */
+    'rotation': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return atan2(this.b, this.a);
+      },
+      /* Set a new rotation for matrix.
+       * @param {Number} angle, in radians
+       * @return {Matrix}
+       */
+      set: function (radians) {
+        /*DEBUG*/
+        check_number_type(radians, this+'.rotation', '*radians*');
+        /*END_DEBUG*/
+        var c = cos(radians),
+            s = sin(radians);
+        return this.compose(c, s, -s, c, this.tx, this.ty);
+      }
+    },
+
+    /* Applies a scaling transformation to the matrix.
+     * @param {Number} sx A multiplier used to scale the object along the x axis.
+     * @param {Number} sy A multiplier used to scale the object along the y axis.
+     * @return {Matrix}
+     */
+    'scale': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (sx, sy) {
+        /*DEBUG*/
+        check_number_type(sx, this+'.scale', '*sx*, sy');
+        check_number_type(sy, this+'.scale', 'sx, *sy*');
+        /*END_DEBUG*/
+        var m = doodle_Matrix(sx, 0, 0, sy, 0, 0);
+        return this.multiply(m);
+      }
+    },
+
+    /* Applies a scaling transformation to the matrix, ignores translation.
+     * @param {Number} sx A multiplier used to scale the object along the x axis.
+     * @param {Number} sy A multiplier used to scale the object along the y axis.
+     * @return {Matrix}
+     */
+    'deltaScale': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (sx, sy) {
+        /*DEBUG*/
+        check_number_type(sx, this+'.deltaScale', '*sx*, sy');
+        check_number_type(sy, this+'.deltaScale', 'sx, *sy*');
+        /*END_DEBUG*/
+        var x = this.tx,
+            y = this.ty;
+        this.scale(sx, sy);
+        this.tx = x;
+        this.ty = y;
+        return this;
+      }
+    },
+
+    /* Translates the matrix along the x and y axes.
+     * @param {Number} dx The amount of movement along the x axis to the right, in pixels.
+     * @param {Number} dy The amount of movement down along the y axis, in pixels.
+     * @return {Matrix}
+     */
+    'translate': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (dx, dy) {
+        /*DEBUG*/
+        check_number_type(dx, this+'.translate', '*dx*, dy');
+        check_number_type(dy, this+'.translate', 'dx, *dy*');
+        /*END_DEBUG*/
+        this.tx += dx;
+        this.ty += dy;
+        return this;
+      }
+    },
+
+    /*
+     * @param {Number} skewX
+     * @param {Number} skewY
+     * @return {Matrix}
+     */
+    'skew': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (skewX, skewY) {
+        /*DEBUG*/
+        check_number_type(skewX, this+'.skew', '*skewX*, skewY');
+        check_number_type(skewY, this+'.skew', 'skewX, *skewY*');
+        /*END_DEBUG*/
+        var sx = tan(skewX),
+            sy = tan(skewY),
+            m = doodle_Matrix(1, sy, sx, 1, 0, 0);
+        return this.multiply(m);
+      }
+    },
+
+    /* Skew matrix and ignore translation.
+     * @param {Number} skewX
+     * @param {Number} skewY
+     * @return {Matrix}
+     */
+    'deltaSkew': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (skewX, skewY) {
+        /*DEBUG*/
+        check_number_type(skewX, this+'.deltaSkew', '*skewX*, skewY');
+        check_number_type(skewY, this+'.deltaSkew', 'skewX, *skewY*');
+        /*END_DEBUG*/
+        var x = this.tx,
+            y = this.ty;
+        this.skew(skewX, skewY);
+        this.tx = x;
+        this.ty = y;
+        return this;
+      }
+    },
+
+    /* Add a matrix with the current matrix.
+     * @param {Matrix} m
+     * @return {Matrix}
+     */
+    'add': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (m) {
+        /*DEBUG*/
+        check_matrix_type(m, this+'.add', '*matrix*');
+        /*END_DEBUG*/
+        this.a  += m.a;
+        this.b  += m.b;
+        this.c  += m.c;
+        this.d  += m.d;
+        this.tx += m.tx;
+        this.ty += m.ty;
+        return this;
+      }
+    },
+
+    /* Performs the opposite transformation of the original matrix.
+     * @return {Matrix}
+     */
+    'invert': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        var det = this.a * this.d - this.b * this.c,
+            a  =  this.d / det,
+            b  = -this.b / det,
+            c  = -this.c / det,
+            d  =  this.a / det,
+            tx =  (this.ty * this.c - this.d * this.tx) / det,
+            ty = -(this.ty * this.a - this.b * this.tx) / det;
+        return this.compose(a, b, c, d, tx, ty);
+      }
+    },
+
+    /* Returns the result of applying the geometric transformation
+     * represented by the Matrix object to the specified point.
+     * @param {Point} pt
+     * @return {Point}
+     */
+    'transformPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.transformPoint', '*point*');
+        /*END_DEBUG*/
+        return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx,
+                            this.b * pt.x + this.d * pt.y + this.ty);
+      }
+    },
+
+    /* Given a point in the pretransform coordinate space, returns
+     * the coordinates of that point after the transformation occurs.
+     * Unlike 'transformPoint', does not consider translation.
+     * @param {Point} pt
+     * @return {Point}
+     */
+    'deltaTransformPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.deltaTransformPoint', '*point*');
+        /*END_DEBUG*/
+        return doodle_Point(this.a * pt.x + this.c * pt.y,
+                            this.b * pt.x + this.d * pt.y);
+      }
+    },
+    
+    'rotateAroundExternalPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt, radians) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.rotateAroundExternalPoint', '*point*, radians');
+        check_number_type(radians, this+'.rotateAroundExternalPoint', 'point, *radians*');
+        /*END_DEBUG*/
+        var parent_matrix = doodle_Matrix().rotate(radians), //global space
+            reg_pt, //new registration point
+            dx = pt.x,
+            dy = pt.y;
+        
+        this.translate(-dx, -dy);
+        
+        reg_pt = parent_matrix.transformPoint({x:this.tx, y:this.ty});
+        this.tx = reg_pt.x;
+        this.ty = reg_pt.y;
+        //apply parents rotation, and put back
+        return this.multiply(parent_matrix).translate(dx, dy);
+      }
+    },
+    
+    'rotateAroundInternalPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt, radians) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.rotateAroundInternalPoint', '*point*, radians');
+        check_number_type(radians, this+'.rotateAroundInternalPoint', 'point, *radians*');
+        /*END_DEBUG*/
+        var p = this.transformPoint(pt);
+        return this.rotateAroundExternalPoint(p, radians);
+      }
+    },
+    
+    'matchInternalPointWithExternal': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt_int, pt_ext) {
+        /*DEBUG*/
+        check_point_type(pt_int, this+'.matchInternalPointWithExternal', '*pt_int*, pt_ext');
+        check_point_type(pt_ext, this+'.matchInternalPointWithExternal', 'pt_int, *pt_ext*');
+        /*END_DEBUG*/
+        var pt = this.transformPoint(pt_int),
+            dx = pt_ext.x - pt.x,
+            dy = pt_ext.y - pt.y;
+        return this.translate(dx, dy);
+      }
+    },
+
+    /* Update matrix 'in-between' this and another matrix
+     * given a value of t bewteen 0 and 1.
+     * @return {Matrix}
+     */
+    'interpolate': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (m, t) {
+        /*DEBUG*/
+        check_matrix_type(m, this+'.interpolate', '*matrix*, t');
+        check_number_type(t, this+'.interpolate', 'matrix, *t*');
+        /*END_DEBUG*/
+        this.a  = this.a  + (m.a  - this.a)  * t;
+        this.b  = this.b  + (m.b  - this.b)  * t;
+        this.c  = this.c  + (m.c  - this.c)  * t;
+        this.d  = this.d  + (m.d  - this.d)  * t;
+        this.tx = this.tx + (m.tx - this.tx) * t;
+        this.ty = this.ty + (m.ty - this.ty) * t;
+        return this;
+      }
+    }
+    
+  };//end matrix_static_properties defintion
+
+  
+  /*
+   * CLASS FUNCTIONS
+   */
+  
   /* Check if a given object contains a numeric matrix properties.
    * Does not check if a matrix is actually a doodle.geom.matrix.
    * @param {Matrix} m Object with numeric matrix parameters.
@@ -3197,7 +3674,7 @@ Object.defineProperties(doodle.TextEvent, {
             typeof m.tx === 'number' && typeof m.ty === 'number');
   };
 
-  doodle.utils.types.check_matrix_type = function (m, caller_name) {
+  check_matrix_type = doodle.utils.types.check_matrix_type = function (m, caller_name) {
     if (!isMatrix(m)) {
       caller_name = (caller_name === undefined) ? "check_matrix_type" : caller_name;
       throw new TypeError(caller_name + ": Parameter must be a matrix.");
@@ -3205,518 +3682,33 @@ Object.defineProperties(doodle.TextEvent, {
       return true;
     }
   };
-
-  
-  (function () {
-    //avoid lookups
-    var Matrix = doodle.geom.Matrix,
-        Point = doodle.geom.Point,
-        check_matrix_type = doodle.utils.types.check_matrix_type,
-        check_point_type = doodle.utils.types.check_point_type,
-        sin = Math.sin,
-        cos = Math.cos,
-        atan2 = Math.atan2,
-        tan = Math.tan;
-      
-    matrix_properties = {
-      /*
-       * METHODS
-       */
-
-      /* Set values of this matrix with the specified parameters.
-       * @param {Number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
-       * @param {Number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
-       * @param {Number} c The value that affects the positioning of pixels along the x axis when rotating or skewing an image.
-       * @param {Number} d The value that affects the positioning of pixels along the y axis when scaling or rotating an image.
-       * @param {Number} tx The distance by which to translate each point along the x axis.
-       * @param {Number} ty The distance by which to translate each point along the y axis.
-       * @return {Matrix}
-       */
-      'compose': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (a, b, c, d, tx, ty) {
-          /*DEBUG*/
-          check_number_type(a, this+'.compose', '*a*, b, c, d, tx, ty');
-          check_number_type(b, this+'.compose', 'a, *b*, c, d, tx, ty');
-          check_number_type(c, this+'.compose', 'a, b, *c*, d, tx, ty');
-          check_number_type(d, this+'.compose', 'a, b, c, *d*, tx, ty');
-          check_number_type(tx, this+'.compose', 'a, b, c, d, *tx*, ty');
-          check_number_type(ty, this+'.compose', 'a, b, c, d, tx, *ty*');
-          /*END_DEBUG*/
-          this.a  = a;
-          this.b  = b;
-          this.c  = c;
-          this.d  = d;
-          this.tx = tx;
-          this.ty = ty;
-          return this;
-        }
-      },
-      
-      /* Returns an array value containing the properties of the Matrix object.
-       * @return {Array}
-       */
-      'toArray': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          var a = new Array(6);
-              a[0] = this.a;
-              a[1] = this.b;
-              a[2] = this.c;
-              a[3] = this.d;
-              a[4] = this.tx;
-              a[5] = this.ty;
-          return a;
-        }
-      },
-      
-      /* Returns a text value listing the properties of the Matrix object.
-       * @return {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return ("(a="+ this.a +", b="+ this.b +", c="+ this.c +
-                  ", d="+ this.d +", tx="+ this.tx +", ty="+ this.ty +")");
-        }
-      },
-
-      /* Test if matrix is equal to this one.
-       * @param {Matrix} m
-       * @return {Boolean}
-       */
-      'equals': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (m) {
-          /*DEBUG*/
-          check_matrix_type(m, this+'.equals', '*matrix*');
-          /*END_DEBUG*/
-          return ((this && m && 
-                   this.a  === m.a &&
-                   this.b  === m.b &&
-                   this.c  === m.c &&
-                   this.d  === m.d &&
-                   this.tx === m.tx &&
-                   this.ty === m.ty) || 
-                  (!this && !m));
-        }
-      },
-
-      /* Sets each matrix property to a value that causes a null transformation.
-       * @return {Matrix}
-       */
-      'identity': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value:  function () {
-          this.a  = 1;
-          this.b  = 0;
-          this.c  = 0;
-          this.d  = 1;
-          this.tx = 0;
-          this.ty = 0;
-          return this;
-        }
-      },
-
-      /* Returns a new Matrix object that is a clone of this matrix,
-       * with an exact copy of the contained object.
-       * @return {Matrix}
-       */
-      'clone': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty);
-        }
-      },
-
-      /* Multiplies a matrix with the current matrix,
-       * effectively combining the geometric effects of the two.
-       * @param {Matrix} m The matrix to be concatenated to the source matrix.
-       * @return {Matrix}
-       */
-      'multiply': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (m) {
-          /*DEBUG*/
-          check_matrix_type(m, this+'.multiply', '*matrix*');
-          /*END_DEBUG*/
-          var a  = this.a * m.a  + this.c * m.b,
-              b  = this.b * m.a  + this.d * m.b,
-              c  = this.a * m.c  + this.c * m.d,
-              d  = this.b * m.c  + this.d * m.d,
-              tx = this.a * m.tx + this.c * m.ty + this.tx,
-              ty = this.b * m.tx + this.d * m.ty + this.ty;
-            
-          return this.compose(a, b, c, d, tx, ty);
-        }
-      },
-
-      /* Applies a rotation transformation to the Matrix object.
-       * @param {Number} angle The rotation angle in radians.
-       * @return {Matrix}
-       */
-      'rotate': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (radians) {
-          /*DEBUG*/
-          check_number_type(radians, this+'.rotate', '*radians*');
-          /*END_DEBUG*/
-          var c = cos(radians),
-              s = sin(radians),
-              m = Matrix(c, s, -s, c, 0, 0);
-          return this.multiply(m);
-        }
-      },
-
-      /* Applies a rotation transformation to the Matrix object, ignore translation.
-       * @param {Number} angle The rotation angle in radians.
-       * @return {Matrix}
-       */
-      'deltaRotate': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (radians) {
-          /*DEBUG*/
-          check_number_type(radians, this+'.deltaRotate', '*radians*');
-          /*END_DEBUG*/
-          var x = this.tx,
-              y = this.ty;
-          this.rotate(radians);
-          this.tx = x;
-          this.ty = y;
-          return this;
-        }
-      },
-
-      /* Return the angle of rotation in radians.
-       * @return {Number} radians
-       */
-      'rotation': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return atan2(this.b, this.a);
-        },
-        /* Set a new rotation for matrix.
-         * @param {Number} angle, in radians
-         * @return {Matrix}
-         */
-        set: function (radians) {
-          /*DEBUG*/
-          check_number_type(radians, this+'.rotation', '*radians*');
-          /*END_DEBUG*/
-          var c = cos(radians),
-              s = sin(radians);
-          return this.compose(c, s, -s, c, this.tx, this.ty);
-        }
-      },
-
-      /* Applies a scaling transformation to the matrix.
-       * @param {Number} sx A multiplier used to scale the object along the x axis.
-       * @param {Number} sy A multiplier used to scale the object along the y axis.
-       * @return {Matrix}
-       */
-      'scale': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (sx, sy) {
-          /*DEBUG*/
-          check_number_type(sx, this+'.scale', '*sx*, sy');
-          check_number_type(sy, this+'.scale', 'sx, *sy*');
-          /*END_DEBUG*/
-          var m = Matrix(sx, 0, 0, sy, 0, 0);
-          return this.multiply(m);
-        }
-      },
-
-      /* Applies a scaling transformation to the matrix, ignores translation.
-       * @param {Number} sx A multiplier used to scale the object along the x axis.
-       * @param {Number} sy A multiplier used to scale the object along the y axis.
-       * @return {Matrix}
-       */
-      'deltaScale': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (sx, sy) {
-          /*DEBUG*/
-          check_number_type(sx, this+'.deltaScale', '*sx*, sy');
-          check_number_type(sy, this+'.deltaScale', 'sx, *sy*');
-          /*END_DEBUG*/
-          var x = this.tx,
-              y = this.ty;
-          this.scale(sx, sy);
-          this.tx = x;
-          this.ty = y;
-          return this;
-        }
-      },
-
-      /* Translates the matrix along the x and y axes.
-       * @param {Number} dx The amount of movement along the x axis to the right, in pixels.
-       * @param {Number} dy The amount of movement down along the y axis, in pixels.
-       * @return {Matrix}
-       */
-      'translate': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (dx, dy) {
-          /*DEBUG*/
-          check_number_type(dx, this+'.translate', '*dx*, dy');
-          check_number_type(dy, this+'.translate', 'dx, *dy*');
-          /*END_DEBUG*/
-          this.tx += dx;
-          this.ty += dy;
-          return this;
-        }
-      },
-
-      /*
-       * @param {Number} skewX
-       * @param {Number} skewY
-       * @return {Matrix}
-       */
-      'skew': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (skewX, skewY) {
-          /*DEBUG*/
-          check_number_type(skewX, this+'.skew', '*skewX*, skewY');
-          check_number_type(skewY, this+'.skew', 'skewX, *skewY*');
-          /*END_DEBUG*/
-          var sx = tan(skewX),
-              sy = tan(skewY),
-              m = Matrix(1, sy, sx, 1, 0, 0);
-          return this.multiply(m);
-        }
-      },
-
-      /* Skew matrix and ignore translation.
-       * @param {Number} skewX
-       * @param {Number} skewY
-       * @return {Matrix}
-       */
-      'deltaSkew': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (skewX, skewY) {
-          /*DEBUG*/
-          check_number_type(skewX, this+'.deltaSkew', '*skewX*, skewY');
-          check_number_type(skewY, this+'.deltaSkew', 'skewX, *skewY*');
-          /*END_DEBUG*/
-          var x = this.tx,
-              y = this.ty;
-          this.skew(skewX, skewY);
-          this.tx = x;
-          this.ty = y;
-          return this;
-        }
-      },
-
-      /* Add a matrix with the current matrix.
-       * @param {Matrix} m
-       * @return {Matrix}
-       */
-      'add': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (m) {
-          /*DEBUG*/
-          check_matrix_type(m, this+'.add', '*matrix*');
-          /*END_DEBUG*/
-          this.a  += m.a;
-          this.b  += m.b;
-          this.c  += m.c;
-          this.d  += m.d;
-          this.tx += m.tx;
-          this.ty += m.ty;
-          return this;
-        }
-      },
-
-      /* Performs the opposite transformation of the original matrix.
-       * @return {Matrix}
-       */
-      'invert': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          var det = this.a * this.d - this.b * this.c,
-              a  =  this.d / det,
-              b  = -this.b / det,
-              c  = -this.c / det,
-              d  =  this.a / det,
-              tx =  (this.ty * this.c - this.d * this.tx) / det,
-              ty = -(this.ty * this.a - this.b * this.tx) / det;
-          return this.compose(a, b, c, d, tx, ty);
-        }
-      },
-
-      /* Returns the result of applying the geometric transformation
-       * represented by the Matrix object to the specified point.
-       * @param {Point} pt
-       * @return {Point}
-       */
-      'transformPoint': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.transformPoint', '*point*');
-          /*END_DEBUG*/
-          return Point(this.a * pt.x + this.c * pt.y + this.tx,
-                       this.b * pt.x + this.d * pt.y + this.ty);
-        }
-      },
-
-      /* Given a point in the pretransform coordinate space, returns
-       * the coordinates of that point after the transformation occurs.
-       * Unlike 'transformPoint', does not consider translation.
-       * @param {Point} pt
-       * @return {Point}
-       */
-      'deltaTransformPoint': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.deltaTransformPoint', '*point*');
-          /*END_DEBUG*/
-          return Point(this.a * pt.x + this.c * pt.y,
-                       this.b * pt.x + this.d * pt.y);
-          }
-      },
-      
-      'rotateAroundExternalPoint': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt, radians) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.rotateAroundExternalPoint', '*point*, radians');
-          check_number_type(radians, this+'.rotateAroundExternalPoint', 'point, *radians*');
-          /*END_DEBUG*/
-          var parent_matrix = Matrix().rotate(radians), //global space
-              reg_pt, //new registration point
-              dx = pt.x,
-              dy = pt.y;
-          
-          this.translate(-dx, -dy);
-          
-          reg_pt = parent_matrix.transformPoint({x:this.tx, y:this.ty});
-          this.tx = reg_pt.x;
-          this.ty = reg_pt.y;
-          //apply parents rotation, and put back
-          return this.multiply(parent_matrix).translate(dx, dy);
-        }
-      },
-      
-      'rotateAroundInternalPoint': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt, radians) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.rotateAroundInternalPoint', '*point*, radians');
-          check_number_type(radians, this+'.rotateAroundInternalPoint', 'point, *radians*');
-          /*END_DEBUG*/
-          var p = this.transformPoint(pt);
-          return this.rotateAroundExternalPoint(p, radians);
-        }
-      },
-      
-      'matchInternalPointWithExternal': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt_int, pt_ext) {
-          /*DEBUG*/
-          check_point_type(pt_int, this+'.matchInternalPointWithExternal', '*pt_int*, pt_ext');
-          check_point_type(pt_ext, this+'.matchInternalPointWithExternal', 'pt_int, *pt_ext*');
-          /*END_DEBUG*/
-          var pt = this.transformPoint(pt_int),
-              dx = pt_ext.x - pt.x,
-              dy = pt_ext.y - pt.y;
-          return this.translate(dx, dy);
-        }
-      },
-
-      /* Update matrix 'in-between' this and another matrix
-       * given a value of t bewteen 0 and 1.
-       * @return {Matrix}
-       */
-      'interpolate': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (m, t) {
-          /*DEBUG*/
-          check_matrix_type(m, this+'.interpolate', '*matrix*, t');
-          check_number_type(t, this+'.interpolate', 'matrix, *t*');
-          /*END_DEBUG*/
-          this.a  = this.a  + (m.a  - this.a)  * t;
-          this.b  = this.b  + (m.b  - this.b)  * t;
-          this.c  = this.c  + (m.c  - this.c)  * t;
-          this.d  = this.d  + (m.d  - this.d)  * t;
-          this.tx = this.tx + (m.tx - this.tx) * t;
-          this.ty = this.ty + (m.ty - this.ty) * t;
-          return this;
-        }
-      }
-      
-    };//end matrix_properties defintion
-  }());
   
 }());//end class closure
-
+/*globals doodle*/
 (function () {
-  var rect_properties,
+  var rect_static_properties,
+      doodle_Rectangle, 
+      isRect,
+      check_rect_type,
       check_number_type = doodle.utils.types.check_number_type,
-      isRect;
+      check_point_type = doodle.utils.types.check_point_type;
   
   /* Super constructor
    * @param {Number|Array|Rectangle|Function} (x,y,w,h)|initializer
    * @return {Object}
    */
-  doodle.geom.Rectangle = function (x, y, width, height) {
-    var arg_len = arguments.length,
-        initializer,
-        rect = {};
+  doodle_Rectangle = doodle.geom.Rectangle = function (x, y, width, height) {
+    var rect = {},
+        arg_len = arguments.length,
+        init_obj;
 
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      x = undefined;
-    } else if (arg_len > 4) {
-      throw new SyntaxError("[object Rectangle]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arg_len !== 0 && arg_len !== 1 && arg_len !== 4) {
+      throw new SyntaxError("[object Rectangle](x, y, width, height): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
-    Object.defineProperties(rect, rect_properties);
+    Object.defineProperties(rect, rect_static_properties);
     //properties that require privacy
     Object.defineProperties(rect, {
       'x': {
@@ -3766,36 +3758,342 @@ Object.defineProperties(doodle.TextEvent, {
           height = n;
         }
       }
-    });
+    });//end defineProperties
 
-    //passed an initialization object: rectangle/function
-    if (initializer) {
-      if (typeof initializer === 'function') {
-        rect.identity();
-        initializer.call(rect);
-      } else if (isRectangle(initializer)) {
-        rect.compose(initializer.x, initializer.y,
-                     initializer.width, initializer.height);
-      } else {
-        throw new SyntaxError("[object Rectangle]: Passed an invalid initializer object.");
-      }
+    //initialize rectangle
+    if (arg_len === 0) {
+      //default instantiation: {x:0, y:0, width:0, height:0}
+      rect.compose(0, 0, 0, 0);
+    } else if (arg_len === 4) {
+      //standard instantiation
+      rect.compose(x, y, width, height);
     } else {
-      //initialize based on parameter count
-      switch (arg_len) {
-      case 0:
+      //passed an initialization obj
+      init_obj = arguments[0];
+      x = undefined;
+      
+      if (typeof init_obj === 'function') {
         rect.compose(0, 0, 0, 0);
-        break;
-      case 4:
-        rect.compose(x, y, width, height);
-        break;
-      default:
-        throw new SyntaxError("[object Rectangle]: Invalid number of parameters.");
+        init_obj.call(rect);
+      }  else if (Array.isArray(init_obj)) {
+        /*DEBUG*/
+        if (init_obj.length !== 4) {
+          throw new SyntaxError("[object Rectangle]([x, y, width, height]): Invalid array parameter.");
+        }
+        /*END_DEBUG*/
+        rect.compose.apply(rect, init_obj);
+      } else {
+        /*DEBUG*/
+        check_rect_type(init_obj, '[object Rectangle](rect)');
+        /*END_DEBUG*/
+        rect.compose(init_obj.x, init_obj.y, init_obj.width, init_obj.height);
       }
     }
 
     return rect;
   };
 
+
+  rect_static_properties = {
+    'top': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.y;
+      },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.top');
+        /*END_DEBUG*/
+        this.y = n;
+        this.height -= n;
+      }
+    },
+    
+    'right': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.x + this.width;
+      },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.right');
+        /*END_DEBUG*/
+        this.width = n - this.x;
+      }
+    },
+    
+    'bottom': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.y + this.height;
+      },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.bottom');
+        /*END_DEBUG*/
+        this.height = n - this.y;
+      }
+    },
+    
+    'left': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.x;
+      },
+      set: function (n) {
+        /*DEBUG*/
+        check_number_type(n, this+'.left');
+        /*END_DEBUG*/
+        this.x = n;
+        this.width -= n;
+      }
+    },
+    
+    /*
+     * METHODS
+     */
+    
+    'clone': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return doodle_Rectangle(this.x, this.y, this.width, this.height);
+      }
+    },
+    
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "(x="+ this.x +", y="+ this.y +", w="+ this.width +", h="+ this.height +")";
+      }
+    },
+    
+    'toArray': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return [this.top, this.right, this.bottom, this.left];
+      }
+    },
+    
+    /* Sets this rectangle's parameters.
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} width
+     * @param {Number} height
+     * @return {Rectangle}
+     */
+    'compose': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (x, y, width, height) {
+        /*DEBUG*/
+        check_number_type(x, this+'.compose', '*x*, y, width, height');
+        check_number_type(y, this+'.compose', 'x, *y*, width, height');
+        check_number_type(width, this+'.compose', 'x, y, *width*, height');
+        check_number_type(height, this+'.compose', 'x, y, width, *height*');
+        /*END_DEBUG*/
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        return this;
+      }
+    },
+
+    /* Adjusts the location of the rectangle, as determined by
+     * its top-left corner, by the specified amounts.
+     * @param {Number} dx
+     * @param {Number} dy
+     */
+    'offset': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (dx, dy) {
+        /*DEBUG*/
+        check_number_type(dx, this+'.offset', '*dx*, dy');
+        check_number_type(dy, this+'.offset', 'dx, *dy*');
+        /*END_DEBUG*/
+        this.x += dx;
+        this.y += dy;
+        return this;
+      }
+    },
+
+    /* Increases the size of the rectangle by the specified amounts, in pixels.
+     * The center point of the Rectangle object stays the same, and its size
+     * increases to the left and right by the dx value, and to the top and the
+     * bottom by the dy value.
+     * @param {Number} dx
+     * @param {Number} dy
+     */
+    'inflate': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (dx, dy) {
+        /*DEBUG*/
+        check_number_type(dx, this+'.inflate', '*dx*, dy');
+        check_number_type(dy, this+'.inflate', 'dx, *dy*');
+        /*END_DEBUG*/
+        this.x -= dx;
+        this.width += 2 * dx;
+        this.y -= dy;
+        this.height += 2 * dy;
+        return this;
+      }
+    },
+
+    /* Determines whether the rectangle argument is equal to this rectangle.
+     * @param {Rectangle} rect
+     * @return {Boolean}
+     */
+    'equals': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.equals', '*rect*');
+        /*END_DEBUG*/
+        return (this.x === rect.x && this.y === rect.y &&
+                this.width === rect.width && this.height === rect.height);
+      }
+    },
+
+    /* Determines whether or not this Rectangle object is empty.
+     */
+    'isEmpty': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return (this.width >= 0 || this.height >= 0);
+      }
+    },
+
+    /* Determines whether the specified point is contained within this rectangle object.
+     * @param {Point} pt
+     * @return {Boolean}
+     */
+    'containsPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.containsPoint', '*point*');
+        /*END_DEBUG*/
+        var x = pt.x,
+            y = pt.y;
+        return (x >= this.left && x <= this.right &&
+                y >= this.top && y <= this.bottom);
+      }
+    },
+
+    /* Determines whether the rectangle argument is contained within this rectangle.
+     * @param {Rectangle} rect
+     * @return {Boolean}
+     */
+    'containsRect': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.containsRect', '*rect*');
+        /*END_DEBUG*/
+        //check each corner
+        return (this.containsPoint({x: rect.x, y: rect.y}) &&           //top-left
+                this.containsPoint({x: rect.right, y: rect.y}) &&       //top-right
+                this.containsPoint({x: rect.right, y: rect.bottom}) &&  //bot-right
+                this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
+      }
+    },
+
+    /* Determines whether the rectangle argument intersects with this rectangle.
+     * @param {Rectangle} rect
+     * @return {Boolean}
+     */
+    'intersects': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.intersects', '*rect*');
+        /*END_DEBUG*/
+        //check each corner
+        return (this.containsPoint({x: rect.x, y: rect.y}) ||           //top-left
+                this.containsPoint({x: rect.right, y: rect.y}) ||       //top-right
+                this.containsPoint({x: rect.right, y: rect.bottom}) ||  //bot-right
+                this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
+      }
+    },
+
+    /* If the rectangle argument intersects with this rectangle, returns
+     * the area of intersection as a Rectangle object.
+     * If the rectangles do not intersect, this method returns an empty
+     * Rectangle object with its properties set to 0.
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     */
+    'intersection': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.intersection', '*rect*');
+        /*END_DEBUG*/
+        var r = doodle_Rectangle();
+        if (this.intersects(rect)) {
+          r.left = Math.max(this.left, rect.left);
+          r.top = Math.max(this.top, rect.top);
+          r.right = Math.min(this.right, rect.right);
+          r.bottom = Math.min(this.bottom, rect.bottom);
+        }
+        return r;
+      }
+    },
+
+    /* Adds two rectangles together to create a new Rectangle object,
+     * by filling in the horizontal and vertical space between the two.
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     */
+    'union': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.union', '*rect*');
+        /*END_DEBUG*/
+        var r = doodle_Rectangle();
+        r.left = Math.min(this.left, rect.left);
+        r.top = Math.min(this.top, rect.top);
+        r.right = Math.max(this.right, rect.right);
+        r.bottom = Math.max(this.bottom, rect.bottom);
+        return r;
+      }
+    }
+    
+  };//end rect_static_properties definition
+
+  /*
+   * CLASS FUNCTIONS
+   */
 
   /* Check if a given object contains a numeric rectangle properties including
    * x, y, width, height, top, bottom, right, left.
@@ -3810,7 +4108,7 @@ Object.defineProperties(doodle.TextEvent, {
             typeof rect.left  === "number" && typeof rect.right  === "number");
   };
 
-  doodle.utils.types.check_rect_type = function (rect, caller_name) {
+  check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller_name) {
     if (!isRect(rect)) {
       caller_name = (caller_name === undefined) ? "check_rect_type" : caller_name;
       throw new TypeError(caller_name + ": Parameter must be a rectangle.");
@@ -3818,311 +4116,7 @@ Object.defineProperties(doodle.TextEvent, {
       return true;
     }
   };
-
   
-  (function () {
-    //avoid lookups
-    var Rectangle = doodle.geom.Rectangle,
-        check_point_type = doodle.utils.types.check_point_type,
-        check_rect_type = doodle.utils.types.check_rect_type;
-    
-    rect_properties = {
-      'top': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.y;
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.top');
-          /*END_DEBUG*/
-          this.y = n;
-          this.height -= n;
-        }
-      },
-      
-      'right': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.x + this.width;
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.right');
-          /*END_DEBUG*/
-          this.width = n - this.x;
-        }
-      },
-      
-      'bottom': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.y + this.height;
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.bottom');
-          /*END_DEBUG*/
-          this.height = n - this.y;
-        }
-      },
-      
-      'left': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.x;
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.left');
-          /*END_DEBUG*/
-          this.x = n;
-          this.width -= n;
-        }
-      },
-      
-      /*
-       * METHODS
-       */
-      
-      'clone': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return Rectangle(this.x, this.y, this.width, this.height);
-        }
-      },
-      
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "(x="+ this.x +", y="+ this.y +", w="+ this.width +", h="+ this.height +")";
-        }
-      },
-      
-      'toArray': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return [this.top, this.right, this.bottom, this.left];
-        }
-      },
-      
-      /* Sets this rectangle's parameters.
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} width
-       * @param {Number} height
-       * @return {Rectangle}
-       */
-      'compose': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (x, y, width, height) {
-          /*DEBUG*/
-          check_number_type(x, this+'.compose', '*x*, y, width, height');
-          check_number_type(y, this+'.compose', 'x, *y*, width, height');
-          check_number_type(width, this+'.compose', 'x, y, *width*, height');
-          check_number_type(height, this+'.compose', 'x, y, width, *height*');
-          /*END_DEBUG*/
-          this.x = x;
-          this.y = y;
-          this.width = width;
-          this.height = height;
-          return this;
-        }
-      },
-
-      /* Adjusts the location of the rectangle, as determined by
-       * its top-left corner, by the specified amounts.
-       * @param {Number} dx
-       * @param {Number} dy
-       */
-      'offset': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (dx, dy) {
-          /*DEBUG*/
-          check_number_type(dx, this+'.offset', '*dx*, dy');
-          check_number_type(dy, this+'.offset', 'dx, *dy*');
-          /*END_DEBUG*/
-          this.x += dx;
-          this.y += dy;
-          return this;
-        }
-      },
-
-      /* Increases the size of the rectangle by the specified amounts, in pixels.
-       * The center point of the Rectangle object stays the same, and its size
-       * increases to the left and right by the dx value, and to the top and the
-       * bottom by the dy value.
-       * @param {Number} dx
-       * @param {Number} dy
-       */
-      'inflate': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (dx, dy) {
-          /*DEBUG*/
-          check_number_type(dx, this+'.inflate', '*dx*, dy');
-          check_number_type(dy, this+'.inflate', 'dx, *dy*');
-          /*END_DEBUG*/
-          this.x -= dx;
-          this.width += 2 * dx;
-          this.y -= dy;
-          this.height += 2 * dy;
-          return this;
-        }
-      },
-
-      /* Determines whether the rectangle argument is equal to this rectangle.
-       * @param {Rectangle} rect
-       * @return {Boolean}
-       */
-      'equals': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (rect) {
-          /*DEBUG*/
-          check_rect_type(rect, this+'.equals', '*rect*');
-          /*END_DEBUG*/
-          return (this.x === rect.x && this.y === rect.y &&
-                  this.width === rect.width && this.height === rect.height);
-        }
-      },
-
-      /* Determines whether or not this Rectangle object is empty.
-       */
-      'isEmpty': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return (this.width >= 0 || this.height >= 0);
-        }
-      },
-
-      /* Determines whether the specified point is contained within this rectangle object.
-       * @param {Point} pt
-       * @return {Boolean}
-       */
-      'containsPoint': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.containsPoint', '*point*');
-          /*END_DEBUG*/
-          var x = pt.x,
-              y = pt.y;
-          return (x >= this.left && x <= this.right &&
-                  y >= this.top && y <= this.bottom);
-        }
-      },
-
-      /* Determines whether the rectangle argument is contained within this rectangle.
-       * @param {Rectangle} rect
-       * @return {Boolean}
-       */
-      'containsRect': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (rect) {
-          /*DEBUG*/
-          check_rect_type(rect, this+'.containsRect', '*rect*');
-          /*END_DEBUG*/
-          //check each corner
-          return (this.containsPoint({x: rect.x, y: rect.y}) &&           //top-left
-                  this.containsPoint({x: rect.right, y: rect.y}) &&       //top-right
-                  this.containsPoint({x: rect.right, y: rect.bottom}) &&  //bot-right
-                  this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
-        }
-      },
-
-      /* Determines whether the rectangle argument intersects with this rectangle.
-       * @param {Rectangle} rect
-       * @return {Boolean}
-       */
-      'intersects': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (rect) {
-          /*DEBUG*/
-          check_rect_type(rect, this+'.intersects', '*rect*');
-          /*END_DEBUG*/
-          //check each corner
-          return (this.containsPoint({x: rect.x, y: rect.y}) ||           //top-left
-                  this.containsPoint({x: rect.right, y: rect.y}) ||       //top-right
-                  this.containsPoint({x: rect.right, y: rect.bottom}) ||  //bot-right
-                  this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
-        }
-      },
-
-      /* If the rectangle argument intersects with this rectangle, returns
-       * the area of intersection as a Rectangle object.
-       * If the rectangles do not intersect, this method returns an empty
-       * Rectangle object with its properties set to 0.
-       * @param {Rectangle} rect
-       * @return {Rectangle}
-       */
-      'intersection': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (rect) {
-          /*DEBUG*/
-          check_rect_type(rect, this+'.intersection', '*rect*');
-          /*END_DEBUG*/
-          var r = Rectangle();
-          if (this.intersects(rect)) {
-            r.left = Math.max(this.left, rect.left);
-            r.top = Math.max(this.top, rect.top);
-            r.right = Math.min(this.right, rect.right);
-            r.bottom = Math.min(this.bottom, rect.bottom);
-          }
-          return r;
-        }
-      },
-
-      /* Adds two rectangles together to create a new Rectangle object,
-       * by filling in the horizontal and vertical space between the two.
-       * @param {Rectangle} rect
-       * @return {Rectangle}
-       */
-      'union': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (rect) {
-          /*DEBUG*/
-          check_rect_type(rect, this+'.union', '*rect*');
-          /*END_DEBUG*/
-          var r = Rectangle();
-          r.left = Math.min(this.left, rect.left);
-          r.top = Math.min(this.top, rect.top);
-          r.right = Math.max(this.right, rect.right);
-          r.bottom = Math.max(this.bottom, rect.bottom);
-          return r;
-        }
-      }
-      
-    };//end rect_properties definition
-  }());
 }());//end class closure
 (function () {
   var evtDisp_static_properties,
@@ -4574,7 +4568,7 @@ Object.defineProperties(doodle.TextEvent, {
     
     /*DEBUG*/
     if (arguments.length > 1) {
-      throw new SyntaxError("[object Node](*id*): Invalid number of parameters.");
+      throw new SyntaxError("[object Node](id): Invalid number of parameters.");
     }
     /*END_DEBUG*/
 
@@ -4760,11 +4754,10 @@ Object.defineProperties(doodle.TextEvent, {
       value: {x: this.x, y: this.y}
     },
 
+    /*
     'rotate': { //around external point?
       value: function (deg) {
-        /*DEBUG*/
         check_number_type(deg, this+'.rotate', '*degrees*');
-        /*END_DEBUG*/
 
         if (this.axis.x !== undefined && this.axis.y !== undefined) {
           this.transform.rotateAroundInternalPoint(this.axis, deg*to_radians);
@@ -4773,15 +4766,14 @@ Object.defineProperties(doodle.TextEvent, {
         }
       }
     },
-
-    /*
-      'rotate': { //around external point?
-      value: function (deg) {
-      check_number_type(deg, this+'.rotate');
-      this.transform.rotate(deg * to_radians);
-      }
-      },
     */
+
+    'rotate': { //around external point?
+      value: function (deg) {
+        check_number_type(deg, this+'.rotate');
+        this.transform.rotate(deg * to_radians);
+      }
+    },
     
     'rotation': {
       enumerable: true,
@@ -5172,67 +5164,725 @@ Object.defineProperties(doodle.TextEvent, {
   };
   
 }());//end class closure
-/*not implemented
-  id: null,
-  //node has matrix - x,y
-  showBoundingBox: null,
-
-  clickable: false,
-  useHandCursor: false, //on mouse over
-  hitArea: null, //if null use this, otherwise use another sprite
-  hitTestPoint: null, //point intersects with obj bounds
-  hitTestObject: null, //another object intersects with obj bounds
-*/
-
+/*globals doodle, Image*/
 (function () {
+  var graphics_static_properties,
+      check_number_type = doodle.utils.types.check_number_type,
+      check_string_type = doodle.utils.types.check_string_type,
+      check_function_type = doodle.utils.types.check_function_type,
+      check_array_type = doodle.utils.types.check_array_type,
+      check_point_type = doodle.utils.types.check_point_type,
+      hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+      get_element = doodle.utils.get_element,
+      doodle_Event = doodle.Event,
+      LINEAR = doodle.GradientType.LINEAR,
+      RADIAL = doodle.GradientType.RADIAL;
+  
+  /* Super constructor
+   * @param {Sprite} Reference to sprite object.
+   * @param {Array} Reference to draw commands array.
+   * @param {Object} Reference to object's extrema points.
+   * @return {Object}
+   */
+  doodle.Graphics = function (sprite, draw_commands, extrema) {
+    var graphics = Object.create(null),
+        cursor_x = 0,
+        cursor_y = 0;
+    
+    Object.defineProperties(graphics, graphics_static_properties);
+    //properties that require privacy
+    Object.defineProperties(graphics, {
 
-  var sprite_properties,
+      /*
+       * METHODS
+       */
+
+      /* Provide direct access to the canvas drawing api.
+       * Canvas context is called as the first argument to function.
+       * Unable to set bounds from a user supplied function unless explictly set.
+       * @param {Function} fn
+       * Ex:
+       * x = Object.create(doodle.sprite);
+       * x.graphics.draw(function (ctx) {
+       *   ctx.fillStyle = "#ff0000";
+       *   ctx.fillRect(this.x, this.y, 100, 100);
+       * });
+       * x.draw();
+       */
+      'draw': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (fn) {
+          /*DEBUG*/
+          check_function_type(fn, this+'.graphics.draw', '*function*');
+          /*END_DEBUG*/
+          draw_commands.push(fn);
+        }
+      },
+
+      /* Remove all drawing commands for sprite.
+       */
+      'clear': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          //should probably test, better to assign new empty array?
+          var i = draw_commands.length;
+          while ((i=i-1) >= 0) {
+            draw_commands.splice(i, 1);
+          }
+          //reset dimensions
+          sprite.width = 0;
+          sprite.height = 0;
+
+          extrema.min_x = extrema.min_y = extrema.max_x = extrema.max_y = 0;
+          cursor_x = cursor_y = 0;
+          
+        }
+      },
+
+      /*
+       * @param {Number} x
+       * @param {Number} y
+       * @param {Number} w
+       * @param {Number} h
+       */
+      'rect': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (x, y, width, height) {
+          /*DEBUG*/
+          check_number_type(x, this+'.graphics.rect', '*x*, y, width, height');
+          check_number_type(y, this+'.graphics.rect', 'x, *y*, width, height');
+          check_number_type(width, this+'.graphics.rect', 'x, y, *width*, height');
+          check_number_type(height, this+'.graphics.rect', 'x, y, width, *height*');
+          /*END_DEBUG*/
+
+          //update extremas
+          extrema.min_x = Math.min(0, x, extrema.min_x);
+          extrema.min_y = Math.min(0, y, extrema.min_y);
+          extrema.max_x = Math.max(0, x, x+width, extrema.max_x);
+          extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
+          
+          //update size for bounding box
+          sprite.width = -extrema.min_x + extrema.max_x;
+          sprite.height = -extrema.min_y + extrema.max_y;
+          
+          draw_commands.push(function (ctx) {
+            ctx.beginPath();
+            ctx.rect(x, y, width, height);
+            ctx.closePath();
+            ctx.stroke();
+          });
+          
+        }
+      },
+
+      /*
+       * @param {Number} x The x location of the center of the circle relative to the registration point of the parent display object (in pixels).
+       * @param {Number} y The y location of the center of the circle relative to the registration point of the parent display object (in pixels).
+       * @param {Number} radius
+       */
+      'circle': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (x, y, radius) {
+          /*DEBUG*/
+          check_number_type(x, this+'.graphics.circle', '*x*, y, radius');
+          check_number_type(y, this+'.graphics.circle', 'x, *y*, radius');
+          check_number_type(radius, this+'.graphics.circle', 'x, y, *radius*');
+          /*END_DEBUG*/
+
+          //update extremas
+          extrema.min_x = Math.min(0, -radius+x, extrema.min_x);
+          extrema.min_y = Math.min(0, -radius+y, extrema.min_y);
+          extrema.max_x = Math.max(0, x, x+radius, extrema.max_x);
+          extrema.max_y = Math.max(0, y, y+radius, extrema.max_y);
+          
+          //update size for bounding box
+          sprite.width = -extrema.min_x + extrema.max_x;
+          sprite.height = -extrema.min_y + extrema.max_y;
+
+          draw_commands.push(function (ctx) {
+            ctx.beginPath();
+            //x, y, radius, start_angle, end_angle (Math.PI*2), anti-clockwise
+            ctx.arc(x, y, radius, 0, 6.283185307179586, true);
+            ctx.closePath();
+            ctx.stroke();
+          });
+          
+        }
+      },
+
+      /*
+       * @param {Number} x
+       * @param {Number} y
+       * @param {Number} width
+       * @param {Number} height
+       */
+      'ellipse': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (x, y, width, height) {
+          height = (height === undefined) ? width : height; //default to circle
+          /*DEBUG*/
+          check_number_type(x, this+'.graphics.ellipse', '*x*, y, width, height');
+          check_number_type(y, this+'.graphics.ellipse', 'x, *y*, width, height');
+          check_number_type(width, this+'.graphics.ellipse', 'x, y, *width*, height');
+          check_number_type(height, this+'.graphics.ellipse', 'x, y, width, *height*');
+          /*END_DEBUG*/
+          var rx = width / 2,
+              ry = height / 2,
+              krx = 0.5522847498 * rx, //kappa * radius_x
+              kry = 0.5522847498 * ry;
+
+          //update extremas
+          extrema.min_x = Math.min(0, -rx+x, extrema.min_x);
+          extrema.min_y = Math.min(0, -ry+y, extrema.min_y);
+          extrema.max_x = Math.max(0, x, x+rx, extrema.max_x);
+          extrema.max_y = Math.max(0, y, y+ry, extrema.max_y);
+          
+          //update size for bounding box
+          sprite.width = -extrema.min_x + extrema.max_x;
+          sprite.height = -extrema.min_y + extrema.max_y;
+
+          draw_commands.push(function (ctx) {
+            ctx.beginPath();
+            ctx.moveTo(x+rx, y);
+            //(cp1), (cp2), (pt)
+            ctx.bezierCurveTo(x+rx, y-kry, x+krx, y-ry, x, y-ry);
+            ctx.bezierCurveTo(x-krx, y-ry, x-rx, y-kry, x-rx, y);
+            ctx.bezierCurveTo(x-rx, y+kry, x-krx, y+ry, x, y+ry);
+            ctx.bezierCurveTo(x+krx, y+ry, x+rx, y+kry, x+rx, y);
+            ctx.closePath();
+            ctx.stroke();
+          });
+          
+        }
+      },
+
+      /*
+       * @param {Number} x
+       * @param {Number} y
+       * @param {Number} width
+       * @param {Number} height
+       * @param {Number} rx
+       * @param {Number} ry
+       */
+      'roundRect': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (x, y, width, height, rx, ry) {
+          rx = (rx === undefined) ? 0 : rx; //default to rectangle
+          ry = (ry === undefined) ? 0 : ry;
+          /*DEBUG*/
+          check_number_type(x, this+'.graphics.roundRect', '*x*, y, width, height, rx, ry');
+          check_number_type(y, this+'.graphics.roundRect', 'x, *y*, width, height, rx, ry');
+          check_number_type(width, this+'.graphics.roundRect', 'x, y, *width*, height, rx, ry');
+          check_number_type(height, this+'.graphics.roundRect', 'x, y, width, *height*, rx, ry');
+          check_number_type(rx, this+'.graphics.roundRect', 'x, y, width, height, *rx*, ry');
+          check_number_type(ry, this+'.graphics.roundRect', 'x, y, width, height, rx, *ry*');
+          /*END_DEBUG*/
+          var x3 = x + width,
+              x2 = x3 - rx,
+              x1 = x + rx,
+              y3 = y + height,
+              y2 = y3 - ry,
+              y1 = y + ry;
+
+          //update extremas
+          extrema.min_x = Math.min(0, x, extrema.min_x);
+          extrema.min_y = Math.min(0, y, extrema.min_y);
+          extrema.max_x = Math.max(0, x, x+width, extrema.max_x);
+          extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
+          
+          //update size for bounding box
+          sprite.width = -extrema.min_x + extrema.max_x;
+          sprite.height = -extrema.min_y + extrema.max_y;
+
+          draw_commands.push(function (ctx) {
+            ctx.beginPath();
+            //clockwise
+            ctx.moveTo(x1, y);
+            ctx.beginPath();
+            ctx.lineTo(x2, y);
+            ctx.quadraticCurveTo(x3, y, x3, y1);
+            ctx.lineTo(x3, y2);
+            ctx.quadraticCurveTo(x3, y3, x2, y3);
+            ctx.lineTo(x1, y3);
+            ctx.quadraticCurveTo(x, y3, x, y2);
+            ctx.lineTo(x, y1);
+            ctx.quadraticCurveTo(x, y, x1, y);
+            ctx.closePath();
+            ctx.stroke();
+          });
+          
+        }
+      },
+
+      /*
+       * @param {Number} x
+       * @param {Number} y
+       */
+      'moveTo': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (x, y) {
+          /*DEBUG*/
+          check_number_type(x, this+'.graphics.moveTo', '*x*, y');
+          check_number_type(y, this+'.graphics.moveTo', 'x, *y*');
+          /*END_DEBUG*/
+          draw_commands.push(function (ctx) {
+            ctx.moveTo(x, y);
+          });
+          //update cursor
+          cursor_x = x;
+          cursor_y = y;
+          
+        }
+      },
+
+      /*
+       * @param {Number} x
+       * @param {Number} y
+       */
+      'lineTo': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (x, y) {
+          /*DEBUG*/
+          check_number_type(x, this+'.graphics.lineTo', '*x*, y');
+          check_number_type(y, this+'.graphics.lineTo', 'x, *y*');
+          /*END_DEBUG*/
+
+          //update extremas
+          extrema.min_x = Math.min(0, x, cursor_x, extrema.min_x);
+          extrema.min_y = Math.min(0, y, cursor_y, extrema.min_y);
+          extrema.max_x = Math.max(0, x, cursor_x, extrema.max_x);
+          extrema.max_y = Math.max(0, y, cursor_y, extrema.max_y);
+          
+          //update size for bounding box
+          sprite.width = extrema.max_x - extrema.min_x;
+          sprite.height = extrema.max_y - extrema.min_y;
+          
+          draw_commands.push(function (ctx) {
+            ctx.lineTo(x, y);
+          });
+
+          //update cursor
+          cursor_x = x;
+          cursor_y = y;
+          
+        }
+      },
+
+      /* Quadratic curve to point.
+       * @param {Point} pt1 Control point
+       * @param {Point} pt2 End point
+       */
+      'curveTo': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (pt1, pt2) {
+          /*DEBUG*/
+          check_point_type(pt1, this+'.graphics.curveTo', '*ctl_point*, point');
+          check_point_type(pt2, this+'.graphics.curveTo', 'ctl_point, *point*');
+          /*END_DEBUG*/
+          var x0 = cursor_x,
+              y0 = cursor_y,
+              x1 = pt1.x,
+              y1 = pt1.y,
+              x2 = pt2.x,
+              y2 = pt2.y,
+              t,
+              cx = 0,
+              cy = 0;
+          
+          //curve ratio of extrema
+          t = (x0 - x1) / (x0 - 2 * x1 + x2);
+          //if true, store extrema position
+          if (0 <= t && t <= 1) {
+            cx = (1-t) * (1-t) * x0 + 2 * (1-t) * t * x1 + t * t * x2;
+          }
+
+          t = (y0 - y1) / (y0 - 2 * y1 + y2);
+          if (0 <= t && t <= 1) {
+            cy = (1-t) * (1-t) * y0 + 2 * (1-t) * t * y1 + t * t * y2;
+          }
+          
+          //update extremas
+          extrema.min_x = Math.min(0, x0, cx, x2, extrema.min_x);
+          extrema.min_y = Math.min(0, y0, cy, y2, extrema.min_y);
+          extrema.max_x = Math.max(0, x0, cx, x2, extrema.max_x);
+          extrema.max_y = Math.max(0, y0, cy, y2, extrema.max_y);
+          
+          //update size for bounding box
+          sprite.width = -extrema.min_x + extrema.max_x;
+          sprite.height = -extrema.min_y + extrema.max_y;
+
+          draw_commands.push(function (ctx) {
+            ctx.quadraticCurveTo(x1, y1, x2, y2);
+          });
+
+          //update cursor
+          cursor_x = x2;
+          cursor_y = y2;
+          
+        }
+      },
+
+      /* Bezier curve to point.
+       * @param {Point} pt1 Control point 1
+       * @param {Point} pt2 Control point 2
+       * @param {Point} pt3 End point
+       */
+      'bezierCurveTo': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (pt1, pt2, pt3) {
+          /*DEBUG*/
+          check_point_type(pt1, this+'.graphics.bezierCurveTo', '*ctl_point1*, ctl_point2, point');
+          check_point_type(pt2, this+'.graphics.bezierCurveTo', 'ctl_point1, *ctl_point2*, point');
+          check_point_type(pt3, this+'.graphics.bezierCurveTo', 'ctl_point1, ctl_point2, *point*');
+          /*END_DEBUG*/
+          var pow = Math.pow,
+              max = Math.max,
+              min = Math.min,
+              x0 = cursor_x,
+              y0 = cursor_y,
+              x1 = pt1.x,
+              y1 = pt1.y,
+              x2 = pt2.x,
+              y2 = pt2.y,
+              x3 = pt3.x,
+              y3 = pt3.y,
+              t,
+              xt,
+              yt,
+              cx_max = 0,
+              cx_min = 0,
+              cy_max = 0,
+              cy_min = 0;
+
+          /* Solve for t on curve at various intervals and keep extremas.
+           * Kinda hacky until I can find a real equation.
+           * 0 <= t && t <= 1
+           */
+          for (t = 0.1; t < 1; t += 0.1) {
+            xt = pow(1-t,3) * x0 + 3 * pow(1-t,2) * t * x1 +
+              3 * pow(1-t,1) * pow(t,2) * x2 + pow(t,3) * x3;
+            //extremas
+            if (xt > cx_max) { cx_max = xt; }
+            if (xt < cx_min) { cx_min = xt; }
+            
+            yt = pow(1-t,3) * y0 + 3 * pow(1-t,2) * t * y1 +
+              3 * pow(1-t,1) * pow(t,2) * y2 + pow(t,3) * y3;
+            //extremas
+            if (yt > cy_max) { cy_max = yt; }
+            if (yt < cy_min) { cy_min = yt; }
+          }
+
+          //update extremas
+          extrema.min_x = min(0, x0, cx_min, x3, extrema.min_x);
+          extrema.min_y = min(0, y0, cy_min, y3, extrema.min_y);
+          extrema.max_x = max(0, x0, cx_max, x3, extrema.max_x);
+          extrema.max_y = max(0, y0, cy_max, y3, extrema.max_y);
+          
+          //update size for bounding box
+          sprite.width = -extrema.min_x + extrema.max_x;
+          sprite.height = -extrema.min_y + extrema.max_y;
+
+          draw_commands.push(function (ctx) {
+            ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+          });
+
+          //update cursor
+          cursor_x = x3;
+          cursor_y = y3;
+
+        }
+      },
+
+      /* Specifies a simple one-color fill that subsequent calls to other
+       * graphics methods use when drawing.
+       * @param {Color} color In hex format.
+       * @param {Number} alpha
+       */
+      'beginFill': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function (color, alpha) {
+          alpha = (alpha === undefined) ? 1 : alpha;
+          /*DEBUG*/
+          check_number_type(alpha, this+'.graphics.beginFill', 'color, *alpha*');
+          /*END_DEBUG*/
+          draw_commands.push(function (ctx) {
+            ctx.fillStyle = hex_to_rgb_str(color, alpha);
+          });
+        }
+      },
+
+      'beginGradientFill': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function (type, pt1, pt2, ratios, colors, alphas) {
+          /*DEBUG*/
+          check_point_type(pt1, this+'.graphics.beginGradientFill', 'type, *point1*, point2, ratios, colors, alphas');
+          check_point_type(pt2, this+'.graphics.beginGradientFill', 'type, point1, *point2*, ratios, colors, alphas');
+          check_array_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
+          check_number_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
+          check_array_type(colors, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, *colors*, alphas');
+          check_array_type(alphas, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, colors, *alphas*');
+          /*END_DEBUG*/
+          
+          draw_commands.push(function (ctx) {
+            var hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+                gradient,
+                len = ratios.length,
+                i = 0;
+            
+            if (type === LINEAR) {
+              //not really too keen on creating this here, but I need access to the context
+              gradient = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
+              
+            } else if (type === RADIAL) {
+              /*DEBUG*/
+              check_number_type(pt1.radius, this+'.graphics.beginGradientFill', 'type, *circle1.radius*, circle2, ratios, colors, alphas');
+              check_number_type(pt2.radius, this+'.graphics.beginGradientFill', 'type, circle1, *circle2.radius*, ratios, colors, alphas');
+              /*END_DEBUG*/
+              gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
+                                                  pt2.x, pt2.y, pt2.radius);
+            } else {
+              throw new TypeError(this+'.graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.');
+            }
+            //add color ratios to our gradient
+            for (; i < len; i+=1) {
+              gradient.addColorStop(ratios[i], hex_to_rgb_str(colors[i], alphas[i]));
+            }
+            ctx.fillStyle = gradient;
+          });
+        }
+      },
+
+      'beginPatternFill': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function (image, repeat) {
+          var img_loaded = null, //image after loaded
+              on_image_error,
+              Pattern = doodle.Pattern;
+          
+          repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
+          /*DEBUG*/
+          check_string_type(repeat, this+'.graphics.beginPatternFill', 'image, *repeat*');
+          /*END_DEBUG*/
+          if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
+              repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
+            throw new SyntaxError(this+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
+          }
+          
+          if (typeof image === 'string') {
+            //element id
+            if (image[0] === '#') {
+              image = get_element(image, this+'.beginPatternFill');
+            } else {
+              //url
+              (function () {
+                var img_url = encodeURI(image);
+                image = new Image();
+                image.src = img_url;
+              }());
+            }
+          }
+          
+          /*DEBUG*/
+          if (image && image.tagName !== 'IMG') {
+            throw new TypeError(this+'.graphics.beginPatternFill(*image*, repeat): Parameter must be an src url, image object, or element id.');
+          }
+          /*END_DEBUG*/
+
+          //check if image has already been loaded
+          if (image.complete) {
+            img_loaded = image;
+          } else {
+            //if not, assign load handlers
+            image.onload = function () {
+              img_loaded = image;
+              sprite.dispatchEvent(doodle_Event(doodle_Event.LOAD));
+            };
+            on_image_error = function () {
+              throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + image.src);
+            };
+            image.onerror = on_image_error;
+            image.onabort = on_image_error;
+          }
+          
+          draw_commands.push(function (ctx) {
+            if (img_loaded) {
+              ctx.fillStyle = ctx.createPattern(img_loaded, repeat);
+            } else {
+              //use transparent fill until image is loaded
+              ctx.fillStyle = 'rgba(0,0,0,0)';
+            }
+          });
+          
+        }
+      },
+
+      'lineStyle': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function (thickness, color, alpha, caps, joints, miterLimit) {
+          //defaults
+          thickness = (thickness === undefined) ? 1 : thickness;
+          color = (color === undefined) ? "#000000" : color;
+          alpha = (alpha === undefined) ? 1 : alpha;
+          caps = (caps === undefined) ? doodle.LineCap.BUTT : caps;
+          joints = (joints === undefined) ? doodle.LineJoin.MITER : joints;
+          miterLimit = (miterLimit === undefined) ? 10 : miterLimit;
+          
+          /*DEBUG*/
+          check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*, color, alpha, caps, joints, miterLimit');
+          check_number_type(alpha, this+'.graphics.lineStyle', 'thickness, color, *alpha*, caps, joints, miterLimit');
+          check_string_type(caps, this+'.graphics.lineStyle', 'thickness, color, alpha, *caps*, joints, miterLimit');
+          check_string_type(joints, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, *joints*, miterLimit');
+          check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, joints, *miterLimit*');
+          /*END_DEBUG*/
+          
+          //convert color to canvas rgb() format
+          if (typeof color === 'string' || typeof color === 'number') {
+            color = hex_to_rgb_str(color, alpha);
+          } else {
+            throw new TypeError(this+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
+          }
+
+          draw_commands.push(function (ctx) {
+            ctx.lineWidth = thickness;
+            ctx.strokeStyle = color;
+            ctx.lineCap = caps;
+            ctx.lineJoin = joints;
+            ctx.miterLimit = miterLimit;
+          });
+          
+        }
+      },
+
+      'beginPath': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          draw_commands.push(function (ctx) {
+            ctx.beginPath();
+            ctx.moveTo(cursor_x, cursor_y);
+          });
+        }
+      },
+
+      'closePath': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          draw_commands.push(function (ctx) {
+            ctx.closePath();
+            ctx.stroke();
+          });
+          cursor_x = 0;
+          cursor_y = 0;
+        }
+      },
+
+      //temp
+      'endFill': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          draw_commands.push(function (ctx) {
+            ctx.fill();
+          });
+        }
+      },
+      
+      //temp
+      'stroke': {
+        enumerable: false,
+        writable: false,
+        configurable: false,
+        value: function () {
+          draw_commands.push(function (ctx) {
+            ctx.stroke();
+          });
+          cursor_x = 0;
+          cursor_y = 0;
+        }
+      }
+
+    });//end defineProperties
+
+    return graphics;
+  };
+  
+
+  graphics_static_properties = {
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Graphics]";
+      }
+    }
+  };
+
+}());//end class closure
+/*globals doodle*/
+(function () {
+  var sprite_static_properties,
       isSprite,
       inheritsSprite,
       check_sprite_type,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
-      check_array_type = doodle.utils.types.check_array_type,
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
       inheritsNode = doodle.Node.inheritsNode,
-      get_element = doodle.utils.get_element,
       doodle_Rectangle = doodle.geom.Rectangle;
-
 
   /* Super constructor
    * @param {String|Function} id|initializer
    * @return {Object}
    */
   doodle.Sprite = function (id) {
-    var arg_len = arguments.length,
-        initializer,
-        sprite,
+    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined)),
         draw_commands = [],
-        bounds_min_x = 0, //offsets used in getBounds and graphics shapes
-        bounds_min_y = 0,
-        bounds_max_x = 0,
-        bounds_max_y = 0,
-        graphics_cursor_x = 0,
-        graphics_cursor_y = 0;
-    
-    //inherits from doodle.Node, if string pass along id
-    sprite = (typeof id === 'string') ?
-      Object.create(doodle.Node(id)) : Object.create(doodle.Node());
+        extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
 
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      id = undefined;
-    } else if (arg_len > 1) {
-      throw new SyntaxError("[object Sprite]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arguments.length > 1) {
+      throw new SyntaxError("[object Sprite](id): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
-    Object.defineProperties(sprite, sprite_properties);
+    Object.defineProperties(sprite, sprite_static_properties);
     //properties that require privacy
     Object.defineProperties(sprite, {
       /*
@@ -5297,10 +5947,10 @@ Object.defineProperties(doodle.TextEvent, {
               w = this.width,
               h = this.height,
               //transform corners to global
-              tl = this.localToGlobal({x: bounds_min_x, y: bounds_min_y}), //top left
-              tr = this.localToGlobal({x: bounds_min_x+w, y: bounds_min_y}), //top right
-              br = this.localToGlobal({x: bounds_min_x+w, y: bounds_min_y+h}), //bot right
-              bl = this.localToGlobal({x: bounds_min_x, y: bounds_min_y+h}); //bot left
+              tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
+              tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
+              br = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y+h}), //bot right
+              bl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y+h}); //bot left
           
           //transform global to target space
           tl = targetCoordSpace.globalToLocal(tl);
@@ -5419,7 +6069,7 @@ Object.defineProperties(doodle.TextEvent, {
         configurable: false,
         value: Object.create(null, {
           'boundingBox': (function () {
-            var debug_boundingBox = "rgb(0, 0, 255)";
+            var debug_boundingBox = "rgb(0,0,255)";
             return {
               enumerable: true,
               configurable: false,
@@ -5427,677 +6077,97 @@ Object.defineProperties(doodle.TextEvent, {
                 return rgb_str_to_hex(debug_boundingBox);
               },
               set: function (color) {
-                debug_boundingBox = hex_to_rgb_str(color);
+                /*DEBUG*/
+                if (typeof color === 'number') {
+                  color = hex_to_rgb_str(color);
+                } else if (typeof color === 'string' && color[0] === '#') {
+                  color = hex_to_rgb_str(color);
+                }
+                /*END_DEBUG*/
+                debug_boundingBox = color;
               }
             };
           }())
         })
-      },
+      }
+    });//end defineProperties
 
-      /*
-       * GRAPHICS
-       */
-      'graphics': {
-        value: Object.create(null, {
-          /*
-           * METHODS
-           */
+    /* The graphics object contains drawing operations to be stored in draw_commands.
+     * Objects and Arrays are passed by reference, so these will be modified
+     */
+    sprite.graphics = Object.create(doodle.Graphics(sprite, draw_commands, extrema));
 
-          /* Provide direct access to the canvas drawing api.
-           * Canvas context is called as the first argument to function.
-           * Unable to set bounds from a user supplied function unless explictly set.
-           * @param {Function} fn
-           * Ex:
-           * x = Object.create(doodle.sprite);
-           * x.graphics.draw(function (ctx) {
-           *   ctx.fillStyle = "#ff0000";
-           *   ctx.fillRect(this.x, this.y, 100, 100);
-           * });
-           * x.draw();
-           */
-          'draw': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (fn) {
-              /*DEBUG*/
-              check_function_type(fn, this+'.graphics.draw', '*function*');
-              /*END_DEBUG*/
-              draw_commands.push(fn);
-            }).bind(sprite)
-          },
-
-          /* Remove all drawing commands for sprite.
-           */
-          'clear': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function () {
-              //should probably test, better to assign new empty array?
-              var i = draw_commands.length;
-              while ((i=i-1) >= 0) {
-                draw_commands.splice(i, 1);
-              }
-              //reset dimensions
-              this.width = 0;
-              this.height = 0;
-
-              bounds_min_x = bounds_min_y = bounds_max_x = bounds_max_y = 0;
-              graphics_cursor_x = graphics_cursor_y = 0;
-              
-            }).bind(sprite)
-          },
-
-          /*
-           * @param {Number} x
-           * @param {Number} y
-           * @param {Number} w
-           * @param {Number} h
-           */
-          'rect': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (x, y, width, height) {
-              /*DEBUG*/
-              check_number_type(x, this+'.graphics.rect', '*x*, y, width, height');
-              check_number_type(y, this+'.graphics.rect', 'x, *y*, width, height');
-              check_number_type(width, this+'.graphics.rect', 'x, y, *width*, height');
-              check_number_type(height, this+'.graphics.rect', 'x, y, width, *height*');
-              /*END_DEBUG*/
-
-              //update extremas
-              bounds_min_x = Math.min(0, x, bounds_min_x);
-              bounds_min_y = Math.min(0, y, bounds_min_y);
-              bounds_max_x = Math.max(0, x, x+width, bounds_max_x);
-              bounds_max_y = Math.max(0, y, y+height, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
-              
-              draw_commands.push(function (ctx) {
-                ctx.beginPath();
-                ctx.rect(x, y, width, height);
-                ctx.closePath();
-                ctx.stroke();
-              });
-              
-            }).bind(sprite)
-          },
-
-          /*
-           * @param {Number} x The x location of the center of the circle relative to the registration point of the parent display object (in pixels).
-           * @param {Number} y The y location of the center of the circle relative to the registration point of the parent display object (in pixels).
-           * @param {Number} radius
-           */
-          'circle': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (x, y, radius) {
-              /*DEBUG*/
-              check_number_type(x, this+'.graphics.circle', '*x*, y, radius');
-              check_number_type(y, this+'.graphics.circle', 'x, *y*, radius');
-              check_number_type(radius, this+'.graphics.circle', 'x, y, *radius*');
-              /*END_DEBUG*/
-
-              //update extremas
-              bounds_min_x = Math.min(0, -radius+x, bounds_min_x);
-              bounds_min_y = Math.min(0, -radius+y, bounds_min_y);
-              bounds_max_x = Math.max(0, x, x+radius, bounds_max_x);
-              bounds_max_y = Math.max(0, y, y+radius, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
-
-              draw_commands.push(function (ctx) {
-                ctx.beginPath();
-                //x, y, radius, start_angle, end_angle (Math.PI*2), anti-clockwise
-                ctx.arc(x, y, radius, 0, 6.283185307179586, true);
-                ctx.closePath();
-                ctx.stroke();
-              });
-              
-            }).bind(sprite)
-          },
-
-          /*
-           * @param {Number} x
-           * @param {Number} y
-           * @param {Number} width
-           * @param {Number} height
-           */
-          'ellipse': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (x, y, width, height) {
-              height = (height === undefined) ? width : height; //default to circle
-              /*DEBUG*/
-              check_number_type(x, this+'.graphics.ellipse', '*x*, y, width, height');
-              check_number_type(y, this+'.graphics.ellipse', 'x, *y*, width, height');
-              check_number_type(width, this+'.graphics.ellipse', 'x, y, *width*, height');
-              check_number_type(height, this+'.graphics.ellipse', 'x, y, width, *height*');
-              /*END_DEBUG*/
-              var rx = width / 2,
-                  ry = height / 2,
-                  krx = 0.5522847498 * rx, //kappa * radius_x
-                  kry = 0.5522847498 * ry;
-
-              //update extremas
-              bounds_min_x = Math.min(0, -rx+x, bounds_min_x);
-              bounds_min_y = Math.min(0, -ry+y, bounds_min_y);
-              bounds_max_x = Math.max(0, x, x+rx, bounds_max_x);
-              bounds_max_y = Math.max(0, y, y+ry, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
-
-              draw_commands.push(function (ctx) {
-                ctx.beginPath();
-                ctx.moveTo(x+rx, y);
-                //(cp1), (cp2), (pt)
-                ctx.bezierCurveTo(x+rx, y-kry, x+krx, y-ry, x, y-ry);
-                ctx.bezierCurveTo(x-krx, y-ry, x-rx, y-kry, x-rx, y);
-                ctx.bezierCurveTo(x-rx, y+kry, x-krx, y+ry, x, y+ry);
-                ctx.bezierCurveTo(x+krx, y+ry, x+rx, y+kry, x+rx, y);
-                ctx.closePath();
-                ctx.stroke();
-              });
-              
-            }).bind(sprite)
-          },
-
-          /*
-           * @param {Number} x
-           * @param {Number} y
-           * @param {Number} width
-           * @param {Number} height
-           * @param {Number} rx
-           * @param {Number} ry
-           */
-          'roundRect': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (x, y, width, height, rx, ry) {
-              rx = (rx === undefined) ? 0 : rx; //default to rectangle
-              ry = (ry === undefined) ? 0 : ry;
-              /*DEBUG*/
-              check_number_type(x, this+'.graphics.roundRect', '*x*, y, width, height, rx, ry');
-              check_number_type(y, this+'.graphics.roundRect', 'x, *y*, width, height, rx, ry');
-              check_number_type(width, this+'.graphics.roundRect', 'x, y, *width*, height, rx, ry');
-              check_number_type(height, this+'.graphics.roundRect', 'x, y, width, *height*, rx, ry');
-              check_number_type(rx, this+'.graphics.roundRect', 'x, y, width, height, *rx*, ry');
-              check_number_type(ry, this+'.graphics.roundRect', 'x, y, width, height, rx, *ry*');
-              /*END_DEBUG*/
-              var x3 = x + width,
-                  x2 = x3 - rx,
-                  x1 = x + rx,
-                  y3 = y + height,
-                  y2 = y3 - ry,
-                  y1 = y + ry;
-
-              //update extremas
-              bounds_min_x = Math.min(0, x, bounds_min_x);
-              bounds_min_y = Math.min(0, y, bounds_min_y);
-              bounds_max_x = Math.max(0, x, x+width, bounds_max_x);
-              bounds_max_y = Math.max(0, y, y+height, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
-
-              draw_commands.push(function (ctx) {
-                ctx.beginPath();
-                //clockwise
-                ctx.moveTo(x1, y);
-                ctx.beginPath();
-                ctx.lineTo(x2, y);
-                ctx.quadraticCurveTo(x3, y, x3, y1);
-                ctx.lineTo(x3, y2);
-                ctx.quadraticCurveTo(x3, y3, x2, y3);
-                ctx.lineTo(x1, y3);
-                ctx.quadraticCurveTo(x, y3, x, y2);
-                ctx.lineTo(x, y1);
-                ctx.quadraticCurveTo(x, y, x1, y);
-                ctx.closePath();
-                ctx.stroke();
-              });
-              
-            }).bind(sprite)
-          },
-
-          /*
-           * @param {Number} x
-           * @param {Number} y
-           */
-          'moveTo': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (x, y) {
-              /*DEBUG*/
-              check_number_type(x, this+'.graphics.moveTo', '*x*, y');
-              check_number_type(y, this+'.graphics.moveTo', 'x, *y*');
-              /*END_DEBUG*/
-              draw_commands.push(function (ctx) {
-                ctx.moveTo(x, y);
-              });
-              //update cursor
-              graphics_cursor_x = x;
-              graphics_cursor_y = y;
-              
-            }).bind(sprite)
-          },
-
-          /*
-           * @param {Number} x
-           * @param {Number} y
-           */
-          'lineTo': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (x, y) {
-              /*DEBUG*/
-              check_number_type(x, this+'.graphics.lineTo', '*x*, y');
-              check_number_type(y, this+'.graphics.lineTo', 'x, *y*');
-              /*END_DEBUG*/
-
-              //update extremas
-              bounds_min_x = Math.min(0, x, graphics_cursor_x, bounds_min_x);
-              bounds_min_y = Math.min(0, y, graphics_cursor_y, bounds_min_y);
-              bounds_max_x = Math.max(0, x, graphics_cursor_x, bounds_max_x);
-              bounds_max_y = Math.max(0, y, graphics_cursor_y, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = bounds_max_x - bounds_min_x;
-              this.height = bounds_max_y - bounds_min_y;
-              
-              draw_commands.push(function (ctx) {
-                ctx.lineTo(x, y);
-              });
-
-              //update cursor
-              graphics_cursor_x = x;
-              graphics_cursor_y = y;
-              
-            }).bind(sprite)
-          },
-
-          /* Quadratic curve to point.
-           * @param {Point} pt1 Control point
-           * @param {Point} pt2 End point
-           */
-          'curveTo': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (pt1, pt2) {
-              /*DEBUG*/
-              check_point_type(pt1, this+'.graphics.curveTo', '*ctl_point*, point');
-              check_point_type(pt2, this+'.graphics.curveTo', 'ctl_point, *point*');
-              /*END_DEBUG*/
-              var x0 = graphics_cursor_x,
-                  y0 = graphics_cursor_y,
-                  x1 = pt1.x,
-                  y1 = pt1.y,
-                  x2 = pt2.x,
-                  y2 = pt2.y,
-                  t,
-                  cx = 0,
-                  cy = 0;
-              
-              //curve ratio of extrema
-              t = (x0 - x1) / (x0 - 2 * x1 + x2);
-              //if true, store extrema position
-              if (0 <= t && t <= 1) {
-                cx = (1-t) * (1-t) * x0 + 2 * (1-t) * t * x1 + t * t * x2;
-              }
-
-              t = (y0 - y1) / (y0 - 2 * y1 + y2);
-              if (0 <= t && t <= 1) {
-                cy = (1-t) * (1-t) * y0 + 2 * (1-t) * t * y1 + t * t * y2;
-              }
-              
-              //update extremas
-              bounds_min_x = Math.min(0, x0, cx, x2, bounds_min_x);
-              bounds_min_y = Math.min(0, y0, cy, y2, bounds_min_y);
-              bounds_max_x = Math.max(0, x0, cx, x2, bounds_max_x);
-              bounds_max_y = Math.max(0, y0, cy, y2, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
-
-              draw_commands.push(function (ctx) {
-                ctx.quadraticCurveTo(x1, y1, x2, y2);
-              });
-
-              //update cursor
-              graphics_cursor_x = x2;
-              graphics_cursor_y = y2;
-              
-            }).bind(sprite)
-          },
-
-          /* Bezier curve to point.
-           * @param {Point} pt1 Control point 1
-           * @param {Point} pt2 Control point 2
-           * @param {Point} pt3 End point
-           */
-          'bezierCurveTo': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (pt1, pt2, pt3) {
-              /*DEBUG*/
-              check_point_type(pt1, this+'.graphics.bezierCurveTo', '*ctl_point1*, ctl_point2, point');
-              check_point_type(pt2, this+'.graphics.bezierCurveTo', 'ctl_point1, *ctl_point2*, point');
-              check_point_type(pt3, this+'.graphics.bezierCurveTo', 'ctl_point1, ctl_point2, *point*');
-              /*END_DEBUG*/
-              var pow = Math.pow,
-                  max = Math.max,
-                  min = Math.min,
-                  x0 = graphics_cursor_x,
-                  y0 = graphics_cursor_y,
-                  x1 = pt1.x,
-                  y1 = pt1.y,
-                  x2 = pt2.x,
-                  y2 = pt2.y,
-                  x3 = pt3.x,
-                  y3 = pt3.y,
-                  t,
-                  xt,
-                  yt,
-                  cx_max = 0,
-                  cx_min = 0,
-                  cy_max = 0,
-                  cy_min = 0;
-
-              /* Solve for t on curve at various intervals and keep extremas.
-               * Kinda hacky until I can find a real equation.
-               * 0 <= t && t <= 1
-               */
-              for (t = 0.1; t < 1; t += 0.1) {
-                xt = pow(1-t,3) * x0 + 3 * pow(1-t,2) * t * x1 +
-                  3 * pow(1-t,1) * pow(t,2) * x2 + pow(t,3) * x3;
-                //extremas
-                if (xt > cx_max) { cx_max = xt; }
-                if (xt < cx_min) { cx_min = xt; }
-                
-                yt = pow(1-t,3) * y0 + 3 * pow(1-t,2) * t * y1 +
-                  3 * pow(1-t,1) * pow(t,2) * y2 + pow(t,3) * y3;
-                //extremas
-                if (yt > cy_max) { cy_max = yt; }
-                if (yt < cy_min) { cy_min = yt; }
-              }
-
-              //update extremas
-              bounds_min_x = min(0, x0, cx_min, x3, bounds_min_x);
-              bounds_min_y = min(0, y0, cy_min, y3, bounds_min_y);
-              bounds_max_x = max(0, x0, cx_max, x3, bounds_max_x);
-              bounds_max_y = max(0, y0, cy_max, y3, bounds_max_y);
-              
-              //update size for bounding box
-              this.width = -bounds_min_x + bounds_max_x;
-              this.height = -bounds_min_y + bounds_max_y;
-
-              draw_commands.push(function (ctx) {
-                ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
-              });
-
-              //update cursor
-              graphics_cursor_x = x3;
-              graphics_cursor_y = y3;
-
-            }).bind(sprite)
-          },
-
-          /* Specifies a simple one-color fill that subsequent calls to other
-           * graphics methods use when drawing.
-           * @param {Color} color In hex format.
-           * @param {Number} alpha
-           */
-          'beginFill': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: (function (color, alpha) {
-              alpha = (alpha === undefined) ? 1 : alpha;
-              /*DEBUG*/
-              check_number_type(alpha, this+'.graphics.beginFill', 'color, *alpha*');
-              /*END_DEBUG*/
-              draw_commands.push(function (ctx) {
-                ctx.fillStyle = hex_to_rgb_str(color, alpha);
-              });
-            }).bind(sprite)
-          },
-
-          'beginGradientFill': {
-            enumerable: true,
-            writable: false,
-            configurable: false,
-            value: (function () {
-              var LINEAR = doodle.GradientType.LINEAR,
-                  RADIAL = doodle.GradientType.RADIAL;
-              
-              return (function (type, pt1, pt2, ratios, colors, alphas) {
-                /*DEBUG*/
-                check_point_type(pt1, this+'.graphics.beginGradientFill', 'type, *point1*, point2, ratios, colors, alphas');
-                check_point_type(pt2, this+'.graphics.beginGradientFill', 'type, point1, *point2*, ratios, colors, alphas');
-                check_array_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-                check_number_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-                check_array_type(colors, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, *colors*, alphas');
-                check_array_type(alphas, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, colors, *alphas*');
-                /*END_DEBUG*/
-                
-                draw_commands.push(function (ctx) {
-                  var hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
-                      gradient,
-                      len = ratios.length,
-                      i = 0;
-                  if (type === LINEAR) {
-                    //not really too keen on creating this here, but I need access to the context
-                    gradient = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
-                    
-                  } else if (type === RADIAL) {
-                    /*DEBUG*/
-                    check_number_type(pt1.radius, this+'.graphics.beginGradientFill', 'type, *circle1.radius*, circle2, ratios, colors, alphas');
-                    check_number_type(pt2.radius, this+'.graphics.beginGradientFill', 'type, circle1, *circle2.radius*, ratios, colors, alphas');
-                    /*END_DEBUG*/
-                    gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
-                                                        pt2.x, pt2.y, pt2.radius);
-                  } else {
-                    throw new TypeError(this+'.graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.');
-                  }
-                  //add color ratios to our gradient
-                  for (; i < len; i+=1) {
-                    gradient.addColorStop(ratios[i], hex_to_rgb_str(colors[i], alphas[i]));
-                  }
-                  ctx.fillStyle = gradient;
-                });
-                
-              }).bind(sprite);
-            }())
-          },
-
-          'beginPatternFill': {
-            enumerable: true,
-            writable: false,
-            configurable: false,
-            value: (function (image, repeat) {
-              var img_loaded = null, //image after loaded
-                  on_image_error,
-                  Pattern = doodle.Pattern,
-                  doodle_Event = doodle.Event;
-              
-              repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
-              /*DEBUG*/
-              check_string_type(repeat, this+'.graphics.beginPatternFill', 'image, *repeat*');
-              /*END_DEBUG*/
-              if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
-                  repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
-                throw new SyntaxError(this+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
-              }
-              
-              if (typeof image === 'string') {
-                //element id
-                if (image[0] === '#') {
-                  image = get_element(image, this+'.beginPatternFill');
-                } else {
-                  //url
-                  (function () {
-                    var img_url = encodeURI(image);
-                    image = new Image();
-                    image.src = img_url;
-                  }());
-                }
-              }
-              
-              /*DEBUG*/
-              if (image && image.tagName !== 'IMG') {
-                throw new TypeError(this+'.graphics.beginPatternFill(*image*, repeat): Parameter must be an src url, image object, or element id.');
-              }
-              /*END_DEBUG*/
-
-              //check if image has already been loaded
-              if (image.complete) {
-                img_loaded = image;
-              } else {
-                //if not, assign load handlers
-                image.onload = (function () {
-                  img_loaded = image;
-                  this.dispatchEvent(doodle_Event(doodle_Event.LOAD));
-                }).bind(this);
-                on_image_error = (function () {
-                  throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + image.src);
-                }).bind(this);
-                image.onerror = on_image_error;
-                image.onabort = on_image_error;
-              }
-              
-              draw_commands.push(function (ctx) {
-                if (img_loaded) {
-                  ctx.fillStyle = ctx.createPattern(img_loaded, repeat);
-                } else {
-                  //use transparent fill until image is loaded
-                  ctx.fillStyle = 'rgba(0,0,0,0)';
-                }
-              });
-              
-            }).bind(sprite)
-          },
-
-          'lineStyle': {
-            enumerable: true,
-            writable: false,
-            configurable: false,
-            value: (function (thickness, color, alpha, caps, joints, miterLimit) {
-              //defaults
-              thickness = (thickness === undefined) ? 1 : thickness;
-              color = (color === undefined) ? "#000000" : color;
-              alpha = (alpha === undefined) ? 1 : alpha;
-              caps = (caps === undefined) ? doodle.LineCap.BUTT : caps;
-              joints = (joints === undefined) ? doodle.LineJoin.MITER : joints;
-              miterLimit = (miterLimit === undefined) ? 10 : miterLimit;
-              
-              /*DEBUG*/
-              check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*, color, alpha, caps, joints, miterLimit');
-              check_number_type(alpha, this+'.graphics.lineStyle', 'thickness, color, *alpha*, caps, joints, miterLimit');
-              check_string_type(caps, this+'.graphics.lineStyle', 'thickness, color, alpha, *caps*, joints, miterLimit');
-              check_string_type(joints, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, *joints*, miterLimit');
-              check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, joints, *miterLimit*');
-              /*END_DEBUG*/
-              
-              //convert color to canvas rgb() format
-              if (typeof color === 'string' || typeof color === 'number') {
-                color = hex_to_rgb_str(color, alpha);
-              } else {
-                throw new TypeError(this+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
-              }
-
-              draw_commands.push(function (ctx) {
-                ctx.lineWidth = thickness;
-                ctx.strokeStyle = color;
-                ctx.lineCap = caps;
-                ctx.lineJoin = joints;
-                ctx.miterLimit = miterLimit;
-              });
-              
-            }).bind(sprite)
-          },
-
-          'beginPath': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: function () {
-              draw_commands.push(function (ctx) {
-                ctx.beginPath();
-                ctx.moveTo(graphics_cursor_x, graphics_cursor_y);
-              });
-            }
-          },
-
-          'closePath': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: function () {
-              draw_commands.push(function (ctx) {
-                ctx.closePath();
-                ctx.stroke();
-              });
-              graphics_cursor_x = 0;
-              graphics_cursor_y = 0;
-            }
-          },
-
-          //temp
-          'endFill': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: function () {
-              draw_commands.push(function (ctx) {
-                ctx.fill();
-              });
-            }
-          },
-          
-          //temp
-          'stroke': {
-            enumerable: false,
-            writable: false,
-            configurable: false,
-            value: function () {
-              draw_commands.push(function (ctx) {
-                ctx.stroke();
-              });
-              graphics_cursor_x = 0;
-              graphics_cursor_y = 0;
-            }
-          }
-          
-        })
-      }//end graphics object
-    });//end sprite property definitions w/ privact
-
-
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(sprite);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      arguments[0].call(sprite);
     }
     
     return sprite;
   };
 
+  
+  sprite_static_properties = {
+    'rotation': (function () {
+      var to_degrees = 180 / Math.PI,
+          to_radians = Math.PI / 180;
+      return {
+        enumerable: true,
+        configurable: false,
+        get: function () {
+          return this.transform.rotation * to_degrees;
+        },
+        set: function (deg) {
+          /*DEBUG*/
+          check_number_type(deg, this+'.rotation', '*degrees*');
+          /*END_DEBUG*/
+          this.transform.rotation = deg * to_radians;
+        }
+      };
+    }()),
+
+    /*
+     * METHODS
+     */
+
+    /* Returns the string representation of the specified object.
+     * @param {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Sprite]";
+      }
+    },
+
+    /* Updates the position and size of this sprite.
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} width
+     * @param {Number} height
+     * @return {Sprite}
+     */
+    'compose': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (x, y, width, height) {
+        /*DEBUG*/
+        check_number_type(x, this+'.compose', '*x*, y, width, height');
+        check_number_type(y, this+'.compose', 'x, *y*, width, height');
+        check_number_type(width, this+'.compose', 'x, y, *width*, height');
+        check_number_type(height, this+'.compose', 'x, y, width, *height*');
+        /*END_DEBUG*/
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        return this;
+      }
+    }
+  };//end sprite_static_properties
+  
   
   /*
    * CLASS METHODS
@@ -6135,72 +6205,6 @@ Object.defineProperties(doodle.TextEvent, {
     }
   };
   
-
-  (function () {
-    
-    sprite_properties = {
-      /*
-       * PROPERTIES
-       */
-
-      'rotation': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.transform.rotation * 180/Math.PI; //return degress
-        },
-        set: function (deg) {
-          /*DEBUG*/
-          check_number_type(deg, this+'.rotation', '*degrees*');
-          /*END_DEBUG*/
-          this.transform.rotation = deg * Math.PI/180; //deg-to-rad
-        }
-      },
-
-      /*
-       * METHODS
-       */
-
-      /* Returns the string representation of the specified object.
-       * @param {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object Sprite]";
-        }
-      },
-
-      /* Updates the position and size of this sprite.
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} width
-       * @param {Number} height
-       * @return {Sprite}
-       */
-      'compose': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (x, y, width, height) {
-          /*DEBUG*/
-          check_number_type(x, this+'.compose', '*x*, y, width, height');
-          check_number_type(y, this+'.compose', 'x, *y*, width, height');
-          check_number_type(width, this+'.compose', 'x, y, *width*, height');
-          check_number_type(height, this+'.compose', 'x, y, width, *height*');
-          /*END_DEBUG*/
-          this.x = x;
-          this.y = y;
-          this.width = width;
-          this.height = height;
-          return this;
-        }
-      }
-    };//end sprite_properties
-    
-  }());
 }());//end class closure
 /*globals doodle*/
 (function () {
@@ -6220,34 +6224,46 @@ Object.defineProperties(doodle.TextEvent, {
    * @return {Object}
    */
   doodle.ElementNode = function (element) {
-    var arg_len = arguments.length,
-        initializer,
-        element_node = Object.create(doodle.Node());
+    var element_node = Object.create(doodle.Node());
 
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      element = undefined;
-    } else if (arg_len > 1) {
-      throw new SyntaxError("[object ElementNode]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arguments.length > 1) {
+      throw new SyntaxError("[object ElementNode](element): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
     Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
     Object.defineProperties(element_node, {
-      'element': {
-        get: function () {
-          return element;
-        },
-        set: function (elem) {
-          element = elem;
-        }
-      }
-    });
+      'element': (function () {
+        var dom_element = null;
+        return {
+          get: function () {
+            return dom_element;
+          },
+          set: function (elementArg) {
+            if (elementArg === null) {
+              dom_element = null;
+            } else {
+              elementArg = get_element(elementArg);
+              /*DEBUG*/
+              if (!elementArg) {
+                throw new TypeError("[object ElementNode]: Parameter must be a DOM Element");
+              }
+              /*END_DEBUG*/
+              dom_element = elementArg;
+            }
+          }
+        };
+      }())
+    });//end defineProperties
 
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(element_node);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      arguments[0].call(element_node);
+    } else if (element !== undefined) {
+      //standard instantiation
+      element_node.element = element;
     }
 
     return element_node;
@@ -6416,8 +6432,8 @@ Object.defineProperties(doodle.TextEvent, {
         return "[object ElementNode]";
       }
     }
-    
   };//end node_static_properties
+  
 }());//end class closure
 (function () {
   var layer_static_properties,
