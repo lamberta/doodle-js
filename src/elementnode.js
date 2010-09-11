@@ -34,7 +34,7 @@
             return dom_element;
           },
           set: function (elementArg) {
-            if (elementArg === null || elementArg === false) {
+            if (elementArg === null) {
               dom_element = null;
             } else {
               elementArg = get_element(elementArg);
@@ -53,6 +53,9 @@
     //passed an initialization function
     if (typeof arguments[0] === 'function') {
       arguments[0].call(element_node);
+    } else if (element !== undefined) {
+      //standard instantiation
+      element_node.element = element;
     }
 
     return element_node;
