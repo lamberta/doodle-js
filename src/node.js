@@ -24,7 +24,7 @@
     
     /*DEBUG*/
     if (arguments.length > 1) {
-      throw new SyntaxError("[object Node](*id*): Invalid number of parameters.");
+      throw new SyntaxError("[object Node](id): Invalid number of parameters.");
     }
     /*END_DEBUG*/
 
