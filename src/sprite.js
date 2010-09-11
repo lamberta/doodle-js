@@ -1,18 +1,6 @@
-/*not implemented
-  id: null,
-  //node has matrix - x,y
-  showBoundingBox: null,
-
-  clickable: false,
-  useHandCursor: false, //on mouse over
-  hitArea: null, //if null use this, otherwise use another sprite
-  hitTestPoint: null, //point intersects with obj bounds
-  hitTestObject: null, //another object intersects with obj bounds
-*/
-
+/*globals doodle, Image*/
 (function () {
-
-  var sprite_properties,
+  var sprite_static_properties,
       isSprite,
       inheritsSprite,
       check_sprite_type,
@@ -29,15 +17,12 @@
       get_element = doodle.utils.get_element,
       doodle_Rectangle = doodle.geom.Rectangle;
 
-
   /* Super constructor
    * @param {String|Function} id|initializer
    * @return {Object}
    */
   doodle.Sprite = function (id) {
-    var arg_len = arguments.length,
-        initializer,
-        sprite,
+    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined)),
         draw_commands = [],
         bounds_min_x = 0, //offsets used in getBounds and graphics shapes
         bounds_min_y = 0,
@@ -45,20 +30,15 @@
         bounds_max_y = 0,
         graphics_cursor_x = 0,
         graphics_cursor_y = 0;
-    
-    //inherits from doodle.Node, if string pass along id
-    sprite = (typeof id === 'string') ?
-      Object.create(doodle.Node(id)) : Object.create(doodle.Node());
 
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      id = undefined;
-    } else if (arg_len > 1) {
-      throw new SyntaxError("[object Sprite]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arguments.length > 1) {
+      throw new SyntaxError("[object Sprite](id): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
+    
 
-    Object.defineProperties(sprite, sprite_properties);
+    Object.defineProperties(sprite, sprite_static_properties);
     //properties that require privacy
     Object.defineProperties(sprite, {
       /*
@@ -245,7 +225,7 @@
         configurable: false,
         value: Object.create(null, {
           'boundingBox': (function () {
-            var debug_boundingBox = "rgb(0, 0, 255)";
+            var debug_boundingBox = "rgb(0,0,255)";
             return {
               enumerable: true,
               configurable: false,
@@ -253,7 +233,14 @@
                 return rgb_str_to_hex(debug_boundingBox);
               },
               set: function (color) {
-                debug_boundingBox = hex_to_rgb_str(color);
+                /*DEBUG*/
+                if (typeof color === 'number') {
+                  color = hex_to_rgb_str(color);
+                } else if (typeof color === 'string' && color[0] === '#') {
+                  color = hex_to_rgb_str(color);
+                }
+                /*END_DEBUG*/
+                debug_boundingBox = color;
               }
             };
           }())
@@ -913,17 +900,75 @@
           
         })
       }//end graphics object
-    });//end sprite property definitions w/ privact
+    });//end defineProperties
 
-
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(sprite);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      arguments[0].call(sprite);
     }
     
     return sprite;
   };
 
+  
+  sprite_static_properties = {
+    'rotation': {
+      enumerable: true,
+      configurable: false,
+      get: function () {
+        return this.transform.rotation * 180/Math.PI; //return degress
+      },
+      set: function (deg) {
+        /*DEBUG*/
+        check_number_type(deg, this+'.rotation', '*degrees*');
+        /*END_DEBUG*/
+        this.transform.rotation = deg * Math.PI/180; //deg-to-rad
+      }
+    },
+
+    /*
+     * METHODS
+     */
+
+    /* Returns the string representation of the specified object.
+     * @param {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Sprite]";
+      }
+    },
+
+    /* Updates the position and size of this sprite.
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} width
+     * @param {Number} height
+     * @return {Sprite}
+     */
+    'compose': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (x, y, width, height) {
+        /*DEBUG*/
+        check_number_type(x, this+'.compose', '*x*, y, width, height');
+        check_number_type(y, this+'.compose', 'x, *y*, width, height');
+        check_number_type(width, this+'.compose', 'x, y, *width*, height');
+        check_number_type(height, this+'.compose', 'x, y, width, *height*');
+        /*END_DEBUG*/
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        return this;
+      }
+    }
+  };//end sprite_static_properties
+  
   
   /*
    * CLASS METHODS
@@ -961,70 +1006,4 @@
     }
   };
   
-
-  (function () {
-    
-    sprite_properties = {
-      /*
-       * PROPERTIES
-       */
-
-      'rotation': {
-        enumerable: true,
-        configurable: false,
-        get: function () {
-          return this.transform.rotation * 180/Math.PI; //return degress
-        },
-        set: function (deg) {
-          /*DEBUG*/
-          check_number_type(deg, this+'.rotation', '*degrees*');
-          /*END_DEBUG*/
-          this.transform.rotation = deg * Math.PI/180; //deg-to-rad
-        }
-      },
-
-      /*
-       * METHODS
-       */
-
-      /* Returns the string representation of the specified object.
-       * @param {String}
-       */
-      'toString': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object Sprite]";
-        }
-      },
-
-      /* Updates the position and size of this sprite.
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} width
-       * @param {Number} height
-       * @return {Sprite}
-       */
-      'compose': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (x, y, width, height) {
-          /*DEBUG*/
-          check_number_type(x, this+'.compose', '*x*, y, width, height');
-          check_number_type(y, this+'.compose', 'x, *y*, width, height');
-          check_number_type(width, this+'.compose', 'x, y, *width*, height');
-          check_number_type(height, this+'.compose', 'x, y, width, *height*');
-          /*END_DEBUG*/
-          this.x = x;
-          this.y = y;
-          this.width = width;
-          this.height = height;
-          return this;
-        }
-      }
-    };//end sprite_properties
-    
-  }());
 }());//end class closure
