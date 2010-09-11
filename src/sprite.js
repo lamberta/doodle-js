@@ -28,7 +28,6 @@
       throw new SyntaxError("[object Sprite](id): Invalid number of parameters.");
     }
     /*END_DEBUG*/
-    
 
     Object.defineProperties(sprite, sprite_static_properties);
     //properties that require privacy
@@ -238,9 +237,11 @@
           }())
         })
       }
-
     });//end defineProperties
 
+    /* The graphics object contains drawing operations to be stored in draw_commands.
+     * Objects and Arrays are passed by reference, so these will be modified
+     */
     sprite.graphics = Object.create(doodle.Graphics(sprite, draw_commands, extrema));
 
     //passed an initialization function
@@ -253,19 +254,23 @@
 
   
   sprite_static_properties = {
-    'rotation': {
-      enumerable: true,
-      configurable: false,
-      get: function () {
-        return this.transform.rotation * 180/Math.PI; //return degress
-      },
-      set: function (deg) {
-        /*DEBUG*/
-        check_number_type(deg, this+'.rotation', '*degrees*');
-        /*END_DEBUG*/
-        this.transform.rotation = deg * Math.PI/180; //deg-to-rad
-      }
-    },
+    'rotation': (function () {
+      var to_degrees = 180 / Math.PI,
+          to_radians = Math.PI / 180;
+      return {
+        enumerable: true,
+        configurable: false,
+        get: function () {
+          return this.transform.rotation * to_degrees;
+        },
+        set: function (deg) {
+          /*DEBUG*/
+          check_number_type(deg, this+'.rotation', '*degrees*');
+          /*END_DEBUG*/
+          this.transform.rotation = deg * to_radians;
+        }
+      };
+    }()),
 
     /*
      * METHODS
