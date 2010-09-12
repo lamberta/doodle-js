@@ -1228,15 +1228,15 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   })
 });
+/*globals doodle*/
 
-/* Will propbably want to implement the dom event interface:
+/* Will probably want to implement the dom event interface:
  * http://www.w3.org/TR/DOM-Level-3-Events/
  * But this works for now.
  */
-
 (function () {
   var event_prototype = {},
-      event_properties,
+      event_static_properties,
       isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -1300,7 +1300,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       throw new SyntaxError("[object Event]: Invalid number of parameters.");
     }
 
-    Object.defineProperties(event, event_properties);
+    Object.defineProperties(event, event_static_properties);
     //properties that require privacy
     Object.defineProperties(event, {
       /*
@@ -1489,34 +1489,32 @@ Object.defineProperty(doodle, 'LineJoin', {
     
     return event;
   };
+  
 
-
+  event_prototype = Event.prototype;
+  /*
   (function () {
-
-    var dom_event_proto = Object.getPrototypeOf(document.createEvent('Event'));
+    var dom_event_proto = Event.prototype;
 
     //copy event property constants, will add my own methods later
     for (var prop in dom_event_proto) {
-      if (typeof dom_event_proto[prop] !== 'function') {
+      if (typeof dom_event_proto[prop] === 'number') {
         event_prototype[prop] = dom_event_proto[prop];
       }
     }
-
-
-    //static event properties
-    event_properties = {
-
-      'toString': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object Event]";
-        }
-      }
-      
-    };//end event_properties
   }());
+  */
+  
+  event_static_properties = {
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Event]";
+      }
+    }
+  };//end event_static_properties
 
   /*
    * CLASS METHODS
@@ -3029,6 +3027,7 @@ Object.defineProperties(doodle.TextEvent, {
 }());//end class closure
 (function () {
   var matrix_static_properties,
+      doodle_Matrix,
       isMatrix,
       check_matrix_type,
       doodle_Point = doodle.geom.Point,
@@ -4580,7 +4579,7 @@ Object.defineProperties(doodle.TextEvent, {
         var node_id;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return node_id; },
           set: function (idArg) {
             /*DEBUG*/
@@ -4659,7 +4658,7 @@ Object.defineProperties(doodle.TextEvent, {
         var visible = true;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return visible; },
           set: function (isVisible) {
             /*DEBUG*/
@@ -4674,7 +4673,7 @@ Object.defineProperties(doodle.TextEvent, {
         var alpha = 1;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return alpha; },
           set: function (alphaValue) {
             /*DEBUG*/
@@ -4777,7 +4776,7 @@ Object.defineProperties(doodle.TextEvent, {
     
     'rotation': {
       enumerable: true,
-      configurable: false,
+      configurable: true,
       get: function () {
         return this.transform.rotation * to_degrees;
       },
@@ -6238,6 +6237,7 @@ Object.defineProperties(doodle.TextEvent, {
       'element': (function () {
         var dom_element = null;
         return {
+          configurable: true,
           get: function () {
             return dom_element;
           },
@@ -6284,6 +6284,8 @@ Object.defineProperties(doodle.TextEvent, {
     },
     
     'width': {
+      enumerable: true,
+      configurable: true,
       get: function () {
         return get_element_property(this.element, 'width', 'int');
       },
@@ -6297,6 +6299,8 @@ Object.defineProperties(doodle.TextEvent, {
     },
     
     'height': {
+      enumerable: true,
+      configurable: true,
       get: function () {
         return get_element_property(this.element, 'height', 'int');
       },
@@ -6602,7 +6606,7 @@ Object.defineProperties(doodle.TextEvent, {
       isLayer = doodle.Layer.isLayer,
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
-      set_element_property = doodle.utils.set_element_property
+      set_element_property = doodle.utils.set_element_property,
       inheritsSprite = doodle.Sprite.inheritsSprite,
       doodle_Event = doodle.Event,
       doodle_MouseEvent = doodle.MouseEvent,
@@ -6623,7 +6627,7 @@ Object.defineProperties(doodle.TextEvent, {
         mouseY = 0,
         debug_stats = null, //stats object
         debug_bounding_box = false;
-
+    
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
@@ -6671,7 +6675,7 @@ Object.defineProperties(doodle.TextEvent, {
           element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, function (evt) {
             mouseX = evt.offsetX;
             mouseY = evt.offsetY;
-          });
+          }, false);
           
           //add keyboard listeners to document
           //how to make this work for multiple displays?
@@ -6788,8 +6792,8 @@ Object.defineProperties(doodle.TextEvent, {
     //draw_scene_graph(display);
     redraw_scene_graph();
     return display;
-    
 
+    
     /* Clear, move, draw.
      * Dispatches Event.ENTER_FRAME to all objects listening to it,
      * reguardless if it's on the scene graph or not.
