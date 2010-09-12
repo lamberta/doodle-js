@@ -36,7 +36,7 @@
         var node_id;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return node_id; },
           set: function (idArg) {
             /*DEBUG*/
@@ -115,7 +115,7 @@
         var visible = true;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return visible; },
           set: function (isVisible) {
             /*DEBUG*/
@@ -130,7 +130,7 @@
         var alpha = 1;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return alpha; },
           set: function (alphaValue) {
             /*DEBUG*/
@@ -233,7 +233,7 @@
     
     'rotation': {
       enumerable: true,
-      configurable: false,
+      configurable: true,
       get: function () {
         return this.transform.rotation * to_degrees;
       },

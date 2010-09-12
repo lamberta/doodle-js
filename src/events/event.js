@@ -1,12 +1,12 @@
+/*globals doodle*/
 
-/* Will propbably want to implement the dom event interface:
+/* Will probably want to implement the dom event interface:
  * http://www.w3.org/TR/DOM-Level-3-Events/
  * But this works for now.
  */
-
 (function () {
   var event_prototype = {},
-      event_properties,
+      event_static_properties,
       isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -70,7 +70,7 @@
       throw new SyntaxError("[object Event]: Invalid number of parameters.");
     }
 
-    Object.defineProperties(event, event_properties);
+    Object.defineProperties(event, event_static_properties);
     //properties that require privacy
     Object.defineProperties(event, {
       /*
@@ -259,34 +259,32 @@
     
     return event;
   };
+  
 
-
+  event_prototype = Event.prototype;
+  /*
   (function () {
-
-    var dom_event_proto = Object.getPrototypeOf(document.createEvent('Event'));
+    var dom_event_proto = Event.prototype;
 
     //copy event property constants, will add my own methods later
     for (var prop in dom_event_proto) {
-      if (typeof dom_event_proto[prop] !== 'function') {
+      if (typeof dom_event_proto[prop] === 'number') {
         event_prototype[prop] = dom_event_proto[prop];
       }
     }
-
-
-    //static event properties
-    event_properties = {
-
-      'toString': {
-        enumerable: true,
-        writable: false,
-        configurable: false,
-        value: function () {
-          return "[object Event]";
-        }
-      }
-      
-    };//end event_properties
   }());
+  */
+  
+  event_static_properties = {
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Event]";
+      }
+    }
+  };//end event_static_properties
 
   /*
    * CLASS METHODS

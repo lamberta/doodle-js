@@ -9,7 +9,7 @@
       isLayer = doodle.Layer.isLayer,
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
-      set_element_property = doodle.utils.set_element_property
+      set_element_property = doodle.utils.set_element_property,
       inheritsSprite = doodle.Sprite.inheritsSprite,
       doodle_Event = doodle.Event,
       doodle_MouseEvent = doodle.MouseEvent,
@@ -30,7 +30,7 @@
         mouseY = 0,
         debug_stats = null, //stats object
         debug_bounding_box = false;
-
+    
     //check if passed an init function
     if (arg_len === 1 && typeof arguments[0] === 'function') {
       initializer = arguments[0];
@@ -78,7 +78,7 @@
           element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, function (evt) {
             mouseX = evt.offsetX;
             mouseY = evt.offsetY;
-          });
+          }, false);
           
           //add keyboard listeners to document
           //how to make this work for multiple displays?
@@ -195,8 +195,8 @@
     //draw_scene_graph(display);
     redraw_scene_graph();
     return display;
-    
 
+    
     /* Clear, move, draw.
      * Dispatches Event.ENTER_FRAME to all objects listening to it,
      * reguardless if it's on the scene graph or not.

@@ -1,5 +1,6 @@
 (function () {
   var matrix_static_properties,
+      doodle_Matrix,
       isMatrix,
       check_matrix_type,
       doodle_Point = doodle.geom.Point,

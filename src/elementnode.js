@@ -30,6 +30,7 @@
       'element': (function () {
         var dom_element = null;
         return {
+          configurable: true,
           get: function () {
             return dom_element;
           },
@@ -76,6 +77,8 @@
     },
     
     'width': {
+      enumerable: true,
+      configurable: true,
       get: function () {
         return get_element_property(this.element, 'width', 'int');
       },
@@ -89,6 +92,8 @@
     },
     
     'height': {
+      enumerable: true,
+      configurable: true,
       get: function () {
         return get_element_property(this.element, 'height', 'int');
       },
