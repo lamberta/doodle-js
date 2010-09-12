@@ -5,8 +5,8 @@
  * But this works for now.
  */
 (function () {
-  var event_static_properties,
-      event_proto_properties,
+  var event_prototype,
+      event_static_properties,
       isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -23,7 +23,7 @@
    * @return {Object}
    */
   doodle.Event = function (type, bubbles, cancelable) {
-    var event = Object.create({}, event_proto_properties),
+    var event = Object.create(event_prototype),
         arg_len = arguments.length,
         init_obj, //function, event
         copy_event_properties; //fn declared per event for private vars
@@ -202,8 +202,8 @@
           configurable: false,
           value: function (typeArg, canBubbleArg, cancelableArg) {
             //parameter defaults
-            canBubbleArg = canBubbleArg === true; //false
-            cancelableArg = cancelableArg === true;
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             /*DEBUG*/
             check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
             check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
@@ -295,7 +295,7 @@
     }
   };//end event_static_properties
 
-  event_proto_properties = {
+  event_prototype = Object.create({}, {
     'CAPTURING_PHASE': {
       enumerable: true,
       writable: false,
@@ -411,7 +411,7 @@
       configurable: false,
       value: 32768
     }
-  };//end event_proto_properties
+  });//end event_prototype
 
   /*
    * CLASS METHODS
