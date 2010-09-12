@@ -5,6 +5,7 @@ function print_help_and_exit {
     echo "  -h      Show this usage guide."
     echo "  -d      Also build debug version."
     echo "  -D      Only build debug version."
+    echo "  -S      Strip debugging code (for profiling)."
     echo "  -c      Clean."
     echo "  -C=jar  Location of the Closure compiler."
     exit 0
@@ -98,12 +99,13 @@ function clean_up {
 
 
 #parse args
-while getopts "hdDcC:" option; do
+while getopts "hdDcC:S" option; do
     case $option in
         d) BUILD_DEBUG=1;;
         D) BUILD_DEBUG=1; BUILD_DEBUG_ONLY=1;;
         c) clean_up; exit 0;;
         C) CLOSURE_COMPILER="$OPTARG";;
+        S) BUILD_STRIP=1;;
         h) print_help_and_exit;;
         \?) print_help_and_exit;;
     esac
@@ -122,7 +124,10 @@ if [ -z "$BUILD_DEBUG_ONLY" ]; then
     if strip_debugging; then
         echo "done."
     fi
-    compile_file
+    #only stripped build is useful for profiling
+    if [ -z "$BUILD_STRIP" ]; then
+        compile_file
+    fi
     echo -e "\tCreated $MIN_OUT_FILE"
 fi
 
