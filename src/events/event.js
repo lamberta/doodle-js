@@ -5,8 +5,8 @@
  * But this works for now.
  */
 (function () {
-  var event_prototype = {},
-      event_static_properties,
+  var event_static_properties,
+      event_proto_properties,
       isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -23,257 +23,266 @@
    * @return {Object}
    */
   doodle.Event = function (type, bubbles, cancelable) {
-    var arg_len = arguments.length,
-        initializer, //if passed another event object
-        event = Object.create(event_prototype), //super-object
-        //read-only properties
-        cancel = false, //internal use
-        cancelNow = false, //internal use
-        cancelBubble = false,
-        defaultPrevented = false,
-        eventPhase = 0,
-        target = null,
-        currentTarget = null,
-        timeStamp = new Date(),
-        clipboardData,
-        srcElement = null,
-        returnValue = true;
+    var event = Object.create({}, event_proto_properties),
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_event_properties; //fn declared per event for private vars
 
-    //check if given an init event to wrap
-    if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0];
-      //copy event properties to our args that'll be used for initialization
-      //initEvent() will typecheck these
-      type = initializer.type;
-      bubbles = initializer.bubbles;
-      cancelable = initializer.cancelable;
-      //initEvent() won't touch these
-      cancelBubble = initializer.cancelBubble;
-      defaultPrevented = initializer.defaultPrevented;
-      eventPhase = initializer.eventPhase;
-      target = initializer.target;
-      currentTarget = initializer.currentTarget;
-      timeStamp = initializer.timeStamp;
-      clipboardData = initializer.clipboardData;
-      srcElement = initializer.srcElement;
-      returnValue = initializer.returnValue;
-      //check for doodle internal event properties
-      if (initializer.__cancel) {
-        cancel = initializer.__cancel;
-      }
-      if (initializer.__cancelNow) {
-        cancelNow = initializer.__cancelNow;
-      }
-      
-    } else if (arg_len === 0 || arg_len > 3) {
-      //check arg count
-      throw new SyntaxError("[object Event]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 3) {
+      throw new SyntaxError("[object Event](type, bubbles, cancelable): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
     Object.defineProperties(event, event_static_properties);
     //properties that require privacy
-    Object.defineProperties(event, {
-      /*
-       * PROPERTIES
-       */
+    Object.defineProperties(event, (function () {
+      var evt_type,
+          evt_bubbles,
+          evt_cancelable,
+          evt_cancelBubble = false,
+          evt_defaultPrevented = false,
+          evt_eventPhase = 0,
+          evt_currentTarget = null,
+          evt_target = null,
+          evt_srcElement = null,
+          evt_timeStamp = new Date(),
+          evt_returnValue = true,
+          evt_clipboardData,
+          //internal use
+          __cancel = false,
+          __cancelNow = false;
 
-      'bubbles': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return bubbles; }
-      },
-
-      'cancelBubble': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return cancelBubble; },
-        set: function (cancelArg) {
-          /*DEBUG*/
-          check_boolean_type(cancelArg, this+'.cancelBubble');
-          /*END_DEBUG*/
-          cancelBubble = cancelArg;
+      copy_event_properties = function  (evt) {
+        evt_type = evt.type;
+        evt_bubbles = evt.bubbles;
+        evt_cancelable = evt.cancelable;
+        evt_cancelBubble = evt.cancelBubble;
+        evt_defaultPrevented = evt.defaultPrevented;
+        evt_eventPhase = evt.eventPhase;
+        evt_currentTarget = evt.currentTarget;
+        evt_target = evt.target;
+        evt_srcElement = evt.srcElement;
+        evt_timeStamp = evt.timeStamp;
+        evt_returnValue = evt.returnValue;
+        evt_clipboardData = evt.clipboardData;
+        //check for doodle internal event properties
+        if (evt.__cancel) {
+          __cancel = true;
         }
-      },
-
-      'cancelable': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return cancelable; }
-      },
-
-      //test if event propagation should stop after this node
-      //@internal
-      '__cancel': {
-        enumerable: false,
-        configurable: false,
-        get: function () { return cancel; }
-      },
-
-      //test if event propagation should stop immediately,
-      //ignore other handlers on this node
-      //@internal
-      '__cancelNow': {
-        enumerable: false,
-        configurable: false,
-        get: function () { return cancelNow; }
-      },
-
-      'currentTarget': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return currentTarget; }
-      },
-
-      //currentTarget is read-only, but damnit I need to set it sometimes
-      '__setCurrentTarget': {
-        enumerable: false,
-        value: function (targetArg) {
-          currentTarget = targetArg;
+        if (evt.__cancelNow) {
+          __cancelNow = true;
         }
-      },
-
-      'target': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return target; }
-      },
-
-      '__setTarget': {
-        enumerable: false,
-        value: function (targetArg) {
-          target = targetArg;
-        }
-      },
-
-      'eventPhase': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return eventPhase; }
-      },
+      };
       
-      '__setEventPhase': {
-        enumerable: false,
-        value: function (phaseArg) {
-          /*DEBUG*/
-          check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
-          /*END_DEBUG*/
-          eventPhase = phaseArg;
-        }
-      },
+      return {
+        'type': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_type; }
+        },
+        
+        '__setType': {
+          enumerable: false,
+          value: function (typeArg) {
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.__setType', '*type*');
+            /*END_DEBUG*/
+            evt_type = typeArg;
+          }
+        },
+        
+        'bubbles': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_bubbles; }
+        },
+        
+        'cancelable': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_cancelable; }
+        },
+        
+        'cancelBubble': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_cancelBubble; },
+          set: function (cancelArg) {
+            /*DEBUG*/
+            check_boolean_type(cancelArg, this+'.cancelBubble');
+            /*END_DEBUG*/
+            evt_cancelBubble = cancelArg;
+          }
+        },
+        
+        //test if event propagation should stop after this node
+        //@internal
+        '__cancel': {
+          enumerable: false,
+          configurable: false,
+          get: function () { return __cancel; }
+        },
+        
+        //test if event propagation should stop immediately,
+        //ignore other handlers on this node
+        //@internal
+        '__cancelNow': {
+          enumerable: false,
+          configurable: false,
+          get: function () { return __cancelNow; }
+        },
+        
+        'currentTarget': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_currentTarget; }
+        },
+        
+        //currentTarget is read-only, but damnit I need to set it sometimes
+        '__setCurrentTarget': {
+          enumerable: false,
+          value: function (targetArg) {
+            evt_currentTarget = targetArg;
+          }
+        },
+        
+        'target': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_target; }
+        },
+        
+        '__setTarget': {
+          enumerable: false,
+          value: function (targetArg) {
+            evt_target = targetArg;
+          }
+        },
+        
+        'eventPhase': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_eventPhase; }
+        },
+        
+        '__setEventPhase': {
+          enumerable: false,
+          value: function (phaseArg) {
+            /*DEBUG*/
+            check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
+            /*END_DEBUG*/
+            evt_eventPhase = phaseArg;
+          }
+        },
+        
+        'srcElement': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_srcElement; }
+        },
+        
+        'timeStamp': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_timeStamp; }
+        },
+        
+        'returnValue': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_returnValue; }
+        },
+        
+        /*
+         * METHODS
+         */
+        'initEvent': {
+          enumerable: true,
+          configurable: false,
+          value: function (typeArg, canBubbleArg, cancelableArg) {
+            //parameter defaults
+            canBubbleArg = canBubbleArg === true; //false
+            cancelableArg = cancelableArg === true;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
+            check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
+            check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
+            /*END_DEBUG*/
 
-      'srcElement': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return srcElement; }
-      },
+            evt_type = typeArg;
+            evt_bubbles = canBubbleArg;
+            evt_cancelable = cancelableArg;
+            
+            return this;
+          }
+        },
 
-      'timeStamp': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return timeStamp; }
-      },
+        'preventDefault': {
+          enumerable: true,
+          configurable: false,
+          value: function () {
+            evt_defaultPrevented = true;
+          }
+        },
 
-      'type': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return type; }
-      },
-      
-      '__setType': {
-        enumerable: false,
-        value: function (typeArg) {
-          /*DEBUG*/
-          check_string_type(typeArg, this+'.__setType', '*type*');
-          /*END_DEBUG*/
-          type = typeArg;
-        }
-      },
+        'stopPropagation': {
+          enumerable: true,
+          configurable: false,
+          value: function () {
+            if (!this.cancelable) {
+              throw new Error(this+'.stopPropagation: Event can not be cancelled.');
+            } else {
+              __cancel = true;
+            }
+          }
+        },
 
-      'returnValue': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return returnValue; }
-      },
-      
-      /*
-       * METHODS
-       */
-
-      'initEvent': {
-        enumerable: true,
-        configurable: false,
-        value: function (typeArg, canBubbleArg, cancelableArg) {
-          //parameter defaults
-          canBubbleArg = canBubbleArg === true; //false
-          cancelableArg = cancelableArg === true;
-          /*DEBUG*/
-          check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
-          check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
-          check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
-          /*END_DEBUG*/
-
-          type = typeArg;
-          bubbles = canBubbleArg;
-          cancelable = cancelableArg;
-          
-          return this;
-        }
-      },
-
-      'preventDefault': {
-        enumerable: true,
-        configurable: false,
-        value: function () {
-          defaultPrevented = true;
-        }
-      },
-
-      'stopPropagation': {
-        enumerable: true,
-        configurable: false,
-        value: function () {
-          if (!this.cancelable) {
-            throw new Error(this+'.stopPropagation: Event can not be cancelled.');
-          } else {
-            cancel = true;
+        'stopImmediatePropagation': {
+          enumerable: true,
+          configurable: false,
+          value: function () {
+            if (!this.cancelable) {
+              throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
+            } else {
+              __cancel = true;
+              __cancelNow = true;
+            }
           }
         }
-      },
+      };
+    }()));//end defineProperties
 
-      'stopImmediatePropagation': {
-        enumerable: true,
-        configurable: false,
-        value: function () {
-          if (!this.cancelable) {
-            throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
-          } else {
-            cancel = true;
-            cancelNow = true;
-          }
-        }
-      }
-    });
-
-    //init event
-    event.initEvent(type, bubbles, cancelable);
     
+    //using a function or another event object to init?
+    if (arg_len === 1 && (typeof arguments[0] === 'function' || isEvent(arguments[0]))) {
+      init_obj = arguments[0];
+      type = undefined;
+    }
+
+    //initialize event
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(event);
+        /*DEBUG*/
+        if (event.type === undefined ||
+            event.bubbles === undefined ||
+            event.cancelable === undefined) {
+          throw new SyntaxError("[object Event](function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_event_properties(init_obj);
+      }
+    } else {
+      //standard instantiation
+      event.initEvent(type, bubbles, cancelable);
+    }
+
     return event;
   };
   
-
-  event_prototype = Event.prototype;
-  /*
-  (function () {
-    var dom_event_proto = Event.prototype;
-
-    //copy event property constants, will add my own methods later
-    for (var prop in dom_event_proto) {
-      if (typeof dom_event_proto[prop] === 'number') {
-        event_prototype[prop] = dom_event_proto[prop];
-      }
-    }
-  }());
-  */
   
   event_static_properties = {
     'toString': {
@@ -285,6 +294,124 @@
       }
     }
   };//end event_static_properties
+
+  event_proto_properties = {
+    'CAPTURING_PHASE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 1
+    },
+    'AT_TARGET': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 2
+    },
+    'BUBBLING_PHASE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 3
+    },
+    
+    'MOUSEDOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 1
+    },
+    'MOUSEUP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 2
+    },
+    'MOUSEOVER': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 4
+    },
+    'MOUSEOUT': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 8
+    },
+    'MOUSEMOVE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 16
+    },
+    'MOUSEDRAG': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 32
+    },
+    'CLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 64
+    },
+    'DBLCLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 128
+    },
+    'KEYDOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 256
+    },
+    'KEYUP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 512
+    },
+    'KEYPRESS': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 1024
+    },
+    'DRAGDROP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 2048
+    },
+    'FOCUS': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 4096
+    },
+    'BLUR': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 8192
+    },
+    'SELECT': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 16384
+    },
+    'CHANGE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 32768
+    }
+  };//end event_proto_properties
 
   /*
    * CLASS METHODS
