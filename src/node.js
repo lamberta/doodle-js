@@ -213,6 +213,7 @@
     /*
     'rotate': { //around external point?
       value: function (deg) {
+      
         check_number_type(deg, this+'.rotate', '*degrees*');
 
         if (this.axis.x !== undefined && this.axis.y !== undefined) {
@@ -226,7 +227,9 @@
 
     'rotate': { //around external point?
       value: function (deg) {
+        /*DEBUG*/
         check_number_type(deg, this+'.rotate');
+        /*END_DEBUG*/
         this.transform.rotate(deg * to_radians);
       }
     },
@@ -565,6 +568,7 @@
     }
   };//end node_static_properties
 
+  
   /*
    * CLASS METHODS
    */
