@@ -222,7 +222,7 @@
             keyboardevent.keyLocation === undefined ||
             keyboardevent.keyIdentifier === undefined ||
             keyboardevent.repeat === undefined) {
-          throw new SyntaxError("[object KeyboardEvent](function): Must call 'this.initKeyboardevent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat)' within the function argument.");
+          throw new SyntaxError("[object KeyboardEvent](function): Must call 'this.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat)' within the function argument.");
         }
         /*END_DEBUG*/
       } else {
