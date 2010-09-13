@@ -40,7 +40,7 @@
          * Objects and Arrays are passed by reference, so these will be modified
          */
         'graphics': {
-          enumerable: true,
+          enumerable: false,
           configurable: false,
           value:  Object.create(doodle.Graphics(sprite, draw_commands, extrema))
         },
@@ -106,6 +106,8 @@
             var bounding_box = doodle_Rectangle(),
                 w = this.width,
                 h = this.height,
+                min = Math.min,
+                max = Math.max,
                 //transform corners to global
                 tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
                 tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
@@ -119,10 +121,10 @@
             bl = targetCoordSpace.globalToLocal(bl);
 
             //set rect with extremas
-            bounding_box.left = Math.min(tl.x, tr.x, br.x, bl.x);
-            bounding_box.right = Math.max(tl.x, tr.x, br.x, bl.x);
-            bounding_box.top = Math.min(tl.y, tr.y, br.y, bl.y);
-            bounding_box.bottom = Math.max(tl.y, tr.y, br.y, bl.y);
+            bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
+            bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
+            bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
+            bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
 
             return bounding_box;
           }
@@ -181,13 +183,13 @@
         'context': {
           get: function () {
             //will keep checking parent for context till found or null
-            var node = this.parent,
-            ctx;
+            var node = this.parent;
             while (node) {
               if (node.context) {
-                ctx = node.context;
-                check_context_type(ctx, this+'.context (traversal)');
-                return ctx;
+                /*DEBUG*/
+                check_context_type(node.context, this+'.context (traversal)');
+                /*END_DEBUG*/
+                return node.context;
               }
               node = node.parent;
             }
