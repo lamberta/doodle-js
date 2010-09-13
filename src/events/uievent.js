@@ -162,8 +162,8 @@
             /*END_DEBUG*/
             evt_view = viewArg;
             evt_detail = detailArg;
-            this.initEvent(typeArg, canBubbleArg, cancelableArg);
             
+            this.initEvent(typeArg, canBubbleArg, cancelableArg);
             return this;
           }
         }
