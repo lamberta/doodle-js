@@ -1,4 +1,5 @@
 /*globals doodle*/
+
 (function () {
   var sprite_static_properties,
       isSprite,
@@ -19,9 +20,8 @@
    * @return {Object}
    */
   doodle.Sprite = function (id) {
-    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined)),
-        draw_commands = [],
-        extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
+    //only pass id if string, an init function will be called later
+    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
 
     /*DEBUG*/
     if (arguments.length > 1) {
@@ -31,218 +31,227 @@
 
     Object.defineProperties(sprite, sprite_static_properties);
     //properties that require privacy
-    Object.defineProperties(sprite, {
-      /*
-       * PROPERTIES
-       */
-
-      /* Indicates the width of the sprite, in pixels.
-       * @param {Number}
-       */
-      'width': (function () {
-        var width = 0;
-        return {
-          enumerable: true,
-          configurable: false,
-          get: function () {
-            return width;
-          },
-          set: function (n) {
-            /*DEBUG*/
-            check_number_type(n, this+'.width');
-            /*END_DEBUG*/
-            width = n;
-          }
-        };
-      }()),
-
-      /* Indicates the height of the sprite, in pixels.
-       * @param {Number}
-       */
-      'height': (function () {
-        var height = 0;
-        return {
-          enumerable: true,
-          configurable: false,
-          get: function () {
-            return height;
-          },
-          set: function (n) {
-            /*DEBUG*/
-            check_number_type(n, this+'.height');
-            /*END_DEBUG*/
-            height = n;
-          }
-        };
-      }()),
-
-      /*
-       * @param {Node|Matrix} targetCoordSpace
-       * @return {Rectangle}
-       */
-      'getBounds': {
-        enumerable: true,
-        writable: true,
-        configurable: false,
-        value: function (targetCoordSpace) {
-          /*DEBUG*/
-          if (!inheritsNode(targetCoordSpace)) {
-            throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
-          }
-          /*END_DEBUG*/
-          var bounding_box = doodle_Rectangle(),
-              w = this.width,
-              h = this.height,
-              //transform corners to global
-              tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
-              tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
-              br = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y+h}), //bot right
-              bl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y+h}); //bot left
-          
-          //transform global to target space
-          tl = targetCoordSpace.globalToLocal(tl);
-          tr = targetCoordSpace.globalToLocal(tr);
-          br = targetCoordSpace.globalToLocal(br);
-          bl = targetCoordSpace.globalToLocal(bl);
-
-          //set rect with extremas
-          bounding_box.left = Math.min(tl.x, tr.x, br.x, bl.x);
-          bounding_box.right = Math.max(tl.x, tr.x, br.x, bl.x);
-          bounding_box.top = Math.min(tl.y, tr.y, br.y, bl.y);
-          bounding_box.bottom = Math.max(tl.y, tr.y, br.y, bl.y);
-
-          return bounding_box;
-        }
-      },
+    Object.defineProperties(sprite, (function () {
+      var draw_commands = [],
+          extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
       
-      'hitArea': (function () {
-        var hit_area = null;
-        return {
+      return {
+        /* The graphics object contains drawing operations to be stored in draw_commands.
+         * Objects and Arrays are passed by reference, so these will be modified
+         */
+        'graphics': {
           enumerable: true,
           configurable: false,
-          get: function () {
-            if (hit_area === null) {
-              return this.getBounds(this);
-            } else {
-              return hit_area;
+          value:  Object.create(doodle.Graphics(sprite, draw_commands, extrema))
+        },
+        
+        /*
+         * PROPERTIES
+         */
+
+        /* Indicates the width of the sprite, in pixels.
+         * @param {Number}
+         */
+        'width': (function () {
+          var width = 0;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () {
+              return width;
+            },
+            set: function (n) {
+              /*DEBUG*/
+              check_number_type(n, this+'.width');
+              /*END_DEBUG*/
+              width = n;
             }
-          },
-          set: function (rect) {
-            //accepts null/false or rectangle area for now
-            rect = (rect === false) ? null : rect;
+          };
+        }()),
+
+        /* Indicates the height of the sprite, in pixels.
+         * @param {Number}
+         */
+        'height': (function () {
+          var height = 0;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () {
+              return height;
+            },
+            set: function (n) {
+              /*DEBUG*/
+              check_number_type(n, this+'.height');
+              /*END_DEBUG*/
+              height = n;
+            }
+          };
+        }()),
+
+        /*
+         * @param {Node|Matrix} targetCoordSpace
+         * @return {Rectangle}
+         */
+        'getBounds': {
+          enumerable: true,
+          writable: true,
+          configurable: false,
+          value: function (targetCoordSpace) {
             /*DEBUG*/
-            if (rect !== null) {
-              check_rect_type(rect, this+'.hitArea');
+            if (!inheritsNode(targetCoordSpace)) {
+              throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
             }
             /*END_DEBUG*/
-            hit_area = rect;
+            var bounding_box = doodle_Rectangle(),
+                w = this.width,
+                h = this.height,
+                //transform corners to global
+                tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
+                tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
+                br = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y+h}), //bot right
+                bl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y+h}); //bot left
+            
+            //transform global to target space
+            tl = targetCoordSpace.globalToLocal(tl);
+            tr = targetCoordSpace.globalToLocal(tr);
+            br = targetCoordSpace.globalToLocal(br);
+            bl = targetCoordSpace.globalToLocal(bl);
+
+            //set rect with extremas
+            bounding_box.left = Math.min(tl.x, tr.x, br.x, bl.x);
+            bounding_box.right = Math.max(tl.x, tr.x, br.x, bl.x);
+            bounding_box.top = Math.min(tl.y, tr.y, br.y, bl.y);
+            bounding_box.bottom = Math.max(tl.y, tr.y, br.y, bl.y);
+
+            return bounding_box;
           }
-        };
-      }()),
-
-      'hitTestObject': {
-        enumerable: true,
-        writable: true,
-        configurable: false,
-        value: function (obj) {
-          /*DEBUG*/
-          check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
-          /*END_DEBUG*/
-          return this.getBounds(this).intersects(obj.getBounds(this));
-        }
-      },
-
-      'hitTestPoint': {
-        enumerable: true,
-        writable: true,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.hitTestPoint', '*point*');
-          /*END_DEBUG*/
-          return this.getBounds(this).containsPoint(this.globalToLocal(pt));
-        }
-      },
-
-      //drawing context to use
-      'context': {
-        get: function () {
-          //will keep checking parent for context till found or null
-          var node = this.parent,
-              ctx;
-          while (node) {
-            if (node.context) {
-              ctx = node.context;
-              check_context_type(ctx, this+'.context (traversal)');
-              return ctx;
-            }
-            node = node.parent;
-          }
-          return null;
-        }
-      },
-
-      /*
-       * METHODS
-       */
-
-      /* When called execute all the draw commands in the stack.
-       * This draws from screen 0,0 - transforms are applied when the
-       * entire scene graph is drawn.
-       * @private
-       * @param {Context} ctx 2d canvas context to draw on.
-       */
-      '__draw': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (ctx) {
-          /*DEBUG*/
-          check_context_type(ctx, this+'.__draw', '*context*');
-          /*END_DEBUG*/
-          draw_commands.forEach(function (cmd) {
-            /*DEBUG*/
-            check_function_type(cmd, sprite+'.__draw: [draw_commands]::', '*command*');
-            /*END_DEBUG*/
-            cmd.call(sprite, ctx);
-          });
-        }
-      },
-
-      /* Debug
-       */
-      'debug': {
-        enumerable: true,
-        configurable: false,
-        value: Object.create(null, {
-          'boundingBox': (function () {
-            var debug_boundingBox = "rgb(0,0,255)";
-            return {
-              enumerable: true,
-              configurable: false,
-              get: function () {
-                return rgb_str_to_hex(debug_boundingBox);
-              },
-              set: function (color) {
-                /*DEBUG*/
-                if (typeof color === 'number') {
-                  color = hex_to_rgb_str(color);
-                } else if (typeof color === 'string' && color[0] === '#') {
-                  color = hex_to_rgb_str(color);
-                }
-                /*END_DEBUG*/
-                debug_boundingBox = color;
+        },
+        
+        'hitArea': (function () {
+          var hit_area = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () {
+              if (hit_area === null) {
+                return this.getBounds(this);
+              } else {
+                return hit_area;
               }
-            };
-          }())
-        })
-      }
-    });//end defineProperties
+            },
+            set: function (rect) {
+              //accepts null/false or rectangle area for now
+              rect = (rect === false) ? null : rect;
+              /*DEBUG*/
+              if (rect !== null) {
+                check_rect_type(rect, this+'.hitArea');
+              }
+              /*END_DEBUG*/
+              hit_area = rect;
+            }
+          };
+        }()),
 
-    /* The graphics object contains drawing operations to be stored in draw_commands.
-     * Objects and Arrays are passed by reference, so these will be modified
-     */
-    sprite.graphics = Object.create(doodle.Graphics(sprite, draw_commands, extrema));
+        'hitTestObject': {
+          enumerable: true,
+          writable: true,
+          configurable: false,
+          value: function (obj) {
+            /*DEBUG*/
+            check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
+            /*END_DEBUG*/
+            return this.getBounds(this).intersects(obj.getBounds(this));
+          }
+        },
+
+        'hitTestPoint': {
+          enumerable: true,
+          writable: true,
+          configurable: false,
+          value: function (pt) {
+            /*DEBUG*/
+            check_point_type(pt, this+'.hitTestPoint', '*point*');
+            /*END_DEBUG*/
+            return this.getBounds(this).containsPoint(this.globalToLocal(pt));
+          }
+        },
+
+        //drawing context to use
+        'context': {
+          get: function () {
+            //will keep checking parent for context till found or null
+            var node = this.parent,
+            ctx;
+            while (node) {
+              if (node.context) {
+                ctx = node.context;
+                check_context_type(ctx, this+'.context (traversal)');
+                return ctx;
+              }
+              node = node.parent;
+            }
+            return null;
+          }
+        },
+
+        /*
+         * METHODS
+         */
+
+        /* When called execute all the draw commands in the stack.
+         * This draws from screen 0,0 - transforms are applied when the
+         * entire scene graph is drawn.
+         * @private
+         * @param {Context} ctx 2d canvas context to draw on.
+         */
+        '__draw': {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: function (ctx) {
+            /*DEBUG*/
+            check_context_type(ctx, this+'.__draw', '*context*');
+            /*END_DEBUG*/
+            draw_commands.forEach(function (cmd) {
+              /*DEBUG*/
+              check_function_type(cmd, sprite+'.__draw: [draw_commands]::', '*command*');
+              /*END_DEBUG*/
+              cmd.call(sprite, ctx);
+            });
+          }
+        },
+
+        /* Debug
+         */
+        'debug': {
+          enumerable: true,
+          configurable: false,
+          value: Object.create(null, {
+            'boundingBox': (function () {
+              var debug_boundingBox = "rgb(0,0,255)";
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () {
+                  return rgb_str_to_hex(debug_boundingBox);
+                },
+                set: function (color) {
+                  /*DEBUG*/
+                  if (typeof color === 'number') {
+                    color = hex_to_rgb_str(color);
+                  } else if (typeof color === 'string' && color[0] === '#') {
+                    color = hex_to_rgb_str(color);
+                  }
+                  /*END_DEBUG*/
+                  debug_boundingBox = color;
+                }
+              };
+            }())
+          })
+        }
+      };
+    }()));//end defineProperties
 
     //passed an initialization function
     if (typeof arguments[0] === 'function') {
