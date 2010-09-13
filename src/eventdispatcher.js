@@ -1,11 +1,19 @@
+/*globals doodle*/
+
 (function () {
   var evtDisp_static_properties,
       dispatcher_queue,
       isEventDispatcher,
       inheritsEventDispatcher,
+      /*DEBUG*/
+      check_boolean_type = doodle.utils.types.check_boolean_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
-      check_event_type = doodle.utils.types.check_event_type;
+      check_event_type = doodle.utils.types.check_event_type,
+      /*END_DEBUG*/
+      CAPTURING_PHASE = doodle.Event.CAPTURING_PHASE,
+      AT_TARGET = doodle.Event.AT_TARGET,
+      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE;
   
   /* Super constructor
    * @param {Function} initializer
@@ -85,10 +93,11 @@
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
-        useCapture = useCapture === true; //default to false, bubble event
+        useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
         check_string_type(type, this+'.addEventListener', '*type*, listener, useCapture');
         check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
+        check_boolean_type(useCapture, this+'.addEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
         
         var self = this;
@@ -115,10 +124,11 @@
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
-        useCapture = useCapture === true; //default to false, bubble event
+        useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
         check_string_type(type, this+'.removeEventListener', '*type*, listener, useCapture');
         check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
+        check_boolean_type(useCapture, this+'.removeEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
         
         //make sure event type exists
@@ -156,7 +166,7 @@
         
         //check for listeners that match event type
         //if capture not set, using bubble listeners - like for AT_TARGET phase
-        var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
+        var phase = (event.eventPhase === CAPTURING_PHASE) ? 'capture' : 'bubble',
             listeners = this.eventListeners[event.type], //obj
             count = 0, //listener count
             rv,  //return value of handler
@@ -170,7 +180,9 @@
           //if we have any, call each handler with event object
           count = listeners.length;
           for (i = 0; i < count; i += 1) {
+            /*DEBUG*/
             check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
+            /*END_DEBUG*/
             //pass event to handler
             rv = listeners[i].call(this, event);
             
@@ -240,7 +252,7 @@
         }
 
         //enter capture phase: down the tree
-        event.__setEventPhase(event.CAPTURING_PHASE);
+        event.__setEventPhase(CAPTURING_PHASE);
         i = len = node_path.length;
         while ((i=i-1) >= 0) {
           node_path[i].handleEvent(event);
@@ -251,7 +263,7 @@
         }
 
         //enter target phase
-        event.__setEventPhase(event.AT_TARGET);
+        event.__setEventPhase(AT_TARGET);
         target.handleEvent(event);
         //was the event stopped inside the handler?
         if (event.__cancel) {
@@ -264,7 +276,7 @@
         }
 
         //enter bubble phase: back up the tree
-        event.__setEventPhase(event.BUBBLING_PHASE);
+        event.__setEventPhase(BUBBLING_PHASE);
         for (i = 0; i < len; i = i+1) {
           node_path[i].handleEvent(event);
           //was the event stopped inside the handler?
@@ -289,7 +301,7 @@
       value: function (event) {
         var receivers, //event listeners of correct type
             len, //count of event listeners
-            i; //counter
+            i = 0; //counter
         
         /*DEBUG*/
         check_event_type(event, this+'.broadcastEvent', '*event*');
@@ -311,7 +323,7 @@
         });
         
         //and call each
-        for (i = 0, len = receivers.length; i < len; i=i+1) {
+        for (len = receivers.length; i < len; i=i+1) {
           receivers[i].handleEvent(event);
           //event cancelled in listener?
           if (event.__cancel) {
