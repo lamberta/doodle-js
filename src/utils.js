@@ -31,10 +31,11 @@ doodle.utils = {
   rgb_to_rgb_str: function (r, g, b, a) {
     a = (a === undefined) ? 1 : a;
     /*DEBUG*/
-    doodle.utils.types.check_number_type(r, 'rgb_to_rgb_str', '*r*, g, b, a');
-    doodle.utils.types.check_number_type(g, 'rgb_to_rgb_str', 'r, *g*, b, a');
-    doodle.utils.types.check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
-    doodle.utils.types.check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
+    var check_number_type = doodle.utils.types.check_number_type;
+    check_number_type(r, 'rgb_to_rgb_str', '*r*, g, b, a');
+    check_number_type(g, 'rgb_to_rgb_str', 'r, *g*, b, a');
+    check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
+    check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
     /*END_DEBUG*/
     a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
     if (a === 1) {

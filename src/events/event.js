@@ -423,18 +423,18 @@
    * @return {Boolean}
    */
   isEvent = doodle.Event.isEvent = function (event) {
-    var evt_name;
-    if (typeof event !== 'object') {
-          return false;
+    if (!event || typeof event !== "object") {
+      return false;
     } else {
-      evt_name = event.toString();
+      event = event.toString();
     }
-    return (evt_name === '[object Event]' ||
-            evt_name === '[object UIEvent]' ||
-            evt_name === '[object MouseEvent]' ||
-            evt_name === '[object KeyboardEvent]' ||
-            evt_name === '[object TextEvent]' ||
-            evt_name === '[object WheelEvent]');
+    return (event === '[object Event]' ||
+            event === '[object UIEvent]' ||
+            event === '[object MouseEvent]' ||
+            event === '[object TouchEvent]' ||
+            event === '[object KeyboardEvent]' ||
+            event === '[object TextEvent]' ||
+            event === '[object WheelEvent]');
   };
   
 }());//end class closure
