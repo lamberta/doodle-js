@@ -1235,7 +1235,7 @@ Object.defineProperty(doodle, 'LineJoin', {
  * But this works for now.
  */
 (function () {
-  var event_prototype = {},
+  var event_prototype,
       event_static_properties,
       isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
@@ -1253,257 +1253,266 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @return {Object}
    */
   doodle.Event = function (type, bubbles, cancelable) {
-    var arg_len = arguments.length,
-        initializer, //if passed another event object
-        event = Object.create(event_prototype), //super-object
-        //read-only properties
-        cancel = false, //internal use
-        cancelNow = false, //internal use
-        cancelBubble = false,
-        defaultPrevented = false,
-        eventPhase = 0,
-        target = null,
-        currentTarget = null,
-        timeStamp = new Date(),
-        clipboardData,
-        srcElement = null,
-        returnValue = true;
+    var event = Object.create(event_prototype),
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_event_properties; //fn declared per event for private vars
 
-    //check if given an init event to wrap
-    if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0];
-      //copy event properties to our args that'll be used for initialization
-      //initEvent() will typecheck these
-      type = initializer.type;
-      bubbles = initializer.bubbles;
-      cancelable = initializer.cancelable;
-      //initEvent() won't touch these
-      cancelBubble = initializer.cancelBubble;
-      defaultPrevented = initializer.defaultPrevented;
-      eventPhase = initializer.eventPhase;
-      target = initializer.target;
-      currentTarget = initializer.currentTarget;
-      timeStamp = initializer.timeStamp;
-      clipboardData = initializer.clipboardData;
-      srcElement = initializer.srcElement;
-      returnValue = initializer.returnValue;
-      //check for doodle internal event properties
-      if (initializer.__cancel) {
-        cancel = initializer.__cancel;
-      }
-      if (initializer.__cancelNow) {
-        cancelNow = initializer.__cancelNow;
-      }
-      
-    } else if (arg_len === 0 || arg_len > 3) {
-      //check arg count
-      throw new SyntaxError("[object Event]: Invalid number of parameters.");
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 3) {
+      throw new SyntaxError("[object Event](type, bubbles, cancelable): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
     Object.defineProperties(event, event_static_properties);
     //properties that require privacy
-    Object.defineProperties(event, {
-      /*
-       * PROPERTIES
-       */
+    Object.defineProperties(event, (function () {
+      var evt_type,
+          evt_bubbles,
+          evt_cancelable,
+          evt_cancelBubble = false,
+          evt_defaultPrevented = false,
+          evt_eventPhase = 0,
+          evt_currentTarget = null,
+          evt_target = null,
+          evt_srcElement = null,
+          evt_timeStamp = new Date(),
+          evt_returnValue = true,
+          evt_clipboardData,
+          //internal use
+          __cancel = false,
+          __cancelNow = false;
 
-      'bubbles': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return bubbles; }
-      },
-
-      'cancelBubble': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return cancelBubble; },
-        set: function (cancelArg) {
-          /*DEBUG*/
-          check_boolean_type(cancelArg, this+'.cancelBubble');
-          /*END_DEBUG*/
-          cancelBubble = cancelArg;
+      copy_event_properties = function  (evt) {
+        evt_type = evt.type;
+        evt_bubbles = evt.bubbles;
+        evt_cancelable = evt.cancelable;
+        evt_cancelBubble = evt.cancelBubble;
+        evt_defaultPrevented = evt.defaultPrevented;
+        evt_eventPhase = evt.eventPhase;
+        evt_currentTarget = evt.currentTarget;
+        evt_target = evt.target;
+        evt_srcElement = evt.srcElement;
+        evt_timeStamp = evt.timeStamp;
+        evt_returnValue = evt.returnValue;
+        evt_clipboardData = evt.clipboardData;
+        //check for doodle internal event properties
+        if (evt.__cancel) {
+          __cancel = true;
         }
-      },
-
-      'cancelable': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return cancelable; }
-      },
-
-      //test if event propagation should stop after this node
-      //@internal
-      '__cancel': {
-        enumerable: false,
-        configurable: false,
-        get: function () { return cancel; }
-      },
-
-      //test if event propagation should stop immediately,
-      //ignore other handlers on this node
-      //@internal
-      '__cancelNow': {
-        enumerable: false,
-        configurable: false,
-        get: function () { return cancelNow; }
-      },
-
-      'currentTarget': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return currentTarget; }
-      },
-
-      //currentTarget is read-only, but damnit I need to set it sometimes
-      '__setCurrentTarget': {
-        enumerable: false,
-        value: function (targetArg) {
-          currentTarget = targetArg;
+        if (evt.__cancelNow) {
+          __cancelNow = true;
         }
-      },
-
-      'target': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return target; }
-      },
-
-      '__setTarget': {
-        enumerable: false,
-        value: function (targetArg) {
-          target = targetArg;
-        }
-      },
-
-      'eventPhase': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return eventPhase; }
-      },
+      };
       
-      '__setEventPhase': {
-        enumerable: false,
-        value: function (phaseArg) {
-          /*DEBUG*/
-          check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
-          /*END_DEBUG*/
-          eventPhase = phaseArg;
-        }
-      },
+      return {
+        'type': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_type; }
+        },
+        
+        '__setType': {
+          enumerable: false,
+          value: function (typeArg) {
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.__setType', '*type*');
+            /*END_DEBUG*/
+            evt_type = typeArg;
+          }
+        },
+        
+        'bubbles': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_bubbles; }
+        },
+        
+        'cancelable': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_cancelable; }
+        },
+        
+        'cancelBubble': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_cancelBubble; },
+          set: function (cancelArg) {
+            /*DEBUG*/
+            check_boolean_type(cancelArg, this+'.cancelBubble');
+            /*END_DEBUG*/
+            evt_cancelBubble = cancelArg;
+          }
+        },
+        
+        //test if event propagation should stop after this node
+        //@internal
+        '__cancel': {
+          enumerable: false,
+          configurable: false,
+          get: function () { return __cancel; }
+        },
+        
+        //test if event propagation should stop immediately,
+        //ignore other handlers on this node
+        //@internal
+        '__cancelNow': {
+          enumerable: false,
+          configurable: false,
+          get: function () { return __cancelNow; }
+        },
+        
+        'currentTarget': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_currentTarget; }
+        },
+        
+        //currentTarget is read-only, but damnit I need to set it sometimes
+        '__setCurrentTarget': {
+          enumerable: false,
+          value: function (targetArg) {
+            evt_currentTarget = targetArg;
+          }
+        },
+        
+        'target': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_target; }
+        },
+        
+        '__setTarget': {
+          enumerable: false,
+          value: function (targetArg) {
+            evt_target = targetArg;
+          }
+        },
+        
+        'eventPhase': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_eventPhase; }
+        },
+        
+        '__setEventPhase': {
+          enumerable: false,
+          value: function (phaseArg) {
+            /*DEBUG*/
+            check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
+            /*END_DEBUG*/
+            evt_eventPhase = phaseArg;
+          }
+        },
+        
+        'srcElement': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_srcElement; }
+        },
+        
+        'timeStamp': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_timeStamp; }
+        },
+        
+        'returnValue': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_returnValue; }
+        },
+        
+        /*
+         * METHODS
+         */
+        'initEvent': {
+          enumerable: true,
+          configurable: false,
+          value: function (typeArg, canBubbleArg, cancelableArg) {
+            //parameter defaults
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
+            check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
+            check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
+            /*END_DEBUG*/
 
-      'srcElement': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return srcElement; }
-      },
+            evt_type = typeArg;
+            evt_bubbles = canBubbleArg;
+            evt_cancelable = cancelableArg;
+            
+            return this;
+          }
+        },
 
-      'timeStamp': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return timeStamp; }
-      },
+        'preventDefault': {
+          enumerable: true,
+          configurable: false,
+          value: function () {
+            evt_defaultPrevented = true;
+          }
+        },
 
-      'type': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return type; }
-      },
-      
-      '__setType': {
-        enumerable: false,
-        value: function (typeArg) {
-          /*DEBUG*/
-          check_string_type(typeArg, this+'.__setType', '*type*');
-          /*END_DEBUG*/
-          type = typeArg;
-        }
-      },
+        'stopPropagation': {
+          enumerable: true,
+          configurable: false,
+          value: function () {
+            if (!this.cancelable) {
+              throw new Error(this+'.stopPropagation: Event can not be cancelled.');
+            } else {
+              __cancel = true;
+            }
+          }
+        },
 
-      'returnValue': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return returnValue; }
-      },
-      
-      /*
-       * METHODS
-       */
-
-      'initEvent': {
-        enumerable: true,
-        configurable: false,
-        value: function (typeArg, canBubbleArg, cancelableArg) {
-          //parameter defaults
-          canBubbleArg = canBubbleArg === true; //false
-          cancelableArg = cancelableArg === true;
-          /*DEBUG*/
-          check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
-          check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
-          check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
-          /*END_DEBUG*/
-
-          type = typeArg;
-          bubbles = canBubbleArg;
-          cancelable = cancelableArg;
-          
-          return this;
-        }
-      },
-
-      'preventDefault': {
-        enumerable: true,
-        configurable: false,
-        value: function () {
-          defaultPrevented = true;
-        }
-      },
-
-      'stopPropagation': {
-        enumerable: true,
-        configurable: false,
-        value: function () {
-          if (!this.cancelable) {
-            throw new Error(this+'.stopPropagation: Event can not be cancelled.');
-          } else {
-            cancel = true;
+        'stopImmediatePropagation': {
+          enumerable: true,
+          configurable: false,
+          value: function () {
+            if (!this.cancelable) {
+              throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
+            } else {
+              __cancel = true;
+              __cancelNow = true;
+            }
           }
         }
-      },
+      };
+    }()));//end defineProperties
 
-      'stopImmediatePropagation': {
-        enumerable: true,
-        configurable: false,
-        value: function () {
-          if (!this.cancelable) {
-            throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
-          } else {
-            cancel = true;
-            cancelNow = true;
-          }
-        }
-      }
-    });
-
-    //init event
-    event.initEvent(type, bubbles, cancelable);
     
+    //using a function or another event object to init?
+    if (arg_len === 1 && (typeof arguments[0] === 'function' || isEvent(arguments[0]))) {
+      init_obj = arguments[0];
+      type = undefined;
+    }
+
+    //initialize event
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(event);
+        /*DEBUG*/
+        if (event.type === undefined ||
+            event.bubbles === undefined ||
+            event.cancelable === undefined) {
+          throw new SyntaxError("[object Event](function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_event_properties(init_obj);
+      }
+    } else {
+      //standard instantiation
+      event.initEvent(type, bubbles, cancelable);
+    }
+
     return event;
   };
   
-
-  event_prototype = Event.prototype;
-  /*
-  (function () {
-    var dom_event_proto = Event.prototype;
-
-    //copy event property constants, will add my own methods later
-    for (var prop in dom_event_proto) {
-      if (typeof dom_event_proto[prop] === 'number') {
-        event_prototype[prop] = dom_event_proto[prop];
-      }
-    }
-  }());
-  */
   
   event_static_properties = {
     'toString': {
@@ -1515,6 +1524,124 @@ Object.defineProperty(doodle, 'LineJoin', {
       }
     }
   };//end event_static_properties
+
+  event_prototype = Object.create({}, {
+    'CAPTURING_PHASE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 1
+    },
+    'AT_TARGET': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 2
+    },
+    'BUBBLING_PHASE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 3
+    },
+    
+    'MOUSEDOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 1
+    },
+    'MOUSEUP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 2
+    },
+    'MOUSEOVER': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 4
+    },
+    'MOUSEOUT': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 8
+    },
+    'MOUSEMOVE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 16
+    },
+    'MOUSEDRAG': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 32
+    },
+    'CLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 64
+    },
+    'DBLCLICK': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 128
+    },
+    'KEYDOWN': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 256
+    },
+    'KEYUP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 512
+    },
+    'KEYPRESS': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 1024
+    },
+    'DRAGDROP': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 2048
+    },
+    'FOCUS': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 4096
+    },
+    'BLUR': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 8192
+    },
+    'SELECT': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 16384
+    },
+    'CHANGE': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: 32768
+    }
+  });//end event_prototype
 
   /*
    * CLASS METHODS
@@ -1541,13 +1668,13 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
   
 }());//end class closure
+/*globals doodle*/
 
 /* DOM 2 Event: UIEvent:Event
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-Events-UIEvent
  */
-
 (function () {
-  var uievent_properties,
+  var uievent_static_properties,
       isEvent = doodle.Event.isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -1566,148 +1693,182 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @return {UIEvent}
    */
   doodle.UIEvent = function (type, bubbles, cancelable, view, detail) {
-    var arg_len = arguments.length,
-        initializer, //if passed another event object
-        uievent, //super-object to construct
-        //read-only properties
-        which = 0,
-        charCode = 0,
-        keyCode = 0,
-        layerX = 0,
-        layerY = 0,
-        pageX = 0,
-        pageY = 0;
+    var uievent,
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_uievent_properties; //fn declared per event for private vars
 
-    //check if given an init event to wrap
-    if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0]; //event object
-      
-      //copy event properties to our args that'll be used for initialization
-      //initUIEvent() will typecheck these
-      type = initializer.type;
-      bubbles = initializer.bubbles;
-      cancelable = initializer.cancelable;
-      view = initializer.view;
-      detail = initializer.detail;
-      //initUIEvent() won't touch these
-      which = initializer.which || 0;
-      charCode = initializer.charCode || 0;
-      keyCode = initializer.keyCode || 0;
-      layerX = initializer.layerX || 0;
-      layerY = initializer.layerY || 0;
-      pageX = initializer.pageX || 0;
-      pageY = initializer.pageY || 0;
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 5) {
+      throw new SyntaxError("[object UIEvent](type, bubbles, cancelable, view, detail): Invalid number of parameters.");
+    }
+    /*END_DEBUG*/
 
-      //init uiobject with event
-      uievent = Object.create(doodle.Event(initializer));
-      
-    } else if (arg_len === 0 || arg_len > 5) {
-      //check arg count
-      throw new SyntaxError("[object UIEvent]: Invalid number of parameters.");
-    } else {
-      //regular instantiation of prototype
-      bubbles = bubbles === true; //false
-      cancelable = cancelable === true;
-
+    //initialize uievent prototype with another event, function, or args
+    if (isEvent(arguments[0])) {
       /*DEBUG*/
-      check_string_type(type, '[object UIEvent].constructor', '*type*');
-      check_boolean_type(bubbles, '[object UIEvent].constructor', '*bubbles*');
-      check_boolean_type(cancelable, '[object UIEvent].constructor', '*cancelable*');
+      if (arg_len > 1) {
+        throw new SyntaxError("[object UIEvent](event): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      uievent = Object.create(doodle.Event(init_obj));
+    } else if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object UIEvent](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      //use empty event type for now, will check after we call the init function.
+      uievent = Object.create(doodle.Event(''));
+    } else {
+      //parameter defaults
+      bubbles = (bubbles === undefined) ? false : bubbles;
+      cancelable = (cancelable === undefined) ? false : cancelable;
+      /*DEBUG*/
+      check_string_type(type, '[object UIEvent]', '*type*, bubbles, cancelable, view, detail');
+      check_boolean_type(bubbles, '[object UIEvent]', 'type, *bubbles*, cancelable, view, detail');
+      check_boolean_type(cancelable, '[object UIEvent]', 'type, bubbles, *cancelable*, view, detail');
       /*END_DEBUG*/
       uievent = Object.create(doodle.Event(type, bubbles, cancelable));
     }
     
-    Object.defineProperties(uievent, uievent_properties);
-    Object.defineProperties(uievent, {
-      /* PROPERTIES
-       */
-      'view': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return view; }
-      },
+    Object.defineProperties(uievent, uievent_static_properties);
+    //properties that require privacy
+    Object.defineProperties(uievent, (function () {
+      var evt_view,
+          evt_detail,
+          evt_which = 0,
+          evt_charCode = 0,
+          evt_keyCode = 0,
+          evt_layerX = 0,
+          evt_layerY = 0,
+          evt_pageX = 0,
+          evt_pageY = 0;
 
-      'detail': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return detail; }
-      },
+      copy_uievent_properties = function (evt) {
+        //only looking for UIEvent properties
+        if (evt.view !== undefined) { evt_view = evt.view; }
+        if (evt.detail !== undefined) { evt_detail = evt.detail; }
+        if (evt.which !== undefined) { evt_which = evt.which; }
+        if (evt.charCode !== undefined) { evt_charCode = evt.charCode; }
+        if (evt.keyCode !== undefined) { evt_keyCode = evt.keyCode; }
+        if (evt.layerX !== undefined) { evt_layerX = evt.layerX; }
+        if (evt.layerY !== undefined) { evt_layerY = evt.layerY; }
+        if (evt.pageX !== undefined) { evt_pageX = evt.pageX; }
+        if (evt.pageY !== undefined) { evt_pageY = evt.pageY; }
+      };
+      
+      return {
+        'view': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_view; }
+        },
 
-      'which': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return which; }
-      },
+        'detail': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_detail; }
+        },
 
-      'charCode': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return charCode; }
-      },
+        'which': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_which; }
+        },
 
-      'keyCode': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return keyCode; }
-      },
+        'charCode': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_charCode; }
+        },
 
-      'layerX': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return layerX; }
-      },
+        'keyCode': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_keyCode; }
+        },
 
-      'layerY': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return layerY; }
-      },
+        'layerX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_layerX; }
+        },
 
-      'pageX': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return pageX; }
-      },
+        'layerY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_layerY; }
+        },
 
-      'pageY': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return pageY; }
-      },
+        'pageX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_pageX; }
+        },
 
-      /* METHODS
-       */
-      'initUIEvent': {
-        value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg) {
-          //parameter defaults
-          type = typeArg;
-          bubbles = canBubbleArg === true; //false
-          cancelable = cancelableArg === true;
-          view = (viewArg === undefined) ? null : viewArg;
-          detail = (detailArg === undefined) ? 0 : detailArg;
-
-          /*DEBUG*/
-          check_string_type(type, this+'.initUIEvent', '*type*');
-          check_boolean_type(bubbles, this+'.initUIEvent', '*bubbles*');
-          check_boolean_type(cancelable, this+'.initUIEvent', '*cancelable*');
-          check_number_type(detail, this+'.initUIEvent', '*detail*');
-          /*END_DEBUG*/
-          
-          this.initEvent(type, bubbles, cancelable);
-          return this;
+        'pageY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_pageY; }
+        },
+        
+        'initUIEvent': {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg) {
+            //parameter defaults
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
+            viewArg = (viewArg === undefined) ? null : viewArg;
+            detailArg = (detailArg === undefined) ? 0 : detailArg;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initUIEvent', '*type*, bubbles, cancelable, view, detail');
+            check_boolean_type(canBubbleArg, this+'.initUIEvent', 'type, *bubbles*, cancelable, view, detail');
+            check_boolean_type(cancelableArg, this+'.initUIEvent', 'type, bubbles, *cancelable*, view, detail');
+            check_number_type(detailArg, this+'.initUIEvent', 'type, bubbles, cancelable, view, *detail*');
+            /*END_DEBUG*/
+            evt_view = viewArg;
+            evt_detail = detailArg;
+            
+            this.initEvent(typeArg, canBubbleArg, cancelableArg);
+            return this;
+          }
         }
+      };
+    }()));//end defineProperties
+
+    
+    //initialize uievent
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(uievent);
+        /*DEBUG*/
+        //make sure we've checked our dummy type string
+        if (uievent.type === undefined || uievent.type === '' ||
+            uievent.bubbles === undefined ||
+            uievent.cancelable === undefined ||
+            uievent.view === undefined ||
+            uievent.detail === undefined) {
+          throw new SyntaxError("[object UIEvent](function): Must call 'this.initUIEvent(type, bubbles, cancelable, view, detail)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_uievent_properties(init_obj);
       }
-
-    });
-
-    //init event
-    uievent.initUIEvent(type, bubbles, cancelable, view, detail);
+    } else {
+      //standard instantiation
+      uievent.initUIEvent(type, bubbles, cancelable, view, detail);
+    }
     
     return uievent;
   };
 
-  //static
-  uievent_properties = {
+  
+  uievent_static_properties = {
     'toString': {
       enumerable: true,
       writable: false,
@@ -1719,13 +1880,13 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
 
 }());//end class closure
+/*globals doodle*/
 
 /* DOM 2 Event: MouseEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevents
  */
-
 (function () {
-  var mouseevent_properties,
+  var mouseevent_static_properties,
       isEvent = doodle.Event.isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -1755,239 +1916,292 @@ Object.defineProperty(doodle, 'LineJoin', {
    */
   doodle.MouseEvent = function (type, bubbles, cancelable, view, detail,
                                 screenX, screenY, clientX, clientY, 
-                                ctrlKey, altKey, shiftKey, metaKey,
-                                button, relatedTarget) {
-    var arg_len = arguments.length,
-        initializer,
-        mouseevent,
-        //mouse-event read-only properties
-        x = 0,
-        y = 0,
-        offsetX = 0,
-        offsetY = 0;
+                                ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
+    var mouseevent,
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_mouseevent_properties; //fn declared per event for private vars
+    
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 15) {
+      throw new SyntaxError("[object MouseEvent](type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget): Invalid number of parameters.");
+    }
+    /*END_DEBUG*/
 
-    //check if given an init event to wrap
-    if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0]; //event object
-      //copy event properties to our args that'll be used for initialization
-      //initMouseEvent() will typecheck these
-      type = initializer.type;
-      bubbles = initializer.bubbles;
-      cancelable = initializer.cancelable;
-      view = initializer.view;
-      detail = initializer.detail;
-      screenX = initializer.screenX;
-      screenY = initializer.screenY;
-      clientX = initializer.clientX;
-      clientY = initializer.clientY;
-      ctrlKey = initializer.ctrlKey;
-      altKey = initializer.altKey;
-      shiftKey = initializer.shiftKey;
-      metaKey = initializer.metaKey;
-      button = initializer.button;
-      relatedTarget = initializer.relatedTarget;
-      //initMouseEvent() won't touch these
-      x = initializer.x || 0;
-      y = initializer.y || 0;
-      offsetX = initializer.offsetX || 0;
-      offsetY = initializer.offsetY || 0;
-
-      //init mouse-event object with uievent
-      mouseevent = Object.create(doodle.UIEvent(initializer));
-
-    } else if (arg_len === 0 || arg_len > 15) {
-      //check arg count
-      throw new SyntaxError("[object MouseEvent]: Invalid number of parameters.");
+    //initialize uievent prototype with another event, function, or args
+    if (isEvent(arguments[0])) {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object MouseEvent](event): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      mouseevent = Object.create(doodle.UIEvent(init_obj));
+    } else if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object MouseEvent](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      //use empty event type for now, will check after we call the init function.
+      mouseevent = Object.create(doodle.UIEvent(''));
     } else {
-      //regular instantiation
-      bubbles = bubbles === true; //false
-      cancelable = cancelable === true;
+      //parameter defaults
+      bubbles = (bubbles === undefined) ? false : bubbles;
+      cancelable = (cancelable === undefined) ? false : cancelable;
       view = (view === undefined) ? null : view;
       detail = (detail === undefined) ? 0 : detail;
-
       /*DEBUG*/
-      check_string_type(type, '[object MouseEvent].constructor', '*type*');
-      check_boolean_type(bubbles, '[object MouseEvent].constructor', '*bubbles*');
-      check_boolean_type(cancelable, '[object MouseEvent].constructor', '*cancelable*');
-      check_number_type(detail, '[object MouseEvent].constructor', '*detail*');
+      check_string_type(type, '[object MouseEvent]', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+      check_boolean_type(bubbles, '[object MouseEvent]', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+      check_boolean_type(cancelable, '[object MouseEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+      check_number_type(detail, '[object MouseEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
       /*END_DEBUG*/
-      
       mouseevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
-    Object.defineProperties(mouseevent, mouseevent_properties);
-    Object.defineProperties(mouseevent, {
-      /* PROPERTIES
-       */
+    
+    Object.defineProperties(mouseevent, mouseevent_static_properties);
+    //properties that require privacy
+    Object.defineProperties(mouseevent, (function () {
+      var evt_x = 0,
+          evt_y = 0,
+          evt_offsetX = 0,
+          evt_offsetY = 0,
+          evt_screenX,
+          evt_screenY,
+          evt_clientX,
+          evt_clientY,
+          evt_ctrlKey,
+          evt_altKey,
+          evt_shiftKey,
+          evt_metaKey,
+          evt_button,
+          evt_relatedTarget;
 
-      'x': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return x; }
-      },
+      copy_mouseevent_properties = function (evt) {
+        //only looking for MouseEvent properties
+        evt_x = (evt.x !== undefined) ? evt.x : 0;
+        evt_y = (evt.y !== undefined) ? evt.y : 0;
+        evt_offsetX = (evt.offsetX !== undefined) ? evt.offsetX : 0;
+        evt_offsetY = (evt.offsetY !== undefined) ? evt.offsetY : 0;
+        if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
+        if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
+        if (evt.clientX !== undefined) { evt_clientX = evt.clientX; }
+        if (evt.clientY !== undefined) { evt_clientY = evt.clientY; }
+        if (evt.ctrlKey !== undefined) { evt_ctrlKey = evt.ctrlKey; }
+        if (evt.altKey !== undefined) { evt_altKey = evt.altKey; }
+        if (evt.shiftKey !== undefined) { evt_shiftKey = evt.shiftKey; }
+        if (evt.metaKey !== undefined) { evt_metaKey = evt.metaKey; }
+        if (evt.button !== undefined) { evt_button = evt.button; }
+        if (evt.relatedTarget !== undefined) { evt_relatedTarget = evt.relatedTarget; }
+      };
+      
+      return {
+        'x': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_x; }
+        },
 
-      'y': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return y; }
-      },
+        'y': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_y; }
+        },
 
-      'screenX': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return screenX; }
-      },
+        'screenX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_screenX; }
+        },
 
-      'screenY': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return screenY; }
-      },
+        'screenY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_screenY; }
+        },
 
-      'clientX': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return clientX; }
-      },
+        'clientX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_clientX; }
+        },
 
-      'clientY': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return clientY; }
-      },
+        'clientY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_clientY; }
+        },
 
-      'offsetX': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return offsetX; }
-      },
+        'offsetX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_offsetX; }
+        },
 
-      'offsetY': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return offsetY; }
-      },
+        'offsetY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_offsetY; }
+        },
 
-      'ctrlKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return ctrlKey; }
-      },
+        'ctrlKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_ctrlKey; }
+        },
 
-      'altKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return altKey; }
-      },
+        'altKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_altKey; }
+        },
 
-      'shiftKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return shiftKey; }
-      },
+        'shiftKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_shiftKey; }
+        },
 
-      'metaKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return metaKey; }
-      },
+        'metaKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_metaKey; }
+        },
 
-      'button': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return button; }
-      },
+        'button': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_button; }
+        },
 
-      'relatedTarget': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return relatedTarget; }
-      },
+        'relatedTarget': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_relatedTarget; }
+        },
 
-      /* METHODS
-       */
+        'initMouseEvent': {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
+                           screenXArg, screenYArg, clientXArg, clientYArg, 
+                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
+                           buttonArg, relatedTargetArg) {
+            //parameter defaults
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
+            viewArg = (viewArg === undefined) ? null : viewArg;
+            detailArg = (detailArg === undefined) ? 0 : detailArg;
+            screenXArg = (screenXArg === undefined) ? 0 : screenXArg;
+            screenYArg = (screenYArg === undefined) ? 0 : screenYArg;
+            clientXArg = (clientXArg === undefined) ? 0 : clientXArg;
+            clientYArg = (clientYArg === undefined) ? 0 : clientYArg;
+            ctrlKeyArg = (ctrlKeyArg === undefined) ? false : ctrlKeyArg;
+            altKeyArg = (altKeyArg === undefined) ? false : altKeyArg;
+            shiftKeyArg = (shiftKeyArg === undefined) ? false : shiftKeyArg;
+            metaKeyArg = (metaKeyArg === undefined) ? false : metaKeyArg;
+            button = (buttonArg === undefined) ? 0 : buttonArg;
+            relatedTarget = (relatedTargetArg === undefined) ? null : relatedTargetArg;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initMouseEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_boolean_type(canBubbleArg, this+'.initMouseEvent', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_boolean_type(cancelableArg, this+'.initMouseEvent', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_number_type(detailArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_number_type(screenXArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, *screenX*, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_number_type(screenYArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, *screenY*, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_number_type(clientXArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, *clientX*, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_number_type(clientYArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, *clientY*, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_boolean_type(ctrlKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, *ctrlKey*, altKey, shiftKey, metaKey, button, relatedTarget');
+            check_boolean_type(altKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, *altKey*, shiftKey, metaKey, button, relatedTarget');
+            check_boolean_type(shiftKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, *shiftKey*, metaKey, button, relatedTarget');
+            check_boolean_type(metaKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, *metaKey*, button, relatedTarget');
+            check_number_type(buttonArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, *button*, relatedTarget');
+            /*END_DEBUG*/
+            evt_screenX = screenXArg;
+            evt_screenY = screenYArg;
+            evt_clientX = clientXArg;
+            evt_clientY = clientYArg;
+            evt_ctrlKey = ctrlKeyArg;
+            evt_altKey = altKeyArg;
+            evt_shiftKey = shiftKeyArg;
+            evt_metaKey = metaKeyArg;
+            evt_button = buttonArg;
+            evt_relatedTarget = relatedTargetArg;
 
-      'initMouseEvent': {
-        value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
-                         screenXArg, screenYArg, clientXArg, clientYArg, 
-                         ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
-                         buttonArg, relatedTargetArg) {
-          //parameter defaults, assign to outer constructor vars
-          bubbles = canBubbleArg === true; //false
-          cancelable = cancelableArg === true;
-          view = (viewArg === undefined) ? null : viewArg;
-          detail = (detailArg === undefined) ? 0 : detailArg;
-          //position is zero
-          screenX = (screenXArg === undefined) ? 0 : screenXArg;
-          screenY = (screenYArg === undefined) ? 0 : screenYArg;
-          clientX = (clientXArg === undefined) ? 0 : clientXArg;
-          clientY = (clientYArg === undefined) ? 0 : clientYArg;
-          //modifier keys are false
-          ctrlKey = ctrlKeyArg === true;
-          altKey = altKeyArg === true;
-          shiftKey = shiftKeyArg === true;
-          metaKey = metaKeyArg === true;
-          //else
-          button = (buttonArg === undefined) ? 0 : buttonArg;
-          relatedTarget = (relatedTargetArg === undefined) ? null : relatedTargetArg;
-          
-          /*DEBUG*/
-          check_string_type(type, this+'.initMouseEvent', '*type*');
-          check_boolean_type(bubbles, this+'.initMouseEvent', '*bubbles*');
-          check_boolean_type(cancelable, this+'.initMouseEvent', '*cancelable*');
-          check_number_type(detail, this+'.initMouseEvent', '*detail*');
-          check_number_type(screenX, this+'.initMouseEvent', '*screenX*');
-          check_number_type(screenY, this+'.initMouseEvent', '*screenY*');
-          check_number_type(clientX, this+'.initMouseEvent', '*clientX*');
-          check_number_type(clientY, this+'.initMouseEvent', '*clientY*');
-          check_boolean_type(ctrlKey, this+'.initMouseEvent', '*ctrlKey*');
-          check_boolean_type(altKey, this+'.initMouseEvent', '*altKey*');
-          check_boolean_type(shiftKey, this+'.initMouseEvent', '*shiftKey*');
-          check_boolean_type(metaKey, this+'.initMouseEvent', '*metaKey*');
-          check_number_type(button, this+'.initMouseEvent', '*button*');
-          /*END_DEBUG*/
-          
-          this.initUIEvent(type, bubbles, cancelable, view, detail);
-          return this;
-        }
-      },
+            this.initUIEvent(type, bubbles, cancelable, view, detail);
+            return this;
+          }
+        },
 
-      /* Queries the state of a modifier using a key identifier.
-       * @param {String} key A modifier key identifier
-       * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-       * This is an incomplete list of modifiers.
-       */
-      'getModifierState': {
-        value: function (key) {
-          check_string_type(key, this+'.getModifierState');
-          switch (key) {
-          case 'Alt':
-            return altKey;
-          case 'Control':
-            return ctrlKey;
-          case 'Meta':
-            return metaKey;
-          case 'Shift':
-            return shiftKey;
-          default:
-            return false;
+        /* Queries the state of a modifier using a key identifier.
+         * @param {String} key A modifier key identifier
+         * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
+         * This is an incomplete list of modifiers.
+         */
+        'getModifierState': {
+          value: function (key) {
+            check_string_type(key, this+'.getModifierState', '*key*');
+            switch (key) {
+            case 'Alt':
+              return evt_altKey;
+            case 'Control':
+              return evt_ctrlKey;
+            case 'Meta':
+              return evt_metaKey;
+            case 'Shift':
+              return evt_shiftKey;
+            default:
+              return false;
+            }
           }
         }
+      };
+    }()));//end defineProperties
+
+
+    //initialize mouseevent
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(mouseevent);
+        /*DEBUG*/
+        //make sure we've checked our dummy type string
+        if (mouseevent.type === undefined || mouseevent.type === '' ||
+            mouseevent.bubbles === undefined ||
+            mouseevent.cancelable === undefined ||
+            mouseevent.view === undefined ||
+            mouseevent.detail === undefined ||
+            mouseevent.screenX === undefined ||
+            mouseevent.screenY === undefined ||
+            mouseevent.clientX === undefined ||
+            mouseevent.clientY === undefined ||
+            mouseevent.ctrlKey === undefined ||
+            mouseevent.altKey === undefined ||
+            mouseevent.shiftKey === undefined ||
+            mouseevent.metaKey === undefined ||
+            mouseevent.button === undefined ||
+            mouseevent.relatedTarget === undefined) {
+          throw new SyntaxError("[object MouseEvent](function): Must call 'this.initMouseEvent(type, bubbles, cancelable, view, detail)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_mouseevent_properties(init_obj);
       }
-
-    });
-
-    //init event
-    mouseevent.initMouseEvent(type, bubbles, cancelable, view, detail,
-                              screenX, screenY, clientX, clientY, 
-                              ctrlKey, altKey, shiftKey, metaKey,
-                              button, relatedTarget);
+    } else {
+      //standard instantiation
+      mouseevent.initMouseEvent(type, bubbles, cancelable, view, detail,
+                                screenX, screenY, clientX, clientY, 
+                                ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
+    }
     
     return mouseevent;
   };
     
-  //static
-  mouseevent_properties = {
+  
+  mouseevent_static_properties = {
     'toString': {
       enumerable: true,
       writable: false,
@@ -1999,13 +2213,13 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
 
 }());//end class closure
+/*globals doodle*/
 
 /* DOM 3 Event: TextEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-textevents
  */
-
 (function () {
-  var textevent_properties,
+  var textevent_static_properties,
       isEvent = doodle.Event.isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -2025,97 +2239,129 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @return {TextEvent}
    */
   doodle.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
-    var arg_len = arguments.length,
-        initializer, //if passed another event object
-        textevent; //super-object to construct
+    var textevent,
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_textevent_properties; //fn declared per event for private vars
 
-    //check if given an init event to wrap
-    if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0]; //event object
-      
-      //copy event properties to our args that'll be used for initialization
-      //initTextEvent() will typecheck these
-      type = initializer.type;
-      bubbles = initializer.bubbles;
-      cancelable = initializer.cancelable;
-      view = initializer.view;
-      data = initializer.data;
-      inputMode = initializer.inputMode;
-      
-      //pass on the event arg to init our uievent prototype
-      textevent = Object.create(doodle.UIEvent(initializer));
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 6) {
+      throw new SyntaxError("[object TextEvent](type, bubbles, cancelable, view, data, inputMode): Invalid number of parameters.");
+    }
+    /*END_DEBUG*/
 
-    } else if (arg_len === 0 || arg_len > 6) {
-      //check arg count
-      throw new SyntaxError("[object TextEvent]: Invalid number of parameters.");
-    } else {
-      //regular instantiation of prototype
-      bubbles = bubbles === true; //false
-      cancelable = cancelable === true;
-      view = (viewArg === undefined) ? null : view;
-
+    //initialize uievent prototype with another event, function, or args
+    if (isEvent(arguments[0])) {
       /*DEBUG*/
-      check_string_type(type, '[object TextEvent].constructor', '*type*');
-      check_boolean_type(bubbles, '[object TextEvent].constructor', '*bubbles*');
-      check_boolean_type(cancelable, '[object TextEvent].constructor', '*cancelable*');
+      if (arg_len > 1) {
+        throw new SyntaxError("[object TextEvent](event): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      textevent = Object.create(doodle.UIEvent(init_obj));
+    } else if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object TextEvent](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      //use empty event type for now, will check after we call the init function.
+      textevent = Object.create(doodle.UIEvent(''));
+    } else {
+      //parameter defaults
+      bubbles = (bubbles === undefined) ? false : bubbles;
+      cancelable = (cancelable === undefined) ? false : cancelable;
+      view = (view === undefined) ? null : view;
+      /*DEBUG*/
+      check_string_type(type, '[object TextEvent]', '*type*, bubbles, cancelable, view, data, inputMode');
+      check_boolean_type(bubbles, '[object TextEvent]', 'type, *bubbles*, cancelable, view, data, inputMode');
+      check_boolean_type(cancelable, '[object TextEvent]', 'type, bubbles, *cancelable*, view, data, inputMode');
       /*END_DEBUG*/
       textevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
     }
     
-    Object.defineProperties(textevent, textevent_properties);
-    Object.defineProperties(textevent, {
-      /* PROPERTIES
-       */
+    Object.defineProperties(textevent, textevent_static_properties);
+    //properties that require privacy
+    Object.defineProperties(textevent, (function () {
+      var evt_data,
+          evt_inputMode;
 
-      'data': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return data; }
-      },
+      copy_textevent_properties = function (evt) {
+        //only looking for TextEvent properties
+        if (evt.data !== undefined) { evt_data = evt.data; }
+        if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }
+      };
+      
+      return {
+        'data': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_data; }
+        },
 
-      'inputMode': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return inputMode; }
-      },
+        'inputMode': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_inputMode; }
+        },
 
-      /* METHODS
-       */
-
-      'initTextEvent': {
-        value: function (typeArg, canBubbleArg, cancelableArg,
-                         viewArg, dataArg, inputModeArg) {
-          //parameter defaults
-          type = typeArg;
-          bubbles = canBubbleArg === true; //false
-          cancelable = cancelableArg === true;
-          view = (viewArg === undefined) ? null : viewArg;
-          data = (dataArg === undefined) ? "" : dataArg;
-          inputMode = (inputModeArg === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
-
-          /*DEBUG*/
-          check_string_type(type, this+'.initTextEvent', '*type*');
-          check_boolean_type(bubbles, this+'.initTextEvent', '*bubbles*');
-          check_boolean_type(cancelable, this+'.initTextEvent', '*cancelable*');
-          check_string_type(data, this+'.initTextEvent', '*data*');
-          check_number_type(inputMode, this+'.initTextEvent', '*inputMode*');
-          /*END_DEBUG*/
-          
-          this.initUIEvent(type, bubbles, cancelable, view);
-          return this;
+        'initTextEvent': {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, dataArg, inputModeArg) {
+            //parameter defaults
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
+            viewArg = (viewArg === undefined) ? null : viewArg;
+            dataArg = (dataArg === undefined) ? "" : dataArg;
+            inputModeArg = (inputModeArg === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initTextEvent', '*type*, bubbles, cancelable, view, data, inputMode');
+            check_boolean_type(canBubbleArg, this+'.initTextEvent', 'type, *bubbles*, cancelable, view, data, inputMode');
+            check_boolean_type(cancelableArg, this+'.initTextEvent', 'type, bubbles, *cancelable*, view, data, inputMode');
+            check_string_type(dataArg, this+'.initTextEvent', 'type, bubbles, cancelable, view, *data*, inputMode');
+            check_number_type(inputModeArg, this+'.initTextEvent', 'type, bubbles, cancelable, view, data, *inputMode*');
+            /*END_DEBUG*/
+            evt_data = dataArg;
+            evt_inputMode = inputModeArg;
+            
+            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
+            return this;
+          }
         }
+      };
+    }()));
+
+    //initialize textevent
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(textevent);
+        /*DEBUG*/
+        //make sure we've checked our dummy type string
+        if (textevent.type === undefined || textevent.type === '' ||
+            textevent.bubbles === undefined ||
+            textevent.cancelable === undefined ||
+            textevent.view === undefined ||
+            textevent.data === undefined ||
+            textevent.inputMode === undefined) {
+          throw new SyntaxError("[object TextEvent](function): Must call 'this.initTextEvent(type, bubbles, cancelable, view, data, inputMode)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_textevent_properties(init_obj);
       }
-
-    });
-
-    //init event
-    textevent.initTextEvent(type, bubbles, cancelable, view, data, inputMode);
+    } else {
+      //standard instantiation
+      textevent.initTextEvent(type, bubbles, cancelable, view, data, inputMode);
+    }
     
     return textevent;
   };
-    
-  //static
-  textevent_properties = {
+  
+  
+  textevent_static_properties = {
     'toString': {
       enumerable: true,
       writable: false,
@@ -2127,13 +2373,14 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
   
 }());//end class closure
+/*globals doodle*/
 
 /* DOM 3 Event: KeyboardEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
  */
 
 (function () {
-  var keyboardevent_properties,
+  var keyboardevent_static_properties,
       isEvent = doodle.Event.isEvent,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -2156,186 +2403,218 @@ Object.defineProperty(doodle, 'LineJoin', {
    */
   doodle.KeyboardEvent = function (type, bubbles, cancelable, view,
                                    keyIdentifier, keyLocation, modifiersList, repeat) {
-    var arg_len = arguments.length,
-        initializer, //if passed another event object
-        keyboardevent, //this super-object we'll be constructing
-        //read-only properties
-        ctrlKey = false,
-        shiftKey = false,
-        altKey = false,
-        metaKey = false;
+    var keyboardevent,
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_keyboardevent_properties; //fn declared per event for private vars
 
-    //check if given an init event to wrap
-    if (arg_len === 1 && isEvent(arguments[0])) {
-      initializer = arguments[0]; //event object
-      
-      //copy event properties to our args that'll be used for initialization
-      //initKeyboardEvent() will typecheck these
-      type = initializer.type;
-      bubbles = initializer.bubbles;
-      cancelable = initializer.cancelable;
-      view = initializer.view;
-      keyIdentifier = initializer.keyIdentifier;
-      keyLocation = initializer.keyLocation;
-      repeat = initializer.repeat;
-      //get modifiers, use defaults to avoid contructing a new modifiers list string
-      //initKeyboardEvent() won't touch these
-      ctrlKey = initializer.ctrlKey || false;
-      shiftKey = initializer.shiftKey || false;
-      altKey = initializer.altKey || false;
-      metaKey = initializer.metaKey || false;
-      
-      //pass on the event arg to init our uievent prototype
-      keyboardevent = Object.create(doodle.UIEvent(initializer));
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 8) {
+      throw new SyntaxError("[object KeyboardEvent](type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat): Invalid number of parameters.");
+    }
+    /*END_DEBUG*/
 
-    } else if (arg_len === 0 || arg_len > 8) {
-      //check arg count
-      throw new SyntaxError("[object KeyboardEvent]: Invalid number of parameters.");
-    } else {
-      //regular instantiation of our prototype
-      bubbles = bubbles === true; //false
-      cancelable = cancelable === true;
-      view = (view === undefined) ? null : view;
-      
+    //initialize uievent prototype with another event, function, or args
+    if (isEvent(arguments[0])) {
       /*DEBUG*/
-      check_string_type(type, '[object KeyboardEvent].constructor', '*type*');
-      check_boolean_type(bubbles, '[object KeyboardEvent].constructor', '*bubbles*');
-      check_boolean_type(cancelable, '[object KeyboardEvent].constructor', '*cancelable*');
+      if (arg_len > 1) {
+        throw new SyntaxError("[object KeyboardEvent](event): Invalid number of parameters.");
+      }
       /*END_DEBUG*/
-      
+      init_obj = arguments[0];
+      type = undefined;
+      keyboardevent = Object.create(doodle.UIEvent(init_obj));
+    } else if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object KeyboardEvent](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      //use empty event type for now, will check after we call the init function.
+      keyboardevent = Object.create(doodle.UIEvent(''));
+    } else {
+      //parameter defaults
+      bubbles = (bubbles === undefined) ? false : bubbles;
+      cancelable = (cancelable === undefined) ? false : cancelable;
+      view = (view === undefined) ? null : view;
+      /*DEBUG*/
+      check_string_type(type, '[object KeyboardEvent]', '*type*, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
+      check_boolean_type(bubbles, '[object KeyboardEvent]', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
+      check_boolean_type(cancelable, '[object KeyboardEvent]', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
+      /*END_DEBUG*/
       keyboardevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
     }
     
-    Object.defineProperties(keyboardevent, keyboardevent_properties);
-    Object.defineProperties(keyboardevent, {
-      /* PROPERTIES
-       */
+    Object.defineProperties(keyboardevent, keyboardevent_static_properties);
+    //properties that require privacy
+    Object.defineProperties(keyboardevent, (function () {
+      var evt_keyIdentifier,
+          evt_keyLocation,
+          evt_repeat,
+          evt_ctrlKey = false,
+          evt_altKey = false,
+          evt_shiftKey = false,
+          evt_metaKey = false;
 
-      'keyIdentifier': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return keyIdentifier; }
-      },
+      copy_keyboardevent_properties = function (evt) {
+        //only looking for KeyboardEvent properties
+        if (evt.keyIdentifier !== undefined) { evt_keyIdentifier = evt.keyIdentifier; }
+        if (evt.keyLocation !== undefined) { evt_keyLocation = evt.keyLocation; }
+        if (evt.repeat !== undefined) { evt_repeat = evt.repeat; }
+        if (evt.ctrlKey !== undefined) { evt_ctrlKey = evt.ctrlKey; }
+        if (evt.altKey !== undefined) { evt_altKey = evt.altKey; }
+        if (evt.shiftKey !== undefined) { evt_shiftKey = evt.shiftKey; }
+        if (evt.metaKey !== undefined) { evt_metaKey = evt.metaKey; }
+      };
+      
+      return {
+        'keyIdentifier': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_keyIdentifier; }
+        },
 
-      'keyLocation': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return keyLocation; }
-      },
+        'keyLocation': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_keyLocation; }
+        },
 
-      'repeat': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return repeat; }
-      },
+        'repeat': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_repeat; }
+        },
 
-      'altKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return altKey; }
-      },
+        'ctrlKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_ctrlKey; }
+        },
+        
+        'altKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_altKey; }
+        },
 
-      'ctrlKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return ctrlKey; }
-      },
+        'shiftKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_shiftKey; }
+        },
 
-      'metaKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return metaKey; }
-      },
+        'metaKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_metaKey; }
+        },
 
-      'shiftKey': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return shiftKey; }
-      },
+        'initKeyboardEvent': {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg,
+                           keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
+            //parameter defaults
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
+            viewArg = (viewArg === undefined) ? null : viewArg;
+            keyIdentifierArg = (keyIdentifierArg === undefined) ? "" : keyIdentifierArg;
+            keyLocationArg = (keyLocationArg === undefined) ? 0 : keyLocationArg;
+            modifiersListArg = (modifiersListArg === undefined) ? "" : modifiersListArg;
+            repeatArg = (repeatArg === undefined) ? false : repeatArg;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initKeyboardEvent', '*type*, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
+            check_boolean_type(canBubbleArg, this+'.initKeyboardEvent', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
+            check_boolean_type(cancelableArg, this+'.initKeyboardEvent', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
+            check_string_type(keyIdentifierArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, *keyIdentifier*, keyLocation, modifiersList, repeat');
+            check_number_type(keyLocationArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, *keyLocation*, modifiersList, repeat');
+            check_string_type(modifiersListArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, keyLocation, *modifiersList*, repeat');
+            check_boolean_type(repeatArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, *repeat*');
+            /*END_DEBUG*/
+            evt_keyIdentifier = keyIdentifierArg;
+            evt_keyLocation = keyLocationArg;
+            evt_repeat = repeatArg;
+            
+            //parse string of white-space separated list of modifier key identifiers
+            modifiersListArg.split(" ").forEach(function (modifier) {
+              switch (modifier) {
+              case 'Alt':
+                evt_altKey = true;
+                break;
+              case 'Control':
+                evt_ctrlKey = true;
+                break;
+              case 'Meta':
+                evt_metaKey = true;
+                break;
+              case 'Shift':
+                evt_shiftKey = true;
+                break;
+              }
+            });
+            
+            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
+            return this;
+          }
+        },
 
-      /* METHODS
-       */
-
-      'initKeyboardEvent': {
-        value: function (typeArg, canBubbleArg, cancelableArg, viewArg,
-                         keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
-          //parameter defaults, assign to outer constructor vars
-          type = typeArg;
-          bubbles = canBubbleArg === true; //false
-          cancelable = cancelableArg === true;
-          view = (viewArg === undefined) ? null : viewArg;
-          keyIdentifier = (keyIdentifierArg === undefined) ? "" : keyIdentifierArg;
-          keyLocation = (keyLocationArg === undefined) ? 0 : keyLocationArg;
-          modifiersList = (modifiersListArg === undefined) ? "" : modifiersListArg;
-          repeat = repeatArg === true;
-
-          /*DEBUG*/
-          check_string_type(type, this+'.initKeyboardEvent', 'type');
-          check_boolean_type(bubbles, this+'.initKeyboardEvent', 'bubbles');
-          check_boolean_type(cancelable, this+'.initKeyboardEvent', 'cancelable');
-          check_string_type(keyIdentifier, this+'.initKeyboardEvent', 'keyIdentifier');
-          check_number_type(keyLocation, this+'.initKeyboardEvent', 'keyLocation');
-          check_string_type(modifiersList, this+'.initKeyboardEvent', 'modifiersList');
-          check_boolean_type(repeat, this+'.initKeyboardEvent', 'repeat');
-          /*END_DEBUG*/
-
-          //parse string of white-space separated list of modifier key identifiers
-          modifiersList.split(" ").forEach(function (modifier) {
-            switch (modifier) {
+        /* Queries the state of a modifier using a key identifier.
+         * @param {String} key A modifier key identifier
+         * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
+         * This is an incomplete list of modifiers.
+         */
+        'getModifierState': {
+          value: function (key) {
+            check_string_type(key, this+'.getModifierState', '*key*');
+            switch (key) {
             case 'Alt':
-              altKey = true;
-              break;
+              return evt_altKey;
             case 'Control':
-              ctrlKey = true;
-              break;
+              return evt_ctrlKey;
             case 'Meta':
-              metaKey = true;
-              break;
+              return evt_metaKey;
             case 'Shift':
-              shiftKey = true;
-              break;
+              return evt_shiftKey;
+            default:
+              return false;
             }
-          });
-          
-          this.initUIEvent(type, bubbles, cancelable, view);
-          return this;
-        }
-      },
-
-      /* Queries the state of a modifier using a key identifier.
-       * @param {String} key A modifier key identifier
-       * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-       * This is an incomplete list of modifiers.
-       */
-      'getModifierState': {
-        value: function (key) {
-          check_string_type(key, this+'.getModifierState');
-          switch (key) {
-          case 'Alt':
-            return altKey;
-          case 'Control':
-            return ctrlKey;
-          case 'Meta':
-            return metaKey;
-          case 'Shift':
-            return shiftKey;
-          default:
-            return false;
           }
         }
+      };
+    }()));
+
+    //initialize keyboardevent
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(keyboardevent);
+        /*DEBUG*/
+        //make sure we've checked our dummy type string
+        if (keyboardevent.type === undefined || keyboardevent.type === '' ||
+            keyboardevent.bubbles === undefined ||
+            keyboardevent.cancelable === undefined ||
+            keyboardevent.view === undefined ||
+            keyboardevent.keyLocation === undefined ||
+            keyboardevent.keyIdentifier === undefined ||
+            keyboardevent.repeat === undefined) {
+          throw new SyntaxError("[object KeyboardEvent](function): Must call 'this.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_keyboardevent_properties(init_obj);
       }
-
-    });
-
-    //init event
-    keyboardevent.initKeyboardEvent(type, bubbles, cancelable, view,
-                                    keyIdentifier, keyLocation, modifiersList, repeat);
+    } else {
+      //standard instantiation
+      keyboardevent.initKeyboardEvent(type, bubbles, cancelable, view,
+                                      keyIdentifier, keyLocation, modifiersList, repeat);
+    }
     
     return keyboardevent;
   };
     
-  //static
-  keyboardevent_properties = {
+
+  keyboardevent_static_properties = {
     'toString': {
       enumerable: true,
       writable: false,
