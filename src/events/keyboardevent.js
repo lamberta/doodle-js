@@ -75,9 +75,9 @@
     Object.defineProperties(keyboardevent, keyboardevent_static_properties);
     //properties that require privacy
     Object.defineProperties(keyboardevent, (function () {
-      var evt_keyIdentifier,
-          evt_keyLocation,
-          evt_repeat,
+      var evt_keyIdentifier = "",
+          evt_keyLocation = 0,
+          evt_repeat = false,
           evt_ctrlKey = false,
           evt_altKey = false,
           evt_shiftKey = false,
@@ -217,11 +217,7 @@
         //make sure we've checked our dummy type string
         if (keyboardevent.type === undefined || keyboardevent.type === '' ||
             keyboardevent.bubbles === undefined ||
-            keyboardevent.cancelable === undefined ||
-            keyboardevent.view === undefined ||
-            keyboardevent.keyLocation === undefined ||
-            keyboardevent.keyIdentifier === undefined ||
-            keyboardevent.repeat === undefined) {
+            keyboardevent.cancelable === undefined) {
           throw new SyntaxError("[object KeyboardEvent](function): Must call 'this.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat)' within the function argument.");
         }
         /*END_DEBUG*/

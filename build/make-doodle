@@ -36,6 +36,7 @@ function build_full {
     cat ./src/events/event.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/uievent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/mouseevent.js >> "$DEBUG_OUT_FILE"
+    cat ./src/events/touchevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/textevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/keyboardevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/constants.js >> "$DEBUG_OUT_FILE"

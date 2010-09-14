@@ -71,8 +71,8 @@
     Object.defineProperties(textevent, textevent_static_properties);
     //properties that require privacy
     Object.defineProperties(textevent, (function () {
-      var evt_data,
-          evt_inputMode;
+      var evt_data = '',
+          evt_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
 
       copy_textevent_properties = function (evt) {
         //only looking for TextEvent properties
@@ -99,7 +99,7 @@
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             viewArg = (viewArg === undefined) ? null : viewArg;
-            dataArg = (dataArg === undefined) ? "" : dataArg;
+            dataArg = (dataArg === undefined) ? '' : dataArg;
             inputModeArg = (inputModeArg === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
             /*DEBUG*/
             check_string_type(typeArg, this+'.initTextEvent', '*type*, bubbles, cancelable, view, data, inputMode');
@@ -126,10 +126,7 @@
         //make sure we've checked our dummy type string
         if (textevent.type === undefined || textevent.type === '' ||
             textevent.bubbles === undefined ||
-            textevent.cancelable === undefined ||
-            textevent.view === undefined ||
-            textevent.data === undefined ||
-            textevent.inputMode === undefined) {
+            textevent.cancelable === undefined) {
           throw new SyntaxError("[object TextEvent](function): Must call 'this.initTextEvent(type, bubbles, cancelable, view, data, inputMode)' within the function argument.");
         }
         /*END_DEBUG*/

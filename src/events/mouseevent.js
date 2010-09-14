@@ -89,16 +89,16 @@
           evt_y = 0,
           evt_offsetX = 0,
           evt_offsetY = 0,
-          evt_screenX,
-          evt_screenY,
-          evt_clientX,
-          evt_clientY,
-          evt_ctrlKey,
-          evt_altKey,
-          evt_shiftKey,
-          evt_metaKey,
-          evt_button,
-          evt_relatedTarget;
+          evt_screenX = 0,
+          evt_screenY = 0,
+          evt_clientX = 0,
+          evt_clientY = 0,
+          evt_ctrlKey = false,
+          evt_altKey = false,
+          evt_shiftKey = false,
+          evt_metaKey = false,
+          evt_button = 0,
+          evt_relatedTarget = null;
 
       copy_mouseevent_properties = function (evt) {
         //only looking for MouseEvent properties
@@ -205,7 +205,7 @@
 
         'initMouseEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
-                           screenXArg, screenYArg, clientXArg, clientYArg, 
+                           screenXArg, screenYArg, clientXArg, clientYArg,
                            ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
                            buttonArg, relatedTargetArg) {
             //parameter defaults
@@ -221,7 +221,7 @@
             altKeyArg = (altKeyArg === undefined) ? false : altKeyArg;
             shiftKeyArg = (shiftKeyArg === undefined) ? false : shiftKeyArg;
             metaKeyArg = (metaKeyArg === undefined) ? false : metaKeyArg;
-            button = (buttonArg === undefined) ? 0 : buttonArg;
+            buttonArg = (buttonArg === undefined) ? 0 : buttonArg;
             relatedTarget = (relatedTargetArg === undefined) ? null : relatedTargetArg;
             /*DEBUG*/
             check_string_type(typeArg, this+'.initMouseEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
@@ -249,7 +249,7 @@
             evt_button = buttonArg;
             evt_relatedTarget = relatedTargetArg;
 
-            this.initUIEvent(type, bubbles, cancelable, view, detail);
+            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
             return this;
           }
         },
@@ -288,20 +288,8 @@
         //make sure we've checked our dummy type string
         if (mouseevent.type === undefined || mouseevent.type === '' ||
             mouseevent.bubbles === undefined ||
-            mouseevent.cancelable === undefined ||
-            mouseevent.view === undefined ||
-            mouseevent.detail === undefined ||
-            mouseevent.screenX === undefined ||
-            mouseevent.screenY === undefined ||
-            mouseevent.clientX === undefined ||
-            mouseevent.clientY === undefined ||
-            mouseevent.ctrlKey === undefined ||
-            mouseevent.altKey === undefined ||
-            mouseevent.shiftKey === undefined ||
-            mouseevent.metaKey === undefined ||
-            mouseevent.button === undefined ||
-            mouseevent.relatedTarget === undefined) {
-          throw new SyntaxError("[object MouseEvent](function): Must call 'this.initMouseEvent(type, bubbles, cancelable, view, detail)' within the function argument.");
+            mouseevent.cancelable === undefined) {
+          throw new SyntaxError("[object MouseEvent](function): Must call 'this.initMouseEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget)' within the function argument.");
         }
         /*END_DEBUG*/
       } else {

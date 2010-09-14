@@ -166,6 +166,42 @@ Object.defineProperties(doodle.MouseEvent, {
 });
 
 
+/* TOUCH EVENT
+ * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
+ */
+Object.defineProperties(doodle.TouchEvent, {
+  
+  'TOUCH_START': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchstart"
+  },
+
+  'TOUCH_MOVE': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchmove"
+  },
+
+  'TOUCH_END': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchend"
+  },
+
+  'TOUCH_CANCEL': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchcancel"
+  }
+  
+});
+
+
 /* KEYBOARD EVENT
  */
 Object.defineProperties(doodle.KeyboardEvent, {

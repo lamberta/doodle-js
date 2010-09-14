@@ -69,8 +69,8 @@
     Object.defineProperties(uievent, uievent_static_properties);
     //properties that require privacy
     Object.defineProperties(uievent, (function () {
-      var evt_view,
-          evt_detail,
+      var evt_view = null,
+          evt_detail = 0,
           evt_which = 0,
           evt_charCode = 0,
           evt_keyCode = 0,
@@ -179,9 +179,7 @@
         //make sure we've checked our dummy type string
         if (uievent.type === undefined || uievent.type === '' ||
             uievent.bubbles === undefined ||
-            uievent.cancelable === undefined ||
-            uievent.view === undefined ||
-            uievent.detail === undefined) {
+            uievent.cancelable === undefined) {
           throw new SyntaxError("[object UIEvent](function): Must call 'this.initUIEvent(type, bubbles, cancelable, view, detail)' within the function argument.");
         }
         /*END_DEBUG*/
