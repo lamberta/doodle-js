@@ -175,14 +175,15 @@ doodle.utils.types = (function () {
 
 /* Returns HTML element from id name or element itself.
  */
-doodle.utils.get_element = function (id) {
-  if (typeof id === 'string') {
+doodle.utils.get_element = function (element) {
+  if (typeof element === 'string') {
     //lop off pound-sign if given
-    id = (id[0] === '#') ? id.slice(1) : id;
+    element = (element[0] === '#') ? element.slice(1) : element;
+    return document.getElementById(element);
   } else {
-    id = (id && id.id) ? id.id : null;
+    //if it has an element property, we'll call it an element
+    return (element && element.tagName) ? element : null;
   }
-  return document.getElementById(id);
 };
 
 /* Returns css property of element, it's own or inherited.
@@ -240,8 +241,9 @@ doodle.utils.get_element_property = function (element, property, type) {
 doodle.utils.set_element_property = function (element, property, value, type) {
   type = (type === undefined) ? 'css' : type;
   /*DEBUG*/
-  doodle.utils.types.check_string_type(property, 'set_element_property', 'element, *property*, value, type');
-  doodle.utils.types.check_string_type(type, 'set_element_property', 'element, property, value, *type*');
+  var check_string_type = doodle.utils.types.check_string_type;
+  check_string_type(property, 'set_element_property', 'element, *property*, value, type');
+  check_string_type(type, 'set_element_property', 'element, property, value, *type*');
   /*END_DEBUG*/
   switch (type) {
   case 'css':

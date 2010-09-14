@@ -151,7 +151,7 @@
 
     //node defaults
     if (node.id === undefined) {
-      node.id = (id !== undefined) ? id : "node"+ String('000'+node_count).slice(-3);
+      node.id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
       node_count += 1;
     }
 

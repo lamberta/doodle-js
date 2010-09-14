@@ -1,8 +1,15 @@
+/*globals doodle, document*/
+
 (function () {
   var layer_static_properties,
       layer_count = 0,
+      isLayer,
+      inheritsLayer,
+      /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
       check_canvas_type = doodle.utils.types.check_canvas_type,
+      /*END_DEBUG*/
+      get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property;
   
@@ -11,99 +18,69 @@
    * @return {Object}
    */
   doodle.Layer = function (id, element) {
-    var arg_len = arguments.length,
-        initializer,
-        layer = Object.create(doodle.ElementNode()),
-        layer_name = "layer" + layer_count;
-
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      id = undefined;
-    } else if (arg_len > 2) {
-      throw new SyntaxError("[object Layer]: Invalid number of parameters.");
+    var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
+        layer = Object.create(doodle.ElementNode(layer_name));
+    
+    /*DEBUG*/
+    if (arguments.length > 2) {
+      throw new SyntaxError("[object Layer](id, element): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
     Object.defineProperties(layer, layer_static_properties);
     //properties that require privacy
     Object.defineProperties(layer, {
-      'element': {
-        get: function () {
-          return element;
-        },
-        set: function (canvas) {
-          /*DEBUG*/
-          check_canvas_type(canvas, this+'.element');
-          /*END_DEBUG*/
-          element = canvas;
-        }
-      }
+      'element': (function () {
+        var dom_element = null;
+        return {
+          get: function () {
+            return dom_element;
+          },
+          set: function (canvasArg) {
+            if (canvasArg === null) {
+              dom_element = null;
+            } else {
+              canvasArg = get_element(canvasArg);
+              /*DEBUG*/
+              check_canvas_type(canvasArg, this+'.element');
+              /*END_DEBUG*/
+              dom_element = canvasArg;
+              set_element_property(dom_element, 'id', layer_name, 'html');
+              if (this.parent) {
+                //set to display dimensions
+                this.width = this.parent.width;
+                this.height = this.parent.height;
+              }
+              //need to stack canvas elements inside div
+              set_element_property(dom_element, 'position', 'absolute');
+            }
+          }
+        };
+      }())
     });
 
-    //init
-    layer.element = element || document.createElement('canvas');
-    //need to stack canvas elements inside div
-    layer.element.style.position = "absolute";
-
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(layer);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arguments.length > 1) {
+        throw new SyntaxError("[object Layer](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      arguments[0].call(layer);
+      id = undefined;
     }
-
-    if (!layer.id) {
-      layer.id = (typeof id === 'string') ? id : "layer" + String('00'+layer_count).slice(-2);
-      layer_count += 1;
+    
+    //layer defaults - if not set in init function
+    if (layer.element === null) {
+      layer.element = document.createElement('canvas');
     }
+    
+    layer_count += 1;
 
     return layer;
   };
 
-  (function () {
-    /*
-     * CLASS METHODS
-     */
-
-    /* Test if an object is an node.
-     * Not the best way to test object, but it'll do for now.
-     * @param {Object} obj
-     * @return {Boolean}
-     */
-    var isLayer = doodle.Layer.isLayer = function (obj) {
-      return obj.toString() === '[object Layer]';
-    };
-
-    /* Check if object inherits from node.
-     * @param {Object} obj
-     * @return {Boolean}
-     */
-    var inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
-      while (obj) {
-        if (isLayer(obj)) {
-          return true;
-        } else {
-          if (typeof obj !== 'object') {
-            return false;
-          }
-          obj = Object.getPrototypeOf(obj);
-        }
-      }
-      return false;
-    };
-
-    doodle.utils.types.check_layer_type = function (layer, caller, param) {
-      if (inheritsLayer(layer)) {
-        return true;
-      } else {
-        caller = (caller === undefined) ? "check_layer_type" : caller;
-        param = (param === undefined) ? "" : '('+param+')';
-        throw new TypeError(caller + param +": Parameter must be a Layer.");
-      }
-    };
-    
-  }());
-
-  /* STATIC PROPERTIES
-   */
+  
   layer_static_properties = {
     'context': {
       get: function () {
@@ -149,8 +126,53 @@
       value: function () {
         return "[object Layer]";
       }
-    }
-    
+    } 
   };//end layer_static_properties
+
+  /*
+   * CLASS METHODS
+   */
+
+  /* Test if an object is an node.
+   * Not the best way to test object, but it'll do for now.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  isLayer = doodle.Layer.isLayer = function (obj) {
+    if (!obj || typeof obj !== "object") {
+      return false;
+    } else {
+      obj = obj.toString();
+    }
+    return (obj === '[object Layer]');
+  };
+
+  /* Check if object inherits from node.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
+    while (obj) {
+      if (isLayer(obj)) {
+        return true;
+      } else {
+        if (typeof obj !== 'object') {
+          return false;
+        }
+        obj = Object.getPrototypeOf(obj);
+      }
+    }
+    return false;
+  };
+  
+  doodle.utils.types.check_layer_type = function (layer, caller, param) {
+    if (inheritsLayer(layer)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_layer_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Layer.");
+    }
+  };
   
 }());//end class closure

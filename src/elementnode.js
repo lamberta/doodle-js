@@ -15,12 +15,12 @@
    * @param {String|Function} id|initializer
    * @return {Object}
    */
-  doodle.ElementNode = function (element) {
-    var element_node = Object.create(doodle.Node());
+  doodle.ElementNode = function (id, element) {
+    var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
 
     /*DEBUG*/
-    if (arguments.length > 1) {
-      throw new SyntaxError("[object ElementNode](element): Invalid number of parameters.");
+    if (arguments.length > 2) {
+      throw new SyntaxError("[object ElementNode](id, element): Invalid number of parameters.");
     }
     /*END_DEBUG*/
 
@@ -53,7 +53,13 @@
 
     //passed an initialization function
     if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arguments.length > 1) {
+        throw new SyntaxError("[object ElementNode](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
       arguments[0].call(element_node);
+      id = undefined;
     } else if (element !== undefined) {
       //standard instantiation
       element_node.element = element;
