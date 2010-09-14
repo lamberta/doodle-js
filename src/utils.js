@@ -11,14 +11,16 @@ doodle.utils = {
   },
 
   rgb_str_to_hex: function (rgb_str) {
-    var utils = doodle.utils;
+    var utils = doodle.utils,
+        rgb;
+    
     /*DEBUG*/
     if (typeof rgb_str !== 'string') {
       throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
     }
     /*END_DEBUG*/
     
-    var rgb = utils.rgb_str_to_rgb(rgb_str);
+    rgb = utils.rgb_str_to_rgb(rgb_str);
     
     /*DEBUG*/
     if (!Array.isArray(rgb)) {
@@ -177,9 +179,13 @@ doodle.utils.get_element = function (element) {
 
 /* Returns css property of element, it's own or inherited.
  */
-doodle.utils.get_style_property = function (element, property) {
+doodle.utils.get_style_property = function (element, property, useComputedStyle) {
+  useComputedStyle = (useComputedStyle === undefined) ? true : false;
+  /*DEBUG*/
+  doodle.utils.types.check_boolean_type(useComputedStyle, 'get_style_property');
+  /*END_DEBUG*/
   try {
-    if (document.defaultView && document.defaultView.getComputedStyle) {
+    if (useComputedStyle && document.defaultView && document.defaultView.getComputedStyle) {
       return document.defaultView.getComputedStyle(element, null)[property];
     } else if (element.currentStyle) {
       return element.currentStyle[property];
@@ -197,25 +203,34 @@ doodle.utils.get_style_property = function (element, property) {
  * CSS properties take precedence over HTML attributes.
  * @param type {String} 'int'|'float' Return type.
  */
-doodle.utils.get_element_property = function (element, property, type) {
-  var val;
+doodle.utils.get_element_property = function (element, property, returnType, useComputedStyle) {
+  returnType = returnType || false;
+  var val, obj;
   try {
-    val = doodle.utils.get_style_property(element, property);
+    val = doodle.utils.get_style_property(element, property, useComputedStyle);
   } catch (e) {
     val = undefined;
   }
-  if (val === undefined || val === null) {
+  if (val === undefined || val === null || val === '') {
     val = element.getAttribute(property);
   }
-  if (type !== undefined) {
-    switch (type) {
+  if (returnType !== false) {
+    switch (returnType) {
     case 'int':
       val = parseInt(val, 10);
       val = isNaN(val) ? null : val;
       break;
+    case 'number':
     case 'float':
       val = parseFloat(val);
       val = isNaN(val) ? null : val;
+      break;
+    case 'string':
+      val = String(val);
+      break;
+    case 'object':
+      obj = {};
+      val = obj[property] = val;
       break;
     default:
       break;
