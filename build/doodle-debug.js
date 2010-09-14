@@ -159,32 +159,21 @@ doodle.utils.types = (function () {
         true : throw_type_error('array', caller || 'check_array_type', param);
     },
 
-    check_event_type: function (evt, caller, param) {
-      //list all event types
-      if (evt && (evt.toString() === '[object Event]' ||
-                  evt.toString() === '[object UIEvent]' ||
-                  evt.toString() === '[object MouseEvent]' ||
-                  evt.toString() === '[object KeyboardEvent]' ||
-                  evt.toString() === '[object TextEvent]')) {
-        return true;
-      } else {
-        throw_type_error('event', caller || 'check_event_type', param);
-      }
-    },
-
     check_canvas_type: function (canvas, caller, param) {
-      return (canvas && canvas.toString() === '[object HTMLCanvasElement]') ?
+      return (canvas && typeof canvas.toString === 'function' &&
+              canvas.toString() === '[object HTMLCanvasElement]') ?
         true : throw_type_error('canvas element', caller || 'check_canvas_type', param);
     },
 
     check_context_type: function (ctx, caller, param) {
-      return (ctx && ctx.toString() === '[object CanvasRenderingContext2D]') ?
+      return (ctx && typeof ctx.toString === 'function' &&
+              ctx.toString() === '[object CanvasRenderingContext2D]') ?
         true : throw_type_error('canvas context', caller || 'check_context_type', param);
     },
 
     check_block_element: function (element, caller, param) {
       try {
-        return (doodle.utils.get_style_property(element, 'display') === "block") ?
+        return (doodle.utils.get_style_property(element, 'display') === 'block') ?
           true : throw_type_error('HTML block element', caller || 'check_block_type', param);
       } catch (e) {
         throw_type_error('HTML block element', caller || 'check_block_type', param);
@@ -197,14 +186,15 @@ doodle.utils.types = (function () {
 
 /* Returns HTML element from id name or element itself.
  */
-doodle.utils.get_element = function (id) {
-  if (typeof id === 'string') {
+doodle.utils.get_element = function (element) {
+  if (typeof element === 'string') {
     //lop off pound-sign if given
-    id = (id[0] === '#') ? id.slice(1) : id;
+    element = (element[0] === '#') ? element.slice(1) : element;
+    return document.getElementById(element);
   } else {
-    id = (id && id.id) ? id.id : null;
+    //if it has an element property, we'll call it an element
+    return (element && element.tagName) ? element : null;
   }
-  return document.getElementById(id);
 };
 
 /* Returns css property of element, it's own or inherited.
@@ -262,8 +252,9 @@ doodle.utils.get_element_property = function (element, property, type) {
 doodle.utils.set_element_property = function (element, property, value, type) {
   type = (type === undefined) ? 'css' : type;
   /*DEBUG*/
-  doodle.utils.types.check_string_type(property, 'set_element_property', 'element, *property*, value, type');
-  doodle.utils.types.check_string_type(type, 'set_element_property', 'element, property, value, *type*');
+  var check_string_type = doodle.utils.types.check_string_type;
+  check_string_type(property, 'set_element_property', 'element, *property*, value, type');
+  check_string_type(type, 'set_element_property', 'element, property, value, *type*');
   /*END_DEBUG*/
   switch (type) {
   case 'css':
@@ -1654,7 +1645,7 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @return {Boolean}
    */
   isEvent = doodle.Event.isEvent = function (event) {
-    if (!event || typeof event !== "object") {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
       event = event.toString();
@@ -1666,6 +1657,16 @@ Object.defineProperty(doodle, 'LineJoin', {
             event === '[object KeyboardEvent]' ||
             event === '[object TextEvent]' ||
             event === '[object WheelEvent]');
+  };
+
+  doodle.utils.types.check_event_type = function (event, caller, param) {
+    if (isEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_event_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an Event.");
+    }
   };
   
 }());//end class closure
@@ -5143,6 +5144,9 @@ Object.defineProperties(doodle.TextEvent, {
    * @return {Boolean}
    */
   isEventDispatcher = doodle.EventDispatcher.isEventDispatcher = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
     return (obj.toString() === '[object EventDispatcher]');
   };
 
@@ -5182,11 +5186,13 @@ Object.defineProperties(doodle.TextEvent, {
       inheritsNode,
       check_node_type,
       inDisplayList,
+      /*DEBUG*/
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
       doodle_Point = doodle.geom.Point,
       doodle_Event = doodle.Event,
       to_degrees = 180 / Math.PI,
@@ -5328,7 +5334,7 @@ Object.defineProperties(doodle.TextEvent, {
 
     //node defaults
     if (node.id === undefined) {
-      node.id = (id !== undefined) ? id : "node"+ String('000'+node_count).slice(-3);
+      node.id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
       node_count += 1;
     }
 
@@ -5756,6 +5762,9 @@ Object.defineProperties(doodle.TextEvent, {
    * @return {Boolean}
    */
   isNode = doodle.Node.isNode = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
     return (obj.toString() === '[object Node]');
   };
 
@@ -6497,11 +6506,13 @@ Object.defineProperties(doodle.TextEvent, {
       check_sprite_type,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
+      /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
+      /*END_DEBUG*/
       inheritsNode = doodle.Node.inheritsNode,
       doodle_Rectangle = doodle.geom.Rectangle;
 
@@ -6822,7 +6833,10 @@ Object.defineProperties(doodle.TextEvent, {
    */
   
   isSprite = doodle.Sprite.isSprite = function (obj) {
-    return obj.toString() === '[object Sprite]';
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
+    return (obj.toString() === '[object Sprite]');
   };
 
   /* Check if object inherits from Sprite.
@@ -6858,9 +6872,11 @@ Object.defineProperties(doodle.TextEvent, {
 (function () {
   var node_static_properties,
       doodle_utils = doodle.utils,
+      /*DEBUG*/
       check_number_type = doodle_utils.types.check_number_type,
       check_string_type = doodle_utils.types.check_string_type,
       check_boolean_type = doodle_utils.types.check_boolean_type,
+      /*END_DEBUG*/
       rgb_str_to_hex = doodle_utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle_utils.hex_to_rgb_str,
       get_element = doodle_utils.get_element,
@@ -6871,12 +6887,12 @@ Object.defineProperties(doodle.TextEvent, {
    * @param {String|Function} id|initializer
    * @return {Object}
    */
-  doodle.ElementNode = function (element) {
-    var element_node = Object.create(doodle.Node());
+  doodle.ElementNode = function (id, element) {
+    var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
 
     /*DEBUG*/
-    if (arguments.length > 1) {
-      throw new SyntaxError("[object ElementNode](element): Invalid number of parameters.");
+    if (arguments.length > 2) {
+      throw new SyntaxError("[object ElementNode](id, element): Invalid number of parameters.");
     }
     /*END_DEBUG*/
 
@@ -6909,7 +6925,13 @@ Object.defineProperties(doodle.TextEvent, {
 
     //passed an initialization function
     if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arguments.length > 1) {
+        throw new SyntaxError("[object ElementNode](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
       arguments[0].call(element_node);
+      id = undefined;
     } else if (element !== undefined) {
       //standard instantiation
       element_node.element = element;
@@ -7088,11 +7110,18 @@ Object.defineProperties(doodle.TextEvent, {
   };//end node_static_properties
   
 }());//end class closure
+/*globals doodle, document*/
+
 (function () {
   var layer_static_properties,
       layer_count = 0,
+      isLayer,
+      inheritsLayer,
+      /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
       check_canvas_type = doodle.utils.types.check_canvas_type,
+      /*END_DEBUG*/
+      get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property;
   
@@ -7101,99 +7130,69 @@ Object.defineProperties(doodle.TextEvent, {
    * @return {Object}
    */
   doodle.Layer = function (id, element) {
-    var arg_len = arguments.length,
-        initializer,
-        layer = Object.create(doodle.ElementNode()),
-        layer_name = "layer" + layer_count;
-
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      id = undefined;
-    } else if (arg_len > 2) {
-      throw new SyntaxError("[object Layer]: Invalid number of parameters.");
+    var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
+        layer = Object.create(doodle.ElementNode(layer_name));
+    
+    /*DEBUG*/
+    if (arguments.length > 2) {
+      throw new SyntaxError("[object Layer](id, element): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
 
     Object.defineProperties(layer, layer_static_properties);
     //properties that require privacy
     Object.defineProperties(layer, {
-      'element': {
-        get: function () {
-          return element;
-        },
-        set: function (canvas) {
-          /*DEBUG*/
-          check_canvas_type(canvas, this+'.element');
-          /*END_DEBUG*/
-          element = canvas;
-        }
-      }
+      'element': (function () {
+        var dom_element = null;
+        return {
+          get: function () {
+            return dom_element;
+          },
+          set: function (canvasArg) {
+            if (canvasArg === null) {
+              dom_element = null;
+            } else {
+              canvasArg = get_element(canvasArg);
+              /*DEBUG*/
+              check_canvas_type(canvasArg, this+'.element');
+              /*END_DEBUG*/
+              dom_element = canvasArg;
+              set_element_property(dom_element, 'id', layer_name, 'html');
+              if (this.parent) {
+                //set to display dimensions
+                this.width = this.parent.width;
+                this.height = this.parent.height;
+              }
+              //need to stack canvas elements inside div
+              set_element_property(dom_element, 'position', 'absolute');
+            }
+          }
+        };
+      }())
     });
 
-    //init
-    layer.element = element || document.createElement('canvas');
-    //need to stack canvas elements inside div
-    layer.element.style.position = "absolute";
-
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(layer);
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arguments.length > 1) {
+        throw new SyntaxError("[object Layer](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      arguments[0].call(layer);
+      id = undefined;
     }
-
-    if (!layer.id) {
-      layer.id = (typeof id === 'string') ? id : "layer" + String('00'+layer_count).slice(-2);
-      layer_count += 1;
+    
+    //layer defaults - if not set in init function
+    if (layer.element === null) {
+      layer.element = document.createElement('canvas');
     }
+    
+    layer_count += 1;
 
     return layer;
   };
 
-  (function () {
-    /*
-     * CLASS METHODS
-     */
-
-    /* Test if an object is an node.
-     * Not the best way to test object, but it'll do for now.
-     * @param {Object} obj
-     * @return {Boolean}
-     */
-    var isLayer = doodle.Layer.isLayer = function (obj) {
-      return obj.toString() === '[object Layer]';
-    };
-
-    /* Check if object inherits from node.
-     * @param {Object} obj
-     * @return {Boolean}
-     */
-    var inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
-      while (obj) {
-        if (isLayer(obj)) {
-          return true;
-        } else {
-          if (typeof obj !== 'object') {
-            return false;
-          }
-          obj = Object.getPrototypeOf(obj);
-        }
-      }
-      return false;
-    };
-
-    doodle.utils.types.check_layer_type = function (layer, caller, param) {
-      if (inheritsLayer(layer)) {
-        return true;
-      } else {
-        caller = (caller === undefined) ? "check_layer_type" : caller;
-        param = (param === undefined) ? "" : '('+param+')';
-        throw new TypeError(caller + param +": Parameter must be a Layer.");
-      }
-    };
-    
-  }());
-
-  /* STATIC PROPERTIES
-   */
+  
   layer_static_properties = {
     'context': {
       get: function () {
@@ -7239,9 +7238,52 @@ Object.defineProperties(doodle.TextEvent, {
       value: function () {
         return "[object Layer]";
       }
-    }
-    
+    } 
   };//end layer_static_properties
+
+  /*
+   * CLASS METHODS
+   */
+
+  /* Test if an object is an node.
+   * Not the best way to test object, but it'll do for now.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  isLayer = doodle.Layer.isLayer = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
+    return (obj.toString() === '[object Layer]');
+  };
+
+  /* Check if object inherits from node.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
+    while (obj) {
+      if (isLayer(obj)) {
+        return true;
+      } else {
+        if (typeof obj !== 'object') {
+          return false;
+        }
+        obj = Object.getPrototypeOf(obj);
+      }
+    }
+    return false;
+  };
+  
+  doodle.utils.types.check_layer_type = function (layer, caller, param) {
+    if (inheritsLayer(layer)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_layer_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Layer.");
+    }
+  };
   
 }());//end class closure
 (function () {
