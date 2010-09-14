@@ -53,10 +53,11 @@ doodle.utils = {
   rgb_to_rgb_str: function (r, g, b, a) {
     a = (a === undefined) ? 1 : a;
     /*DEBUG*/
-    doodle.utils.types.check_number_type(r, 'rgb_to_rgb_str', '*r*, g, b, a');
-    doodle.utils.types.check_number_type(g, 'rgb_to_rgb_str', 'r, *g*, b, a');
-    doodle.utils.types.check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
-    doodle.utils.types.check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
+    var check_number_type = doodle.utils.types.check_number_type;
+    check_number_type(r, 'rgb_to_rgb_str', '*r*, g, b, a');
+    check_number_type(g, 'rgb_to_rgb_str', 'r, *g*, b, a');
+    check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
+    check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
     /*END_DEBUG*/
     a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
     if (a === 1) {
@@ -1653,18 +1654,18 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @return {Boolean}
    */
   isEvent = doodle.Event.isEvent = function (event) {
-    var evt_name;
-    if (typeof event !== 'object') {
-          return false;
+    if (!event || typeof event !== "object") {
+      return false;
     } else {
-      evt_name = event.toString();
+      event = event.toString();
     }
-    return (evt_name === '[object Event]' ||
-            evt_name === '[object UIEvent]' ||
-            evt_name === '[object MouseEvent]' ||
-            evt_name === '[object KeyboardEvent]' ||
-            evt_name === '[object TextEvent]' ||
-            evt_name === '[object WheelEvent]');
+    return (event === '[object Event]' ||
+            event === '[object UIEvent]' ||
+            event === '[object MouseEvent]' ||
+            event === '[object TouchEvent]' ||
+            event === '[object KeyboardEvent]' ||
+            event === '[object TextEvent]' ||
+            event === '[object WheelEvent]');
   };
   
 }());//end class closure
@@ -1739,8 +1740,8 @@ Object.defineProperty(doodle, 'LineJoin', {
     Object.defineProperties(uievent, uievent_static_properties);
     //properties that require privacy
     Object.defineProperties(uievent, (function () {
-      var evt_view,
-          evt_detail,
+      var evt_view = null,
+          evt_detail = 0,
           evt_which = 0,
           evt_charCode = 0,
           evt_keyCode = 0,
@@ -1849,9 +1850,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         //make sure we've checked our dummy type string
         if (uievent.type === undefined || uievent.type === '' ||
             uievent.bubbles === undefined ||
-            uievent.cancelable === undefined ||
-            uievent.view === undefined ||
-            uievent.detail === undefined) {
+            uievent.cancelable === undefined) {
           throw new SyntaxError("[object UIEvent](function): Must call 'this.initUIEvent(type, bubbles, cancelable, view, detail)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -1971,16 +1970,16 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_y = 0,
           evt_offsetX = 0,
           evt_offsetY = 0,
-          evt_screenX,
-          evt_screenY,
-          evt_clientX,
-          evt_clientY,
-          evt_ctrlKey,
-          evt_altKey,
-          evt_shiftKey,
-          evt_metaKey,
-          evt_button,
-          evt_relatedTarget;
+          evt_screenX = 0,
+          evt_screenY = 0,
+          evt_clientX = 0,
+          evt_clientY = 0,
+          evt_ctrlKey = false,
+          evt_altKey = false,
+          evt_shiftKey = false,
+          evt_metaKey = false,
+          evt_button = 0,
+          evt_relatedTarget = null;
 
       copy_mouseevent_properties = function (evt) {
         //only looking for MouseEvent properties
@@ -2087,7 +2086,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
         'initMouseEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
-                           screenXArg, screenYArg, clientXArg, clientYArg, 
+                           screenXArg, screenYArg, clientXArg, clientYArg,
                            ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
                            buttonArg, relatedTargetArg) {
             //parameter defaults
@@ -2103,7 +2102,7 @@ Object.defineProperty(doodle, 'LineJoin', {
             altKeyArg = (altKeyArg === undefined) ? false : altKeyArg;
             shiftKeyArg = (shiftKeyArg === undefined) ? false : shiftKeyArg;
             metaKeyArg = (metaKeyArg === undefined) ? false : metaKeyArg;
-            button = (buttonArg === undefined) ? 0 : buttonArg;
+            buttonArg = (buttonArg === undefined) ? 0 : buttonArg;
             relatedTarget = (relatedTargetArg === undefined) ? null : relatedTargetArg;
             /*DEBUG*/
             check_string_type(typeArg, this+'.initMouseEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
@@ -2131,7 +2130,7 @@ Object.defineProperty(doodle, 'LineJoin', {
             evt_button = buttonArg;
             evt_relatedTarget = relatedTargetArg;
 
-            this.initUIEvent(type, bubbles, cancelable, view, detail);
+            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
             return this;
           }
         },
@@ -2170,20 +2169,8 @@ Object.defineProperty(doodle, 'LineJoin', {
         //make sure we've checked our dummy type string
         if (mouseevent.type === undefined || mouseevent.type === '' ||
             mouseevent.bubbles === undefined ||
-            mouseevent.cancelable === undefined ||
-            mouseevent.view === undefined ||
-            mouseevent.detail === undefined ||
-            mouseevent.screenX === undefined ||
-            mouseevent.screenY === undefined ||
-            mouseevent.clientX === undefined ||
-            mouseevent.clientY === undefined ||
-            mouseevent.ctrlKey === undefined ||
-            mouseevent.altKey === undefined ||
-            mouseevent.shiftKey === undefined ||
-            mouseevent.metaKey === undefined ||
-            mouseevent.button === undefined ||
-            mouseevent.relatedTarget === undefined) {
-          throw new SyntaxError("[object MouseEvent](function): Must call 'this.initMouseEvent(type, bubbles, cancelable, view, detail)' within the function argument.");
+            mouseevent.cancelable === undefined) {
+          throw new SyntaxError("[object MouseEvent](function): Must call 'this.initMouseEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget)' within the function argument.");
         }
         /*END_DEBUG*/
       } else {
@@ -2208,6 +2195,333 @@ Object.defineProperty(doodle, 'LineJoin', {
       configurable: false,
       value: function () {
         return "[object MouseEvent]";
+      }
+    }
+  };
+
+}());//end class closure
+/*globals doodle*/
+
+/* TouchEvent support is expermental.
+ * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
+ */
+(function () {
+  var touchevent_static_properties,
+      isEvent = doodle.Event.isEvent,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
+      check_string_type = doodle.utils.types.check_string_type;
+  
+  /* Super constructor
+   * @param {String} type
+   * @param {Boolean} bubbles
+   * @param {Boolean} cancelable
+   * @param {DOM Object} view
+   * @param {Number} detail
+   * @param {Number} screenX
+   * @param {Number} screenY
+   * @param {Number} clientX
+   * @param {Number} clientY
+   * @param {Boolean} ctrlKey
+   * @param {Boolean} altKey
+   * @param {Boolean} shiftKey
+   * @param {Boolean} metaKey
+   * @param {} touches
+   * @param {} targetTouches
+   * @param {} changedTouches
+   * @param {Number} scale
+   * @param {Number} rotation
+   *
+   * @alternative instantiation
+   * @param {Event} initializer event to wrap
+   *
+   * @return {TouchEvent}
+   */
+  doodle.TouchEvent = function (type, bubbles, cancelable, view, detail,
+                                screenX, screenY, clientX, clientY,
+                                ctrlKey, altKey, shiftKey, metaKey,
+                                touches, targetTouches, changedTouches,
+                                scale, rotation) {
+    var touchevent,
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_touchevent_properties; //fn declared per event for private vars
+    
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 18) {
+      throw new SyntaxError("[object TouchEvent](type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation");
+    }
+    /*END_DEBUG*/
+
+    //initialize uievent prototype with another event, function, or args
+    if (isEvent(arguments[0])) {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object TouchEvent](event): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      touchevent = Object.create(doodle.UIEvent(init_obj));
+    } else if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object TouchEvent](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      //use empty event type for now, will check after we call the init function.
+      touchevent = Object.create(doodle.UIEvent(''));
+    } else {
+      //parameter defaults
+      bubbles = (bubbles === undefined) ? false : bubbles;
+      cancelable = (cancelable === undefined) ? false : cancelable;
+      view = (view === undefined) ? null : view;
+      detail = (detail === undefined) ? 0 : detail;
+      /*DEBUG*/
+      check_string_type(type, '[object TouchEvent]', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      check_boolean_type(bubbles, '[object TouchEvent]', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      check_boolean_type(cancelable, '[object TouchEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      check_number_type(detail, '[object TouchEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      /*END_DEBUG*/
+      touchevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+    }
+    
+    
+    Object.defineProperties(touchevent, touchevent_static_properties);
+    //properties that require privacy
+    Object.defineProperties(touchevent, (function () {
+      var evt_screenX = 0,
+          evt_screenY = 0,
+          evt_clientX = 0,
+          evt_clientY = 0,
+          evt_ctrlKey = false,
+          evt_altKey = false,
+          evt_shiftKey = false,
+          evt_metaKey = false,
+          evt_touches = null,
+          evt_targetTouches = null,
+          evt_changedTouches = null,
+          evt_scale = 1,
+          evt_rotation = 0;
+
+      copy_touchevent_properties = function (evt) {
+        //only looking for TouchEvent properties
+        if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
+        if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
+        if (evt.clientX !== undefined) { evt_clientX = evt.clientX; }
+        if (evt.clientY !== undefined) { evt_clientY = evt.clientY; }
+        if (evt.ctrlKey !== undefined) { evt_ctrlKey = evt.ctrlKey; }
+        if (evt.altKey !== undefined) { evt_altKey = evt.altKey; }
+        if (evt.shiftKey !== undefined) { evt_shiftKey = evt.shiftKey; }
+        if (evt.metaKey !== undefined) { evt_metaKey = evt.metaKey; }
+        if (evt.touches !== undefined) { evt_touches = evt.touches; }
+        if (evt.targetTouches !== undefined) { evt_targetTouches = evt.targetTouches; }
+        if (evt.changedTouches !== undefined) { evt_changedTouches = evt.changedTouches; }
+        if (evt.scale !== undefined) { evt_scale = evt.scale; }
+        if (evt.rotation !== undefined) { evt_rotation = evt.rotation; }
+      };
+      
+      return {
+        'screenX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_screenX; }
+        },
+
+        'screenY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_screenY; }
+        },
+
+        'clientX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_clientX; }
+        },
+
+        'clientY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_clientY; }
+        },
+        
+        'ctrlKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_ctrlKey; }
+        },
+
+        'altKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_altKey; }
+        },
+
+        'shiftKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_shiftKey; }
+        },
+
+        'metaKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_metaKey; }
+        },
+
+        'touches': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_touches; }
+        },
+
+        'targetTouches': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_targetTouches; }
+        },
+
+        'changedTouches': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_changedTouches; }
+        },
+
+        'scale': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_scale; }
+        },
+
+        'rotation': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_rotation; }
+        },
+
+        'initTouchEvent': {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
+                           screenXArg, screenYArg, clientXArg, clientYArg,
+                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
+                           touchesArg, targetTouchesArg, changedTouchesArg,
+                           scaleArg, rotationArg) {
+            //parameter defaults
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
+            viewArg = (viewArg === undefined) ? null : viewArg;
+            detailArg = (detailArg === undefined) ? 0 : detailArg;
+            screenXArg = (screenXArg === undefined) ? 0 : screenXArg;
+            screenYArg = (screenYArg === undefined) ? 0 : screenYArg;
+            clientXArg = (clientXArg === undefined) ? 0 : clientXArg;
+            clientYArg = (clientYArg === undefined) ? 0 : clientYArg;
+            ctrlKeyArg = (ctrlKeyArg === undefined) ? false : ctrlKeyArg;
+            altKeyArg = (altKeyArg === undefined) ? false : altKeyArg;
+            shiftKeyArg = (shiftKeyArg === undefined) ? false : shiftKeyArg;
+            metaKeyArg = (metaKeyArg === undefined) ? false : metaKeyArg;
+            touchesArg = (touchesArg === undefined) ? null : touchesArg;
+            targetTouchesArg = (targetTouchesArg === undefined) ? null : targetTouchesArg;
+            changedTouchesArg = (changedTouchesArg === undefined) ? null : changedTouchesArg;
+            scaleArg = (scaleArg === undefined) ? 1 : scaleArg;
+            rotationArg = (rotationArg === undefined) ? 0 : rotationArg;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initTouchEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(canBubbleArg, this+'.initTouchEvent', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(cancelableArg, this+'.initTouchEvent', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(detailArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(screenXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, *screenX*, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(screenYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, *screenY*, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(clientXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, *clientX*, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(clientYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, *clientY*, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(ctrlKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, *ctrlKey*, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(altKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, *altKey*, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(shiftKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, *shiftKey*, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(metaKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, *metaKey*, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(scaleArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, *scale*, rotation');
+            check_number_type(rotationArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, *rotation*');
+            /*END_DEBUG*/
+            evt_screenX = screenXArg;
+            evt_screenY = screenYArg;
+            evt_clientX = clientXArg;
+            evt_clientY = clientYArg;
+            evt_ctrlKey = ctrlKeyArg;
+            evt_altKey = altKeyArg;
+            evt_shiftKey = shiftKeyArg;
+            evt_metaKey = metaKeyArg;
+            evt_touches = touchesArg;
+            evt_targetTouches = targetTouchesArg;
+            evt_changedTouches = changedTouchesArg;
+            evt_scale = scaleArg;
+            evt_rotation = rotationArg;
+
+            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
+            return this;
+          }
+        },
+
+        /* Queries the state of a modifier using a key identifier.
+         * @param {String} key A modifier key identifier
+         * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
+         * This is an incomplete list of modifiers.
+         */
+        'getModifierState': {
+          value: function (key) {
+            check_string_type(key, this+'.getModifierState', '*key*');
+            switch (key) {
+            case 'Alt':
+              return evt_altKey;
+            case 'Control':
+              return evt_ctrlKey;
+            case 'Meta':
+              return evt_metaKey;
+            case 'Shift':
+              return evt_shiftKey;
+            default:
+              return false;
+            }
+          }
+        }
+      };
+    }()));//end defineProperties
+
+
+    //initialize touchevent
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(touchevent);
+        /*DEBUG*/
+        //make sure we've checked our dummy type string
+        if (touchevent.type === undefined || touchevent.type === '' ||
+            touchevent.bubbles === undefined ||
+            touchevent.cancelable === undefined) {
+          throw new SyntaxError("[object TouchEvent](function): Must call 'this.initTouchEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_touchevent_properties(init_obj);
+      }
+    } else {
+      //standard instantiation
+      touchevent.initTouchEvent(type, bubbles, cancelable, view, detail,
+                                screenX, screenY, clientX, clientY,
+                                ctrlKey, altKey, shiftKey, metaKey,
+                                touches, targetTouches, changedTouches, scale, rotation);
+    }
+    
+    return touchevent;
+  };
+    
+  
+  touchevent_static_properties = {
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object TouchEvent]";
       }
     }
   };
@@ -2286,8 +2600,8 @@ Object.defineProperty(doodle, 'LineJoin', {
     Object.defineProperties(textevent, textevent_static_properties);
     //properties that require privacy
     Object.defineProperties(textevent, (function () {
-      var evt_data,
-          evt_inputMode;
+      var evt_data = '',
+          evt_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
 
       copy_textevent_properties = function (evt) {
         //only looking for TextEvent properties
@@ -2314,7 +2628,7 @@ Object.defineProperty(doodle, 'LineJoin', {
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             viewArg = (viewArg === undefined) ? null : viewArg;
-            dataArg = (dataArg === undefined) ? "" : dataArg;
+            dataArg = (dataArg === undefined) ? '' : dataArg;
             inputModeArg = (inputModeArg === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
             /*DEBUG*/
             check_string_type(typeArg, this+'.initTextEvent', '*type*, bubbles, cancelable, view, data, inputMode');
@@ -2341,10 +2655,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         //make sure we've checked our dummy type string
         if (textevent.type === undefined || textevent.type === '' ||
             textevent.bubbles === undefined ||
-            textevent.cancelable === undefined ||
-            textevent.view === undefined ||
-            textevent.data === undefined ||
-            textevent.inputMode === undefined) {
+            textevent.cancelable === undefined) {
           throw new SyntaxError("[object TextEvent](function): Must call 'this.initTextEvent(type, bubbles, cancelable, view, data, inputMode)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -2450,9 +2761,9 @@ Object.defineProperty(doodle, 'LineJoin', {
     Object.defineProperties(keyboardevent, keyboardevent_static_properties);
     //properties that require privacy
     Object.defineProperties(keyboardevent, (function () {
-      var evt_keyIdentifier,
-          evt_keyLocation,
-          evt_repeat,
+      var evt_keyIdentifier = "",
+          evt_keyLocation = 0,
+          evt_repeat = false,
           evt_ctrlKey = false,
           evt_altKey = false,
           evt_shiftKey = false,
@@ -2592,11 +2903,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         //make sure we've checked our dummy type string
         if (keyboardevent.type === undefined || keyboardevent.type === '' ||
             keyboardevent.bubbles === undefined ||
-            keyboardevent.cancelable === undefined ||
-            keyboardevent.view === undefined ||
-            keyboardevent.keyLocation === undefined ||
-            keyboardevent.keyIdentifier === undefined ||
-            keyboardevent.repeat === undefined) {
+            keyboardevent.cancelable === undefined) {
           throw new SyntaxError("[object KeyboardEvent](function): Must call 'this.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -2789,6 +3096,42 @@ Object.defineProperties(doodle.MouseEvent, {
     writable: false,
     configurable: false,
     value: "mouseleave"
+  }
+  
+});
+
+
+/* TOUCH EVENT
+ * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
+ */
+Object.defineProperties(doodle.TouchEvent, {
+  
+  'TOUCH_START': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchstart"
+  },
+
+  'TOUCH_MOVE': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchmove"
+  },
+
+  'TOUCH_END': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchend"
+  },
+
+  'TOUCH_CANCEL': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "touchcancel"
   }
   
 });
@@ -4396,14 +4739,22 @@ Object.defineProperties(doodle.TextEvent, {
   };
   
 }());//end class closure
+/*globals doodle*/
+
 (function () {
   var evtDisp_static_properties,
       dispatcher_queue,
       isEventDispatcher,
       inheritsEventDispatcher,
+      /*DEBUG*/
+      check_boolean_type = doodle.utils.types.check_boolean_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
-      check_event_type = doodle.utils.types.check_event_type;
+      check_event_type = doodle.utils.types.check_event_type,
+      /*END_DEBUG*/
+      CAPTURING_PHASE = doodle.Event.CAPTURING_PHASE,
+      AT_TARGET = doodle.Event.AT_TARGET,
+      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE;
   
   /* Super constructor
    * @param {Function} initializer
@@ -4483,10 +4834,11 @@ Object.defineProperties(doodle.TextEvent, {
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
-        useCapture = useCapture === true; //default to false, bubble event
+        useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
         check_string_type(type, this+'.addEventListener', '*type*, listener, useCapture');
         check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
+        check_boolean_type(useCapture, this+'.addEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
         
         var self = this;
@@ -4513,10 +4865,11 @@ Object.defineProperties(doodle.TextEvent, {
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
-        useCapture = useCapture === true; //default to false, bubble event
+        useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
         check_string_type(type, this+'.removeEventListener', '*type*, listener, useCapture');
         check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
+        check_boolean_type(useCapture, this+'.removeEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
         
         //make sure event type exists
@@ -4554,7 +4907,7 @@ Object.defineProperties(doodle.TextEvent, {
         
         //check for listeners that match event type
         //if capture not set, using bubble listeners - like for AT_TARGET phase
-        var phase = (event.eventPhase === doodle.Event.CAPTURING_PHASE) ? 'capture' : 'bubble',
+        var phase = (event.eventPhase === CAPTURING_PHASE) ? 'capture' : 'bubble',
             listeners = this.eventListeners[event.type], //obj
             count = 0, //listener count
             rv,  //return value of handler
@@ -4568,7 +4921,9 @@ Object.defineProperties(doodle.TextEvent, {
           //if we have any, call each handler with event object
           count = listeners.length;
           for (i = 0; i < count; i += 1) {
+            /*DEBUG*/
             check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
+            /*END_DEBUG*/
             //pass event to handler
             rv = listeners[i].call(this, event);
             
@@ -4638,7 +4993,7 @@ Object.defineProperties(doodle.TextEvent, {
         }
 
         //enter capture phase: down the tree
-        event.__setEventPhase(event.CAPTURING_PHASE);
+        event.__setEventPhase(CAPTURING_PHASE);
         i = len = node_path.length;
         while ((i=i-1) >= 0) {
           node_path[i].handleEvent(event);
@@ -4649,7 +5004,7 @@ Object.defineProperties(doodle.TextEvent, {
         }
 
         //enter target phase
-        event.__setEventPhase(event.AT_TARGET);
+        event.__setEventPhase(AT_TARGET);
         target.handleEvent(event);
         //was the event stopped inside the handler?
         if (event.__cancel) {
@@ -4662,7 +5017,7 @@ Object.defineProperties(doodle.TextEvent, {
         }
 
         //enter bubble phase: back up the tree
-        event.__setEventPhase(event.BUBBLING_PHASE);
+        event.__setEventPhase(BUBBLING_PHASE);
         for (i = 0; i < len; i = i+1) {
           node_path[i].handleEvent(event);
           //was the event stopped inside the handler?
@@ -4687,7 +5042,7 @@ Object.defineProperties(doodle.TextEvent, {
       value: function (event) {
         var receivers, //event listeners of correct type
             len, //count of event listeners
-            i; //counter
+            i = 0; //counter
         
         /*DEBUG*/
         check_event_type(event, this+'.broadcastEvent', '*event*');
@@ -4709,7 +5064,7 @@ Object.defineProperties(doodle.TextEvent, {
         });
         
         //and call each
-        for (i = 0, len = receivers.length; i < len; i=i+1) {
+        for (len = receivers.length; i < len; i=i+1) {
           receivers[i].handleEvent(event);
           //event cancelled in listener?
           if (event.__cancel) {
@@ -5035,6 +5390,7 @@ Object.defineProperties(doodle.TextEvent, {
     /*
     'rotate': { //around external point?
       value: function (deg) {
+      
         check_number_type(deg, this+'.rotate', '*degrees*');
 
         if (this.axis.x !== undefined && this.axis.y !== undefined) {
@@ -5048,7 +5404,9 @@ Object.defineProperties(doodle.TextEvent, {
 
     'rotate': { //around external point?
       value: function (deg) {
+        /*DEBUG*/
         check_number_type(deg, this+'.rotate');
+        /*END_DEBUG*/
         this.transform.rotate(deg * to_radians);
       }
     },
@@ -5387,6 +5745,7 @@ Object.defineProperties(doodle.TextEvent, {
     }
   };//end node_static_properties
 
+  
   /*
    * CLASS METHODS
    */
@@ -6130,6 +6489,7 @@ Object.defineProperties(doodle.TextEvent, {
 
 }());//end class closure
 /*globals doodle*/
+
 (function () {
   var sprite_static_properties,
       isSprite,
@@ -6150,9 +6510,8 @@ Object.defineProperties(doodle.TextEvent, {
    * @return {Object}
    */
   doodle.Sprite = function (id) {
-    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined)),
-        draw_commands = [],
-        extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
+    //only pass id if string, an init function will be called later
+    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
 
     /*DEBUG*/
     if (arguments.length > 1) {
@@ -6162,218 +6521,229 @@ Object.defineProperties(doodle.TextEvent, {
 
     Object.defineProperties(sprite, sprite_static_properties);
     //properties that require privacy
-    Object.defineProperties(sprite, {
-      /*
-       * PROPERTIES
-       */
-
-      /* Indicates the width of the sprite, in pixels.
-       * @param {Number}
-       */
-      'width': (function () {
-        var width = 0;
-        return {
-          enumerable: true,
-          configurable: false,
-          get: function () {
-            return width;
-          },
-          set: function (n) {
-            /*DEBUG*/
-            check_number_type(n, this+'.width');
-            /*END_DEBUG*/
-            width = n;
-          }
-        };
-      }()),
-
-      /* Indicates the height of the sprite, in pixels.
-       * @param {Number}
-       */
-      'height': (function () {
-        var height = 0;
-        return {
-          enumerable: true,
-          configurable: false,
-          get: function () {
-            return height;
-          },
-          set: function (n) {
-            /*DEBUG*/
-            check_number_type(n, this+'.height');
-            /*END_DEBUG*/
-            height = n;
-          }
-        };
-      }()),
-
-      /*
-       * @param {Node|Matrix} targetCoordSpace
-       * @return {Rectangle}
-       */
-      'getBounds': {
-        enumerable: true,
-        writable: true,
-        configurable: false,
-        value: function (targetCoordSpace) {
-          /*DEBUG*/
-          if (!inheritsNode(targetCoordSpace)) {
-            throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
-          }
-          /*END_DEBUG*/
-          var bounding_box = doodle_Rectangle(),
-              w = this.width,
-              h = this.height,
-              //transform corners to global
-              tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
-              tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
-              br = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y+h}), //bot right
-              bl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y+h}); //bot left
-          
-          //transform global to target space
-          tl = targetCoordSpace.globalToLocal(tl);
-          tr = targetCoordSpace.globalToLocal(tr);
-          br = targetCoordSpace.globalToLocal(br);
-          bl = targetCoordSpace.globalToLocal(bl);
-
-          //set rect with extremas
-          bounding_box.left = Math.min(tl.x, tr.x, br.x, bl.x);
-          bounding_box.right = Math.max(tl.x, tr.x, br.x, bl.x);
-          bounding_box.top = Math.min(tl.y, tr.y, br.y, bl.y);
-          bounding_box.bottom = Math.max(tl.y, tr.y, br.y, bl.y);
-
-          return bounding_box;
-        }
-      },
+    Object.defineProperties(sprite, (function () {
+      var draw_commands = [],
+          extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
       
-      'hitArea': (function () {
-        var hit_area = null;
-        return {
+      return {
+        /* The graphics object contains drawing operations to be stored in draw_commands.
+         * Objects and Arrays are passed by reference, so these will be modified
+         */
+        'graphics': {
+          enumerable: false,
+          configurable: false,
+          value:  Object.create(doodle.Graphics(sprite, draw_commands, extrema))
+        },
+        
+        /*
+         * PROPERTIES
+         */
+
+        /* Indicates the width of the sprite, in pixels.
+         * @param {Number}
+         */
+        'width': (function () {
+          var width = 0;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () {
+              return width;
+            },
+            set: function (n) {
+              /*DEBUG*/
+              check_number_type(n, this+'.width');
+              /*END_DEBUG*/
+              width = n;
+            }
+          };
+        }()),
+
+        /* Indicates the height of the sprite, in pixels.
+         * @param {Number}
+         */
+        'height': (function () {
+          var height = 0;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () {
+              return height;
+            },
+            set: function (n) {
+              /*DEBUG*/
+              check_number_type(n, this+'.height');
+              /*END_DEBUG*/
+              height = n;
+            }
+          };
+        }()),
+
+        /*
+         * @param {Node|Matrix} targetCoordSpace
+         * @return {Rectangle}
+         */
+        'getBounds': {
+          enumerable: true,
+          writable: true,
+          configurable: false,
+          value: function (targetCoordSpace) {
+            /*DEBUG*/
+            if (!inheritsNode(targetCoordSpace)) {
+              throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
+            }
+            /*END_DEBUG*/
+            var bounding_box = doodle_Rectangle(),
+                w = this.width,
+                h = this.height,
+                min = Math.min,
+                max = Math.max,
+                //transform corners to global
+                tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
+                tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
+                br = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y+h}), //bot right
+                bl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y+h}); //bot left
+            
+            //transform global to target space
+            tl = targetCoordSpace.globalToLocal(tl);
+            tr = targetCoordSpace.globalToLocal(tr);
+            br = targetCoordSpace.globalToLocal(br);
+            bl = targetCoordSpace.globalToLocal(bl);
+
+            //set rect with extremas
+            bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
+            bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
+            bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
+            bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
+
+            return bounding_box;
+          }
+        },
+        
+        'hitArea': (function () {
+          var hit_area = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () {
+              if (hit_area === null) {
+                return this.getBounds(this);
+              } else {
+                return hit_area;
+              }
+            },
+            set: function (rect) {
+              //accepts null/false or rectangle area for now
+              rect = (rect === false) ? null : rect;
+              /*DEBUG*/
+              if (rect !== null) {
+                check_rect_type(rect, this+'.hitArea');
+              }
+              /*END_DEBUG*/
+              hit_area = rect;
+            }
+          };
+        }()),
+
+        'hitTestObject': {
+          enumerable: true,
+          writable: true,
+          configurable: false,
+          value: function (obj) {
+            /*DEBUG*/
+            check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
+            /*END_DEBUG*/
+            return this.getBounds(this).intersects(obj.getBounds(this));
+          }
+        },
+
+        'hitTestPoint': {
+          enumerable: true,
+          writable: true,
+          configurable: false,
+          value: function (pt) {
+            /*DEBUG*/
+            check_point_type(pt, this+'.hitTestPoint', '*point*');
+            /*END_DEBUG*/
+            return this.getBounds(this).containsPoint(this.globalToLocal(pt));
+          }
+        },
+
+        //drawing context to use
+        'context': {
+          get: function () {
+            //will keep checking parent for context till found or null
+            var node = this.parent;
+            while (node) {
+              if (node.context) {
+                /*DEBUG*/
+                check_context_type(node.context, this+'.context (traversal)');
+                /*END_DEBUG*/
+                return node.context;
+              }
+              node = node.parent;
+            }
+            return null;
+          }
+        },
+
+        /*
+         * METHODS
+         */
+
+        /* When called execute all the draw commands in the stack.
+         * This draws from screen 0,0 - transforms are applied when the
+         * entire scene graph is drawn.
+         * @private
+         * @param {Context} ctx 2d canvas context to draw on.
+         */
+        '__draw': {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: function (ctx) {
+            /*DEBUG*/
+            check_context_type(ctx, this+'.__draw', '*context*');
+            /*END_DEBUG*/
+            draw_commands.forEach(function (cmd) {
+              /*DEBUG*/
+              check_function_type(cmd, sprite+'.__draw: [draw_commands]::', '*command*');
+              /*END_DEBUG*/
+              cmd.call(sprite, ctx);
+            });
+          }
+        },
+
+        /* Debug
+         */
+        'debug': {
           enumerable: true,
           configurable: false,
-          get: function () {
-            if (hit_area === null) {
-              return this.getBounds(this);
-            } else {
-              return hit_area;
-            }
-          },
-          set: function (rect) {
-            //accepts null/false or rectangle area for now
-            rect = (rect === false) ? null : rect;
-            /*DEBUG*/
-            if (rect !== null) {
-              check_rect_type(rect, this+'.hitArea');
-            }
-            /*END_DEBUG*/
-            hit_area = rect;
-          }
-        };
-      }()),
-
-      'hitTestObject': {
-        enumerable: true,
-        writable: true,
-        configurable: false,
-        value: function (obj) {
-          /*DEBUG*/
-          check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
-          /*END_DEBUG*/
-          return this.getBounds(this).intersects(obj.getBounds(this));
-        }
-      },
-
-      'hitTestPoint': {
-        enumerable: true,
-        writable: true,
-        configurable: false,
-        value: function (pt) {
-          /*DEBUG*/
-          check_point_type(pt, this+'.hitTestPoint', '*point*');
-          /*END_DEBUG*/
-          return this.getBounds(this).containsPoint(this.globalToLocal(pt));
-        }
-      },
-
-      //drawing context to use
-      'context': {
-        get: function () {
-          //will keep checking parent for context till found or null
-          var node = this.parent,
-              ctx;
-          while (node) {
-            if (node.context) {
-              ctx = node.context;
-              check_context_type(ctx, this+'.context (traversal)');
-              return ctx;
-            }
-            node = node.parent;
-          }
-          return null;
-        }
-      },
-
-      /*
-       * METHODS
-       */
-
-      /* When called execute all the draw commands in the stack.
-       * This draws from screen 0,0 - transforms are applied when the
-       * entire scene graph is drawn.
-       * @private
-       * @param {Context} ctx 2d canvas context to draw on.
-       */
-      '__draw': {
-        enumerable: false,
-        writable: false,
-        configurable: false,
-        value: function (ctx) {
-          /*DEBUG*/
-          check_context_type(ctx, this+'.__draw', '*context*');
-          /*END_DEBUG*/
-          draw_commands.forEach(function (cmd) {
-            /*DEBUG*/
-            check_function_type(cmd, sprite+'.__draw: [draw_commands]::', '*command*');
-            /*END_DEBUG*/
-            cmd.call(sprite, ctx);
-          });
-        }
-      },
-
-      /* Debug
-       */
-      'debug': {
-        enumerable: true,
-        configurable: false,
-        value: Object.create(null, {
-          'boundingBox': (function () {
-            var debug_boundingBox = "rgb(0,0,255)";
-            return {
-              enumerable: true,
-              configurable: false,
-              get: function () {
-                return rgb_str_to_hex(debug_boundingBox);
-              },
-              set: function (color) {
-                /*DEBUG*/
-                if (typeof color === 'number') {
-                  color = hex_to_rgb_str(color);
-                } else if (typeof color === 'string' && color[0] === '#') {
-                  color = hex_to_rgb_str(color);
+          value: Object.create(null, {
+            'boundingBox': (function () {
+              var debug_boundingBox = "rgb(0,0,255)";
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () {
+                  return rgb_str_to_hex(debug_boundingBox);
+                },
+                set: function (color) {
+                  /*DEBUG*/
+                  if (typeof color === 'number') {
+                    color = hex_to_rgb_str(color);
+                  } else if (typeof color === 'string' && color[0] === '#') {
+                    color = hex_to_rgb_str(color);
+                  }
+                  /*END_DEBUG*/
+                  debug_boundingBox = color;
                 }
-                /*END_DEBUG*/
-                debug_boundingBox = color;
-              }
-            };
-          }())
-        })
-      }
-    });//end defineProperties
-
-    /* The graphics object contains drawing operations to be stored in draw_commands.
-     * Objects and Arrays are passed by reference, so these will be modified
-     */
-    sprite.graphics = Object.create(doodle.Graphics(sprite, draw_commands, extrema));
+              };
+            }())
+          })
+        }
+      };
+    }()));//end defineProperties
 
     //passed an initialization function
     if (typeof arguments[0] === 'function') {
