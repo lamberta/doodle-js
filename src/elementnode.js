@@ -2,9 +2,11 @@
 (function () {
   var node_static_properties,
       doodle_utils = doodle.utils,
+      /*DEBUG*/
       check_number_type = doodle_utils.types.check_number_type,
       check_string_type = doodle_utils.types.check_string_type,
       check_boolean_type = doodle_utils.types.check_boolean_type,
+      /*END_DEBUG*/
       rgb_str_to_hex = doodle_utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle_utils.hex_to_rgb_str,
       get_element = doodle_utils.get_element,

@@ -423,7 +423,7 @@
    * @return {Boolean}
    */
   isEvent = doodle.Event.isEvent = function (event) {
-    if (!event || typeof event !== "object") {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
       event = event.toString();
@@ -435,6 +435,16 @@
             event === '[object KeyboardEvent]' ||
             event === '[object TextEvent]' ||
             event === '[object WheelEvent]');
+  };
+
+  doodle.utils.types.check_event_type = function (event, caller, param) {
+    if (isEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_event_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an Event.");
+    }
   };
   
 }());//end class closure

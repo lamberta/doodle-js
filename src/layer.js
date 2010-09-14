@@ -139,12 +139,10 @@
    * @return {Boolean}
    */
   isLayer = doodle.Layer.isLayer = function (obj) {
-    if (!obj || typeof obj !== "object") {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
       return false;
-    } else {
-      obj = obj.toString();
     }
-    return (obj === '[object Layer]');
+    return (obj.toString() === '[object Layer]');
   };
 
   /* Check if object inherits from node.

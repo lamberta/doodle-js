@@ -5,11 +5,13 @@
       inheritsNode,
       check_node_type,
       inDisplayList,
+      /*DEBUG*/
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
       doodle_Point = doodle.geom.Point,
       doodle_Event = doodle.Event,
       to_degrees = 180 / Math.PI,
@@ -579,6 +581,9 @@
    * @return {Boolean}
    */
   isNode = doodle.Node.isNode = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
     return (obj.toString() === '[object Node]');
   };
 

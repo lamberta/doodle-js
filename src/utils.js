@@ -137,32 +137,21 @@ doodle.utils.types = (function () {
         true : throw_type_error('array', caller || 'check_array_type', param);
     },
 
-    check_event_type: function (evt, caller, param) {
-      //list all event types
-      if (evt && (evt.toString() === '[object Event]' ||
-                  evt.toString() === '[object UIEvent]' ||
-                  evt.toString() === '[object MouseEvent]' ||
-                  evt.toString() === '[object KeyboardEvent]' ||
-                  evt.toString() === '[object TextEvent]')) {
-        return true;
-      } else {
-        throw_type_error('event', caller || 'check_event_type', param);
-      }
-    },
-
     check_canvas_type: function (canvas, caller, param) {
-      return (canvas && canvas.toString() === '[object HTMLCanvasElement]') ?
+      return (canvas && typeof canvas.toString === 'function' &&
+              canvas.toString() === '[object HTMLCanvasElement]') ?
         true : throw_type_error('canvas element', caller || 'check_canvas_type', param);
     },
 
     check_context_type: function (ctx, caller, param) {
-      return (ctx && ctx.toString() === '[object CanvasRenderingContext2D]') ?
+      return (ctx && typeof ctx.toString === 'function' &&
+              ctx.toString() === '[object CanvasRenderingContext2D]') ?
         true : throw_type_error('canvas context', caller || 'check_context_type', param);
     },
 
     check_block_element: function (element, caller, param) {
       try {
-        return (doodle.utils.get_style_property(element, 'display') === "block") ?
+        return (doodle.utils.get_style_property(element, 'display') === 'block') ?
           true : throw_type_error('HTML block element', caller || 'check_block_type', param);
       } catch (e) {
         throw_type_error('HTML block element', caller || 'check_block_type', param);

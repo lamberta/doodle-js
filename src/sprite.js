@@ -7,11 +7,13 @@
       check_sprite_type,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
+      /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
       check_context_type = doodle.utils.types.check_context_type,
+      /*END_DEBUG*/
       inheritsNode = doodle.Node.inheritsNode,
       doodle_Rectangle = doodle.geom.Rectangle;
 
@@ -332,7 +334,10 @@
    */
   
   isSprite = doodle.Sprite.isSprite = function (obj) {
-    return obj.toString() === '[object Sprite]';
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
+    return (obj.toString() === '[object Sprite]');
   };
 
   /* Check if object inherits from Sprite.

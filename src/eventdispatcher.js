@@ -402,6 +402,9 @@
    * @return {Boolean}
    */
   isEventDispatcher = doodle.EventDispatcher.isEventDispatcher = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
     return (obj.toString() === '[object EventDispatcher]');
   };
 
