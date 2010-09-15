@@ -7,10 +7,13 @@
 (function () {
   var event_prototype,
       event_static_properties,
-      isEvent,
+      /*DEBUG*/
+      check_event_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -116,17 +119,19 @@
           }
         },
         
-        //test if event propagation should stop after this node
-        //@internal
+        /* test if event propagation should stop after this node
+         * @internal
+         */
         '__cancel': {
           enumerable: false,
           configurable: false,
           get: function () { return __cancel; }
         },
         
-        //test if event propagation should stop immediately,
-        //ignore other handlers on this node
-        //@internal
+        /* test if event propagation should stop immediately,
+         * ignore other handlers on this node
+         * @internal
+         */
         '__cancelNow': {
           enumerable: false,
           configurable: false,
@@ -139,7 +144,9 @@
           get: function () { return evt_currentTarget; }
         },
         
-        //currentTarget is read-only, but damnit I need to set it sometimes
+        /* currentTarget is read-only, but damnit I need to set it sometimes
+         * @internal
+         */
         '__setCurrentTarget': {
           enumerable: false,
           value: function (targetArg) {
@@ -152,7 +159,9 @@
           configurable: false,
           get: function () { return evt_target; }
         },
-        
+
+        /* @internal
+         */
         '__setTarget': {
           enumerable: false,
           value: function (targetArg) {
@@ -165,7 +174,9 @@
           configurable: false,
           get: function () { return evt_eventPhase; }
         },
-        
+
+        /* @internal
+         */
         '__setEventPhase': {
           enumerable: false,
           value: function (phaseArg) {
@@ -248,6 +259,22 @@
               __cancel = true;
               __cancelNow = true;
             }
+          }
+        },
+
+        /* Copy the properties from another Event.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {Event} evt
+         */
+        '__copyEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt) {
+            /*DEBUG*/
+            check_event_type(evt, this+'.__copyEventProperties', '*event*');
+            /*END_DEBUG*/
+            copy_event_properties(evt);
           }
         }
       };
@@ -437,7 +464,8 @@
             event === '[object WheelEvent]');
   };
 
-  doodle.utils.types.check_event_type = function (event, caller, param) {
+  /*DEBUG*/
+  check_event_type = doodle.utils.types.check_event_type = function (event, caller, param) {
     if (isEvent(event)) {
       return true;
     } else {
@@ -446,5 +474,6 @@
       throw new TypeError(caller + param +": Parameter must be an Event.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure

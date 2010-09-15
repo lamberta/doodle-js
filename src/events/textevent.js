@@ -5,10 +5,14 @@
  */
 (function () {
   var textevent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isTextEvent,
+      /*DEBUG*/
+      check_textevent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -114,6 +118,24 @@
             this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
             return this;
           }
+        },
+
+        /* Copy the properties from another TextEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {TextEvent} evt
+         */
+        '__copyTextEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt) {
+            /*DEBUG*/
+            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*');
+            /*END_DEBUG*/
+            copy_textevent_properties(evt);
+            this.__copyUIEventProperties(evt);
+            this.__copyEventProperties(evt);
+          }
         }
       };
     }()));
@@ -153,5 +175,30 @@
       }
     }
   };
+
+  /*
+   * CLASS METHODS
+   */
+
+  isTextEvent = doodle.TextEvent.isTextEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object TextEvent]');
+  };
+
+  /*DEBUG*/
+  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, param) {
+    if (isTextEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_textevent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an TextEvent.");
+    }
+  };
+  /*END_DEBUG*/
   
 }());//end class closure

@@ -5,10 +5,14 @@
  */
 (function () {
   var uievent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isUIEvent,
+      /*DEBUG*/
+      check_uievent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -166,6 +170,23 @@
             this.initEvent(typeArg, canBubbleArg, cancelableArg);
             return this;
           }
+        },
+
+        /* Copy the properties from another UIEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {UIEvent} evt
+         */
+        '__copyUIEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt) {
+            /*DEBUG*/
+            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*');
+            /*END_DEBUG*/
+            copy_uievent_properties(evt);
+            this.__copyEventProperties(evt);
+          }
         }
       };
     }()));//end defineProperties
@@ -206,5 +227,35 @@
       }
     }
   };
+
+  /*
+   * CLASS METHODS
+   */
+
+  isUIEvent = doodle.UIEvent.isUIEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object UIEvent]' ||
+            event === '[object MouseEvent]' ||
+            event === '[object TouchEvent]' ||
+            event === '[object KeyboardEvent]' ||
+            event === '[object TextEvent]' ||
+            event === '[object WheelEvent]');
+  };
+
+  /*DEBUG*/
+  check_uievent_type = doodle.utils.types.check_uievent_type = function (event, caller, param) {
+    if (isUIEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_uievent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an UIEvent.");
+    }
+  };
+  /*END_DEBUG*/
 
 }());//end class closure

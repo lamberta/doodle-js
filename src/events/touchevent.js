@@ -5,10 +5,14 @@
  */
 (function () {
   var touchevent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isTouchEvent,
+      /*DEBUG*/
+      check_touchevent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -280,6 +284,24 @@
               return false;
             }
           }
+        },
+
+        /* Copy the properties from another TouchEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {TouchEvent} evt
+         */
+        '__copyTouchEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt) {
+            /*DEBUG*/
+            check_touchevent_type(evt, this+'.__copyTouchEventProperties', '*event*');
+            /*END_DEBUG*/
+            copy_touchevent_properties(evt);
+            this.__copyUIEventProperties(evt);
+            this.__copyEventProperties(evt);
+          }
         }
       };
     }()));//end defineProperties
@@ -323,5 +345,30 @@
       }
     }
   };
+
+  /*
+   * CLASS METHODS
+   */
+
+  isTouchEvent = doodle.TouchEvent.isTouchEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object TouchEvent]');
+  };
+
+  /*DEBUG*/
+  check_touchevent_type = doodle.utils.types.check_touchevent_type = function (event, caller, param) {
+    if (isTouchEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_touchevent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an TouchEvent.");
+    }
+  };
+  /*END_DEBUG*/
 
 }());//end class closure

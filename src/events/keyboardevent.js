@@ -6,10 +6,14 @@
 
 (function () {
   var keyboardevent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isKeyboardEvent,
+      /*DEBUG*/
+      check_keyboardevent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -81,7 +85,8 @@
           evt_ctrlKey = false,
           evt_altKey = false,
           evt_shiftKey = false,
-          evt_metaKey = false;
+          evt_metaKey = false,
+          evt_altGraphKey = false;
 
       copy_keyboardevent_properties = function (evt) {
         //only looking for KeyboardEvent properties
@@ -92,6 +97,7 @@
         if (evt.altKey !== undefined) { evt_altKey = evt.altKey; }
         if (evt.shiftKey !== undefined) { evt_shiftKey = evt.shiftKey; }
         if (evt.metaKey !== undefined) { evt_metaKey = evt.metaKey; }
+        if (evt.altGraphKey !== undefined) { evt_altKey = evt.altGraphKey; }
       };
       
       return {
@@ -135,6 +141,12 @@
           enumerable: true,
           configurable: false,
           get: function () { return evt_metaKey; }
+        },
+
+        'altGraphKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_altGraphKey; }
         },
 
         'initKeyboardEvent': {
@@ -205,6 +217,24 @@
               return false;
             }
           }
+        },
+
+        /* Copy the properties from another KeyboardEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {KeyboardEvent} evt
+         */
+        '__copyKeyboardEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt) {
+            /*DEBUG*/
+            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*');
+            /*END_DEBUG*/
+            copy_keyboardevent_properties(evt);
+            this.__copyUIEventProperties(evt);
+            this.__copyEventProperties(evt);
+          }
         }
       };
     }()));
@@ -245,5 +275,30 @@
       }
     }
   };
+
+  /*
+   * CLASS METHODS
+   */
+
+  isKeyboardEvent = doodle.KeyboardEvent.isKeyboardEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object KeyboardEvent]');
+  };
+
+  /*DEBUG*/
+  check_keyboardevent_type = doodle.utils.types.check_keyboardevent_type = function (event, caller, param) {
+    if (isKeyboardEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_keyboardevent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an KeyboardEvent.");
+    }
+  };
+  /*END_DEBUG*/
 
 }());//end class closure

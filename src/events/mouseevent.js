@@ -5,10 +5,14 @@
  */
 (function () {
   var mouseevent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isMouseEvent,
+      /*DEBUG*/
+      check_mouseevent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -275,6 +279,24 @@
               return false;
             }
           }
+        },
+
+        /* Copy the properties from another MouseEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {MouseEvent} evt
+         */
+        '__copyMouseEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt) {
+            /*DEBUG*/
+            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*');
+            /*END_DEBUG*/
+            copy_mouseevent_properties(evt);
+            this.__copyUIEventProperties(evt);
+            this.__copyEventProperties(evt);
+          }
         }
       };
     }()));//end defineProperties
@@ -317,5 +339,30 @@
       }
     }
   };
+
+  /*
+   * CLASS METHODS
+   */
+
+  isMouseEvent = doodle.MouseEvent.isMouseEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object MouseEvent]');
+  };
+
+  /*DEBUG*/
+  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, param) {
+    if (isMouseEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_mouseevent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an MouseEvent.");
+    }
+  };
+  /*END_DEBUG*/
 
 }());//end class closure
