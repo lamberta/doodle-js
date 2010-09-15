@@ -29,7 +29,13 @@
       doodle_Event = doodle.Event,
       doodle_MouseEvent = doodle.MouseEvent,
       doodle_TouchEvent = doodle.TouchEvent,
+			//recycle these event objects
+			evt_mouseEvent = doodle.MouseEvent(''),
+			evt_keyboardEvent = doodle.KeyboardEvent(''),
       ENTER_FRAME = doodle.Event.ENTER_FRAME,
+			MOUSE_OVER = doodle.MouseEvent.MOUSE_OVER,
+			MOUSE_OUT = doodle.MouseEvent.MOUSE_OUT,
+			MOUSE_MOVE = doodle.MouseEvent.MOUSE_MOVE,
       enterFrame = doodle_Event(ENTER_FRAME);
   
   /* Super constructor
@@ -67,14 +73,14 @@
         var dom_element = null,
             disp_mouse_evt = dispatch_mouse_event.bind(display);
 
-        function set_mouse_position (evt) {
+        function update_mouse_position (evt) {
           mouseX = evt.offsetX;
           mouseY = evt.offsetY;
         }
         
         function add_handlers () {
           //MouseEvents
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, set_mouse_position, false);
+          dom_element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, update_mouse_position, false);
           //add listeners to dom events that we'll re-dispatch to the scene graph
           dom_element.addEventListener(doodle_MouseEvent.CLICK, disp_mouse_evt, false);
           dom_element.addEventListener(doodle_MouseEvent.DOUBLE_CLICK, disp_mouse_evt, false);
@@ -96,7 +102,7 @@
 
         function remove_handlers () {
           //MouseEvents
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, set_mouse_position, false);
+          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, update_mouse_position, false);
           dom_element.removeEventListener(doodle_MouseEvent.CLICK, disp_mouse_evt, false);
           dom_element.removeEventListener(doodle_MouseEvent.DOUBLE_CLICK, disp_mouse_evt, false);
           dom_element.removeEventListener(doodle_MouseEvent.CONTEXT_MENU, disp_mouse_evt, false);
@@ -540,55 +546,49 @@
 
   /* Event dispatching - not ready for prime-time.
    */
-  dispatch_mouse_event = function (event) {
-    //console.log(event.type + ", " + event);
-    //last_event = event;
-    //position on canvas element
-    //offset is relative to div, however this implementation adds 1 to y?
-    var display = this, //passed with bind
-        MOUSE_OVER = doodle_MouseEvent.MOUSE_OVER,
-        MOUSE_OUT = doodle_MouseEvent.MOUSE_OUT,
-        MOUSE_MOVE = doodle_MouseEvent.MOUSE_MOVE,
-        evt = doodle_MouseEvent(event), //wrap dom event in doodle event
-        evt_type = evt.type;
+  dispatch_mouse_event = function (evt) {
+		//recycle our doodle.MouseEvent object
+		evt_mouseEvent.__copyMouseEventProperties(evt);
 
-    /* Hack --
-     * The idea is that I only want to dispatch a mouse event to the display
-     * if there are no other objects under the point to dispatch to.
-     */
-    var evt_dispatched_p = false;
-    
+		var display = this,
+		//evt_mouseEvent = doodle.MouseEvent(evt),
+				evt_type = evt_mouseEvent.type,
+				/* Hack --
+				 * The idea is that I only want to dispatch a mouse event to the display
+				 * if there are no other objects under the point to dispatch to.
+				 */
+				evt_dispatched_p = false;
+
+		
     dispatcher_queue.forEach(function (obj) {
       if (inheritsSprite(obj)) {
-        var point_in_bounds = obj.getBounds(display).containsPoint({x: evt.offsetX,
-                                                                    y: evt.offsetY});
+				//position on canvas element
+				//offset is relative to div, however this implementation adds 1 to y?
+        var pt_in_bounds = obj.getBounds(display).containsPoint({x: evt_mouseEvent.offsetX,
+                                                                 y: evt_mouseEvent.offsetY});
+				//dom sets target as canvas element
+        evt_mouseEvent.__setTarget(null);
 
-        evt.__setTarget(null); //dom setting target as canvas element
-
-        if (point_in_bounds && obj.hasEventListener(evt_type)) {
-          obj.dispatchEvent(evt);
-
+        if (pt_in_bounds && obj.hasEventListener(evt_type)) {
+          obj.dispatchEvent(evt_mouseEvent);
           evt_dispatched_p = true;
-          
         }
         
         //have to manufacture mouse over/out since dom element won't know
-        if (point_in_bounds && obj.hasEventListener(MOUSE_OVER)) {
+        if (pt_in_bounds && obj.hasEventListener(MOUSE_OVER)) {
           // __mouse_over property is only used here
           if (!obj.__mouse_over) {
             obj.__mouse_over = true;
-            evt.__setType(MOUSE_OVER);
-            obj.dispatchEvent(evt);
-
+            evt_mouseEvent.__setType(MOUSE_OVER);
+            obj.dispatchEvent(evt_mouseEvent);
             evt_dispatched_p = true;
           }
         }
-        if (!point_in_bounds && obj.hasEventListener(MOUSE_OUT)) {
+        if (!pt_in_bounds && obj.hasEventListener(MOUSE_OUT)) {
           if (obj.__mouse_over) {
             obj.__mouse_over = false;
-            evt.__setType(MOUSE_OUT);
-            obj.dispatchEvent(evt);
-
+            evt_mouseEvent.__setType(MOUSE_OUT);
+            obj.dispatchEvent(evt_mouseEvent);
             evt_dispatched_p = true;
           }
         }
@@ -596,8 +596,8 @@
       } else if (obj.hasEventListener(evt_type)) {
         //if in queue and not sprite, could be ElementNode - display, layer
         //don't want these going off if sprite is in front
-        evt.__setTarget(null);
-        obj.dispatchEvent(evt);
+        evt_mouseEvent.__setTarget(null);
+        obj.dispatchEvent(evt_mouseEvent);
         evt_dispatched_p = true;
       }
     });
@@ -606,24 +606,23 @@
     dispatcher_queue.forEach(function (obj) {
       if (obj === display && !evt_dispatched_p && obj.hasEventListener(MOUSE_MOVE)) {
         if (evt_type === MOUSE_MOVE) {
-          evt.__setType(MOUSE_MOVE);
+          evt_mouseEvent.__setType(MOUSE_MOVE);
         }
-        evt.__setTarget(null);
-        obj.dispatchEvent(evt);
-        
+        evt_mouseEvent.__setTarget(null);
+        obj.dispatchEvent(evt_mouseEvent);
         evt_dispatched_p = true;
       }
     });
   };
 
-  dispatch_keyboard_event = function (event) {
-    //console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
-    var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-    evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
+	
+  dispatch_keyboard_event = function (evt) {
+		//recycle our doodle.KeyboardEvent object
+		evt_keyboardEvent.__copyKeyboardEventProperties(evt);
     
     dispatcher_queue.forEach(function (obj) {
-      if (obj.hasEventListener(evt.type)) {
-        obj.handleEvent(evt);
+      if (obj.hasEventListener(evt_keyboardEvent.type)) {
+        obj.handleEvent(evt_keyboardEvent);
       }
     });
   };
