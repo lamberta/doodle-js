@@ -13,7 +13,10 @@
       /*END_DEBUG*/
       CAPTURING_PHASE = doodle.Event.CAPTURING_PHASE,
       AT_TARGET = doodle.Event.AT_TARGET,
-      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE;
+      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE,
+      //lookup help
+      Array_indexOf = Array.prototype.indexOf,
+      Array_splice = Array.prototype.splice;
   
   /* Super constructor
    * @param {Function} initializer
@@ -99,17 +102,17 @@
         check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
         check_boolean_type(useCapture, this+'.addEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
+        var eventListeners = this.eventListeners;
         
-        var self = this;
         //if new event type, create it's array to store callbacks
-        if (!this.eventListeners[type]) {
-          this.eventListeners[type] = {capture:[], bubble:[]};
+        if (!eventListeners.hasOwnProperty(type)) {
+          eventListeners[type] = {capture:[], bubble:[]};
         }
-        this.eventListeners[type][useCapture ? 'capture':'bubble'].push(listener);
+        eventListeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
         
         //object ready for events, add to receivers if not already there
-        if (dispatcher_queue.every(function(obj) { return self !== obj; })) {
-          dispatcher_queue.push(self);
+        if (dispatcher_queue.indexOf(this) === -1) {
+          dispatcher_queue.push(this);
         }
       }
     },
@@ -130,22 +133,27 @@
         check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
         check_boolean_type(useCapture, this+'.removeEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
+        var eventListeners = this.eventListeners,
+            handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
+            listeners,
+            //lookup help
+            disp_queue,
+            indexOf = Array_indexOf,
+            splice = Array_splice;
         
         //make sure event type exists
-        if (this.eventListeners[type]) {
-          //grab our event type array and remove the callback function
-          var evt_type = this.eventListeners[type],
-          listeners = evt_type[useCapture ? 'capture':'bubble'];
-
-          listeners.splice(listeners.indexOf(listener), 1);
-          
-          //if none left, remove event type
-          if (evt_type.capture.length === 0 && evt_type.bubble.length === 0) {
-            delete this.eventListeners[type];
+        if (handler) {
+          listeners = handler[useCapture ? 'capture' : 'bubble'];
+          //remove handler function
+          splice.call(listeners, indexOf.call(listeners, listener), 1);
+          //if none left, remove handler type
+          if (handler.capture.length === 0 && handler.bubble.length === 0) {
+            delete eventListeners[type];
           }
           //if no more listeners, remove from object queue
-          if (Object.keys(this.eventListeners).length === 0) {
-            dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
+          if (Object.keys(eventListeners).length === 0) {
+            disp_queue = dispatcher_queue;
+            splice.call(disp_queue, indexOf.call(disp_queue, this), 1);
           }
         }
       }
@@ -221,6 +229,9 @@
         //events are dispatched from the child,
         //capturing goes down to the child, bubbling then goes back up
         var target,
+            evt_type = event.type,
+            hasOwnProperty = Object.prototype.hasOwnProperty,
+            evt_handler_p = hasOwnProperty.call(this.eventListeners, evt_type),
             node,
             node_path = [],
             len, //count of nodes up to root
@@ -244,11 +255,20 @@
         target = event.target;
         //path starts at node parent
         node = target.parent || null;
-
+        
         //create path from node's parent to top of tree
         while (node) {
+          //only want to dispatch if there's a reason to
+          if (!evt_handler_p) {
+            evt_handler_p = hasOwnProperty.call(node.eventListeners, evt_type);
+          }
           node_path.push(node);
           node = node.parent;
+        }
+
+        //if no handlers for event type, no need to dispatch
+        if (!evt_handler_p) {
+          return true;
         }
 
         //enter capture phase: down the tree
@@ -292,7 +312,7 @@
     /* Dispatches an event to every object with an active listener.
      * Ignores propagation path, objects come from 
      * @param {Event} event
-     * @return {Boolean} true if the event was successfully dispatched.
+     * @return {Boolean} True if the event was successfully dispatched.
      */
     'broadcastEvent': {
       enumerable: true,
@@ -301,7 +321,11 @@
       value: function (event) {
         var receivers, //event listeners of correct type
             len, //count of event listeners
-            i = 0; //counter
+            i = 0, //counter
+            evt_type = event.type,
+            hasOwnProperty = Object.prototype.hasOwnProperty,
+            disp_queue = dispatcher_queue,
+            dq_count = disp_queue.length;
         
         /*DEBUG*/
         check_event_type(event, this+'.broadcastEvent', '*event*');
@@ -316,15 +340,12 @@
         if (!event.target) {
           event.__setTarget(this);
         }
-        
-        //pare down to eligible receivers with event type listener
-        receivers = dispatcher_queue.filter(function (obj) {
-          return obj.hasEventListener(event.type);
-        });
-        
-        //and call each
-        for (len = receivers.length; i < len; i=i+1) {
-          receivers[i].handleEvent(event);
+
+        while (dq_count--) {
+          //hasEventListener
+          if (hasOwnProperty.call(disp_queue[dq_count].eventListeners, evt_type)) {
+            disp_queue[dq_count].handleEvent(event);
+          }
           //event cancelled in listener?
           if (event.__cancel) {
             break;
@@ -348,7 +369,7 @@
         /*DEBUG*/
         check_string_type(type, this+'.hasEventListener', '*type*');
         /*END_DEBUG*/
-        return this.eventListeners !== null && this.eventListeners.hasOwnProperty(type);
+        return this.eventListeners.hasOwnProperty(type);
       }
     },
 
@@ -362,24 +383,23 @@
      * @return {Boolean}
      */
     'willTrigger': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type) {
         /*DEBUG*/
         check_string_type(type, this+'.willTrigger', '*type*');
         /*END_DEBUG*/
-        
-        if (this.hasEventListener(type)) {
+        if (this.eventListeners.hasOwnProperty(type)) {
+          //hasEventListener
           return true;
-        } else if (!this.children || this.children.length === 0) {
-          //requires scene graph be in place to proceed down the tree
-          return false;
-        } else {
-          for (var i in this.children) {
-            if (this.children[i].willTrigger(type)) {
-              return true;
-            }
+        }
+        var children = this.children,
+            child_count = children ? children.length : 0;
+
+        while (child_count--) {
+          if (children[child_count].willTrigger(type)) {
+            return true;
           }
         }
         return false;
