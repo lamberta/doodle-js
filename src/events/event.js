@@ -56,15 +56,28 @@
           __cancel = false,
           __cancelNow = false;
 
-      copy_event_properties = function  (evt) {
-        evt_type = evt.type;
+      copy_event_properties = function  (evt, resetTarget, resetType) {
+        resetTarget = (resetTarget === undefined) ? false : resetTarget;
+        if (resetType) {
+          /*DEBUG*/
+          check_string_type(resetType, event+'::copy_event_properties', 'evt, resetTarget, *resetType*');
+          /*END_DEBUG*/
+          evt_type = resetType;
+        } else {
+          evt_type = evt.type;
+        }
         evt_bubbles = evt.bubbles;
         evt_cancelable = evt.cancelable;
         evt_cancelBubble = evt.cancelBubble;
         evt_defaultPrevented = evt.defaultPrevented;
         evt_eventPhase = evt.eventPhase;
-        evt_currentTarget = evt.currentTarget;
-        evt_target = evt.target;
+        if (resetTarget === false) {
+          evt_currentTarget = evt.currentTarget;
+          evt_target = evt.target;
+        } else {
+          evt_currentTarget = resetTarget;
+          evt_target = resetTarget;
+        }
         evt_srcElement = evt.srcElement;
         evt_timeStamp = evt.timeStamp;
         evt_returnValue = evt.returnValue;
@@ -270,11 +283,12 @@
         '__copyEventProperties': {
           enumerable: false,
           configurable: false,
-          value: function (evt) {
+          value: function (evt, resetTarget, resetType) {
             /*DEBUG*/
-            check_event_type(evt, this+'.__copyEventProperties', '*event*');
+            check_event_type(evt, this+'.__copyEventProperties', '*event*, resetTarget, resetType');
             /*END_DEBUG*/
-            copy_event_properties(evt);
+            copy_event_properties(evt, resetTarget, resetType);
+            return this;
           }
         }
       };

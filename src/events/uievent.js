@@ -180,12 +180,12 @@
         '__copyUIEventProperties': {
           enumerable: false,
           configurable: false,
-          value: function (evt) {
+          value: function (evt, resetTarget, resetType) {
             /*DEBUG*/
-            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*');
+            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*, resetTarget, resetType');
             /*END_DEBUG*/
             copy_uievent_properties(evt);
-            this.__copyEventProperties(evt);
+            return this.__copyEventProperties(evt, resetTarget, resetType);
           }
         }
       };

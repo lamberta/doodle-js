@@ -128,13 +128,12 @@
         '__copyTextEventProperties': {
           enumerable: false,
           configurable: false,
-          value: function (evt) {
+          value: function (evt, resetTarget, resetType) {
             /*DEBUG*/
-            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*');
+            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*, resetTarget, resetType');
             /*END_DEBUG*/
             copy_textevent_properties(evt);
-            this.__copyUIEventProperties(evt);
-            this.__copyEventProperties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
           }
         }
       };

@@ -227,13 +227,12 @@
         '__copyKeyboardEventProperties': {
           enumerable: false,
           configurable: false,
-          value: function (evt) {
+          value: function (evt, resetTarget, resetType) {
             /*DEBUG*/
-            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*');
+            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*, resetTarget, resetType');
             /*END_DEBUG*/
             copy_keyboardevent_properties(evt);
-            this.__copyUIEventProperties(evt);
-            this.__copyEventProperties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
           }
         }
       };

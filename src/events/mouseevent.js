@@ -289,13 +289,12 @@
         '__copyMouseEventProperties': {
           enumerable: false,
           configurable: false,
-          value: function (evt) {
+          value: function (evt, resetTarget, resetType) {
             /*DEBUG*/
-            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*');
+            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*, resetTarget, resetType');
             /*END_DEBUG*/
             copy_mouseevent_properties(evt);
-            this.__copyUIEventProperties(evt);
-            this.__copyEventProperties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
           }
         }
       };

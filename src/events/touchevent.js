@@ -294,13 +294,12 @@
         '__copyTouchEventProperties': {
           enumerable: false,
           configurable: false,
-          value: function (evt) {
+          value: function (evt, resetTarget, resetType) {
             /*DEBUG*/
-            check_touchevent_type(evt, this+'.__copyTouchEventProperties', '*event*');
+            check_touchevent_type(evt, this+'.__copyTouchEventProperties', '*event*, resetTarget, resetType');
             /*END_DEBUG*/
             copy_touchevent_properties(evt);
-            this.__copyUIEventProperties(evt);
-            this.__copyEventProperties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
           }
         }
       };
