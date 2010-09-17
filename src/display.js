@@ -1,11 +1,10 @@
+/*jslint nomen: false, plusplus: false*/
 /*globals doodle, document, setInterval, clearInterval, Stats*/
 
 (function () {
   var display_static_properties,
       display_count = 0,
       frame_count = 0,
-      mouseX = 0,
-      mouseY = 0,
       dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
       create_frame,
       clear_scene_graph,
@@ -13,6 +12,8 @@
       draw_bounding_box,
       redraw_scene_graph,
       dispatch_mouse_event,
+      dispatch_mousemove_event,
+      dispatch_mouse_boundary_event,
       dispatch_keyboard_event,
       /*DEBUG*/
       check_boolean_type = doodle.utils.types.check_boolean_type,
@@ -22,21 +23,19 @@
       check_block_element = doodle.utils.types.check_block_element,
       /*END_DEBUG*/
       isLayer = doodle.Layer.isLayer,
-      inheritsSprite = doodle.Sprite.inheritsSprite,
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
       doodle_Event = doodle.Event,
       doodle_MouseEvent = doodle.MouseEvent,
-      doodle_TouchEvent = doodle.TouchEvent,
-			//recycle these event objects
-			evt_mouseEvent = doodle.MouseEvent(''),
-			evt_keyboardEvent = doodle.KeyboardEvent(''),
-      ENTER_FRAME = doodle.Event.ENTER_FRAME,
-			MOUSE_OVER = doodle.MouseEvent.MOUSE_OVER,
-			MOUSE_OUT = doodle.MouseEvent.MOUSE_OUT,
-			MOUSE_MOVE = doodle.MouseEvent.MOUSE_MOVE,
-      enterFrame = doodle_Event(ENTER_FRAME);
+      //doodle_TouchEvent = doodle.TouchEvent,
+      //recycle these event objects
+      evt_mouseEvent = doodle.MouseEvent(''),
+      //evt_touchEvent = doodle.TouchEvent(''),
+      evt_keyboardEvent = doodle.KeyboardEvent(''),
+      enterFrame = doodle_Event(doodle.Event.ENTER_FRAME),
+      ENTER_FRAME = doodle.Event.ENTER_FRAME;
+      
   
   /* Super constructor
    * @param {String|Function} id|initializer
@@ -68,176 +67,205 @@
 
     Object.defineProperties(display, display_static_properties);
     //properties that require privacy
-    Object.defineProperties(display, {
-      'element': (function () {
-        var dom_element = null,
-            disp_mouse_evt = dispatch_mouse_event.bind(display);
+    Object.defineProperties(display, (function () {
+      var mouseX = 0,
+          mouseY = 0,
+          dom_element = null,
+          //lookup help
+          mouseEvent = evt_mouseEvent,
+          disp = display,
+          disp_mouse_evt = dispatch_mouse_event,
+          disp_mousemove_evt = dispatch_mousemove_event,
+          disp_mouse_boundary_evt = dispatch_mouse_boundary_event,
+          hasOwnProperty = Object.prototype.hasOwnProperty;
 
-        function update_mouse_position (evt) {
-          mouseX = evt.offsetX;
-          mouseY = evt.offsetY;
-        }
-        
-        function add_handlers () {
-          //MouseEvents
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, update_mouse_position, false);
-          //add listeners to dom events that we'll re-dispatch to the scene graph
-          dom_element.addEventListener(doodle_MouseEvent.CLICK, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.DOUBLE_CLICK, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.CONTEXT_MENU, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_DOWN, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_UP, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_WHEEL, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_OUT, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_OVER, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_ENTER, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_MouseEvent.MOUSE_LEAVE, disp_mouse_evt, false);
-          //TouchEvents
-          dom_element.addEventListener(doodle_TouchEvent.TOUCH_START, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_TouchEvent.TOUCH_MOVE, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_TouchEvent.TOUCH_END, disp_mouse_evt, false);
-          dom_element.addEventListener(doodle_TouchEvent.TOUCH_CANCEL, disp_mouse_evt, false);
-        }
+      function on_mouse_event (evt) {
+        var d = disp,
+            layers = d.children;    
+        //dom event, recycle event, display, layers, layer_count, mouseX, mouseY, fn
+        disp_mouse_evt(evt, mouseEvent, evt.type, d, layers, layers.length,
+                       evt.offsetX, evt.offsetY, hasOwnProperty);
+      }
 
-        function remove_handlers () {
-          //MouseEvents
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, update_mouse_position, false);
-          dom_element.removeEventListener(doodle_MouseEvent.CLICK, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.DOUBLE_CLICK, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.CONTEXT_MENU, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_DOWN, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_UP, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_WHEEL, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_OUT, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_OVER, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_ENTER, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_MouseEvent.MOUSE_LEAVE, disp_mouse_evt, false);
-          //TouchEvents
-          dom_element.removeEventListener(doodle_TouchEvent.TOUCH_START, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_TouchEvent.TOUCH_END, disp_mouse_evt, false);
-          dom_element.removeEventListener(doodle_TouchEvent.TOUCH_CANCEL, disp_mouse_evt, false);
-        }
-        
-        return {
+      function on_mouse_move (evt) {
+        var d = disp,
+            layers = d.children,
+            x, y;
+        mouseX = x = evt.offsetX;
+        mouseY = y = evt.offsetY;
+        disp_mousemove_evt(evt, mouseEvent, d, layers, layers.length, x, y, hasOwnProperty);
+      }
+
+      /* Mouse leaves dom element.
+       * Test display and layers for handlers.
+       */
+      function on_mouse_element_boundary (evt) {
+        var d = disp,
+            layers = d.children;
+        disp_mouse_boundary_evt(evt, mouseEvent, evt.type, d, layers, layers.length, hasOwnProperty);
+      }
+
+      
+      function add_handlers (element) {
+        //MouseEvents
+        element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+        element.addEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_element_boundary, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_OVER, on_mouse_element_boundary, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_ENTER, on_mouse_element_boundary, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_LEAVE, on_mouse_element_boundary, false);
+        /*//TouchEvents
+        element.addEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
+        element.addEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
+        element.addEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
+        element.addEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
+        */
+      }
+
+      function remove_handlers (element) {
+        //MouseEvents
+        element.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+        element.removeEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_element_boundary, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_OVER, on_mouse_element_boundary, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_ENTER, on_mouse_element_boundary, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_LEAVE, on_mouse_element_boundary, false);
+        /*//TouchEvents
+        element.removeEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
+        element.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
+        element.removeEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
+        element.removeEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
+        */
+      }
+      
+      return {
+        'element': {
           get: function () { return dom_element; },
           set: function (displayArg) {
             if (displayArg === null) {
               if (dom_element !== null) {
-                remove_handlers();
+                remove_handlers(dom_element);
               }
               dom_element = null;
             } else {
-              dom_element = get_element(displayArg);
               /*DEBUG*/
-              check_block_element(dom_element, this+'.element');
+              check_block_element(displayArg, this+'.element');
               /*END_DEBUG*/
-
+              dom_element = get_element(displayArg);
+              
               //need to stack the canvas elements on top of each other
-              set_element_property(dom_element, 'position', 'relative');
-
+              set_element_property(displayArg, 'position', 'relative');
+              
               //only check user styles, computed styles include window size
-              var w = get_element_property(dom_element, 'width', 'int', false),
-                  h = get_element_property(dom_element, 'height', 'int', false);
+              var w = get_element_property(displayArg, 'width', 'int', false),
+                  h = get_element_property(displayArg, 'height', 'int', false);
               if (w !== null) { this.width = w; }
               if (h !== null) { this.height = h; }
 
-              add_handlers();
+              add_handlers(displayArg);
             }
           }
-        };
-      }()),
-
-      /* Determines the interval to dispatch the event type Event.ENTER_FRAME.
-       * This event is dispatched simultaneously to all display objects listenting
-       * for this event. It does not go through a "capture phase" and is dispatched
-       * directly to the target, whether the target is on the display list or not.
-       */
-      'frameRate': (function () {
-        var frame_rate = false, //fps
-            framerate_interval_id;
-        return {
-          get: function () { return frame_rate; },
-          set: function (fps) {
-            //turn off interval
-            if (fps === 0 || fps === false) {
-              frame_rate = false;
-              clearInterval(framerate_interval_id);
-            } else if (typeof fps === 'number' && isFinite(1000/fps)) {
-              frame_rate = fps;
-              clearInterval(framerate_interval_id);
-              framerate_interval_id = setInterval(create_frame.bind(this), 1000/frame_rate);
-            } else {
-              throw new TypeError('[object Display].frameRate: Parameter must be a valid number or false.');
+        },
+        
+        /* Determines the interval to dispatch the event type Event.ENTER_FRAME.
+         * This event is dispatched simultaneously to all display objects listenting
+         * for this event. It does not go through a "capture phase" and is dispatched
+         * directly to the target, whether the target is on the display list or not.
+         */
+        'frameRate': (function () {
+          var frame_rate = false, //fps
+          framerate_interval_id;
+          return {
+            get: function () { return frame_rate; },
+            set: function (fps) {
+              //turn off interval
+              if (fps === 0 || fps === false) {
+                frame_rate = false;
+                clearInterval(framerate_interval_id);
+              } else if (typeof fps === 'number' && isFinite(1000/fps)) {
+                frame_rate = fps;
+                clearInterval(framerate_interval_id);
+                framerate_interval_id = setInterval(create_frame.bind(this), 1000/frame_rate);
+              } else {
+                throw new TypeError('[object Display].frameRate: Parameter must be a valid number or false.');
+              }
             }
+          };
+        }()),
+
+        'mouseX': {
+          enumerable: false,
+          configurable: false,
+          get: function () {
+            return mouseX;
           }
-        };
-      }()),
+        },
 
-      'mouseX': {
-        enumerable: false,
-        configurable: false,
-        get: function () {
-          return mouseX;
-        }
-      },
+        'mouseY': {
+          enumerable: false,
+          configurable: false,
+          get: function () {
+            return mouseY;
+          }
+        },
 
-      'mouseY': {
-        enumerable: false,
-        configurable: false,
-        get: function () {
-          return mouseY;
-        }
-      },
-
-      /* For debugging
-       */
-      'debug': {
-        enumerable: true,
-        configurable: false,
-        value: Object.create(null, {
-          'stats': (function () {
-            var debug_stats = false; //stats object
-            return {
-              enumerable: true,
-              configurable: false,
-              get: function () { return debug_stats; },
-              set: function (useStats) {
-                /*DEBUG*/
-                check_boolean_type(useStats, display+'.debug.stats');
-                /*END_DEBUG*/
-                if (useStats && !debug_stats) {
-                  //fps counter from http://github.com/mrdoob/stats.js
-                  debug_stats = new Stats();
-                  display.element.appendChild(debug_stats.domElement);
-                } else if (!useStats && debug_stats) {
-                  display.element.removeChild(debug_stats.domElement);
-                  debug_stats = false;
+        /* For debugging
+         */
+        'debug': {
+          enumerable: true,
+          configurable: false,
+          value: Object.create(null, {
+            'stats': (function () {
+              var debug_stats = false; //stats object
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () { return debug_stats; },
+                set: function (useStats) {
+                  /*DEBUG*/
+                  check_boolean_type(useStats, display+'.debug.stats');
+                  /*END_DEBUG*/
+                  if (useStats && !debug_stats) {
+                    //fps counter from http://github.com/mrdoob/stats.js
+                    debug_stats = new Stats();
+                    display.element.appendChild(debug_stats.domElement);
+                  } else if (!useStats && debug_stats) {
+                    display.element.removeChild(debug_stats.domElement);
+                    debug_stats = false;
+                  }
                 }
-              }
-            };
-          }()),
-          'boundingBox': (function () {
-            var debug_bounding_box = false;
-            return {
-              enumerable: true,
-              configurable: false,
-              get: function () {
-                return debug_bounding_box;
-              },
-              set: function (showBoundingBox) {
-                /*DEBUG*/
-                check_boolean_type(showBoundingBox, display+'.debug.boundingBox');
-                /*END_DEBUG*/
-                debug_bounding_box = showBoundingBox;
-              }
-            };
-          }())
-        })
-      }//end debug
-    });//end defineProperties
+              };
+            }()),
+            'boundingBox': (function () {
+              var debug_bounding_box = false;
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () {
+                  return debug_bounding_box;
+                },
+                set: function (showBoundingBox) {
+                  /*DEBUG*/
+                  check_boolean_type(showBoundingBox, display+'.debug.boundingBox');
+                  /*END_DEBUG*/
+                  debug_bounding_box = showBoundingBox;
+                }
+              };
+            }())
+          })
+        }//end debug
+      };//end return object
+    }()));//end defineProperties
     
 
     //passed an initialization function
@@ -276,9 +304,9 @@
 
     /* Add keyboard listeners to document.
      */
-    document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event, false);
-    document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event, false);
-    document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event, false);
+    document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event.bind(display), false);
+    document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event.bind(display), false);
+    document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event.bind(display), false);
 
     
     //draw_scene_graph(display);
@@ -543,88 +571,147 @@
     clear_scene_graph(this);
     draw_scene_graph.call(this, this);
   };
+  
 
-  /* Event dispatching - not ready for prime-time.
+  /*
+   * EVENT DISPATCHING
    */
-  dispatch_mouse_event = function (evt) {
-		//recycle our doodle.MouseEvent object
-		evt_mouseEvent.__copyMouseEventProperties(evt);
 
-		var display = this,
-		//evt_mouseEvent = doodle.MouseEvent(evt),
-				evt_type = evt_mouseEvent.type,
-				/* Hack --
-				 * The idea is that I only want to dispatch a mouse event to the display
-				 * if there are no other objects under the point to dispatch to.
-				 */
-				evt_dispatched_p = false;
+  /*
+   * CLICK, DOUBLE_CLICK, CONTEXT_MENU, MOUSE_DOWN, MOUSE_UP, MOUSE_WHEEL, MOUSE_MOVE
+   */
+  dispatch_mouse_event = function (evt/*dom*/, mouseEvent/*doodle*/, evt_type,
+                                   display, layers, layer_count, x, y, hasOwnProperty/*fn*/) {
+    var layer,
+        layer_handler = false,
+        sprites,
+        sprite_count,
+        sprite;
 
-		
-    dispatcher_queue.forEach(function (obj) {
-      if (inheritsSprite(obj)) {
-				//position on canvas element
-				//offset is relative to div, however this implementation adds 1 to y?
-        var pt_in_bounds = obj.getBounds(display).containsPoint({x: evt_mouseEvent.offsetX,
-                                                                 y: evt_mouseEvent.offsetY});
-				//dom sets target as canvas element
-        evt_mouseEvent.__setTarget(null);
+    //reverse loop
+    while (layer_count--) {
+      layer = layers[layer_count];
+      //only testing top layer sprites
+      sprites = layer.children;
+      sprite_count = sprites.length;
 
-        if (pt_in_bounds && obj.hasEventListener(evt_type)) {
-          obj.dispatchEvent(evt_mouseEvent);
-          evt_dispatched_p = true;
+      //check sprites
+      while (sprite_count--) {
+        sprite = sprites[sprite_count];
+        if (sprite.getBounds && sprite.getBounds(display).containsPoint({x: x, y: y})) {
+          //hit a sprite, dispatch event to it and it's chain
+          sprite.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+          return true;
         }
-        
-        //have to manufacture mouse over/out since dom element won't know
-        if (pt_in_bounds && obj.hasEventListener(MOUSE_OVER)) {
-          // __mouse_over property is only used here
-          if (!obj.__mouse_over) {
-            obj.__mouse_over = true;
-            evt_mouseEvent.__setType(MOUSE_OVER);
-            obj.dispatchEvent(evt_mouseEvent);
-            evt_dispatched_p = true;
-          }
-        }
-        if (!pt_in_bounds && obj.hasEventListener(MOUSE_OUT)) {
-          if (obj.__mouse_over) {
-            obj.__mouse_over = false;
-            evt_mouseEvent.__setType(MOUSE_OUT);
-            obj.dispatchEvent(evt_mouseEvent);
-            evt_dispatched_p = true;
-          }
-        }
-        
-      } else if (obj.hasEventListener(evt_type)) {
-        //if in queue and not sprite, could be ElementNode - display, layer
-        //don't want these going off if sprite is in front
-        evt_mouseEvent.__setTarget(null);
-        obj.dispatchEvent(evt_mouseEvent);
-        evt_dispatched_p = true;
       }
-    });
-
-    //dispatch to display if no other object under cursor has
-    dispatcher_queue.forEach(function (obj) {
-      if (obj === display && !evt_dispatched_p && obj.hasEventListener(MOUSE_MOVE)) {
-        if (evt_type === MOUSE_MOVE) {
-          evt_mouseEvent.__setType(MOUSE_MOVE);
-        }
-        evt_mouseEvent.__setTarget(null);
-        obj.dispatchEvent(evt_mouseEvent);
-        evt_dispatched_p = true;
+      //check layers while we're down here, hasEventListener
+      if (!layer_handler && hasOwnProperty.call(layer.eventListeners, evt_type)) {
+        layer_handler = layer;
       }
-    });
+    }
+    //layer dispatch
+    if (layer_handler) {
+      layer_handler.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    //finally try the display
+    if (hasOwnProperty.call(display.eventListeners, evt_type)) {
+      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    //if it gets here, there are no handlers for the event type
+    return false;
   };
 
-	
-  dispatch_keyboard_event = function (evt) {
-		//recycle our doodle.KeyboardEvent object
-		evt_keyboardEvent.__copyKeyboardEventProperties(evt);
+  /* Since a mousemove event can trigger a mouseover or mouseout, we
+   * need to check it more thoroughly.
+   */
+  dispatch_mousemove_event = function (evt/*dom*/, mouseEvent/*doodle*/,
+                                       display, layers, layer_count, x, y, hasOwnProperty/*fn*/) {
+    var layer,
+        layer_handler = false,
+        sprites,
+        sprite_count,
+        sprite;
     
-    dispatcher_queue.forEach(function (obj) {
-      if (obj.hasEventListener(evt_keyboardEvent.type)) {
-        obj.handleEvent(evt_keyboardEvent);
+    while (layer_count--) {
+      layer = layers[layer_count];
+      sprites = layer.children;
+      sprite_count = sprites.length;
+
+      //check sprites
+      while (sprite_count--) {
+        sprite = sprites[sprite_count];
+        if (sprite.getBounds && sprite.getBounds(display).containsPoint({x: x, y: y})) {
+          //point in bounds
+          if (!sprite.__pointInBounds) {
+            sprite.__pointInBounds = true;
+            //dispatch events to sprite and up parent chain
+            sprite.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+            sprite.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+            sprite.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+            return true;
+          }
+        } else {
+          //point not on sprite
+          if (sprite.__pointInBounds) {
+            sprite.__pointInBounds = false;
+            //dispatch events to sprite and up parent chain
+            sprite.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+            sprite.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+            return true;
+          }
+        }
       }
-    });
+      //check layers
+      if (!layer_handler && hasOwnProperty.call(layer.eventListeners, 'mousemove')) {
+        layer_handler = layer;
+      }
+    }
+    //layer dispatch
+    if (layer_handler) {
+      layer_handler.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    //finally try the display
+    if (hasOwnProperty.call(display.eventListeners, 'mousemove')) {
+      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    //if it gets here, there are no handlers for mousemove
+    return false;
+  };
+  
+
+  /* When the mouse leaves the dom element,
+   * check display and layers for event handlers
+   */
+  dispatch_mouse_boundary_event = function (evt/*dom*/, mouseEvent/*doodle*/, evt_type,
+                                            display, layers, layer_count, hasOwnProperty/*fn*/) {
+    var layer;
+    
+    //reverse loop
+    while (layer_count--) {
+      layer = layers[layer_count];
+      //check layers
+      if (hasOwnProperty.call(layer.eventListeners, evt_type)) {
+        layer.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+    //finally try the display
+    if (hasOwnProperty.call(display.eventListeners, evt_type)) {
+      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    //nuthin doin'
+    return false;
+  };
+
+  /*
+   */
+  dispatch_keyboard_event = function (evt) {
+    this.broadcastEvent(evt_keyboardEvent.__copyKeyboardEventProperties(evt, null));
   };
 
 
