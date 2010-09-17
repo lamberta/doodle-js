@@ -102,10 +102,12 @@
           value: function (targetCoordSpace) {
             /*DEBUG*/
             if (!inheritsNode(targetCoordSpace)) {
-              throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
+              throw new TypeError(this+'.getBounds(*targetCoordinateSpace*): Parameter must inherit from doodle.Node.');
             }
             /*END_DEBUG*/
-            var bounding_box = doodle_Rectangle(),
+            var children = this.children,
+                len = children.length,
+                bounding_box = doodle_Rectangle(),
                 w = this.width,
                 h = this.height,
                 min = Math.min,
@@ -128,6 +130,11 @@
             bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
             bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
 
+            //add child bounds to this
+            while (len--) {
+              bounding_box = bounding_box.union(children[len].getBounds(targetCoordSpace));
+            }
+            
             return bounding_box;
           }
         },
