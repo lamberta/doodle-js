@@ -92,7 +92,7 @@
         }()),
 
         /*
-         * @param {Node|Matrix} targetCoordSpace
+         * @param {Node} targetCoordSpace
          * @return {Rectangle}
          */
         'getBounds': {
@@ -108,6 +108,7 @@
             var children = this.children,
                 len = children.length,
                 bounding_box = doodle_Rectangle(),
+                child_bounds,
                 w = this.width,
                 h = this.height,
                 min = Math.min,
@@ -132,7 +133,10 @@
 
             //add child bounds to this
             while (len--) {
-              bounding_box = bounding_box.union(children[len].getBounds(targetCoordSpace));
+              child_bounds = children[len].getBounds(targetCoordSpace);
+              if (child_bounds !== null) {
+                bounding_box = bounding_box.union(child_bounds);
+              }
             }
             
             return bounding_box;
