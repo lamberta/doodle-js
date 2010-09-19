@@ -12,6 +12,9 @@
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
+      evt_addedEvent = doodle.Event(doodle.Event.ADDED, true),
+      evt_removedEvent = doodle.Event(doodle.Event.REMOVED, true),
+      doodle_Rectangle = doodle.geom.Rectangle,
       doodle_Point = doodle.geom.Point,
       doodle_Event = doodle.Event,
       to_degrees = 180 / Math.PI,
@@ -58,9 +61,8 @@
           set: function (node) {
             /*DEBUG*/
             if (node !== null) {
-              if (!inheritsNode(node)) {
-                throw new TypeError(this+".root: Parameter must be a node.");
-              }
+              //because it's defined later, global declared in prologue
+              check_display_type(node, this+'.root');
             }
             /*END_DEBUG*/
             root = node;
@@ -77,9 +79,7 @@
           set: function (node) {
             /*DEBUG*/
             if (node !== null) {
-              if (!inheritsNode(node)) {
-                throw new TypeError(this+".parent: Parameter must be a node.");
-              }
+              check_node_type(node, this+'.parent');
             }
             /*END_DEBUG*/
             parent = node;
@@ -129,20 +129,53 @@
       }()),
 
       'alpha': (function () {
-        var alpha = 1;
+        var alpha = 1; //alpha is between 0 and 1
         return {
           enumerable: true,
           configurable: true,
           get: function () { return alpha; },
-          set: function (alphaValue) {
+          set: function (alphaArg) {
             /*DEBUG*/
-            check_number_type(alphaValue, node+'.alpha');
+            check_number_type(alphaArg, node+'.alpha');
             /*END_DEBUG*/
-            //alpha is between 0 and 1
-            alpha = (alphaValue > 1) ? 1 : ((alphaValue < 0) ? 0 : alphaValue);
+            alpha = (alphaArg > 1) ? 1 : ((alphaArg < 0) ? 0 : alphaArg);
           }
         };
-      }())
+      }()),
+
+      /* The bounding box of a Node is a union of all it's child Sprite's bounds.
+       * @param {Node} targetCoordSpace
+       * @return {Rectangle|Null}
+       */
+      'getBounds': {
+        enumerable: true,
+        writable: true,
+        configurable: false,
+        value: function (targetCoordSpace) {
+          /*DEBUG*/
+          check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
+          /*END_DEBUG*/
+          var bounding_box = null,
+              child_bounds,
+              children = this.children,
+              len = children.length;
+          
+          while (len--) {
+            child_bounds = children[len].getBounds(targetCoordSpace);
+
+            if (child_bounds === null) {
+              continue;
+            }
+            if (bounding_box === null) {
+              bounding_box = child_bounds;
+            } else {
+              bounding_box = bounding_box.union(child_bounds);
+            }
+          }
+          
+          return bounding_box;
+        }
+      }
     });//end defineProperties
 
     //passed an initialization function
@@ -160,21 +193,6 @@
     return node;
   };
 
-  
-  /* Dispatches and event type from all of a nodes children and grandchildren.
-   * @param {Node} node
-   * @param {String} event_type
-   * @param {Function} child_action
-   */
-  function children_dispatch_event (node, event_type, child_action) {
-    node.children.forEach(function (child) {
-      if (typeof child_action === 'function') {
-        child_action(child);
-      }
-      child.dispatchEvent(doodle_Event(event_type, true));
-      children_dispatch_event(child, event_type, child_action);
-    });
-  }
 
   node_static_properties = {
     
@@ -184,11 +202,11 @@
       get: function () {
         return this.transform.tx;
       },
-      set: function (d) {
+      set: function (n) {
         /*DEBUG*/
-        check_number_type(d, this+'.x');
+        check_number_type(n, this+'.x');
         /*END_DEBUG*/
-        this.transform.tx = d;
+        this.transform.tx = n;
       }
     },
     
@@ -198,11 +216,11 @@
       get: function () {
         return this.transform.ty;
       },
-      set: function (d) {
+      set: function (n) {
         /*DEBUG*/
-        check_number_type(d, this+'.y');
+        check_number_type(n, this+'.y');
         /*END_DEBUG*/
-        this.transform.ty = d;
+        this.transform.ty = n;
       }
     },
 
@@ -230,7 +248,7 @@
     'rotate': { //around external point?
       value: function (deg) {
         /*DEBUG*/
-        check_number_type(deg, this+'.rotate');
+        check_number_type(deg, this+'.rotate', '*degrees*');
         /*END_DEBUG*/
         this.transform.rotate(deg * to_radians);
       }
@@ -299,31 +317,50 @@
       writable: false,
       configurable: false,
       value: function (node, index) {
+        var children = this.children,
+            this_display = this.root,
+            node_display = node.root,
+            node_parent = node.parent,
+            //was the node already on the display list?
+            on_scene_graph_p = (node_display && node_display === this_display) ? true : false,
+            node_descendants,
+            i;
+        
         //if already a child then ignore
-        if (this.children.indexOf(node) !== -1) {
+        if (children.indexOf(node) !== -1) {
           return false;
         }
-
         /*DEBUG*/
         check_node_type(node, this+'.addChildAt', '*node*, index');
         check_number_type(index, this+'.addChildAt', 'node, *index*');
         /*END_DEBUG*/
         
         //make sure parent/child share same root
-        if (node.root !== this.root) {
-          node.root = this.root;
+        if (node_display !== this_display) {
+          node.root = this_display;
         }
-        //if has previous parent, remove from it's children
-        if (node.parent !== null && node.parent !== this) {
+        //if it had another parent, remove from their children
+        if (node_parent !== null && node_parent !== this) {
           node.parent.removeChild(node);
         }
+        //adopt node
         node.parent = this;
-        this.children.splice(index, 0, node);
-        
-        //is the node now a part of the display list?
-        if (inDisplayList(node)) {
-          node.dispatchEvent(doodle_Event(doodle_Event.ADDED, true));
-          children_dispatch_event(node, doodle_Event.ADDED);
+        children.splice(index, 0, node);
+
+        //now part of display list
+        if (display) {
+          //reorder scene path
+          display.__sortAllChildren();
+          //if it wasn't on the scene graph before, tell everyone now
+          if (!on_scene_graph_p) {
+            //fire off Event.ADDED for node and all it's descendants
+            node_descendants = create_scene_path(node, []);
+            i = node_descendants.length;
+            while(i--) {
+              //recycle our Event.ADDED
+              node_descendants[i].dispatchEvent(evt_addedEvent.__setTarget(null));
+            }
+          }
         }
 
         return node;
@@ -346,40 +383,38 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: (function () {
-        /* Called on every child of removed node with a context.
-         * Ensures it's old bounds are cleared before being re-parented.
-         */
-        function clear_node_bounds (child, context) {
-          var bounds = child.getBounds(child.root);
-          if (context) {
-            context.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
+      value: function (index) {
+        /*DEBUG*/
+        check_number_type(index, this+'.removeChildAt', '*index*');
+        /*END_DEBUG*/
+        var children = this.children,
+            child = children[index],
+            this_display = this.root,
+            child_descendants = create_scene_path(child, []), //includes child
+            i = child_descendants.length,
+            j = i;
+        
+        //event dispatching depends on an intact scene graph
+        if (this_display) {
+          while (i--) {
+            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
           }
-          child.root = null;
+        }
+
+        //un-adopt child
+        children.splice(index, 1);
+        
+        //reset child and descendants
+        child.parent = null;
+        while (j--) {
+          child_descendants[j].root = null;
         }
         
-        return function (index) {
-          /*DEBUG*/
-          check_number_type(index, this+'.removeChildAt', '*index*');
-          /*END_DEBUG*/
-          var node = this.children[index],
-          ctx = node.context;
-          
-          this.children.splice(index, 1);
-
-          //is it no longer a part of the display list?
-          if (ctx) {
-            clear_node_bounds(node, ctx);
-            node.dispatchEvent(doodle_Event(doodle_Event.REMOVED, true));
-            children_dispatch_event(node, doodle_Event.REMOVED, function (child) {
-              clear_node_bounds(child, ctx);
-            });
-          }
-          //these are needed for final transversal
-          node.root = null;
-          node.parent = null;
-        };
-      }())
+        //reorder this display's scene path
+        if (this_display) {
+          this_display.__sortAllChildren();
+        }
+      }
     },
     
     'removeChild': {
