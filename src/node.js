@@ -1,10 +1,12 @@
+/*jslint nomen: false, plusplus: false*/
+/*globals doodle, create_scene_path, check_display_type*/
+
 (function () {
   var node_count = 0,
       node_static_properties,
       isNode,
       inheritsNode,
       check_node_type,
-      inDisplayList,
       /*DEBUG*/
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -12,18 +14,18 @@
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
-      create_node_path = create_scene_path,
+      //recycled events
       evt_addedEvent = doodle.Event(doodle.Event.ADDED, true),
       evt_removedEvent = doodle.Event(doodle.Event.REMOVED, true),
-      doodle_Rectangle = doodle.geom.Rectangle,
+      //lookup help
       doodle_Point = doodle.geom.Point,
-      doodle_Event = doodle.Event,
-      to_degrees = 180 / Math.PI,
-      to_radians = Math.PI / 180;
+      doodle_Matrix = doodle.geom.Matrix,
+      create_scene_path_local = create_scene_path,
+      PI = Math.PI;
   
   /* Super constructor
-   * @param {Function} init_fn
-   * @return {Object}
+   * @param {String|Function} id|initializer
+   * @return {Node}
    */
   doodle.Node = function (id) {
     var node = Object.create(doodle.EventDispatcher());
@@ -100,7 +102,7 @@
       }()),
       
       'transform': (function () {
-        var transform = doodle.geom.Matrix();
+        var transform = doodle_Matrix();
         return {
           enumerable: true,
           configurable: false,
@@ -225,13 +227,12 @@
       }
     },
 
+    /**
     //registration point
     'axis': {
-      //temp value
       value: {x: this.x, y: this.y}
     },
 
-    /*
     'rotate': { //around external point?
       value: function (deg) {
       
@@ -244,14 +245,14 @@
         }
       }
     },
-    */
+    **/
 
-    'rotate': { //around external point?
+    'rotate': {
       value: function (deg) {
         /*DEBUG*/
         check_number_type(deg, this+'.rotate', '*degrees*');
         /*END_DEBUG*/
-        this.transform.rotate(deg * to_radians);
+        this.transform.rotate(deg * PI / 180);
       }
     },
     
@@ -259,13 +260,13 @@
       enumerable: true,
       configurable: true,
       get: function () {
-        return this.transform.rotation * to_degrees;
+        return this.transform.rotation * 180 / PI;
       },
       set: function (deg) {
         /*DEBUG*/
         check_number_type(deg, this+'.rotation', '*degrees*');
         /*END_DEBUG*/
-        this.transform.rotation = deg * to_radians;
+        this.transform.rotation = deg * PI / 180;
       }
     },
 
@@ -349,13 +350,13 @@
         children.splice(index, 0, node);
 
         //now part of display list
-        if (display) {
+        if (this_display) {
           //reorder scene path
-          display.__sortAllChildren();
+          this_display.__sortAllChildren();
           //if it wasn't on the scene graph before, tell everyone now
           if (!on_scene_graph_p) {
             //fire off Event.ADDED for node and all it's descendants
-            node_descendants = create_node_path(node, []);
+            node_descendants = create_scene_path_local(node, []);
             i = node_descendants.length;
             while(i--) {
               //recycle our Event.ADDED
@@ -391,7 +392,7 @@
         var children = this.children,
             child = children[index],
             this_display = this.root,
-            child_descendants = create_node_path(child, []), //includes child
+            child_descendants = create_scene_path_local(child, []), //includes child
             i = child_descendants.length,
             j = i;
         
@@ -401,7 +402,6 @@
             child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
           }
         }
-
         //un-adopt child
         children.splice(index, 1);
         
@@ -410,7 +410,6 @@
         while (j--) {
           child_descendants[j].root = null;
         }
-        
         //reorder this display's scene path
         if (this_display) {
           this_display.__sortAllChildren();
@@ -447,9 +446,8 @@
       writable: false,
       configurable: false,
       value: function () {
-        //just assign an empty array to this.children?
         var i = this.children.length;
-        while ((i -= 1) >= 0) {
+        while (i--) {
           this.removeChildAt(i);
         }
       }
@@ -463,12 +461,23 @@
         /*DEBUG*/
         check_string_type(id, this+'.getChildById', '*id*');
         /*END_DEBUG*/
-        return this.children.filter(function (child) {
-          return child.id === id;
-        })[0];
+        var children = this.children,
+            len = children.length,
+            i = 0;
+        for (; i < len; i++) {
+          if (children[i].id === id) {
+            return children[i];
+          }
+        }
+        return null;
       }
     },
 
+    /* Changes the position of an existing child in the node's children array.
+     * This affects the layering of child objects.
+     * @param {Node} child
+     * @param {Number} index
+     */
     'setChildIndex': {
       enumerable: true,
       writable: false,
@@ -479,19 +488,23 @@
         check_number_type(index, this+'.setChildIndex', 'child, *index*');
         /*END_DEBUG*/
         var children = this.children,
-        len = children.length,
-        pos = children.indexOf(child);
+            len = children.length,
+            pos = children.indexOf(child);
+        /*DEBUG*/
         if (pos === -1) {
           throw new ReferenceError(this+'.setChildIndex(*child*, index): ' + child + ' does not exist on child list.');
         }
         if (index > len || index < -len) {
           throw new RangeError(this+'.setChildIndex(child, *index*): ' + index + ' does not exist on child list.');
         }
-        children.splice(pos, 1); //remove element
-        children.splice(index, 0, child); //set new position
+        /*END_DEBUG*/
+        children.splice(pos, 1); //remove child
+        children.splice(index, 0, child); //place child at new position
       }
     },
-    
+
+    /* Swaps the child nodes at the two specified index positions in the child list.
+     */
     'swapChildrenAt': {
       enumerable: false,
       writable: false,
@@ -501,8 +514,8 @@
         check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
         check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
         /*END_DEBUG*/
-        var a = this.children;
-        a[index1] = a.splice(index2, 1, a[index1])[0];
+        var children = this.children;
+        children[index1] = children.splice(index2, 1, children[index1])[0];
       }
     },
     
@@ -520,58 +533,58 @@
       }
     },
 
-    //change this nodes depth in parent
+    /* Swap positions with another node in the parents child list.
+     * @param {Node} node
+     */
     'swapDepths': {
       enumerable: false,
       writable: false,
       configurable: false,
       value: function I(node) {
+        var parent = this.parent,
+            children;
         /*DEBUG*/
         check_node_type(node, this+'.swapDepths', '*node*');
-        /*END_DEBUG*/
-        var parent = this.parent;
-        if (!parent || !Array.isArray(parent.children)) {
-          throw new Error(this+".swapDepths: no parent found.");
-        } else {
-          parent.swapChildren(this, node);
+        check_node_type(parent, this+'.swapDepths(node): No parent node found.');
+        if (node.parent !== parent) {
+          throw new ReferenceError(this+".swapDepths(node): "+ this.id +" node and "+ node.id + " node do not share a parent.");
         }
+        /*END_DEBUG*/
+        children = parent.children;
+        parent.swapChildrenAt(children.indexOf(this), children.indexOf(node));
       }
     },
 
+    /* Swap positions with another node at a given index in the parents child list.
+     * @param {Number} index
+     */
     'swapDepthAt': {
       enumerable: false,
       writable: false,
       configurable: false,
       value: function (index) {
+        var parent = this.parent;
         /*DEBUG*/
         check_number_type(index, this+'.swapDepthAt', '*index*');
+        check_node_type(parent, this+'.swapDepthAt(node): No parent node found.');
         /*END_DEBUG*/
-        var parent = this.parent;
-        if (!parent || !Array.isArray(parent.children)) {
-          throw new Error(this+".swapDepthAt: no parent found.");
-        } else {
-          parent.swapChildrenAt(index, parent.children.indexOf(this));
-        }
+        parent.swapChildrenAt(index, parent.children.indexOf(this));
       }
     },
     
     /* Determine if node is among it's children, grandchildren, etc.
+     * @param {Node} node
      * @return {Boolean}
-     *
-     * THIS ONLY CHECKS PARENTS / GRANDPARENTS
      */
     'contains': {
       enumerable: false,
       writable: false,
       configurable: false,
       value: function (node) {
-        while (node) {
-          if (node === this) {
-            return true;
-          }
-          node = node.parent;
-        }
-        return false;
+        /*DEBUG*/
+        check_node_type(node, this+'.contains', '*node*');
+        /*END_DEBUG*/
+        return (create_scene_path_local(this, []).indexOf(node) !== -1) ? true : false;
       }
     },
 
@@ -579,16 +592,18 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (pt) {
+      value: function (point) {
         /*DEBUG*/
-        check_point_type(pt, this+'.localToGlobal', '*point*');
+        check_point_type(point, this+'.localToGlobal', '*point*');
         /*END_DEBUG*/
-        var node = this;
+        var node = this.parent;
+        //apply each transformation from this node up to root
+        point = this.transform.transformPoint(point); //new point
         while (node) {
-          pt = node.transform.transformPoint(pt);
+          node.transform.__transformPoint(point); //modify point
           node = node.parent;
         }
-        return pt;
+        return point;
       }
     },
 
@@ -596,12 +611,12 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (pt) {
+      value: function (point) {
         /*DEBUG*/
-        check_point_type(pt, this+'.globalToLocal', '*point*');
+        check_point_type(point, this+'.globalToLocal', '*point*');
         /*END_DEBUG*/
-        var global_pos = this.localToGlobal({x: 0, y: 0});
-        return doodle_Point(pt.x - global_pos.x, pt.y - global_pos.y);
+        var global_pt = this.localToGlobal({x: 0, y: 0});
+        return doodle_Point(point.x - global_pt.x, point.y - global_pt.y);
       }
     }
   };//end node_static_properties
@@ -649,19 +664,6 @@
       param = (param === undefined) ? "" : '('+param+')';
       throw new TypeError(caller + param +": Parameter must be a Node.");
     }
-  };
-
-  /* A node is part of the display list if it can find a context to
-   * draw on in it's scene graph.
-   */
-  inDisplayList = doodle.Node.inDisplayList = function (node) {
-    while (node) {
-      if (node.context) {
-        return true;
-      }
-      node = node.parent;
-    }
-    return false;
   };
   
 }());//end class closure
