@@ -12,6 +12,7 @@
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
+      create_node_path = create_scene_path,
       evt_addedEvent = doodle.Event(doodle.Event.ADDED, true),
       evt_removedEvent = doodle.Event(doodle.Event.REMOVED, true),
       doodle_Rectangle = doodle.geom.Rectangle,
@@ -354,7 +355,7 @@
           //if it wasn't on the scene graph before, tell everyone now
           if (!on_scene_graph_p) {
             //fire off Event.ADDED for node and all it's descendants
-            node_descendants = create_scene_path(node, []);
+            node_descendants = create_node_path(node, []);
             i = node_descendants.length;
             while(i--) {
               //recycle our Event.ADDED
@@ -390,7 +391,7 @@
         var children = this.children,
             child = children[index],
             this_display = this.root,
-            child_descendants = create_scene_path(child, []), //includes child
+            child_descendants = create_node_path(child, []), //includes child
             i = child_descendants.length,
             j = i;
         
