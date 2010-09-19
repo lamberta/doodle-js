@@ -1,11 +1,18 @@
+/*globals doodle*/
+
 (function () {
   var matrix_static_properties,
-      doodle_Matrix,
       isMatrix,
+      /*DEBUG*/
       check_matrix_type,
-      doodle_Point = doodle.geom.Point,
       check_number_type = doodle.utils.types.check_number_type,
       check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
+      //recycle object for internal calculations
+      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
+      //lookup help
+      doodle_Matrix,
+      doodle_Point = doodle.geom.Point,
       sin = Math.sin,
       cos = Math.cos,
       atan2 = Math.atan2,
@@ -161,6 +168,7 @@
 
   
   matrix_static_properties = {
+    
     /* Set values of this matrix with the specified parameters.
      * @param {Number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
      * @param {Number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
@@ -316,9 +324,15 @@
         check_number_type(radians, this+'.rotate', '*radians*');
         /*END_DEBUG*/
         var c = cos(radians),
-            s = sin(radians),
-            m = doodle_Matrix(c, s, -s, c, 0, 0);
-        return this.multiply(m);
+            s = sin(radians);
+        temp_matrix.a = c;
+        temp_matrix.b = s;
+        temp_matrix.c = -s;
+        temp_matrix.d = c;
+        temp_matrix.tx = 0;
+        temp_matrix.ty = 0;
+        
+        return this.multiply(temp_matrix);
       }
     },
 
@@ -380,8 +394,14 @@
         check_number_type(sx, this+'.scale', '*sx*, sy');
         check_number_type(sy, this+'.scale', 'sx, *sy*');
         /*END_DEBUG*/
-        var m = doodle_Matrix(sx, 0, 0, sy, 0, 0);
-        return this.multiply(m);
+        temp_matrix.a = sx;
+        temp_matrix.b = 0;
+        temp_matrix.c = 0;
+        temp_matrix.d = sy;
+        temp_matrix.tx = 0;
+        temp_matrix.ty = 0;
+        
+        return this.multiply(temp_matrix);
       }
     },
 
@@ -443,9 +463,15 @@
         check_number_type(skewY, this+'.skew', 'skewX, *skewY*');
         /*END_DEBUG*/
         var sx = tan(skewX),
-            sy = tan(skewY),
-            m = doodle_Matrix(1, sy, sx, 1, 0, 0);
-        return this.multiply(m);
+            sy = tan(skewY);
+        temp_matrix.a = 1;
+        temp_matrix.b = sy;
+        temp_matrix.c = sx;
+        temp_matrix.d = 1;
+        temp_matrix.tx = 0;
+        temp_matrix.ty = 0;
+        
+        return this.multiply(temp_matrix);
       }
     },
 
@@ -519,7 +545,7 @@
      * @return {Point}
      */
     'transformPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -528,6 +554,23 @@
         /*END_DEBUG*/
         return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx,
                             this.b * pt.x + this.d * pt.y + this.ty);
+      }
+    },
+
+    /* Same as transformPoint, but modifies the point object argument.
+     * @internal
+     */
+    '__transformPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.transformPoint', '*point*');
+        /*END_DEBUG*/
+        point.x = this.a * point.x + this.c * point.y + this.tx;
+        point.y = this.b * point.x + this.d * point.y + this.ty;
+        return point;
       }
     },
 
@@ -547,6 +590,23 @@
         /*END_DEBUG*/
         return doodle_Point(this.a * pt.x + this.c * pt.y,
                             this.b * pt.x + this.d * pt.y);
+      }
+    },
+
+    /* Same as deltaTransformPoint, but modifies the point object argument.
+     * @internal
+     */
+    '__deltaTransformPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.deltaTransformPoint', '*point*');
+        /*END_DEBUG*/
+        point.x = this.a * point.x + this.c * point.y;
+        point.y = this.b * point.x + this.d * point.y;
+        return point;
       }
     },
     
@@ -626,7 +686,6 @@
         return this;
       }
     }
-    
   };//end matrix_static_properties defintion
 
   
