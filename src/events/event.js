@@ -164,6 +164,7 @@
           enumerable: false,
           value: function (targetArg) {
             evt_currentTarget = targetArg;
+            return this;
           }
         },
         
@@ -179,6 +180,7 @@
           enumerable: false,
           value: function (targetArg) {
             evt_target = targetArg;
+            return this;
           }
         },
         
@@ -197,6 +199,7 @@
             check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
             /*END_DEBUG*/
             evt_eventPhase = phaseArg;
+            return this;
           }
         },
         
