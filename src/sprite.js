@@ -4,17 +4,18 @@
   var sprite_static_properties,
       isSprite,
       inheritsSprite,
-      check_sprite_type,
-      hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
-      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       /*DEBUG*/
+      check_sprite_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_point_type = doodle.utils.types.check_point_type,
       check_rect_type = doodle.utils.types.check_rect_type,
+      check_node_type = doodle.utils.types.check_node_type,
       check_context_type = doodle.utils.types.check_context_type,
       /*END_DEBUG*/
-      inheritsNode = doodle.Node.inheritsNode,
+      //lookup help
+      hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       doodle_Rectangle = doodle.geom.Rectangle;
 
   /* Super constructor
@@ -101,9 +102,7 @@
           configurable: false,
           value: function (targetCoordSpace) {
             /*DEBUG*/
-            if (!inheritsNode(targetCoordSpace)) {
-              throw new TypeError(this+'.getBounds(*targetCoordinateSpace*): Parameter must inherit from doodle.Node.');
-            }
+            check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
             /*END_DEBUG*/
             var children = this.children,
                 len = children.length,
@@ -113,17 +112,21 @@
                 h = this.height,
                 min = Math.min,
                 max = Math.max,
-                //transform corners to global
-                tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
-                tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
-                br = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y+h}), //bot right
-                bl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y+h}); //bot left
-            
+                tl = {x: extrema.min_x, y: extrema.min_y},
+								tr = {x: extrema.min_x+w, y: extrema.min_y},
+                br = {x: extrema.min_x+w, y: extrema.min_y+h},
+                bl = {x: extrema.min_x, y: extrema.min_y+h};
+						
+						//transform corners to global
+						this.__localToGlobal(tl); //top left
+            this.__localToGlobal(tr); //top right
+            this.__localToGlobal(br); //bot right
+            this.__localToGlobal(bl); //bot left
             //transform global to target space
-            tl = targetCoordSpace.globalToLocal(tl);
-            tr = targetCoordSpace.globalToLocal(tr);
-            br = targetCoordSpace.globalToLocal(br);
-            bl = targetCoordSpace.globalToLocal(bl);
+            targetCoordSpace.__globalToLocal(tl);
+            targetCoordSpace.__globalToLocal(tr);
+            targetCoordSpace.__globalToLocal(br);
+            targetCoordSpace.__globalToLocal(bl);
 
             //set rect with extremas
             bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
@@ -135,11 +138,64 @@
             while (len--) {
               child_bounds = children[len].getBounds(targetCoordSpace);
               if (child_bounds !== null) {
-                bounding_box = bounding_box.union(child_bounds);
+                bounding_box.__union(child_bounds);
               }
             }
-            
             return bounding_box;
+          }
+        },
+
+				/* Same as getBounds, but modifies a rectangle parameter.
+				 * @param {Rectangle|null} rect
+         * @param {Node} targetCoordSpace
+         * @return {Rectangle}
+         */
+        '__getBounds': {
+          enumerable: true,
+          writable: true,
+          configurable: false,
+          value: function (rect, targetCoordSpace) {
+            /*DEBUG*/
+						check_rect_type(rect, this+'.__getBounds', '*rect*, targetCoordSpace');
+            check_node_type(targetCoordSpace, this+'.__getBounds', 'rect, *targetCoordSpace*');
+            /*END_DEBUG*/
+            var children = this.children,
+                len = children.length,
+                child_bounds,
+                w = this.width,
+                h = this.height,
+                min = Math.min,
+                max = Math.max,
+                tl = {x: extrema.min_x, y: extrema.min_y},
+                tr = {x: extrema.min_x+w, y: extrema.min_y},
+                br = {x: extrema.min_x+w, y: extrema.min_y+h},
+                bl = {x: extrema.min_x, y: extrema.min_y+h};
+
+						//transform corners to global
+						this.__localToGlobal(tl); //top left
+            this.__localToGlobal(tr); //top right
+            this.__localToGlobal(br); //bot right
+            this.__localToGlobal(bl); //bot left
+            //transform global to target space
+            targetCoordSpace.__globalToLocal(tl);
+            targetCoordSpace.__globalToLocal(tr);
+            targetCoordSpace.__globalToLocal(br);
+            targetCoordSpace.__globalToLocal(bl);
+
+            //set rect with extremas
+            rect.left = min(tl.x, tr.x, br.x, bl.x);
+            rect.right = max(tl.x, tr.x, br.x, bl.x);
+            rect.top = min(tl.y, tr.y, br.y, bl.y);
+            rect.bottom = max(tl.y, tr.y, br.y, bl.y);
+
+            //add child bounds to this
+            while (len--) {
+              child_bounds = children[len].getBounds(targetCoordSpace);
+              if (child_bounds !== null) {
+                rect.__union(child_bounds);
+              }
+            }
+            return rect;
           }
         },
         
@@ -369,6 +425,7 @@
     return false;
   };
 
+  /*DEBUG*/
   check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, param) {
     if (inheritsSprite(sprite)) {
       return true;
@@ -378,5 +435,6 @@
       throw new TypeError(caller + param +": Parameter must inherit from Sprite.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
