@@ -1,5 +1,5 @@
 /*jslint nomen: false, plusplus: false*/
-/*globals doodle, create_scene_path, check_display_type*/
+/*globals doodle, check_display_type*/
 
 (function () {
   var node_count = 0,
@@ -21,7 +21,7 @@
       //lookup help
       doodle_Point = doodle.geom.Point,
       doodle_Matrix = doodle.geom.Matrix,
-      create_scene_path_local = create_scene_path,
+      create_scene_path = doodle.utils.create_scene_path,
       PI = Math.PI;
   
   /* Super constructor
@@ -384,7 +384,7 @@
           //if it wasn't on the scene graph before, tell everyone now
           if (!on_scene_graph_p) {
             //fire off Event.ADDED for node and all it's descendants
-            node_descendants = create_scene_path_local(node, []);
+            node_descendants = create_scene_path(node, []);
             i = node_descendants.length;
             while(i--) {
               //recycle our Event.ADDED
@@ -420,7 +420,7 @@
         var children = this.children,
             child = children[index],
             this_display = this.root,
-            child_descendants = create_scene_path_local(child, []), //includes child
+            child_descendants = create_scene_path(child, []), //includes child
             i = child_descendants.length,
             j = i;
         
@@ -612,7 +612,7 @@
         /*DEBUG*/
         check_node_type(node, this+'.contains', '*node*');
         /*END_DEBUG*/
-        return (create_scene_path_local(this, []).indexOf(node) !== -1) ? true : false;
+        return (create_scene_path(this, []).indexOf(node) !== -1) ? true : false;
       }
     },
 

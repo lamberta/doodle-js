@@ -261,3 +261,25 @@ doodle.utils.set_element_property = function (element, property, value, type) {
   }
   return value;
 };
+
+/* Creates a scene graph path from a given node and all it's descendants.
+ * @param {Node} node
+ * @param {Array} array Array to store the path nodes in.
+ * @param {Boolean} clearArray Empty array passed as parameter before storing nodes in it.
+ * @return {Array} The array passed to the function (modified in place).
+ */
+(function () {
+  doodle.utils.create_scene_path = function create_path (node, array, clearArray) {
+    var i = node.children.length;
+    if (clearArray) {
+      array.splice(0, array.length);
+    }
+    if (i !== 0) {
+      while (i--) {
+        create_path(node.children[i], array);
+      }
+    }
+    array.push(node);
+    return array; //return for further operations on array (reverse)
+  };
+}());
