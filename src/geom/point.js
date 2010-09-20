@@ -1,9 +1,17 @@
+/*globals doodle*/
+
 (function () {
   var point_static_properties,
       isPoint,
-      doodle_Point,
+      /*DEBUG*/
       check_point_type,
-      check_number_type = doodle.utils.types.check_number_type;
+      check_number_type = doodle.utils.types.check_number_type,
+      /*END_DEBUG*/
+      //lookup help
+      doodle_Point,
+      cos = Math.cos,
+      sin = Math.sin,
+      sqrt = Math.sqrt;
   
   /* Super constructor
    * @param {Number|Array|Point|Function} (x,y)|initializer
@@ -26,48 +34,52 @@
       /* The horizontal coordinate of the point.
        * @param {Number} x
        */
-      'x': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return x; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.x');
-          /*END_DEBUG*/
-          x = n;
-        }
-      },
+      'x': (function () {
+        var pt_x = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return pt_x; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.x');
+            /*END_DEBUG*/
+            pt_x = n;
+          }
+        };
+      }()),
 
       /* The vertical coordinate of the point.
        * @param {Number} y
        */
-      'y': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return y; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.y');
-          /*END_DEBUG*/
-          y = n;
-        }
-      }
-    });
+      'y': (function () {
+        var pt_y = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return pt_y; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.y');
+            /*END_DEBUG*/
+            pt_y = n;
+          }
+        };
+      }())
+    });//end defineProperties
 
     //initialize point
-    if (arg_len === 0) {
-      //default instantiation: {x:0, y:0}
-      point.compose(0, 0);
-    } else if (arg_len === 2) {
+    switch (arg_len) {
+    case 2:
       //standard instantiation
       point.compose(x, y);
-    } else {
-      //passed an initialization obj
+      break;
+    case 1:
+      //passed an initialization obj: point, array, function
       init_obj = arguments[0];
       x = undefined;
       
       if (typeof init_obj === 'function') {
-        point.compose(0, 0);
         init_obj.call(point);
       }  else if (Array.isArray(init_obj)) {
         /*DEBUG*/
@@ -82,6 +94,10 @@
         /*END_DEBUG*/
         point.compose(init_obj.x, init_obj.y);
       }
+      break;
+    default:
+      //defaults to 0,0
+      break;
     }
 
     return point;
@@ -103,7 +119,34 @@
     /*
      * METHODS
      */
+
+    /* Returns an array that contains the values of the x and y coordinates.
+     * @return {Array}
+     */
+    'toArray': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        var a = new Array(2);
+        a[0] = this.x;
+        a[1] = this.y;
+        return a;
+      }
+    },
     
+    /* Returns a string that contains the values of the x and y coordinates.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "(x=" + this.x + ", y=" + this.y + ")";
+      }
+    },
+
     /* Set point coordinates.
      * @param {Number} x
      * @param {Number} y
@@ -136,76 +179,6 @@
       }
     },
 
-    /* Returns an array that contains the values of the x and y coordinates.
-     * @return {Array}
-     */
-    'toArray': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function () {
-        var a = new Array(2);
-        a[0] = this.x;
-        a[1] = this.y;
-        return a;
-      }
-    },
-    
-    /* Returns a string that contains the values of the x and y coordinates.
-     * @return {String}
-     */
-    'toString': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function () {
-        return "(x=" + this.x + ", y=" + this.y + ")";
-      }
-    },
-
-    /* Returns the distance between pt1 and pt2.
-     * @return {Number}
-     */
-    'distance': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (pt1, pt2) {
-        /*DEBUG*/
-        check_point_type(pt1, this+'.distance', '*pt1*, pt2');
-        check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
-        /*END_DEBUG*/
-        var dx = pt2.x - pt1.x,
-            dy = pt2.y - pt1.x;
-        return Math.sqrt(dx*dx+dy*dy);
-      }
-    },
-
-    /* Scales the line segment between (0,0) and the
-     * current point to a set length.
-     * @param {Number} thickness The scaling value.
-     * @return {Point}
-     */
-    'normalize': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (thickness) {
-        /*DEBUG*/
-        check_number_type(thickness, this+'.normalize', '*thickness*');
-        /*END_DEBUG*/
-        var len = this.length;
-        this.x = (this.x / len) * thickness;
-        this.y = (this.y / len) * thickness;
-        return this;
-        /*correct version?
-          var angle:Number = Math.atan2(this.y, this.x);
-          this.x = Math.cos(angle) * thickness;
-          this.y = Math.sin(angle) * thickness;
-        */
-      }
-    },
-
     /* Determines whether two points are equal.
      * @param {Point} pt The point to be compared.
      * @return {Boolean}
@@ -222,60 +195,6 @@
                  this.x === pt.x &&
                  this.y === pt.y) ||
                 (!this && !pt));
-      }
-    },
-
-    /* Determines a point between two specified points.
-     * @static
-     * @param {Point} pt1 The first point.
-     * @param {Point} pt2 The second point.
-     * @param {Number} t The level of interpolation between the two points, between 0 and 1.
-     * @return {Point}
-     */
-    'interpolate': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (pt1, pt2, t) {
-        /*DEBUG*/
-        check_point_type(pt1, this+'.interpolate', '*pt1*, pt2, t');
-        check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
-        check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
-        /*END_DEBUG*/
-        var x = pt1.x + (pt2.x - pt1.x) * t,
-            y = pt1.y + (pt2.y - pt1.y) * t;
-        return doodle_Point(x, y);
-
-        /* correct version?
-           var nx = pt2.x - pt1.x;
-           var ny = pt2.y - pt1.y;
-           var angle = Math.atan2(ny , nx);
-           var dis = Math.sqrt(x * nx + ny * ny) * t;
-           var sx = pt2.x - Math.cos(angle) * dis;
-           var sy = pt2.y - Math.sin(angle) * dis;
-           return Object.create(point).compose(sx, sy);
-        */
-      }
-    },
-
-    /* Converts a pair of polar coordinates to a Cartesian point coordinate.
-     * @static
-     * @param {Number} len The length coordinate of the polar pair.
-     * @param {Number} angle The angle, in radians, of the polar pair.
-     * @return {Point}
-     */
-    'polar': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (len, angle) {
-        /*DEBUG*/
-        check_number_type(len, this+'.polar', '*len*, angle');
-        check_number_type(angle, this+'.polar', 'len, *angle*');
-        /*END_DEBUG*/
-        var x = len * Math.cos(angle),
-            y = len * Math.sin(angle);
-        return doodle_Point(x, y);
       }
     },
 
@@ -330,7 +249,105 @@
         this.y += dy;
         return this;
       }
+    },
+
+    /* Returns the distance between pt1 and pt2.
+     * @return {Number}
+     */
+    'distance': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt1, pt2) {
+        /*DEBUG*/
+        check_point_type(pt1, this+'.distance', '*pt1*, pt2');
+        check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
+        /*END_DEBUG*/
+        var dx = pt2.x - pt1.x,
+            dy = pt2.y - pt1.x;
+        return sqrt(dx*dx + dy*dy);
+      }
+    },
+
+    /* Scales the line segment between (0,0) and the
+     * current point to a set length.
+     * @param {Number} thickness The scaling value.
+     * @return {Point}
+     */
+    'normalize': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (thickness) {
+        /*DEBUG*/
+        check_number_type(thickness, this+'.normalize', '*thickness*');
+        /*END_DEBUG*/
+        var len = this.length;
+        this.x = (this.x / len) * thickness;
+        this.y = (this.y / len) * thickness;
+        return this;
+        /*correct version?
+          var angle:Number = Math.atan2(this.y, this.x);
+          this.x = Math.cos(angle) * thickness;
+          this.y = Math.sin(angle) * thickness;
+        */
+      }
+    },
+
+    /* Determines a point between two specified points.
+     * @static
+     * @param {Point} pt1 The first point.
+     * @param {Point} pt2 The second point.
+     * @param {Number} t The level of interpolation between the two points, between 0 and 1.
+     * @return {Point}
+     */
+    'interpolate': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (pt1, pt2, t) {
+        /*DEBUG*/
+        check_point_type(pt1, this+'.interpolate', '*pt1*, pt2, t');
+        check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
+        check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
+        /*END_DEBUG*/
+        var x = pt1.x + (pt2.x - pt1.x) * t,
+            y = pt1.y + (pt2.y - pt1.y) * t;
+        return doodle_Point(x, y);
+
+        /* correct version?
+           var nx = pt2.x - pt1.x;
+           var ny = pt2.y - pt1.y;
+           var angle = Math.atan2(ny , nx);
+           var dis = Math.sqrt(x * nx + ny * ny) * t;
+           var sx = pt2.x - Math.cos(angle) * dis;
+           var sy = pt2.y - Math.sin(angle) * dis;
+           return Object.create(point).compose(sx, sy);
+        */
+      }
+    },
+
+    /* Converts a pair of polar coordinates to a Cartesian point coordinate.
+     * @static
+     * @param {Number} len The length coordinate of the polar pair.
+     * @param {Number} angle The angle, in radians, of the polar pair.
+     * @return {Point}
+     */
+    'polar': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (len, angle) {
+        /*DEBUG*/
+        check_number_type(len, this+'.polar', '*len*, angle');
+        check_number_type(angle, this+'.polar', 'len, *angle*');
+        /*END_DEBUG*/
+        var x = len * cos(angle),
+            y = len * sin(angle);
+        return doodle_Point(x, y);
+      }
     }
+    
   };//end point_static_properties definition
 
   /*
@@ -347,6 +364,7 @@
     return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
   };
 
+  /*DEBUG*/
   check_point_type = doodle.utils.types.check_point_type = function (pt, caller, param) {
     if (!isPoint(pt)) {
       caller = (caller === undefined) ? "check_point_type" : caller;
@@ -356,5 +374,6 @@
       return true;
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
