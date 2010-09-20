@@ -6,12 +6,13 @@
       node_static_properties,
       isNode,
       inheritsNode,
-      check_node_type,
       /*DEBUG*/
+      check_node_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_matrix_type = doodle.utils.types.check_matrix_type,
+      check_rect_type = doodle.utils.types.check_rect_type,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
       //recycled events
@@ -41,7 +42,8 @@
     Object.defineProperties(node, {
       
       'id': (function () {
-        var node_id;
+        var node_id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
+        node_count += 1;
         return {
           enumerable: true,
           configurable: true,
@@ -172,11 +174,41 @@
             if (bounding_box === null) {
               bounding_box = child_bounds;
             } else {
-              bounding_box = bounding_box.union(child_bounds);
+              bounding_box.__union(child_bounds);
             }
           }
-          
           return bounding_box;
+        }
+      },
+
+      /* Same as getBounds, but modifies a rectangle parameter.
+       * @param {Rectangle|null} rect
+       * @param {Node} targetCoordSpace
+       * @return {Rectangle|Null}
+       */
+      '__getBounds': {
+        enumerable: false,
+        writable: true,
+        configurable: false,
+        value: function (rect, targetCoordSpace) {
+          /*DEBUG*/
+          check_rect_type(rect, this+'.__getBounds', '*rect*, targetCoordSpace');
+          check_node_type(targetCoordSpace, this+'.__getBounds', 'rect, *targetCoordSpace*');
+          /*END_DEBUG*/
+          var child_bounds,
+              children = this.children,
+              len = children.length;
+          
+          while (len--) {
+            child_bounds = children[len].getBounds(targetCoordSpace);
+            
+            if (child_bounds === null) {
+              continue;
+            } else {
+              rect.__union(child_bounds);
+            }
+          }
+          return rect;
         }
       }
     });//end defineProperties
@@ -185,12 +217,6 @@
     if (typeof arguments[0] === 'function') {
       arguments[0].call(node);
       id = undefined;
-    }
-
-    //node defaults
-    if (node.id === undefined) {
-      node.id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
-      node_count += 1;
     }
 
     return node;
@@ -248,6 +274,8 @@
     **/
 
     'rotate': {
+      enumerable: true,
+      configurable: false,
       value: function (deg) {
         /*DEBUG*/
         check_number_type(deg, this+'.rotate', '*degrees*');
@@ -258,7 +286,7 @@
     
     'rotation': {
       enumerable: true,
-      configurable: true,
+      configurable: false,
       get: function () {
         return this.transform.rotation * 180 / PI;
       },
@@ -306,7 +334,7 @@
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -315,7 +343,7 @@
     },
 
     'addChildAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node, index) {
@@ -370,7 +398,7 @@
     },
     
     'addChild': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node) {
@@ -382,7 +410,7 @@
     },
     
     'removeChildAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (index) {
@@ -430,7 +458,7 @@
     },
     
     'removeChildById': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (id) {
@@ -442,7 +470,7 @@
     },
     
     'removeAllChildren': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -454,7 +482,7 @@
     },
     
     'getChildById': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (id) {
@@ -506,7 +534,7 @@
     /* Swaps the child nodes at the two specified index positions in the child list.
      */
     'swapChildrenAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (index1, index2) {
@@ -520,7 +548,7 @@
     },
     
     'swapChildren': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node1, node2) {
@@ -537,7 +565,7 @@
      * @param {Node} node
      */
     'swapDepths': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function I(node) {
@@ -559,7 +587,7 @@
      * @param {Number} index
      */
     'swapDepthAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (index) {
@@ -577,7 +605,7 @@
      * @return {Boolean}
      */
     'contains': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node) {
@@ -589,7 +617,7 @@
     },
 
     'localToGlobal': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (point) {
@@ -607,7 +635,43 @@
       }
     },
 
+    /* Same as localToGlobal, but modifies a point in place.
+     */
+    '__localToGlobal': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.localToGlobal', '*point*');
+        /*END_DEBUG*/
+        var node = this;
+        //apply each transformation from this node up to root
+        while (node) {
+          node.transform.__transformPoint(point); //modify point
+          node = node.parent;
+        }
+        return point;
+      }
+    },
+
     'globalToLocal': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.globalToLocal', '*point*');
+        /*END_DEBUG*/
+        var global_pt = {x:0, y:0};
+        this.__localToGlobal(global_pt);
+        return doodle_Point(point.x - global_pt.x, point.y - global_pt.y);
+      }
+    },
+
+    /* Same as globalToLocal, but modifies a point in place.
+     */
+    '__globalToLocal': {
       enumerable: false,
       writable: false,
       configurable: false,
@@ -615,8 +679,11 @@
         /*DEBUG*/
         check_point_type(point, this+'.globalToLocal', '*point*');
         /*END_DEBUG*/
-        var global_pt = this.localToGlobal({x: 0, y: 0});
-        return doodle_Point(point.x - global_pt.x, point.y - global_pt.y);
+        var global_pt = {x:0, y:0};
+        this.__localToGlobal(global_pt);
+        point.x = point.x - global_pt.x;
+        point.y = point.y - global_pt.y;
+        return point;
       }
     }
   };//end node_static_properties
@@ -656,6 +723,7 @@
     return false;
   };
 
+  /*DEBUG*/
   check_node_type = doodle.utils.types.check_node_type = function (node, caller, param) {
     if (inheritsNode(node)) {
       return true;
@@ -665,5 +733,6 @@
       throw new TypeError(caller + param +": Parameter must be a Node.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
