@@ -11,6 +11,7 @@
       check_function_type = doodle.utils.types.check_function_type,
       check_event_type = doodle.utils.types.check_event_type,
       /*END_DEBUG*/
+      //lookup help
       CAPTURING_PHASE = doodle.Event.CAPTURING_PHASE,
       AT_TARGET = doodle.Event.AT_TARGET,
       BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE,
@@ -60,7 +61,7 @@
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -73,7 +74,7 @@
      * @return {Object}
      */
     'modify': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (fn) {
@@ -92,7 +93,7 @@
      * @param {Boolean} useCapture
      */
     'addEventListener': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
@@ -123,7 +124,7 @@
      * @param {Boolean} useCapture
      */
     'removeEventListener': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
@@ -164,7 +165,7 @@
      * @return {Boolean} true if node has listeners of event type.
      */
     'handleEvent': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (event) {
@@ -319,10 +320,7 @@
       writable: false,
       configurable: false,
       value: function (event) {
-        var receivers, //event listeners of correct type
-            len, //count of event listeners
-            i = 0, //counter
-            evt_type = event.type,
+        var evt_type = event.type,
             hasOwnProperty = Object.prototype.hasOwnProperty,
             disp_queue = dispatcher_queue,
             dq_count = disp_queue.length;
@@ -362,7 +360,7 @@
      * @return {Boolean}
      */
     'hasEventListener': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type) {
@@ -446,6 +444,7 @@
     return false;
   };
 
+  /*DEBUG*/
   doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
     if (inheritsEventDispatcher(obj)) {
       return true;
@@ -455,5 +454,6 @@
       throw new TypeError(caller + param +": Parameter must be an EventDispatcher.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure

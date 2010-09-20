@@ -1,11 +1,17 @@
 /*globals doodle*/
+
 (function () {
   var rect_static_properties,
-      doodle_Rectangle, 
       isRect,
+      /*DEBUG*/
       check_rect_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_point_type = doodle.utils.types.check_point_type;
+      check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
+      //lookup help
+      doodle_Rectangle,
+      max = Math.max,
+      min = Math.min;
   
   /* Super constructor
    * @param {Number|Array|Rectangle|Function} (x,y,w,h)|initializer
@@ -16,80 +22,87 @@
         arg_len = arguments.length,
         init_obj;
 
-    /*DEBUG*/
-    if (arg_len !== 0 && arg_len !== 1 && arg_len !== 4) {
-      throw new SyntaxError("[object Rectangle](x, y, width, height): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
-
     Object.defineProperties(rect, rect_static_properties);
     //properties that require privacy
     Object.defineProperties(rect, {
-      'x': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return x; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.x');
-          /*END_DEBUG*/
-          x = n;
-        }
-      },
+      'x': (function () {
+        var rect_x = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_x; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.x');
+            /*END_DEBUG*/
+            rect_x = n;
+          }
+        };
+      }()),
       
-      'y': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return y; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.y');
-          /*END_DEBUG*/
-          y = n;
-        }
-      },
+      'y': (function () {
+        var rect_y = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_y; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.y');
+            /*END_DEBUG*/
+            rect_y = n;
+          }
+        };
+      }()),
       
-      'width': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return width; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.width');
-          /*END_DEBUG*/
-          width = n;
-        }
-      },
+      'width': (function () {
+        var rect_width = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_width; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.width');
+            /*END_DEBUG*/
+            rect_width = n;
+          }
+        };
+      }()),
       
-      'height': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return height; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.height');
-          /*END_DEBUG*/
-          height = n;
-        }
-      }
+      'height': (function () {
+        var rect_height = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_height; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.height');
+            /*END_DEBUG*/
+            rect_height = n;
+          }
+        };
+      }())
     });//end defineProperties
 
     //initialize rectangle
-    if (arg_len === 0) {
-      //default instantiation: {x:0, y:0, width:0, height:0}
-      rect.compose(0, 0, 0, 0);
-    } else if (arg_len === 4) {
+    switch (arg_len) {
+    case 0:
+      //defaults to {x:0, y:0, width:0, height:0}
+      break;
+    case 4:
       //standard instantiation
       rect.compose(x, y, width, height);
-    } else {
-      //passed an initialization obj
+      break;
+    case 1:
+      //passed an initialization obj: point, array, function
       init_obj = arguments[0];
       x = undefined;
       
       if (typeof init_obj === 'function') {
-        rect.compose(0, 0, 0, 0);
         init_obj.call(rect);
-      }  else if (Array.isArray(init_obj)) {
+      } else if (Array.isArray(init_obj)) {
         /*DEBUG*/
         if (init_obj.length !== 4) {
           throw new SyntaxError("[object Rectangle]([x, y, width, height]): Invalid array parameter.");
@@ -102,6 +115,11 @@
         /*END_DEBUG*/
         rect.compose(init_obj.x, init_obj.y, init_obj.width, init_obj.height);
       }
+      break;
+    default:
+      /*DEBUG*/
+      throw new SyntaxError("[object Rectangle](x, y, width, height): Invalid number of parameters.");
+      /*END_DEBUG*/
     }
 
     return rect;
@@ -171,17 +189,8 @@
      * METHODS
      */
     
-    'clone': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function () {
-        return doodle_Rectangle(this.x, this.y, this.width, this.height);
-      }
-    },
-    
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -190,11 +199,16 @@
     },
     
     'toArray': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
-        return [this.top, this.right, this.bottom, this.left];
+        var a = new Array(4);
+        a[0] = this.top;
+        a[1] = this.right;
+        a[2] = this.bottom;
+        a[3] = this.left;
+        return a;
       }
     },
     
@@ -206,7 +220,7 @@
      * @return {Rectangle}
      */
     'compose': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (x, y, width, height) {
@@ -224,13 +238,22 @@
       }
     },
 
+    'clone': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return doodle_Rectangle(this.x, this.y, this.width, this.height);
+      }
+    },
+
     /* Adjusts the location of the rectangle, as determined by
      * its top-left corner, by the specified amounts.
      * @param {Number} dx
      * @param {Number} dy
      */
     'offset': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (dx, dy) {
@@ -252,7 +275,7 @@
      * @param {Number} dy
      */
     'inflate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (dx, dy) {
@@ -273,7 +296,7 @@
      * @return {Boolean}
      */
     'equals': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -288,7 +311,7 @@
     /* Determines whether or not this Rectangle object is empty.
      */
     'isEmpty': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -301,7 +324,7 @@
      * @return {Boolean}
      */
     'containsPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -320,7 +343,7 @@
      * @return {Boolean}
      */
     'containsRect': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -340,7 +363,7 @@
      * @return {Boolean}
      */
     'intersects': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -363,7 +386,7 @@
      * @return {Rectangle}
      */
     'intersection': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -372,12 +395,32 @@
         /*END_DEBUG*/
         var r = doodle_Rectangle();
         if (this.intersects(rect)) {
-          r.left = Math.max(this.left, rect.left);
-          r.top = Math.max(this.top, rect.top);
-          r.right = Math.min(this.right, rect.right);
-          r.bottom = Math.min(this.bottom, rect.bottom);
+          r.left = max(this.left, rect.left);
+          r.top = max(this.top, rect.top);
+          r.right = min(this.right, rect.right);
+          r.bottom = min(this.bottom, rect.bottom);
         }
         return r;
+      }
+    },
+
+    /* Same as intersection, but modifies this rectangle in place.
+     */
+    '__intersection': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.intersection', '*rect*');
+        /*END_DEBUG*/
+        if (this.intersects(rect)) {
+          this.left = max(this.left, rect.left);
+          this.top = max(this.top, rect.top);
+          this.right = min(this.right, rect.right);
+          this.bottom = min(this.bottom, rect.bottom);
+        }
+        return this;
       }
     },
 
@@ -387,7 +430,7 @@
      * @return {Rectangle}
      */
     'union': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -395,11 +438,29 @@
         check_rect_type(rect, this+'.union', '*rect*');
         /*END_DEBUG*/
         var r = doodle_Rectangle();
-        r.left = Math.min(this.left, rect.left);
-        r.top = Math.min(this.top, rect.top);
-        r.right = Math.max(this.right, rect.right);
-        r.bottom = Math.max(this.bottom, rect.bottom);
+        r.left = min(this.left, rect.left);
+        r.top = min(this.top, rect.top);
+        r.right = max(this.right, rect.right);
+        r.bottom = max(this.bottom, rect.bottom);
         return r;
+      }
+    },
+
+    /* Same as union, but modifies this rectangle in place.
+     */
+    '__union': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.__union', '*rect*');
+        /*END_DEBUG*/
+        this.left = min(this.left, rect.left);
+        this.top = min(this.top, rect.top);
+        this.right = max(this.right, rect.right);
+        this.bottom = max(this.bottom, rect.bottom);
+        return this;
       }
     }
     
@@ -422,6 +483,7 @@
             typeof rect.left  === "number" && typeof rect.right  === "number");
   };
 
+  /*DEBUG*/
   check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller_name) {
     if (!isRect(rect)) {
       caller_name = (caller_name === undefined) ? "check_rect_type" : caller_name;
@@ -430,5 +492,6 @@
       return true;
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure

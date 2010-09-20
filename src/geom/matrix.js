@@ -25,13 +25,7 @@
   doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
         arg_len = arguments.length,
-        init_obj; //function, array, matrix
-
-    /*DEBUG*/
-    if (arg_len !== 0 && arg_len !== 1 && arg_len !== 6) {
-      throw new SyntaxError("[object Matrix](a, b, c, d, tx, ty): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
+        init_obj;
     
     Object.defineProperties(matrix, matrix_static_properties);
     //properties that require privacy
@@ -41,113 +35,132 @@
        * when scaling or rotating an image.
        * @param {Number} a
        */
-      'a': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return a; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.a');
-          /*END_DEBUG*/
-          a = n;
-        }
-      },
+      'a': (function () {
+        var mat_a = 1;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_a; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.a');
+            /*END_DEBUG*/
+            mat_a = n;
+          }
+        };
+      }()),
 
       /* The value that affects the positioning of pixels along the y axis
        * when rotating or skewing an image.
        * @param {Number} b
        */
-      'b': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return b; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.b');
-          /*END_DEBUG*/
-          b = n;
-        }
-      },
+      'b': (function () {
+        var mat_b = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_b; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.b');
+            /*END_DEBUG*/
+            mat_b = n;
+          }
+        };
+      }()),
 
       /* The value that affects the positioning of pixels along the x axis
        * when rotating or skewing an image.
        * @param {Number} c
        */
-      'c': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return c; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.c');
-          /*END_DEBUG*/
-          c = n;
-        }
-      },
+      'c': (function () {
+        var mat_c = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_c; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.c');
+            /*END_DEBUG*/
+            mat_c = n;
+          }
+        };
+      }()),
 
       /* The value that affects the positioning of pixels along the y axis
        * when scaling or rotating an image.
        * @param {Number} d
        */
-      'd': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return d; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.d');
-          /*END_DEBUG*/
-          d = n;
-        }
-      },
+      'd': (function () {
+        var mat_d = 1;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_d; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.d');
+            /*END_DEBUG*/
+            mat_d = n;
+          }
+        };
+      }()),
 
       /* The distance by which to translate each point along the x axis.
        * @param {Number} tx
        */
-      'tx': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return tx; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.tx');
-          /*END_DEBUG*/
-          tx = n;
-        }
-      },
+      'tx': (function () {
+        var mat_tx = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_tx; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.tx');
+            /*END_DEBUG*/
+            mat_tx = n;
+          }
+        };
+      }()),
 
       /* The distance by which to translate each point along the y axis.
        * @param {Number} ty
        */
-      'ty': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return ty; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.ty');
-          /*END_DEBUG*/
-          ty = n;
-        }
-      }
+      'ty': (function () {
+        var mat_ty = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_ty; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.ty');
+            /*END_DEBUG*/
+            mat_ty = n;
+          }
+        };
+      }())
     });//end defineProperties
 
     //initialize matrix
-    if (arg_len === 0) {
-      //default instantiation: 1,0,0,1,0,0
-      matrix.identity();
-    } else if (arg_len === 6) {
+    switch (arg_len) {
+    case 0:
+      //defaults to 1,0,0,1,0,0
+      break;
+    case 6:
       //standard instantiation
       matrix.compose(a, b, c, d, tx, ty);
-    } else {
-      //passed an initialization obj
+      break;
+    case 1:
+      //passed an initialization obj: matrix, array, function
       init_obj = arguments[0];
       a = undefined;
-      
+
       if (typeof init_obj === 'function') {
-        matrix.identity();
         init_obj.call(matrix);
-      }  else if (Array.isArray(init_obj)) {
+      } else if (Array.isArray(init_obj)) {
         /*DEBUG*/
         if (init_obj.length !== 6) {
           throw new SyntaxError("[object Matrix]([a, b, c, d, tx, ty]): Invalid array parameter.");
@@ -158,9 +171,13 @@
         /*DEBUG*/
         check_matrix_type(init_obj, '[object Matrix](matrix)');
         /*END_DEBUG*/
-        matrix.compose(init_obj.a, init_obj.b, init_obj.c,
-                       init_obj.d, init_obj.tx, init_obj.ty);
+        matrix.compose(init_obj.a, init_obj.b, init_obj.c, init_obj.d, init_obj.tx, init_obj.ty);
       }
+      break;
+    default:
+      /*DEBUG*/
+      throw new SyntaxError("[object Matrix](a, b, c, d, tx, ty): Invalid number of parameters.");
+      /*END_DEBUG*/
     }
     
     return matrix;
@@ -179,7 +196,7 @@
      * @return {Matrix}
      */
     'compose': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (a, b, c, d, tx, ty) {
@@ -205,7 +222,7 @@
      * @return {Array}
      */
     'toArray': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -224,7 +241,7 @@
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -238,7 +255,7 @@
      * @return {Boolean}
      */
     'equals': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m) {
@@ -260,7 +277,7 @@
      * @return {Matrix}
      */
     'identity': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value:  function () {
@@ -279,7 +296,7 @@
      * @return {Matrix}
      */
     'clone': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -293,7 +310,7 @@
      * @return {Matrix}
      */
     'multiply': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m) {
@@ -316,7 +333,7 @@
      * @return {Matrix}
      */
     'rotate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (radians) {
@@ -341,7 +358,7 @@
      * @return {Matrix}
      */
     'deltaRotate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (radians) {
@@ -368,7 +385,6 @@
       },
       /* Set a new rotation for matrix.
        * @param {Number} angle, in radians
-       * @return {Matrix}
        */
       set: function (radians) {
         /*DEBUG*/
@@ -376,7 +392,7 @@
         /*END_DEBUG*/
         var c = cos(radians),
             s = sin(radians);
-        return this.compose(c, s, -s, c, this.tx, this.ty);
+        this.compose(c, s, -s, c, this.tx, this.ty);
       }
     },
 
@@ -386,7 +402,7 @@
      * @return {Matrix}
      */
     'scale': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (sx, sy) {
@@ -411,7 +427,7 @@
      * @return {Matrix}
      */
     'deltaScale': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (sx, sy) {
@@ -434,7 +450,7 @@
      * @return {Matrix}
      */
     'translate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (dx, dy) {
@@ -454,7 +470,7 @@
      * @return {Matrix}
      */
     'skew': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (skewX, skewY) {
@@ -481,7 +497,7 @@
      * @return {Matrix}
      */
     'deltaSkew': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (skewX, skewY) {
@@ -503,7 +519,7 @@
      * @return {Matrix}
      */
     'add': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m) {
@@ -524,7 +540,7 @@
      * @return {Matrix}
      */
     'invert': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -581,7 +597,7 @@
      * @return {Point}
      */
     'deltaTransformPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -611,7 +627,7 @@
     },
     
     'rotateAroundExternalPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt, radians) {
@@ -625,7 +641,6 @@
             dy = pt.y;
         
         this.translate(-dx, -dy);
-        
         reg_pt = parent_matrix.transformPoint({x:this.tx, y:this.ty});
         this.tx = reg_pt.x;
         this.ty = reg_pt.y;
@@ -635,7 +650,7 @@
     },
     
     'rotateAroundInternalPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt, radians) {
@@ -649,7 +664,7 @@
     },
     
     'matchInternalPointWithExternal': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt_int, pt_ext) {
@@ -669,7 +684,7 @@
      * @return {Matrix}
      */
     'interpolate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m, t) {

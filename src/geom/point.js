@@ -20,13 +20,7 @@
   doodle_Point = doodle.geom.Point = function (x, y) {
     var point = {},
         arg_len = arguments.length,
-        init_obj; //function, array, point
-
-    /*DEBUG*/
-    if (arg_len > 2) {
-      throw new SyntaxError("[object Point](x, y): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
+        init_obj;
 
     Object.defineProperties(point, point_static_properties);
     //properties that require privacy
@@ -70,6 +64,9 @@
 
     //initialize point
     switch (arg_len) {
+    case 0:
+      //defaults to 0,0
+      break;
     case 2:
       //standard instantiation
       point.compose(x, y);
@@ -81,7 +78,7 @@
       
       if (typeof init_obj === 'function') {
         init_obj.call(point);
-      }  else if (Array.isArray(init_obj)) {
+      } else if (Array.isArray(init_obj)) {
         /*DEBUG*/
         if (init_obj.length !== 2) {
           throw new SyntaxError("[object Point]([x, y]): Invalid array parameter.");
@@ -96,8 +93,9 @@
       }
       break;
     default:
-      //defaults to 0,0
-      break;
+      /*DEBUG*/
+      throw new SyntaxError("[object Point](x, y): Invalid number of parameters.");
+      /*END_DEBUG*/
     }
 
     return point;
@@ -124,7 +122,7 @@
      * @return {Array}
      */
     'toArray': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -139,7 +137,7 @@
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -153,7 +151,7 @@
      * @return {Point}
      */
     'compose': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (x, y) {
@@ -171,7 +169,7 @@
      * @return {Point}
      */
     'clone': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -184,7 +182,7 @@
      * @return {Boolean}
      */
     'equals': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -204,7 +202,7 @@
      * @return {Point} The new point.
      */
     'add': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -223,7 +221,7 @@
      * @return {Point} The new point.
      */
     'subtract': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -237,7 +235,7 @@
     },
 
     'offset': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (dx, dy) {
@@ -255,7 +253,7 @@
      * @return {Number}
      */
     'distance': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt1, pt2) {
@@ -275,7 +273,7 @@
      * @return {Point}
      */
     'normalize': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (thickness) {
@@ -302,7 +300,7 @@
      * @return {Point}
      */
     'interpolate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt1, pt2, t) {
@@ -334,7 +332,7 @@
      * @return {Point}
      */
     'polar': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (len, angle) {
