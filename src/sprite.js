@@ -14,8 +14,6 @@
       check_context_type = doodle.utils.types.check_context_type,
       /*END_DEBUG*/
       //lookup help
-      hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
-      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       doodle_Rectangle = doodle.geom.Rectangle;
 
   /* Super constructor
@@ -113,12 +111,12 @@
                 min = Math.min,
                 max = Math.max,
                 tl = {x: extrema.min_x, y: extrema.min_y},
-								tr = {x: extrema.min_x+w, y: extrema.min_y},
+                tr = {x: extrema.min_x+w, y: extrema.min_y},
                 br = {x: extrema.min_x+w, y: extrema.min_y+h},
                 bl = {x: extrema.min_x, y: extrema.min_y+h};
-						
-						//transform corners to global
-						this.__localToGlobal(tl); //top left
+            
+            //transform corners to global
+            this.__localToGlobal(tl); //top left
             this.__localToGlobal(tr); //top right
             this.__localToGlobal(br); //bot right
             this.__localToGlobal(bl); //bot left
@@ -145,18 +143,18 @@
           }
         },
 
-				/* Same as getBounds, but modifies a rectangle parameter.
-				 * @param {Rectangle|null} rect
+        /* Same as getBounds, but modifies a rectangle parameter.
+         * @param {Rectangle|null} rect
          * @param {Node} targetCoordSpace
          * @return {Rectangle}
          */
         '__getBounds': {
-          enumerable: true,
+          enumerable: false,
           writable: true,
           configurable: false,
           value: function (rect, targetCoordSpace) {
             /*DEBUG*/
-						check_rect_type(rect, this+'.__getBounds', '*rect*, targetCoordSpace');
+            check_rect_type(rect, this+'.__getBounds', '*rect*, targetCoordSpace');
             check_node_type(targetCoordSpace, this+'.__getBounds', 'rect, *targetCoordSpace*');
             /*END_DEBUG*/
             var children = this.children,
@@ -171,8 +169,8 @@
                 br = {x: extrema.min_x+w, y: extrema.min_y+h},
                 bl = {x: extrema.min_x, y: extrema.min_y+h};
 
-						//transform corners to global
-						this.__localToGlobal(tl); //top left
+            //transform corners to global
+            this.__localToGlobal(tl); //top left
             this.__localToGlobal(tr); //top right
             this.__localToGlobal(br); //bot right
             this.__localToGlobal(bl); //bot left
@@ -198,7 +196,8 @@
             return rect;
           }
         },
-        
+
+        /** not ready
         'hitArea': (function () {
           var hit_area = null;
           return {
@@ -214,15 +213,14 @@
             set: function (rect) {
               //accepts null/false or rectangle area for now
               rect = (rect === false) ? null : rect;
-              /*DEBUG*/
               if (rect !== null) {
                 check_rect_type(rect, this+'.hitArea');
               }
-              /*END_DEBUG*/
               hit_area = rect;
             }
           };
         }()),
+        **/
 
         'hitTestObject': {
           enumerable: true,
@@ -248,7 +246,7 @@
           }
         },
 
-        //drawing context to use
+        //drawing context to use - don't think I need to keep this
         'context': {
           get: function () {
             //will keep checking parent for context till found or null
@@ -291,35 +289,6 @@
               cmd.call(sprite, ctx);
             });
           }
-        },
-
-        /* Debug
-         */
-        'debug': {
-          enumerable: true,
-          configurable: false,
-          value: Object.create(null, {
-            'boundingBox': (function () {
-              var debug_boundingBox = "rgb(0,0,255)";
-              return {
-                enumerable: true,
-                configurable: false,
-                get: function () {
-                  return rgb_str_to_hex(debug_boundingBox);
-                },
-                set: function (color) {
-                  /*DEBUG*/
-                  if (typeof color === 'number') {
-                    color = hex_to_rgb_str(color);
-                  } else if (typeof color === 'string' && color[0] === '#') {
-                    color = hex_to_rgb_str(color);
-                  }
-                  /*END_DEBUG*/
-                  debug_boundingBox = color;
-                }
-              };
-            }())
-          })
         }
       };
     }()));//end defineProperties

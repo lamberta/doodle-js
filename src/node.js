@@ -41,6 +41,29 @@
     //properties that require privacy
     Object.defineProperties(node, {
       
+      /*DEBUG*/
+      'debug': {
+        //Debugging oprions
+        enumerable: true,
+        configurable: false,
+        value: Object.create(null, {
+          'boundingBox': (function () {
+            var show_bounds = false;
+            return {
+              enumerable: true,
+              configurable: false,
+              get: function () {
+                return show_bounds;
+              },
+              set: function (showBoundingBox) {
+                show_bounds = showBoundingBox === true;
+              }
+            };
+          }())
+        })
+      },
+      /*END_DEBUG*/
+      
       'id': (function () {
         var node_id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
         node_count += 1;
