@@ -705,6 +705,7 @@
             typeof m.tx === 'number' && typeof m.ty === 'number');
   };
 
+  /*DEBUG*/
   check_matrix_type = doodle.utils.types.check_matrix_type = function (m, caller_name) {
     if (!isMatrix(m)) {
       caller_name = (caller_name === undefined) ? "check_matrix_type" : caller_name;
@@ -713,5 +714,6 @@
       return true;
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
