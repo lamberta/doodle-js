@@ -3,11 +3,14 @@
 (function () {
   var node_static_properties,
       url_regexp = new RegExp("^url\\((.*)\\)"),
+      isElementNode,
+      inheritsElementNode,
       /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_block_element = doodle.utils.types.check_block_element,
+      check_canvas_type = doodle.utils.types.check_canvas_type,
       /*END_DEBUG*/
       //lookup help
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
@@ -32,15 +35,16 @@
     Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
     Object.defineProperties(element_node, (function () {
+      //defaults
       var dom_element = null,
-          id = null,
+          node_id = element_node.id, //inherit from node
+          alpha = element_node.alpha,
+          visible = element_node.visible,
           width = 0,
           height = 0,
           bg_color = null,
           bg_image = null,
-          bg_repeat = 'repeat',
-          alpha = 1,
-          visible = true;
+          bg_repeat = 'repeat';
       
       return {
         'element': {
@@ -48,39 +52,72 @@
           configurable: true,
           get: function () { return dom_element; },
           set: function (elementArg) {
+            var color,
+                image,
+                w, h;
+            
             if (elementArg === null) {
               //if removing an element, reset some values on the doodle object
               if (dom_element !== null) {
-                id = null;
-                width = 0;
-                height = 0;
                 bg_color = null;
                 bg_image = null;
                 bg_repeat = 'repeat';
+                //keep values of parent
+                if (!this.parent) {
+                  width = 0;
+                  height = 0;
+                }
               }
               dom_element = null;
               
             } else {
+              //assign a dom element
               elementArg = get_element(elementArg);
-              /*DEBUG*/
-              check_block_element(elementArg, this+'.element');
-              /*END_DEBUG*/
-              if (dom_element !== null) {
-                //reload values from new element in case they've changed
-                id = get_element_property(elementArg, 'id');
-                width = get_element_property(elementArg, 'width', 'int');
-                height = get_element_property(elementArg, 'height', 'int');
-                bg_repeat = get_element_property(elementArg, 'backgroundRepeat');
-                alpha = get_element_property(elementArg, 'opacity', 'float');
-                bg_color = rgb_str_to_hex(get_element_property(elementArg, 'backgroundColor'));
-                //parse image path from url format
-                bg_image = get_element_property(elementArg, 'backgroundImage');
-                bg_image = (bg_image === "none") ? null : bg_image.match(url_regexp);
-                bg_image = bg_image ? bg_image[1] : null;
-                //if it's not visible or hidden, we'll just say it's visible
-                visible = get_element_property(this.element, 'visibility');
-                visible = (visible === 'visible') ? true : ((visible === 'hidden') ? false : true);
+              
+              /* Layer and Display requires some special element handling.
+               * Would put this in their respective classes, but accessing the
+               * properties within this closure would be a pain.
+               */
+              switch (this.toString()) {
+              case '[object Layer]':
+                /*DEBUG*/
+                check_canvas_type(elementArg, this+'.element');
+                /*END_DEBUG*/
+                set_element_property(elementArg, 'id', node_id, 'html');
+                //need to stack canvas elements inside div
+                set_element_property(elementArg, 'position', 'absolute');
+                //set to display dimensions if there
+                if (this.parent) {
+                  this.width = this.parent.width;
+                  this.height = this.parent.height;
+                }
+                break;
+                
+              case '[object Display]':
+
+                break;
+              default:
+                /*DEBUG*/
+                check_block_element(elementArg, this+'.element');
+                /*END_DEBUG*/
+                //get information from element - images, etc.
+                node_id = get_element_property(elementArg, 'id') || node_id;
+                w = get_element_property(elementArg, 'width', 'int');
+                width = (w === null) ? width : w;
+                h = get_element_property(elementArg, 'height', 'int');
+                height = (h === null) ? height : h;
+                break;
               }
+
+              //take on these properties from all passed dom elements
+              bg_repeat = get_element_property(elementArg, 'backgroundRepeat') || bg_repeat;
+              color = get_element_property(elementArg, 'backgroundColor');
+              bg_color = color ? rgb_str_to_hex(color) : bg_color;
+              //parse image path from url format
+              image = get_element_property(elementArg, 'backgroundImage');
+              image = (!image || image === "none") ? null : bg_image.match(url_regexp);
+              bg_image = image ? image[1] : bg_image;
+              
               dom_element = elementArg;
             }
           }
@@ -93,12 +130,12 @@
         'id': {
           enumerable: true,
           configurable: true,
-          get: function () { return id; },
+          get: function () { return node_id; },
           set: function (name) {
             /*DEBUG*/
             check_string_type(name, this+'.id');
             /*END_DEBUG*/
-            id = set_element_property(this.element, 'id', name, 'html');
+            node_id = set_element_property(this.element, 'id', name, 'html');
           }
         },
         
@@ -256,5 +293,51 @@
       }
     }
   };//end node_static_properties
+
+  /*
+   * CLASS METHODS
+   */
+
+  /* Test if an object is an node.
+   * Not the best way to test object, but it'll do for now.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  isElementNode = doodle.ElementNode.isElementNode = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
+    return (obj.toString() === '[object ElementNode]');
+  };
+
+  /* Check if object inherits from node.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  inheritsElementNode = doodle.ElementNode.inheritsElementNode = function (obj) {
+    while (obj) {
+      if (isElementNode(obj)) {
+        return true;
+      } else {
+        if (typeof obj !== 'object') {
+          return false;
+        }
+        obj = Object.getPrototypeOf(obj);
+      }
+    }
+    return false;
+  };
+
+  /*DEBUG*/
+  doodle.utils.types.check_elementnode_type = function (node, caller, param) {
+    if (inheritsElementNode(node)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_elementnode_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an ElementNode.");
+    }
+  };
+  /*END_DEBUG*/
   
 }());//end class closure
