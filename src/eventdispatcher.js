@@ -232,6 +232,7 @@
         var target,
             evt_type = event.type,
             hasOwnProperty = Object.prototype.hasOwnProperty,
+            //check this node for event handler
             evt_handler_p = hasOwnProperty.call(this.eventListeners, evt_type),
             node,
             node_path = [],
@@ -275,7 +276,7 @@
         //enter capture phase: down the tree
         event.__setEventPhase(CAPTURING_PHASE);
         i = len = node_path.length;
-        while ((i=i-1) >= 0) {
+        while (i--) {
           node_path[i].handleEvent(event);
           //was the event stopped inside the handler?
           if (event.__cancel) {
