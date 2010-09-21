@@ -238,6 +238,24 @@
       }
     },
 
+    /* Same as compose, but takes a rectangle parameter.
+     */
+    '__compose': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.__compose', '*rect*');
+        /*END_DEBUG*/
+        this.x = rect.x;
+        this.y = rect.y;
+        this.width = rect.width;
+        this.height = rect.height;
+        return this;
+      }
+    },
+
     'clone': {
       enumerable: true,
       writable: false,
@@ -333,6 +351,22 @@
         /*END_DEBUG*/
         var x = pt.x,
             y = pt.y;
+        return (x >= this.left && x <= this.right &&
+                y >= this.top && y <= this.bottom);
+      }
+    },
+
+    /* Same as containsPoint, but with 2 number parameters.
+     */
+    '__containsPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (x, y) {
+        /*DEBUG*/
+        check_number_type(x, this+'.containsPoint', '*x*, y');
+        check_number_type(y, this+'.containsPoint', 'x, *y*');
+        /*END_DEBUG*/
         return (x >= this.left && x <= this.right &&
                 y >= this.top && y <= this.bottom);
       }
