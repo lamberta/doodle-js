@@ -218,20 +218,27 @@
           check_rect_type(rect, this+'.__getBounds', '*rect*, targetCoordSpace');
           check_node_type(targetCoordSpace, this+'.__getBounds', 'rect, *targetCoordSpace*');
           /*END_DEBUG*/
-          var child_bounds,
+          var bounding_box_p = false,
+              child_bounds,
               children = this.children,
               len = children.length;
           
           while (len--) {
             child_bounds = children[len].getBounds(targetCoordSpace);
-            
+
             if (child_bounds === null) {
               continue;
+            }
+
+            if (!bounding_box_p) {
+              rect.__compose(child_bounds);
+              bounding_box_p = true;
             } else {
               rect.__union(child_bounds);
             }
           }
-          return rect;
+          
+          return bounding_box_p ? rect : null;
         }
       }
     });//end defineProperties
