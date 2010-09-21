@@ -9,10 +9,10 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_block_element = doodle.utils.types.check_block_element,
-      check_canvas_type = doodle.utils.types.check_canvas_type,
+      check_node_type = doodle.utils.types.check_node_type,
       /*END_DEBUG*/
       //lookup help
+      doodle_Rectangle = doodle.geom.Rectangle,
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
@@ -23,14 +23,8 @@
    * @param {String|Function} id|initializer
    * @return {Object}
    */
-  doodle.ElementNode = function (id, element) {
+  doodle.ElementNode = function (element, id/*optional*/) {
     var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
-
-    /*DEBUG*/
-    if (arguments.length > 2) {
-      throw new SyntaxError("[object ElementNode](id, element): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
 
     Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
@@ -54,14 +48,15 @@
           set: function (elementArg) {
             var color,
                 image,
+                id,
                 w, h;
             
             if (elementArg === null) {
               //check if removing an element
               if (dom_element !== null) {
-                //remove display event handlers
-                if (this.toString === '[object Display]') {
-                  this.__removeDomHandlers();
+                //class specific tasks when removing an element
+                if (typeof this.__removeDomElement === 'function') {
+                  this.__removeDomElement(dom_element);
                 }
                 //reset some values on the doodle object
                 bg_color = null;
@@ -79,60 +74,52 @@
             } else {
               //assign a dom element
               elementArg = get_element(elementArg);
+              /*DEBUG*/
+              if (!elementArg) {
+                throw new ReferenceError(this+".element: Invalid element.");
+              }
+              /*END_DEBUG*/
+              dom_element = elementArg;
               
-              /* Layer and Display requires some special element handling.
-               * Would put this in their respective classes, but accessing the
-               * properties within this closure would be a pain.
+              /* Some classes require special handling of their element.
                */
               switch (this.toString()) {
               case '[object Layer]':
-                /*DEBUG*/
-                check_canvas_type(elementArg, this+'.element');
-                /*END_DEBUG*/
-                set_element_property(elementArg, 'id', node_id, 'html');
-                //need to stack canvas elements inside div
-                set_element_property(elementArg, 'position', 'absolute');
-                //set to display dimensions if there
-                if (this.parent) {
-                  this.width = this.parent.width;
-                  this.height = this.parent.height;
-                }
+                this.__addDomElement(dom_element);
                 break;
-                
               case '[object Display]':
-                /*DEBUG*/
-                check_block_element(elementArg, this+'.element');
-                /*END_DEBUG*/
-                //need to stack the canvas elements on top of each other
-                set_element_property(elementArg, 'position', 'relative');
-                //only check user styles, computed styles include window size
-                w = get_element_property(elementArg, 'width', 'int', false);
-                h = get_element_property(elementArg, 'height', 'int', false);
-                if (w !== null) { width = w; }
-                if (h !== null) { height = h; }
-                this.__addDomHandlers(elementArg);
+                this.__addDomElement(dom_element);
+                w = get_element_property(dom_element, 'width', 'int') || dom_element.width;
+                h = get_element_property(dom_element, 'height', 'int') || dom_element.height;
+                if (typeof w === 'number') { width = w; }
+                if (typeof h === 'number') { height = h; }
                 break;
-                
               default:
-                //get information from element - images, etc.
-                node_id = get_element_property(elementArg, 'id') || node_id;
-                w = get_element_property(elementArg, 'width', 'int');
-                h = get_element_property(elementArg, 'height', 'int');
-                if (w !== null) { width = w; }
-                if (h !== null) { height = h; }
+                //get information from element - images, etc.  
+                w = get_element_property(dom_element, 'width', 'int') || dom_element.width;
+                h = get_element_property(dom_element, 'height', 'int') || dom_element.height;
+                if (typeof w === 'number') { width = w; }
+                if (typeof h === 'number') { height = h; }
                 break;
               }
 
-              //take on these properties from all passed dom elements
-              bg_repeat = get_element_property(elementArg, 'backgroundRepeat') || bg_repeat;
-              color = get_element_property(elementArg, 'backgroundColor');
+              /* These go for every dom element passed.
+               */
+              id = get_element_property(dom_element, 'id');
+              //if element has an id, rename node. Else, set element to this id.
+              if (id) {
+                node_id = id;
+              } else {
+                this.id = node_id;
+              }
+              //background color and image
+              bg_repeat = get_element_property(dom_element, 'backgroundRepeat') || bg_repeat;
+              color = get_element_property(dom_element, 'backgroundColor');
               bg_color = color ? rgb_str_to_hex(color) : bg_color;
               //parse image path from url format
-              image = get_element_property(elementArg, 'backgroundImage');
+              image = get_element_property(dom_element, 'backgroundImage');
               image = (!image || image === "none") ? null : bg_image.match(url_regexp);
               bg_image = image ? image[1] : bg_image;
-              
-              dom_element = elementArg;
             }
           }
         },
@@ -272,22 +259,86 @@
             }
             visible =  isVisible;
           }
+        },
+
+        '__getBounds': {
+          enumerable: true,
+          configurable: true,
+          value: (function () {
+            var rect = doodle_Rectangle(); //recycle
+            
+            return function (targetCoordSpace) {
+              /*DEBUG*/
+              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              /*END_DEBUG*/
+              var children = this.children,
+                  len = children.length,
+                  bounding_box = rect,
+                  child_bounds,
+                  w = this.width,
+                  h = this.height,
+                  tl = {x: 0, y: 0},
+                  tr = {x: w, y: 0},
+                  br = {x: w, y: h},
+                  bl = {x: 0, y: h},
+                  min = Math.min,
+                  max = Math.max;
+              
+              //transform corners to global
+              this.__localToGlobal(tl); //top left
+              this.__localToGlobal(tr); //top right
+              this.__localToGlobal(br); //bot right
+              this.__localToGlobal(bl); //bot left
+              //transform global to target space
+              targetCoordSpace.__globalToLocal(tl);
+              targetCoordSpace.__globalToLocal(tr);
+              targetCoordSpace.__globalToLocal(br);
+              targetCoordSpace.__globalToLocal(bl);
+
+              //set rect with extremas
+              bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
+              bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
+              bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
+              bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
+
+              //add child bounds to this
+              while (len--) {
+                child_bounds = children[len].__getBounds(targetCoordSpace);
+                if (child_bounds !== null) {
+                  bounding_box.__union(child_bounds);
+                }
+              }
+              return bounding_box;
+            };
+          }())
         }
+        
       };
     }()));//end defineProperties
-    
-    //passed an initialization function
-    if (typeof arguments[0] === 'function') {
-      /*DEBUG*/
-      if (arguments.length > 1) {
-        throw new SyntaxError("[object ElementNode](function): Invalid number of parameters.");
+
+    //check args
+    switch (arguments.length) {
+    case 0:
+      break;
+    case 1:
+      //passed function
+      if (typeof arguments[0] === 'function') {
+        arguments[0].call(element_node);
+        element = undefined;
+      } else {
+        //passed element
+        element_node.element = element;
       }
-      /*END_DEBUG*/
-      arguments[0].call(element_node);
-      id = undefined;
-    } else if (element !== undefined) {
-      //standard instantiation
-      element_node.element = element;
+      break;
+    case 2:
+      //standard instantiation (element, id)
+      if (element) {
+        //can be undefined
+        element_node.element = element;
+      }
+      break;
+    default:
+      throw new SyntaxError("[object ElementNode](element, id): Invalid number of parameters.");
     }
 
     return element_node;
