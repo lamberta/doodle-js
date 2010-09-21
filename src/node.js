@@ -12,7 +12,6 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_matrix_type = doodle.utils.types.check_matrix_type,
-      check_rect_type = doodle.utils.types.check_rect_type,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
       //recycled events
@@ -21,6 +20,7 @@
       //lookup help
       doodle_Point = doodle.geom.Point,
       doodle_Matrix = doodle.geom.Matrix,
+      doodle_Rectangle = doodle.geom.Rectangle,
       create_scene_path = doodle.utils.create_scene_path,
       PI = Math.PI;
   
@@ -183,63 +183,45 @@
           /*DEBUG*/
           check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
           /*END_DEBUG*/
-          var bounding_box = null,
-              child_bounds,
-              children = this.children,
-              len = children.length;
-          
-          while (len--) {
-            child_bounds = children[len].getBounds(targetCoordSpace);
-
-            if (child_bounds === null) {
-              continue;
-            }
-            if (bounding_box === null) {
-              bounding_box = child_bounds;
-            } else {
-              bounding_box.__union(child_bounds);
-            }
-          }
-          return bounding_box;
+          return this.__getBounds(targetCoordSpace).clone();
         }
       },
 
-      /* Same as getBounds, but modifies a rectangle parameter.
-       * @param {Rectangle|null} rect
-       * @param {Node} targetCoordSpace
-       * @return {Rectangle|Null}
+      /* Same as getBounds, but reuses an internal rectangle.
+       * Since it's passed by reference, you don't want to modify it, but
+       * it's more efficient for checking bounds.
        */
       '__getBounds': {
         enumerable: false,
         writable: true,
         configurable: false,
-        value: function (rect, targetCoordSpace) {
-          /*DEBUG*/
-          check_rect_type(rect, this+'.__getBounds', '*rect*, targetCoordSpace');
-          check_node_type(targetCoordSpace, this+'.__getBounds', 'rect, *targetCoordSpace*');
-          /*END_DEBUG*/
-          var bounding_box_p = false,
-              child_bounds,
-              children = this.children,
-              len = children.length;
+        value: (function () {
+          var rect = doodle_Rectangle(); //recycle
           
-          while (len--) {
-            child_bounds = children[len].getBounds(targetCoordSpace);
-
-            if (child_bounds === null) {
-              continue;
-            }
-
-            if (!bounding_box_p) {
-              rect.__compose(child_bounds);
-              bounding_box_p = true;
-            } else {
-              rect.__union(child_bounds);
-            }
-          }
+          return function (targetCoordSpace) {
+            /*DEBUG*/
+            check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+            /*END_DEBUG*/
+            var bounding_box = null,
+                child_bounds,
+                children = this.children,
+                len = children.length;
           
-          return bounding_box_p ? rect : null;
-        }
+            while (len--) {
+              child_bounds = children[len].__getBounds(targetCoordSpace);
+              
+              if (child_bounds === null) {
+                continue;
+              }
+              if (bounding_box === null) {
+                bounding_box = rect.__compose(child_bounds);
+              } else {
+                bounding_box.__union(child_bounds);
+              }
+            }
+            return bounding_box;
+          };
+        }())
       }
     });//end defineProperties
 

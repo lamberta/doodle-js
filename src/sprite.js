@@ -9,7 +9,6 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_point_type = doodle.utils.types.check_point_type,
-      check_rect_type = doodle.utils.types.check_rect_type,
       check_node_type = doodle.utils.types.check_node_type,
       check_context_type = doodle.utils.types.check_context_type,
       /*END_DEBUG*/
@@ -102,99 +101,65 @@
             /*DEBUG*/
             check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
             /*END_DEBUG*/
-            var children = this.children,
-                len = children.length,
-                bounding_box = doodle_Rectangle(),
-                child_bounds,
-                w = this.width,
-                h = this.height,
-                min = Math.min,
-                max = Math.max,
-                tl = {x: extrema.min_x, y: extrema.min_y},
-                tr = {x: extrema.min_x+w, y: extrema.min_y},
-                br = {x: extrema.min_x+w, y: extrema.min_y+h},
-                bl = {x: extrema.min_x, y: extrema.min_y+h};
-            
-            //transform corners to global
-            this.__localToGlobal(tl); //top left
-            this.__localToGlobal(tr); //top right
-            this.__localToGlobal(br); //bot right
-            this.__localToGlobal(bl); //bot left
-            //transform global to target space
-            targetCoordSpace.__globalToLocal(tl);
-            targetCoordSpace.__globalToLocal(tr);
-            targetCoordSpace.__globalToLocal(br);
-            targetCoordSpace.__globalToLocal(bl);
-
-            //set rect with extremas
-            bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
-            bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
-            bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
-            bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
-
-            //add child bounds to this
-            while (len--) {
-              child_bounds = children[len].getBounds(targetCoordSpace);
-              if (child_bounds !== null) {
-                bounding_box.__union(child_bounds);
-              }
-            }
-            return bounding_box;
+            return this.__getBounds(targetCoordSpace).clone();
           }
         },
 
-        /* Same as getBounds, but modifies a rectangle parameter.
-         * @param {Rectangle|null} rect
-         * @param {Node} targetCoordSpace
-         * @return {Rectangle}
+        /* Same as getBounds, but reuses an internal rectangle.
+         * Since it's passed by reference, you don't want to modify it, but
+         * it's more efficient for checking bounds.
          */
         '__getBounds': {
           enumerable: false,
           writable: true,
           configurable: false,
-          value: function (rect, targetCoordSpace) {
-            /*DEBUG*/
-            check_rect_type(rect, this+'.__getBounds', '*rect*, targetCoordSpace');
-            check_node_type(targetCoordSpace, this+'.__getBounds', 'rect, *targetCoordSpace*');
-            /*END_DEBUG*/
-            var children = this.children,
-                len = children.length,
-                child_bounds,
-                w = this.width,
-                h = this.height,
-                min = Math.min,
-                max = Math.max,
-                tl = {x: extrema.min_x, y: extrema.min_y},
-                tr = {x: extrema.min_x+w, y: extrema.min_y},
-                br = {x: extrema.min_x+w, y: extrema.min_y+h},
-                bl = {x: extrema.min_x, y: extrema.min_y+h};
+          value: (function () {
+            var rect = doodle_Rectangle(); //recycle
+            
+            return function (targetCoordSpace) {
+              /*DEBUG*/
+              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              /*END_DEBUG*/
+              var children = this.children,
+                  len = children.length,
+                  bounding_box = rect,
+                  child_bounds,
+                  w = this.width,
+                  h = this.height,
+                  min = Math.min,
+                  max = Math.max,
+                  tl = {x: extrema.min_x, y: extrema.min_y},
+                  tr = {x: extrema.min_x+w, y: extrema.min_y},
+                  br = {x: extrema.min_x+w, y: extrema.min_y+h},
+                  bl = {x: extrema.min_x, y: extrema.min_y+h};
+              
+              //transform corners to global
+              this.__localToGlobal(tl); //top left
+              this.__localToGlobal(tr); //top right
+              this.__localToGlobal(br); //bot right
+              this.__localToGlobal(bl); //bot left
+              //transform global to target space
+              targetCoordSpace.__globalToLocal(tl);
+              targetCoordSpace.__globalToLocal(tr);
+              targetCoordSpace.__globalToLocal(br);
+              targetCoordSpace.__globalToLocal(bl);
 
-            //transform corners to global
-            this.__localToGlobal(tl); //top left
-            this.__localToGlobal(tr); //top right
-            this.__localToGlobal(br); //bot right
-            this.__localToGlobal(bl); //bot left
-            //transform global to target space
-            targetCoordSpace.__globalToLocal(tl);
-            targetCoordSpace.__globalToLocal(tr);
-            targetCoordSpace.__globalToLocal(br);
-            targetCoordSpace.__globalToLocal(bl);
+              //set rect with extremas
+              bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
+              bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
+              bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
+              bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
 
-            //set rect with extremas
-            rect.left = min(tl.x, tr.x, br.x, bl.x);
-            rect.right = max(tl.x, tr.x, br.x, bl.x);
-            rect.top = min(tl.y, tr.y, br.y, bl.y);
-            rect.bottom = max(tl.y, tr.y, br.y, bl.y);
-
-            //add child bounds to this
-            while (len--) {
-              child_bounds = children[len].getBounds(targetCoordSpace);
-              if (child_bounds !== null) {
-                rect.__union(child_bounds);
+              //add child bounds to this
+              while (len--) {
+                child_bounds = children[len].__getBounds(targetCoordSpace);
+                if (child_bounds !== null) {
+                  bounding_box.__union(child_bounds);
+                }
               }
-            }
-            return rect;
-          }
+              return bounding_box;
+            };
+          }())
         },
 
         /** not ready
