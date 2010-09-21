@@ -582,10 +582,12 @@
       configurable: false,
       value: function (point) {
         /*DEBUG*/
-        check_point_type(point, this+'.transformPoint', '*point*');
+        check_point_type(point, this+'.__transformPoint', '*point*');
         /*END_DEBUG*/
-        point.x = this.a * point.x + this.c * point.y + this.tx;
-        point.y = this.b * point.x + this.d * point.y + this.ty;
+        var x = point.x,
+            y = point.y;
+        point.x = this.a * x + this.c * y + this.tx;
+        point.y = this.b * x + this.d * y + this.ty;
         return point;
       }
     },
@@ -618,10 +620,12 @@
       configurable: false,
       value: function (point) {
         /*DEBUG*/
-        check_point_type(point, this+'.deltaTransformPoint', '*point*');
+        check_point_type(point, this+'.__deltaTransformPoint', '*point*');
         /*END_DEBUG*/
-        point.x = this.a * point.x + this.c * point.y;
-        point.y = this.b * point.x + this.d * point.y;
+        var x = point.x,
+            y = point.y;
+        point.x = this.a * x + this.c * y;
+        point.y = this.b * x + this.d * y;
         return point;
       }
     },
