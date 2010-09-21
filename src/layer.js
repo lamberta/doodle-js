@@ -7,6 +7,7 @@
       inheritsLayer,
       /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
+      check_canvas_type = doodle.utils.types.check_canvas_type,
       /*END_DEBUG*/
       set_element_property = doodle.utils.set_element_property;
   
@@ -16,20 +17,15 @@
    */
   doodle.Layer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
-        layer = Object.create(doodle.ElementNode(layer_name));
-    
-    /*DEBUG*/
-    if (arguments.length > 2) {
-      throw new SyntaxError("[object Layer](id, element): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
+        layer = Object.create(doodle.ElementNode(undefined, layer_name));
 
     Object.defineProperties(layer, layer_static_properties);
     //properties that require privacy
     Object.defineProperties(layer, (function () {
       //defaults
       var width = 0,
-          height = 0;
+          height = 0,
+          context = null;
       
       return {
         /* Canvas dimensions need to apply to HTML attributes.
@@ -56,23 +52,67 @@
             /*END_DEBUG*/
             height = set_element_property(this.element, 'height', n, 'html');
           }
+        },
+
+        'context': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return context; }
+        },
+
+        /* Layer specific things to setup when adding a dom element.
+         * Called in ElementNode.element
+         */
+        '__addDomElement': {
+          enumerable: false,
+          writable: false,
+          value: function (elementArg) {
+            /*DEBUG*/
+            check_canvas_type(elementArg, this+'.element');
+            /*END_DEBUG*/
+            //need to stack canvas elements inside div
+            set_element_property(elementArg, 'position', 'absolute');
+            //set to display dimensions if there
+            if (this.parent) {
+              this.width = this.parent.width;
+              this.height = this.parent.height;
+            }
+            //set rendering context
+            context = elementArg.getContext('2d');
+          }
+        },
+
+        '__removeDomElement': {
+          enumerable: false,
+          writable: false,
+          value: function (elementArg) {
+            context = null;
+          }
         }
         
       };
     }()));//end defineProperties
 
-    //passed an initialization function
-    if (typeof arguments[0] === 'function') {
-      /*DEBUG*/
-      if (arguments.length > 1) {
-        throw new SyntaxError("[object Layer](function): Invalid number of parameters.");
+    switch (arguments.length) {
+    case 0:
+      break;
+    case 1:
+      //passed function or id string
+      if (typeof arguments[0] === 'function') {
+        arguments[0].call(layer);
+        id = undefined;
       }
+      break;
+    case 2:
+      /*DEBUG*/
+      check_canvas_type(element, '[object Layer]', 'id, *element*');
       /*END_DEBUG*/
-      arguments[0].call(layer);
-      id = undefined;
+      layer.element = element;
+      break;
+    default:
+      throw new SyntaxError("[object Layer](id, element): Invalid number of parameters.");
     }
-    
-    //layer defaults - if not set in init function
+
     if (layer.element === null) {
       layer.element = document.createElement('canvas');
     }
@@ -84,24 +124,30 @@
 
   
   layer_static_properties = {
-    
-    'context': {
-      get: function () {
-        return this.element.getContext('2d');
-      }
-    },
-
     /* Returns the string representation of the specified object.
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
         return "[object Layer]";
       }
-    } 
+    },
+
+    /* This is always the same, so we'll save some computation.
+     */
+    '__getBounds': {
+      enumerable: true,
+      configurable: true,
+      value: (function () {
+        var rect = doodle.geom.Rectangle(); //recycle
+        return function () {
+          return rect.compose(0, 0, this.width, this.height);
+        };
+      }())
+    }
   };//end layer_static_properties
 
   /*
