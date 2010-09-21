@@ -57,8 +57,13 @@
                 w, h;
             
             if (elementArg === null) {
-              //if removing an element, reset some values on the doodle object
+              //check if removing an element
               if (dom_element !== null) {
+                //remove display event handlers
+                if (this.toString === '[object Display]') {
+                  this.__removeDomHandlers();
+                }
+                //reset some values on the doodle object
                 bg_color = null;
                 bg_image = null;
                 bg_repeat = 'repeat';
@@ -68,6 +73,7 @@
                   height = 0;
                 }
               }
+              //element be'gone!
               dom_element = null;
               
             } else {
@@ -94,18 +100,26 @@
                 break;
                 
               case '[object Display]':
-
-                break;
-              default:
                 /*DEBUG*/
                 check_block_element(elementArg, this+'.element');
                 /*END_DEBUG*/
+                //need to stack the canvas elements on top of each other
+                set_element_property(elementArg, 'position', 'relative');
+                //only check user styles, computed styles include window size
+                w = get_element_property(elementArg, 'width', 'int', false);
+                h = get_element_property(elementArg, 'height', 'int', false);
+                if (w !== null) { width = w; }
+                if (h !== null) { height = h; }
+                this.__addDomHandlers(elementArg);
+                break;
+                
+              default:
                 //get information from element - images, etc.
                 node_id = get_element_property(elementArg, 'id') || node_id;
                 w = get_element_property(elementArg, 'width', 'int');
-                width = (w === null) ? width : w;
                 h = get_element_property(elementArg, 'height', 'int');
-                height = (h === null) ? height : h;
+                if (w !== null) { width = w; }
+                if (h !== null) { height = h; }
                 break;
               }
 
