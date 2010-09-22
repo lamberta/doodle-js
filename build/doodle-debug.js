@@ -9,6 +9,11 @@ var doodle = {};
 //packages
 doodle.geom = {};
 
+(function () {
+  /*DEBUG*/
+  var check_display_type; //declared in display, used in node.
+  /*END_DEBUG*/
+
 /* ES5 compatibility
  */
   
@@ -21,33 +26,29 @@ if (typeof Function.prototype.bind !== 'function') {
   };
 }
 /*globals doodle, document*/
+
 doodle.utils = {
   rgb_to_hex: function (r, g, b) {
     /*DEBUG*/
-    if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number') {
-      throw new TypeError("rgb_to_hex: Color values must be numbers.");
-    }
+    var check_number_type = doodle.utils.types.check_number_type;
+    check_number_type(r, 'rgb_to_hex', '*r*, g, b');
+    check_number_type(g, 'rgb_to_hex', 'r, *g*, b');
+    check_number_type(b, 'rgb_to_hex', 'r, g, *b*');
     /*END_DEBUG*/
     var hex_color = (b | (g << 8) | (r << 16)).toString(16);
     return '#'+ String('000000'+hex_color).slice(-6); //pad out
   },
 
   rgb_str_to_hex: function (rgb_str) {
-    var utils = doodle.utils;
     /*DEBUG*/
-    if (typeof rgb_str !== 'string') {
-      throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
-    }
-    /*END_DEBUG*/
-    
-    var rgb = utils.rgb_str_to_rgb(rgb_str);
-    
+    doodle.utils.types.check_string_type(rgb_str, 'rgb_str_to_hex', '*rgb_str*');
+    /*END_DEBUG*/   
+    var doodle_utils = doodle.utils,
+        rgb = doodle_utils.rgb_str_to_rgb(rgb_str);
     /*DEBUG*/
-    if (!Array.isArray(rgb)) {
-      throw new SyntaxError('rgb_str_to_hex(rgb_str): Parameter must be in the format: "rgb(n, n, n)".');
-    }
+    doodle.utils.types.check_array_type(rgb, 'rgb_str_to_hex::rgb');
     /*END_DEBUG*/
-    return utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
+    return doodle_utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
   },
   
   rgb_to_rgb_str: function (r, g, b, a) {
@@ -75,9 +76,8 @@ doodle.utils = {
       /*END_DEBUG*/
       color = color.trim().match(rgb_regexp);
       /*DEBUG*/
-      if (!Array.isArray(color)) {
-        throw new SyntaxError('rgb_str_to_rgb(color): Parameter must be in the format: "rgba(n, n, n, n)".');
-      }
+      //if it's not an array, it didn't parse correctly
+      doodle.utils.types.check_array_type(color, 'rgb_str_to_rgb', "*color{'rgba(n, n, n, n)'}*");
       /*END_DEBUG*/
       var rgb = [parseInt(color[1], 10),
                  parseInt(color[2], 10),
@@ -97,23 +97,19 @@ doodle.utils = {
       color = parseInt(color, 16);
     }
     /*DEBUG*/
-    if (typeof color !== 'number') {
-      throw new TypeError("hex_to_rgb: Color in invalid hex format.");
-    }
+    doodle.utils.types.check_number_type(color, 'hex_to_rgb', "*color{0xffffff|#ffffff}*");
     /*END_DEBUG*/
     return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
   },
 
   hex_to_rgb_str: function (color, alpha) {
-    var utils = doodle.utils;
+    var doodle_utils = doodle.utils;
     alpha = (alpha === undefined) ? 1 : alpha;
     /*DEBUG*/
-    if (typeof alpha !== 'number') {
-      throw new TypeError("hex_to_rgb_str(color, *alpha*): Parameter must be a number.");
-    }
+    doodle.utils.types.check_number_type(alpha, 'hex_to_rgb_str', '*color*');
     /*END_DEBUG*/
-    color = utils.hex_to_rgb(color);
-    return utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
+    color = doodle_utils.hex_to_rgb(color);
+    return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
   }
 };
 
@@ -123,6 +119,7 @@ doodle.utils = {
  * check_rect_type
  * These can't be added to utils.types until they're created.
  */
+/*DEBUG*/
 doodle.utils.types = (function () {
   function throw_type_error (type, caller, param) {
     if (typeof type !== 'string') {
@@ -182,7 +179,7 @@ doodle.utils.types = (function () {
     
   };
 }());
-
+/*END_DEBUG*/
 
 /* Returns HTML element from id name or element itself.
  */
@@ -199,9 +196,13 @@ doodle.utils.get_element = function (element) {
 
 /* Returns css property of element, it's own or inherited.
  */
-doodle.utils.get_style_property = function (element, property) {
+doodle.utils.get_style_property = function (element, property, useComputedStyle) {
+  useComputedStyle = (useComputedStyle === undefined) ? true : false;
+  /*DEBUG*/
+  doodle.utils.types.check_boolean_type(useComputedStyle, 'get_style_property');
+  /*END_DEBUG*/
   try {
-    if (document.defaultView && document.defaultView.getComputedStyle) {
+    if (useComputedStyle && document.defaultView && document.defaultView.getComputedStyle) {
       return document.defaultView.getComputedStyle(element, null)[property];
     } else if (element.currentStyle) {
       return element.currentStyle[property];
@@ -219,25 +220,34 @@ doodle.utils.get_style_property = function (element, property) {
  * CSS properties take precedence over HTML attributes.
  * @param type {String} 'int'|'float' Return type.
  */
-doodle.utils.get_element_property = function (element, property, type) {
-  var val;
+doodle.utils.get_element_property = function (element, property, returnType, useComputedStyle) {
+  returnType = returnType || false;
+  var val, obj;
   try {
-    val = doodle.utils.get_style_property(element, property);
+    val = doodle.utils.get_style_property(element, property, useComputedStyle);
   } catch (e) {
     val = undefined;
   }
-  if (val === undefined || val === null) {
+  if (val === undefined || val === null || val === '') {
     val = element.getAttribute(property);
   }
-  if (type !== undefined) {
-    switch (type) {
+  if (returnType !== false) {
+    switch (returnType) {
     case 'int':
       val = parseInt(val, 10);
       val = isNaN(val) ? null : val;
       break;
+    case 'number':
     case 'float':
       val = parseFloat(val);
       val = isNaN(val) ? null : val;
+      break;
+    case 'string':
+      val = String(val);
+      break;
+    case 'object':
+      obj = {};
+      val = obj[property] = val;
       break;
     default:
       break;
@@ -268,8 +278,38 @@ doodle.utils.set_element_property = function (element, property, value, type) {
   }
   return value;
 };
+
+(function () {
+  /**
+   * Creates a scene graph path from a given node and all it's descendants.
+   * @param {Node} node
+   * @param {Array=} array Array to store the path nodes in.
+   * @param {Boolean=} clearArray Empty array passed as parameter before storing nodes in it.
+   * @return {Array} The array passed to the function (modified in place).
+   */
+  doodle.utils.create_scene_path = function create_path (node, array, clearArray) {
+    array = (array === undefined) ? [] : array;
+    clearArray = (clearArray === undefined) ? false : clearArray;
+    /*DEBUG*/
+    doodle.utils.types.check_array_type(array, 'create_scene_path');
+    doodle.utils.types.check_boolean_type(clearArray, 'create_scene_path');
+    /*END_DEBUG*/
+    var i = node.children.length;
+    if (clearArray) {
+      array.splice(0, array.length);
+    }
+    if (i !== 0) {
+      while (i--) {
+        create_path(node.children[i], array, false);
+      }
+    }
+    array.push(node);
+    return array; //return for further operations on array (reverse)
+  };
+}());
+/*DEBUG_STATS*/
 /*
- * stats.js r4
+ * stats.js r5
  * http://github.com/mrdoob/stats.js
  *
  * Released under MIT license:
@@ -278,7 +318,7 @@ doodle.utils.set_element_property = function (element, property, value, type) {
  * How to use:
  *
  *  var stats = new Stats();
- *  parentElement.appendChild(stats.domElement);
+ *  parentElement.appendChild( stats.domElement );
  *
  *  setInterval(function () {
  *
@@ -290,66 +330,126 @@ doodle.utils.set_element_property = function (element, property, value, type) {
 
 var Stats = function () {
 
-	var _container, _mode = 'fps',
+	var _mode = 0, _modesCount = 2, _container,
 	_frames = 0, _time = new Date().getTime(), _timeLastFrame = _time, _timeLastSecond = _time,
-	_fps = 0, _fpsMin = 1000, _fpsMax = 0, _fpsText, _fpsCanvas, _fpsContext, _fpsImageData,
-	_ms = 0, _msMin = 1000, _msMax = 0, _msText, _msCanvas, _msContext, _msImageData;
+	_fps = 0, _fpsMin = 1000, _fpsMax = 0, _fpsDiv, _fpsText, _fpsCanvas, _fpsContext, _fpsImageData,
+	_ms = 0, _msMin = 1000, _msMax = 0, _msDiv, _msText, _msCanvas, _msContext, _msImageData,
+	_mem = 0, _memMin = 1000, _memMax = 0, _memDiv, _memText, _memCanvas, _memContext, _memImageData,
+	_colors = {
+		fps: {
+			bg: { r: 16, g: 16, b: 48 },
+			fg: { r: 0, g: 255, b: 255 }
+		},
+		ms: {
+			bg: { r: 16, g: 48, b: 16 },
+			fg: { r: 0, g: 255, b: 0 }
+		},
+		mem: {
+			bg: { r: 48, g: 16, b: 26 },
+			fg: { r: 255, g: 0, b: 128 }
+		}
+	};
 
 	_container = document.createElement( 'div' );
 	_container.style.fontFamily = 'Helvetica, Arial, sans-serif';
+	_container.style.textAlign = 'left';
 	_container.style.fontSize = '9px';
-	_container.style.backgroundColor = '#000020';
 	_container.style.opacity = '0.9';
 	_container.style.width = '80px';
-	_container.style.paddingTop = '2px';
 	_container.style.cursor = 'pointer';
 	_container.addEventListener( 'click', swapMode, false );
 
+	// fps
+
+	_fpsDiv = document.createElement( 'div' );
+	_fpsDiv.style.backgroundColor = 'rgb(' + Math.floor( _colors.fps.bg.r / 2 ) + ',' + Math.floor( _colors.fps.bg.g / 2 ) + ',' + Math.floor( _colors.fps.bg.b / 2 ) + ')';
+	_fpsDiv.style.padding = '2px 0px 3px 0px';
+	_container.appendChild( _fpsDiv );
+
 	_fpsText = document.createElement( 'div' );
 	_fpsText.innerHTML = '<strong>FPS</strong>';
-	_fpsText.style.color = '#00ffff';
-	_fpsText.style.marginLeft = '3px';
-	_fpsText.style.marginBottom = '3px';
-	_container.appendChild(_fpsText);
+	_fpsText.style.color = 'rgb(' + _colors.fps.fg.r + ',' + _colors.fps.fg.g + ',' + _colors.fps.fg.b + ')';
+	_fpsText.style.margin = '0px 0px 1px 3px';
+	_fpsDiv.appendChild( _fpsText );
 
 	_fpsCanvas = document.createElement( 'canvas' );
 	_fpsCanvas.width = 74;
 	_fpsCanvas.height = 30;
 	_fpsCanvas.style.display = 'block';
 	_fpsCanvas.style.marginLeft = '3px';
-	_fpsCanvas.style.marginBottom = '3px';
-	_container.appendChild(_fpsCanvas);
+	_fpsDiv.appendChild( _fpsCanvas );
 
 	_fpsContext = _fpsCanvas.getContext( '2d' );
-	_fpsContext.fillStyle = '#101030';
+	_fpsContext.fillStyle = 'rgb(' + _colors.fps.bg.r + ',' + _colors.fps.bg.g + ',' + _colors.fps.bg.b + ')';
 	_fpsContext.fillRect( 0, 0, _fpsCanvas.width, _fpsCanvas.height );
 
 	_fpsImageData = _fpsContext.getImageData( 0, 0, _fpsCanvas.width, _fpsCanvas.height );
 
+	// ms
+
+	_msDiv = document.createElement( 'div' );
+	_msDiv.style.backgroundColor = 'rgb(' + Math.floor( _colors.ms.bg.r / 2 ) + ',' + Math.floor( _colors.ms.bg.g / 2 ) + ',' + Math.floor( _colors.ms.bg.b / 2 ) + ')';
+	_msDiv.style.padding = '2px 0px 3px 0px';
+	_msDiv.style.display = 'none';
+	_container.appendChild( _msDiv );
+
 	_msText = document.createElement( 'div' );
 	_msText.innerHTML = '<strong>MS</strong>';
-	_msText.style.color = '#00ffff';
-	_msText.style.marginLeft = '3px';
-	_msText.style.marginBottom = '3px';
-	_msText.style.display = 'none';
-	_container.appendChild(_msText);
+	_msText.style.color = 'rgb(' + _colors.ms.fg.r + ',' + _colors.ms.fg.g + ',' + _colors.ms.fg.b + ')';
+	_msText.style.margin = '0px 0px 1px 3px';
+	_msDiv.appendChild( _msText );
 
 	_msCanvas = document.createElement( 'canvas' );
 	_msCanvas.width = 74;
 	_msCanvas.height = 30;
 	_msCanvas.style.display = 'block';
 	_msCanvas.style.marginLeft = '3px';
-	_msCanvas.style.marginBottom = '3px';
-	_msCanvas.style.display = 'none';
-	_container.appendChild(_msCanvas);
+	_msDiv.appendChild( _msCanvas );
 
 	_msContext = _msCanvas.getContext( '2d' );
-	_msContext.fillStyle = '#101030';
+	_msContext.fillStyle = 'rgb(' + _colors.ms.bg.r + ',' + _colors.ms.bg.g + ',' + _colors.ms.bg.b + ')';
 	_msContext.fillRect( 0, 0, _msCanvas.width, _msCanvas.height );
 
 	_msImageData = _msContext.getImageData( 0, 0, _msCanvas.width, _msCanvas.height );
 
-	function updateGraph( data, value ) {
+	// mem
+
+	try { 
+
+		if ( webkitPerformance && webkitPerformance.memory.totalJSHeapSize ) {
+
+			_modesCount = 3;
+
+		}
+
+	} catch ( error ) { };
+
+	_memDiv = document.createElement( 'div' );
+	_memDiv.style.backgroundColor = 'rgb(' + Math.floor( _colors.mem.bg.r / 2 ) + ',' + Math.floor( _colors.mem.bg.g / 2 ) + ',' + Math.floor( _colors.mem.bg.b / 2 ) + ')';
+	_memDiv.style.padding = '2px 0px 3px 0px';
+	_memDiv.style.display = 'none';
+	_container.appendChild( _memDiv );
+
+	_memText = document.createElement( 'div' );
+	_memText.innerHTML = '<strong>MEM</strong>';
+	_memText.style.color = 'rgb(' + _colors.mem.fg.r + ',' + _colors.mem.fg.g + ',' + _colors.mem.fg.b + ')';
+	_memText.style.margin = '0px 0px 1px 3px';
+	_memDiv.appendChild( _memText );
+
+	_memCanvas = document.createElement( 'canvas' );
+	_memCanvas.width = 74;
+	_memCanvas.height = 30;
+	_memCanvas.style.display = 'block';
+	_memCanvas.style.marginLeft = '3px';
+	_memDiv.appendChild( _memCanvas );
+
+	_memContext = _memCanvas.getContext( '2d' );
+	_memContext.fillStyle = '#301010';
+	_memContext.fillRect( 0, 0, _memCanvas.width, _memCanvas.height );
+
+	_memImageData = _memContext.getImageData( 0, 0, _memCanvas.width, _memCanvas.height );
+
+	function updateGraph( data, value, color ) {
 
 		var x, y, index;
 
@@ -373,15 +473,15 @@ var Stats = function () {
 
 			if ( y < value ) {
 
-				data[ index ] = 16;
-				data[ index + 1 ] = 16;
-				data[ index + 2 ] = 48;
+				data[ index ] = _colors[ color ].bg.r;
+				data[ index + 1 ] = _colors[ color ].bg.g;
+				data[ index + 2 ] = _colors[ color ].bg.b;
 
 			} else {
 
-				data[ index ] = 0;
-				data[ index + 1 ] = 255;
-				data[ index + 2 ] = 255;
+				data[ index ] = _colors[ color ].fg.r;
+				data[ index + 1 ] = _colors[ color ].fg.g;
+				data[ index + 2 ] = _colors[ color ].fg.b;
 
 			}
 
@@ -391,30 +491,32 @@ var Stats = function () {
 
 	function swapMode() {
 
+		_mode ++;
+		_mode == _modesCount ? _mode = 0 : _mode;
+
+		_fpsDiv.style.display = 'none';
+		_msDiv.style.display = 'none';
+		_memDiv.style.display = 'none';
+
 		switch( _mode ) {
 
-			case 'fps':
+			case 0:
 
-				_mode = 'ms';
-
-				_fpsText.style.display = 'none';
-				_fpsCanvas.style.display = 'none';
-				_msText.style.display = 'block';
-				_msCanvas.style.display = 'block';
+				_fpsDiv.style.display = 'block';
 
 				break;
 
-			case 'ms':
+			case 1:
 
-				_mode = 'fps';
-
-				_fpsText.style.display = 'block';
-				_fpsCanvas.style.display = 'block';
-				_msText.style.display = 'none';
-				_msCanvas.style.display = 'none';
+				_msDiv.style.display = 'block';
 
 				break;
 
+			case 2:
+
+				_memDiv.style.display = 'block';
+
+				break;
 		}
 
 	}
@@ -433,7 +535,7 @@ var Stats = function () {
 			_msMin = Math.min( _msMin, _ms );
 			_msMax = Math.max( _msMax, _ms );
 
-			updateGraph( _msImageData.data, Math.min( 30, 30 - ( _ms / 200 ) * 30 ) );
+			updateGraph( _msImageData.data, Math.min( 30, 30 - ( _ms / 200 ) * 30 ), 'ms' );
 
 			_msText.innerHTML = '<strong>' + _ms + ' MS</strong> (' + _msMin + '-' + _msMax + ')';
 			_msContext.putImageData( _msImageData, 0, 0 );
@@ -446,10 +548,23 @@ var Stats = function () {
 				_fpsMin = Math.min( _fpsMin, _fps );
 				_fpsMax = Math.max( _fpsMax, _fps );
 
-				updateGraph( _fpsImageData.data, Math.min( 30, 30 - ( _fps / 100 ) * 30 ) );
+				updateGraph( _fpsImageData.data, Math.min( 30, 30 - ( _fps / 100 ) * 30 ), 'fps' );
 
 				_fpsText.innerHTML = '<strong>' + _fps + ' FPS</strong> (' + _fpsMin + '-' + _fpsMax + ')';
 				_fpsContext.putImageData( _fpsImageData, 0, 0 );
+
+				if ( _modesCount == 3 ) {
+
+					_mem = webkitPerformance.memory.usedJSHeapSize * 0.000000954;
+					_memMin = Math.min( _memMin, _mem );
+					_memMax = Math.max( _memMax, _mem );
+
+					updateGraph( _memImageData.data, Math.min( 30, 30 - ( _mem / 2 ) ), 'mem' );
+
+					_memText.innerHTML = '<strong>' + Math.round( _mem ) + ' MEM</strong> (' + Math.round( _memMin ) + '-' + Math.round( _memMax ) + ')';
+					_memContext.putImageData( _memImageData, 0, 0 );
+
+				}
 
 				_timeLastSecond = _time;
 				_frames = 0;
@@ -461,6 +576,7 @@ var Stats = function () {
 	};
 
 };
+/*END_DEBUG_STATS*/
 
 Object.defineProperty(doodle, 'Keyboard', {
   enumerable: true,
@@ -1229,10 +1345,14 @@ Object.defineProperty(doodle, 'LineJoin', {
 (function () {
   var event_prototype,
       event_static_properties,
-      isEvent,
+      /*DEBUG*/
+      check_event_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      check_node_type = doodle.utils.types.check_node_type,
+      /*END_DEBUG*/
+      isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -1275,15 +1395,38 @@ Object.defineProperty(doodle, 'LineJoin', {
           __cancel = false,
           __cancelNow = false;
 
-      copy_event_properties = function  (evt) {
-        evt_type = evt.type;
+      /**
+       * @param {Event} evt Event to copy properties from.
+       * @param {?Node|Boolean} resetTarget Set new event target or null.
+       * @param {String|Boolean} resetType Set new event type.
+       */
+      copy_event_properties = function (evt, resetTarget, resetType) {
+        /*DEBUG*/
+        check_event_type(evt, 'copy_event_properties', '*event*, target, type');
+        if (resetTarget !== false && resetTarget !== null) {
+          check_node_type(evt, 'copy_event_properties', 'event, *target*, type');
+        }
+        if (resetType !== false) {
+          check_string_type(resetType, 'copy_event_properties', 'event, target, *type*');
+        }
+        /*END_DEBUG*/
+        if (resetType) {
+          evt_type = resetType;
+        } else {
+          evt_type = evt.type;
+        }
         evt_bubbles = evt.bubbles;
         evt_cancelable = evt.cancelable;
         evt_cancelBubble = evt.cancelBubble;
         evt_defaultPrevented = evt.defaultPrevented;
         evt_eventPhase = evt.eventPhase;
-        evt_currentTarget = evt.currentTarget;
-        evt_target = evt.target;
+        if (resetTarget === false) {
+          evt_currentTarget = evt.currentTarget;
+          evt_target = evt.target;
+        } else {
+          evt_currentTarget = resetTarget;
+          evt_target = resetTarget;
+        }
         evt_srcElement = evt.srcElement;
         evt_timeStamp = evt.timeStamp;
         evt_returnValue = evt.returnValue;
@@ -1338,17 +1481,19 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
         
-        //test if event propagation should stop after this node
-        //@internal
+        /* test if event propagation should stop after this node
+         * @internal
+         */
         '__cancel': {
           enumerable: false,
           configurable: false,
           get: function () { return __cancel; }
         },
         
-        //test if event propagation should stop immediately,
-        //ignore other handlers on this node
-        //@internal
+        /* test if event propagation should stop immediately,
+         * ignore other handlers on this node
+         * @internal
+         */
         '__cancelNow': {
           enumerable: false,
           configurable: false,
@@ -1361,11 +1506,14 @@ Object.defineProperty(doodle, 'LineJoin', {
           get: function () { return evt_currentTarget; }
         },
         
-        //currentTarget is read-only, but damnit I need to set it sometimes
+        /* currentTarget is read-only, but damnit I need to set it sometimes
+         * @internal
+         */
         '__setCurrentTarget': {
           enumerable: false,
           value: function (targetArg) {
             evt_currentTarget = targetArg;
+            return this;
           }
         },
         
@@ -1374,11 +1522,14 @@ Object.defineProperty(doodle, 'LineJoin', {
           configurable: false,
           get: function () { return evt_target; }
         },
-        
+
+        /* @internal
+         */
         '__setTarget': {
           enumerable: false,
           value: function (targetArg) {
             evt_target = targetArg;
+            return this;
           }
         },
         
@@ -1387,7 +1538,9 @@ Object.defineProperty(doodle, 'LineJoin', {
           configurable: false,
           get: function () { return evt_eventPhase; }
         },
-        
+
+        /* @internal
+         */
         '__setEventPhase': {
           enumerable: false,
           value: function (phaseArg) {
@@ -1395,6 +1548,7 @@ Object.defineProperty(doodle, 'LineJoin', {
             check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
             /*END_DEBUG*/
             evt_eventPhase = phaseArg;
+            return this;
           }
         },
         
@@ -1471,6 +1625,33 @@ Object.defineProperty(doodle, 'LineJoin', {
               __cancelNow = true;
             }
           }
+        },
+
+        /* Copy the properties from another Event.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {Event} evt
+         * @param {Node=} resetTarget
+         * @param {String=} resetType
+         */
+        '__copyEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
+            /*DEBUG*/
+            check_event_type(evt, this+'.__copyEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyEventProperties', 'event, target, *type*');
+            }
+            /*END_DEBUG*/
+            copy_event_properties(evt, resetTarget, resetType);
+            return this;
+          }
         }
       };
     }()));//end defineProperties
@@ -1495,7 +1676,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         /*END_DEBUG*/
       } else {
         //passed a doodle or dom event object
-        copy_event_properties(init_obj);
+        copy_event_properties(init_obj, false, false);
       }
     } else {
       //standard instantiation
@@ -1659,7 +1840,8 @@ Object.defineProperty(doodle, 'LineJoin', {
             event === '[object WheelEvent]');
   };
 
-  doodle.utils.types.check_event_type = function (event, caller, param) {
+  /*DEBUG*/
+  check_event_type = doodle.utils.types.check_event_type = function (event, caller, param) {
     if (isEvent(event)) {
       return true;
     } else {
@@ -1668,6 +1850,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       throw new TypeError(caller + param +": Parameter must be an Event.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle*/
@@ -1677,10 +1860,14 @@ Object.defineProperty(doodle, 'LineJoin', {
  */
 (function () {
   var uievent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isUIEvent,
+      /*DEBUG*/
+      check_uievent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -1751,8 +1938,12 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_pageX = 0,
           evt_pageY = 0;
 
+      /* @param {UIEvent} evt UIEvent to copy properties from.
+       */
       copy_uievent_properties = function (evt) {
-        //only looking for UIEvent properties
+        /*DEBUG*/
+        check_uievent_type(evt, 'copy_uievent_properties', '*event*');
+        /*END_DEBUG*/
         if (evt.view !== undefined) { evt_view = evt.view; }
         if (evt.detail !== undefined) { evt_detail = evt.detail; }
         if (evt.which !== undefined) { evt_which = evt.which; }
@@ -1838,6 +2029,33 @@ Object.defineProperty(doodle, 'LineJoin', {
             this.initEvent(typeArg, canBubbleArg, cancelableArg);
             return this;
           }
+        },
+
+        /* Copy the properties from another UIEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {UIEvent} evt
+         * @param {Node=} resetTarget
+         * @param {String=} resetType
+         */
+        '__copyUIEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
+            /*DEBUG*/
+            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyUIEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyUIEventProperties', 'event, target, *type*');
+            }
+            /*END_DEBUG*/
+            copy_uievent_properties(evt);
+            return this.__copyEventProperties(evt, resetTarget, resetType);
+          }
         }
       };
     }()));//end defineProperties
@@ -1879,6 +2097,36 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   };
 
+  /*
+   * CLASS METHODS
+   */
+
+  isUIEvent = doodle.UIEvent.isUIEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object UIEvent]' ||
+            event === '[object MouseEvent]' ||
+            event === '[object TouchEvent]' ||
+            event === '[object KeyboardEvent]' ||
+            event === '[object TextEvent]' ||
+            event === '[object WheelEvent]');
+  };
+
+  /*DEBUG*/
+  check_uievent_type = doodle.utils.types.check_uievent_type = function (event, caller, param) {
+    if (isUIEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_uievent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an UIEvent.");
+    }
+  };
+  /*END_DEBUG*/
+
 }());//end class closure
 /*globals doodle*/
 
@@ -1887,10 +2135,14 @@ Object.defineProperty(doodle, 'LineJoin', {
  */
 (function () {
   var mouseevent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isMouseEvent,
+      /*DEBUG*/
+      check_mouseevent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -1982,8 +2234,12 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_button = 0,
           evt_relatedTarget = null;
 
+      /* @param {MouseEvent} evt MouseEvent to copy properties from.
+       */
       copy_mouseevent_properties = function (evt) {
-        //only looking for MouseEvent properties
+        /*DEBUG*/
+        check_mouseevent_type(evt, 'copy_mouseevent_properties', '*event*');
+        /*END_DEBUG*/
         evt_x = (evt.x !== undefined) ? evt.x : 0;
         evt_y = (evt.y !== undefined) ? evt.y : 0;
         evt_offsetX = (evt.offsetX !== undefined) ? evt.offsetX : 0;
@@ -2143,7 +2399,9 @@ Object.defineProperty(doodle, 'LineJoin', {
          */
         'getModifierState': {
           value: function (key) {
+            /*DEBUG*/
             check_string_type(key, this+'.getModifierState', '*key*');
+            /*END_DEBUG*/
             switch (key) {
             case 'Alt':
               return evt_altKey;
@@ -2156,6 +2414,31 @@ Object.defineProperty(doodle, 'LineJoin', {
             default:
               return false;
             }
+          }
+        },
+
+        /* Copy the properties from another MouseEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {MouseEvent} evt
+         */
+        '__copyMouseEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
+            /*DEBUG*/
+            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyMouseEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyMouseEventProperties', 'event, target, *type*');
+            }
+            /*END_DEBUG*/
+            copy_mouseevent_properties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
           }
         }
       };
@@ -2200,332 +2483,30 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   };
 
-}());//end class closure
-/*globals doodle*/
-
-/* TouchEvent support is expermental.
- * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
- */
-(function () {
-  var touchevent_static_properties,
-      isEvent = doodle.Event.isEvent,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
-  
-  /* Super constructor
-   * @param {String} type
-   * @param {Boolean} bubbles
-   * @param {Boolean} cancelable
-   * @param {DOM Object} view
-   * @param {Number} detail
-   * @param {Number} screenX
-   * @param {Number} screenY
-   * @param {Number} clientX
-   * @param {Number} clientY
-   * @param {Boolean} ctrlKey
-   * @param {Boolean} altKey
-   * @param {Boolean} shiftKey
-   * @param {Boolean} metaKey
-   * @param {} touches
-   * @param {} targetTouches
-   * @param {} changedTouches
-   * @param {Number} scale
-   * @param {Number} rotation
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
-   * @return {TouchEvent}
+  /*
+   * CLASS METHODS
    */
-  doodle.TouchEvent = function (type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY,
-                                ctrlKey, altKey, shiftKey, metaKey,
-                                touches, targetTouches, changedTouches,
-                                scale, rotation) {
-    var touchevent,
-        arg_len = arguments.length,
-        init_obj, //function, event
-        copy_touchevent_properties; //fn declared per event for private vars
-    
-    /*DEBUG*/
-    if (arg_len === 0 || arg_len > 18) {
-      throw new SyntaxError("[object TouchEvent](type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation");
-    }
-    /*END_DEBUG*/
 
-    //initialize uievent prototype with another event, function, or args
-    if (isEvent(arguments[0])) {
-      /*DEBUG*/
-      if (arg_len > 1) {
-        throw new SyntaxError("[object TouchEvent](event): Invalid number of parameters.");
-      }
-      /*END_DEBUG*/
-      init_obj = arguments[0];
-      type = undefined;
-      touchevent = Object.create(doodle.UIEvent(init_obj));
-    } else if (typeof arguments[0] === 'function') {
-      /*DEBUG*/
-      if (arg_len > 1) {
-        throw new SyntaxError("[object TouchEvent](function): Invalid number of parameters.");
-      }
-      /*END_DEBUG*/
-      init_obj = arguments[0];
-      type = undefined;
-      //use empty event type for now, will check after we call the init function.
-      touchevent = Object.create(doodle.UIEvent(''));
+  isMouseEvent = doodle.MouseEvent.isMouseEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
     } else {
-      //parameter defaults
-      bubbles = (bubbles === undefined) ? false : bubbles;
-      cancelable = (cancelable === undefined) ? false : cancelable;
-      view = (view === undefined) ? null : view;
-      detail = (detail === undefined) ? 0 : detail;
-      /*DEBUG*/
-      check_string_type(type, '[object TouchEvent]', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-      check_boolean_type(bubbles, '[object TouchEvent]', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-      check_boolean_type(cancelable, '[object TouchEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-      check_number_type(detail, '[object TouchEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-      /*END_DEBUG*/
-      touchevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+      event = event.toString();
     }
-    
-    
-    Object.defineProperties(touchevent, touchevent_static_properties);
-    //properties that require privacy
-    Object.defineProperties(touchevent, (function () {
-      var evt_screenX = 0,
-          evt_screenY = 0,
-          evt_clientX = 0,
-          evt_clientY = 0,
-          evt_ctrlKey = false,
-          evt_altKey = false,
-          evt_shiftKey = false,
-          evt_metaKey = false,
-          evt_touches = null,
-          evt_targetTouches = null,
-          evt_changedTouches = null,
-          evt_scale = 1,
-          evt_rotation = 0;
-
-      copy_touchevent_properties = function (evt) {
-        //only looking for TouchEvent properties
-        if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
-        if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
-        if (evt.clientX !== undefined) { evt_clientX = evt.clientX; }
-        if (evt.clientY !== undefined) { evt_clientY = evt.clientY; }
-        if (evt.ctrlKey !== undefined) { evt_ctrlKey = evt.ctrlKey; }
-        if (evt.altKey !== undefined) { evt_altKey = evt.altKey; }
-        if (evt.shiftKey !== undefined) { evt_shiftKey = evt.shiftKey; }
-        if (evt.metaKey !== undefined) { evt_metaKey = evt.metaKey; }
-        if (evt.touches !== undefined) { evt_touches = evt.touches; }
-        if (evt.targetTouches !== undefined) { evt_targetTouches = evt.targetTouches; }
-        if (evt.changedTouches !== undefined) { evt_changedTouches = evt.changedTouches; }
-        if (evt.scale !== undefined) { evt_scale = evt.scale; }
-        if (evt.rotation !== undefined) { evt_rotation = evt.rotation; }
-      };
-      
-      return {
-        'screenX': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_screenX; }
-        },
-
-        'screenY': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_screenY; }
-        },
-
-        'clientX': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_clientX; }
-        },
-
-        'clientY': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_clientY; }
-        },
-        
-        'ctrlKey': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_ctrlKey; }
-        },
-
-        'altKey': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_altKey; }
-        },
-
-        'shiftKey': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_shiftKey; }
-        },
-
-        'metaKey': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_metaKey; }
-        },
-
-        'touches': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_touches; }
-        },
-
-        'targetTouches': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_targetTouches; }
-        },
-
-        'changedTouches': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_changedTouches; }
-        },
-
-        'scale': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_scale; }
-        },
-
-        'rotation': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return evt_rotation; }
-        },
-
-        'initTouchEvent': {
-          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
-                           screenXArg, screenYArg, clientXArg, clientYArg,
-                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
-                           touchesArg, targetTouchesArg, changedTouchesArg,
-                           scaleArg, rotationArg) {
-            //parameter defaults
-            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
-            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
-            viewArg = (viewArg === undefined) ? null : viewArg;
-            detailArg = (detailArg === undefined) ? 0 : detailArg;
-            screenXArg = (screenXArg === undefined) ? 0 : screenXArg;
-            screenYArg = (screenYArg === undefined) ? 0 : screenYArg;
-            clientXArg = (clientXArg === undefined) ? 0 : clientXArg;
-            clientYArg = (clientYArg === undefined) ? 0 : clientYArg;
-            ctrlKeyArg = (ctrlKeyArg === undefined) ? false : ctrlKeyArg;
-            altKeyArg = (altKeyArg === undefined) ? false : altKeyArg;
-            shiftKeyArg = (shiftKeyArg === undefined) ? false : shiftKeyArg;
-            metaKeyArg = (metaKeyArg === undefined) ? false : metaKeyArg;
-            touchesArg = (touchesArg === undefined) ? null : touchesArg;
-            targetTouchesArg = (targetTouchesArg === undefined) ? null : targetTouchesArg;
-            changedTouchesArg = (changedTouchesArg === undefined) ? null : changedTouchesArg;
-            scaleArg = (scaleArg === undefined) ? 1 : scaleArg;
-            rotationArg = (rotationArg === undefined) ? 0 : rotationArg;
-            /*DEBUG*/
-            check_string_type(typeArg, this+'.initTouchEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(canBubbleArg, this+'.initTouchEvent', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(cancelableArg, this+'.initTouchEvent', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(detailArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(screenXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, *screenX*, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(screenYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, *screenY*, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(clientXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, *clientX*, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(clientYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, *clientY*, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(ctrlKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, *ctrlKey*, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(altKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, *altKey*, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(shiftKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, *shiftKey*, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(metaKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, *metaKey*, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(scaleArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, *scale*, rotation');
-            check_number_type(rotationArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, *rotation*');
-            /*END_DEBUG*/
-            evt_screenX = screenXArg;
-            evt_screenY = screenYArg;
-            evt_clientX = clientXArg;
-            evt_clientY = clientYArg;
-            evt_ctrlKey = ctrlKeyArg;
-            evt_altKey = altKeyArg;
-            evt_shiftKey = shiftKeyArg;
-            evt_metaKey = metaKeyArg;
-            evt_touches = touchesArg;
-            evt_targetTouches = targetTouchesArg;
-            evt_changedTouches = changedTouchesArg;
-            evt_scale = scaleArg;
-            evt_rotation = rotationArg;
-
-            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
-            return this;
-          }
-        },
-
-        /* Queries the state of a modifier using a key identifier.
-         * @param {String} key A modifier key identifier
-         * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-         * This is an incomplete list of modifiers.
-         */
-        'getModifierState': {
-          value: function (key) {
-            check_string_type(key, this+'.getModifierState', '*key*');
-            switch (key) {
-            case 'Alt':
-              return evt_altKey;
-            case 'Control':
-              return evt_ctrlKey;
-            case 'Meta':
-              return evt_metaKey;
-            case 'Shift':
-              return evt_shiftKey;
-            default:
-              return false;
-            }
-          }
-        }
-      };
-    }()));//end defineProperties
-
-
-    //initialize touchevent
-    if (init_obj) {
-      if (typeof init_obj === 'function') {
-        init_obj.call(touchevent);
-        /*DEBUG*/
-        //make sure we've checked our dummy type string
-        if (touchevent.type === undefined || touchevent.type === '' ||
-            touchevent.bubbles === undefined ||
-            touchevent.cancelable === undefined) {
-          throw new SyntaxError("[object TouchEvent](function): Must call 'this.initTouchEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation)' within the function argument.");
-        }
-        /*END_DEBUG*/
-      } else {
-        //passed a doodle or dom event object
-        copy_touchevent_properties(init_obj);
-      }
-    } else {
-      //standard instantiation
-      touchevent.initTouchEvent(type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY,
-                                ctrlKey, altKey, shiftKey, metaKey,
-                                touches, targetTouches, changedTouches, scale, rotation);
-    }
-    
-    return touchevent;
+    return (event === '[object MouseEvent]');
   };
-    
-  
-  touchevent_static_properties = {
-    'toString': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function () {
-        return "[object TouchEvent]";
-      }
+
+  /*DEBUG*/
+  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, param) {
+    if (isMouseEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_mouseevent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an MouseEvent.");
     }
   };
+  /*END_DEBUG*/
 
 }());//end class closure
 /*globals doodle*/
@@ -2535,10 +2516,14 @@ Object.defineProperty(doodle, 'LineJoin', {
  */
 (function () {
   var textevent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isTextEvent,
+      /*DEBUG*/
+      check_textevent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -2604,8 +2589,13 @@ Object.defineProperty(doodle, 'LineJoin', {
       var evt_data = '',
           evt_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
 
+      
+      /* @param {TextEvent} evt TextEvent to copy properties from.
+       */
       copy_textevent_properties = function (evt) {
-        //only looking for TextEvent properties
+        /*DEBUG*/
+        check_textevent_type(evt, 'copy_textevent_properties', '*event*');
+        /*END_DEBUG*/
         if (evt.data !== undefined) { evt_data = evt.data; }
         if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }
       };
@@ -2643,6 +2633,31 @@ Object.defineProperty(doodle, 'LineJoin', {
             
             this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
             return this;
+          }
+        },
+
+        /* Copy the properties from another TextEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {TextEvent} evt
+         */
+        '__copyTextEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
+            /*DEBUG*/
+            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyTextEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyTextEventProperties', 'event, target, *type*');
+            }
+            /*END_DEBUG*/
+            copy_textevent_properties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
           }
         }
       };
@@ -2683,6 +2698,31 @@ Object.defineProperty(doodle, 'LineJoin', {
       }
     }
   };
+
+  /*
+   * CLASS METHODS
+   */
+
+  isTextEvent = doodle.TextEvent.isTextEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object TextEvent]');
+  };
+
+  /*DEBUG*/
+  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, param) {
+    if (isTextEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_textevent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an TextEvent.");
+    }
+  };
+  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle*/
@@ -2693,10 +2733,14 @@ Object.defineProperty(doodle, 'LineJoin', {
 
 (function () {
   var keyboardevent_static_properties,
-      isEvent = doodle.Event.isEvent,
+      isKeyboardEvent,
+      /*DEBUG*/
+      check_keyboardevent_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type;
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
   
   /* Super constructor
    * @param {String} type
@@ -2768,10 +2812,15 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_ctrlKey = false,
           evt_altKey = false,
           evt_shiftKey = false,
-          evt_metaKey = false;
+          evt_metaKey = false,
+          evt_altGraphKey = false;
 
+      /* @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+       */
       copy_keyboardevent_properties = function (evt) {
-        //only looking for KeyboardEvent properties
+        /*DEBUG*/
+        check_keyboardevent_type(evt, 'copy_keyboardevent_properties', '*event*');
+        /*END_DEBUG*/
         if (evt.keyIdentifier !== undefined) { evt_keyIdentifier = evt.keyIdentifier; }
         if (evt.keyLocation !== undefined) { evt_keyLocation = evt.keyLocation; }
         if (evt.repeat !== undefined) { evt_repeat = evt.repeat; }
@@ -2779,6 +2828,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         if (evt.altKey !== undefined) { evt_altKey = evt.altKey; }
         if (evt.shiftKey !== undefined) { evt_shiftKey = evt.shiftKey; }
         if (evt.metaKey !== undefined) { evt_metaKey = evt.metaKey; }
+        if (evt.altGraphKey !== undefined) { evt_altKey = evt.altGraphKey; }
       };
       
       return {
@@ -2822,6 +2872,12 @@ Object.defineProperty(doodle, 'LineJoin', {
           enumerable: true,
           configurable: false,
           get: function () { return evt_metaKey; }
+        },
+
+        'altGraphKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_altGraphKey; }
         },
 
         'initKeyboardEvent': {
@@ -2878,7 +2934,9 @@ Object.defineProperty(doodle, 'LineJoin', {
          */
         'getModifierState': {
           value: function (key) {
+            /*DEBUG*/
             check_string_type(key, this+'.getModifierState', '*key*');
+            /*END_DEBUG*/
             switch (key) {
             case 'Alt':
               return evt_altKey;
@@ -2891,6 +2949,31 @@ Object.defineProperty(doodle, 'LineJoin', {
             default:
               return false;
             }
+          }
+        },
+
+        /* Copy the properties from another KeyboardEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @internal
+         * @param {KeyboardEvent} evt
+         */
+        '__copyKeyboardEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
+            /*DEBUG*/
+            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyKeyboardEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyKeyboardEventProperties', 'event, target, *type*');
+            }
+            /*END_DEBUG*/
+            copy_keyboardevent_properties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
           }
         }
       };
@@ -2932,6 +3015,31 @@ Object.defineProperty(doodle, 'LineJoin', {
       }
     }
   };
+
+  /*
+   * CLASS METHODS
+   */
+
+  isKeyboardEvent = doodle.KeyboardEvent.isKeyboardEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object KeyboardEvent]');
+  };
+
+  /*DEBUG*/
+  check_keyboardevent_type = doodle.utils.types.check_keyboardevent_type = function (event, caller, param) {
+    if (isKeyboardEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_keyboardevent_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an KeyboardEvent.");
+    }
+  };
+  /*END_DEBUG*/
 
 }());//end class closure
 
@@ -3104,7 +3212,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
 /* TOUCH EVENT
  * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
- */
+ *
 Object.defineProperties(doodle.TouchEvent, {
   
   'TOUCH_START': {
@@ -3136,7 +3244,7 @@ Object.defineProperties(doodle.TouchEvent, {
   }
   
 });
-
+***/
 
 /* KEYBOARD EVENT
  */
@@ -3288,27 +3396,31 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x09
   }  
 });
+/*globals doodle*/
+
 (function () {
   var point_static_properties,
       isPoint,
-      doodle_Point,
+      /*DEBUG*/
       check_point_type,
-      check_number_type = doodle.utils.types.check_number_type;
+      check_number_type = doodle.utils.types.check_number_type,
+      /*END_DEBUG*/
+      //lookup help
+      doodle_Point,
+      cos = Math.cos,
+      sin = Math.sin,
+      sqrt = Math.sqrt;
   
-  /* Super constructor
-   * @param {Number|Array|Point|Function} (x,y)|initializer
-   * @return {Object}
+  /* Point
+   * @constructor
+   * @param {Number=} x
+   * @param {Number=} y
+   * @return {Point}
    */
   doodle_Point = doodle.geom.Point = function (x, y) {
     var point = {},
         arg_len = arguments.length,
-        init_obj; //function, array, point
-
-    /*DEBUG*/
-    if (arg_len > 2) {
-      throw new SyntaxError("[object Point](x, y): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
+        init_obj;
 
     Object.defineProperties(point, point_static_properties);
     //properties that require privacy
@@ -3316,50 +3428,57 @@ Object.defineProperties(doodle.TextEvent, {
       /* The horizontal coordinate of the point.
        * @param {Number} x
        */
-      'x': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return x; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.x');
-          /*END_DEBUG*/
-          x = n;
-        }
-      },
+      'x': (function () {
+        var pt_x = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return pt_x; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.x');
+            /*END_DEBUG*/
+            pt_x = n;
+          }
+        };
+      }()),
 
       /* The vertical coordinate of the point.
        * @param {Number} y
        */
-      'y': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return y; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.y');
-          /*END_DEBUG*/
-          y = n;
-        }
-      }
-    });
+      'y': (function () {
+        var pt_y = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return pt_y; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.y');
+            /*END_DEBUG*/
+            pt_y = n;
+          }
+        };
+      }())
+    });//end defineProperties
 
     //initialize point
-    if (arg_len === 0) {
-      //default instantiation: {x:0, y:0}
-      point.compose(0, 0);
-    } else if (arg_len === 2) {
+    switch (arg_len) {
+    case 0:
+      //defaults to 0,0
+      break;
+    case 2:
       //standard instantiation
       point.compose(x, y);
-    } else {
-      //passed an initialization obj
+      break;
+    case 1:
+      //passed an initialization obj: point, array, function
       init_obj = arguments[0];
       x = undefined;
       
       if (typeof init_obj === 'function') {
-        point.compose(0, 0);
         init_obj.call(point);
-      }  else if (Array.isArray(init_obj)) {
+      } else if (Array.isArray(init_obj)) {
         /*DEBUG*/
         if (init_obj.length !== 2) {
           throw new SyntaxError("[object Point]([x, y]): Invalid array parameter.");
@@ -3372,6 +3491,11 @@ Object.defineProperties(doodle.TextEvent, {
         /*END_DEBUG*/
         point.compose(init_obj.x, init_obj.y);
       }
+      break;
+    default:
+      /*DEBUG*/
+      throw new SyntaxError("[object Point](x, y): Invalid number of parameters.");
+      /*END_DEBUG*/
     }
 
     return point;
@@ -3393,14 +3517,41 @@ Object.defineProperties(doodle.TextEvent, {
     /*
      * METHODS
      */
+
+    /* Returns an array that contains the values of the x and y coordinates.
+     * @return {Array}
+     */
+    'toArray': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        var a = new Array(2);
+        a[0] = this.x;
+        a[1] = this.y;
+        return a;
+      }
+    },
     
+    /* Returns a string that contains the values of the x and y coordinates.
+     * @return {String}
+     */
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "(x=" + this.x + ", y=" + this.y + ")";
+      }
+    },
+
     /* Set point coordinates.
      * @param {Number} x
      * @param {Number} y
      * @return {Point}
      */
     'compose': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (x, y) {
@@ -3418,7 +3569,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Point}
      */
     'clone': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -3426,30 +3577,75 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Returns an array that contains the values of the x and y coordinates.
-     * @return {Array}
+    /* Determines whether two points are equal.
+     * @param {Point} pt The point to be compared.
+     * @return {Boolean}
      */
-    'toArray': {
-      enumerable: false,
+    'equals': {
+      enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        var a = new Array(2);
-        a[0] = this.x;
-        a[1] = this.y;
-        return a;
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.equals', '*point*');
+        /*END_DEBUG*/
+        return ((this && pt &&
+                 this.x === pt.x &&
+                 this.y === pt.y) ||
+                (!this && !pt));
       }
     },
-    
-    /* Returns a string that contains the values of the x and y coordinates.
-     * @return {String}
+
+    /* Adds the coordinates of another point to the coordinates of
+     * this point to create a new point.
+     * @param {Point} pt The point to be added.
+     * @return {Point} The new point.
      */
-    'toString': {
-      enumerable: false,
+    'add': {
+      enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "(x=" + this.x + ", y=" + this.y + ")";
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.add', '*point*');
+        /*END_DEBUG*/
+        var x = this.x + pt.x,
+            y = this.y + pt.y;
+        return doodle_Point(x, y);
+      }
+    },
+
+    /* Subtracts the coordinates of another point from the
+     * coordinates of this point to create a new point.
+     * @param {Point} pt The point to be subtracted.
+     * @return {Point} The new point.
+     */
+    'subtract': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (pt) {
+        /*DEBUG*/
+        check_point_type(pt, this+'.subtract', '*point*');
+        /*END_DEBUG*/
+        var x = this.x - pt.x,
+            y = this.y - pt.y;
+        return doodle_Point(x, y);
+      }
+    },
+
+    'offset': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (dx, dy) {
+        /*DEBUG*/
+        check_number_type(dx, this+'.offset', '*dx*, dy');
+        check_number_type(dy, this+'.offset', 'dx, *dy*');
+        /*END_DEBUG*/
+        this.x += dx;
+        this.y += dy;
+        return this;
       }
     },
 
@@ -3457,7 +3653,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Number}
      */
     'distance': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt1, pt2) {
@@ -3467,7 +3663,7 @@ Object.defineProperties(doodle.TextEvent, {
         /*END_DEBUG*/
         var dx = pt2.x - pt1.x,
             dy = pt2.y - pt1.x;
-        return Math.sqrt(dx*dx+dy*dy);
+        return sqrt(dx*dx + dy*dy);
       }
     },
 
@@ -3477,7 +3673,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Point}
      */
     'normalize': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (thickness) {
@@ -3496,25 +3692,6 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether two points are equal.
-     * @param {Point} pt The point to be compared.
-     * @return {Boolean}
-     */
-    'equals': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (pt) {
-        /*DEBUG*/
-        check_point_type(pt, this+'.equals', '*point*');
-        /*END_DEBUG*/
-        return ((this && pt &&
-                 this.x === pt.x &&
-                 this.y === pt.y) ||
-                (!this && !pt));
-      }
-    },
-
     /* Determines a point between two specified points.
      * @static
      * @param {Point} pt1 The first point.
@@ -3523,7 +3700,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Point}
      */
     'interpolate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt1, pt2, t) {
@@ -3555,7 +3732,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Point}
      */
     'polar': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (len, angle) {
@@ -3563,64 +3740,12 @@ Object.defineProperties(doodle.TextEvent, {
         check_number_type(len, this+'.polar', '*len*, angle');
         check_number_type(angle, this+'.polar', 'len, *angle*');
         /*END_DEBUG*/
-        var x = len * Math.cos(angle),
-            y = len * Math.sin(angle);
+        var x = len * cos(angle),
+            y = len * sin(angle);
         return doodle_Point(x, y);
-      }
-    },
-
-    /* Adds the coordinates of another point to the coordinates of
-     * this point to create a new point.
-     * @param {Point} pt The point to be added.
-     * @return {Point} The new point.
-     */
-    'add': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (pt) {
-        /*DEBUG*/
-        check_point_type(pt, this+'.add', '*point*');
-        /*END_DEBUG*/
-        var x = this.x + pt.x,
-            y = this.y + pt.y;
-        return doodle_Point(x, y);
-      }
-    },
-
-    /* Subtracts the coordinates of another point from the
-     * coordinates of this point to create a new point.
-     * @param {Point} pt The point to be subtracted.
-     * @return {Point} The new point.
-     */
-    'subtract': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (pt) {
-        /*DEBUG*/
-        check_point_type(pt, this+'.subtract', '*point*');
-        /*END_DEBUG*/
-        var x = this.x - pt.x,
-            y = this.y - pt.y;
-        return doodle_Point(x, y);
-      }
-    },
-
-    'offset': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (dx, dy) {
-        /*DEBUG*/
-        check_number_type(dx, this+'.offset', '*dx*, dy');
-        check_number_type(dy, this+'.offset', 'dx, *dy*');
-        /*END_DEBUG*/
-        this.x += dx;
-        this.y += dy;
-        return this;
       }
     }
+    
   };//end point_static_properties definition
 
   /*
@@ -3637,6 +3762,7 @@ Object.defineProperties(doodle.TextEvent, {
     return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
   };
 
+  /*DEBUG*/
   check_point_type = doodle.utils.types.check_point_type = function (pt, caller, param) {
     if (!isPoint(pt)) {
       caller = (caller === undefined) ? "check_point_type" : caller;
@@ -3646,35 +3772,44 @@ Object.defineProperties(doodle.TextEvent, {
       return true;
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
+/*globals doodle*/
+
 (function () {
   var matrix_static_properties,
-      doodle_Matrix,
       isMatrix,
+      //recycle object for internal calculations
+      temp_point = {x: null, y: null},
+      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
+      /*DEBUG*/
       check_matrix_type,
-      doodle_Point = doodle.geom.Point,
       check_number_type = doodle.utils.types.check_number_type,
       check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
+      //lookup help
+      doodle_Matrix,
+      doodle_Point = doodle.geom.Point,
       sin = Math.sin,
       cos = Math.cos,
       atan2 = Math.atan2,
       tan = Math.tan;
   
-  /* Super constructor
-   * @param {Number|Array|Matrix|Function} (a, b, c, d, tx, ty)|initializer
-   * @return {Object}
+  /* Matrix
+   * @constructor
+   * @param {Number=} a
+   * @param {Number=} b
+   * @param {Number=} c
+   * @param {Number=} d
+   * @param {Number=} tx
+   * @param {Number=} ty
+   * @return {Matrix}
    */
   doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
         arg_len = arguments.length,
-        init_obj; //function, array, matrix
-
-    /*DEBUG*/
-    if (arg_len !== 0 && arg_len !== 1 && arg_len !== 6) {
-      throw new SyntaxError("[object Matrix](a, b, c, d, tx, ty): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
+        init_obj;
     
     Object.defineProperties(matrix, matrix_static_properties);
     //properties that require privacy
@@ -3684,113 +3819,132 @@ Object.defineProperties(doodle.TextEvent, {
        * when scaling or rotating an image.
        * @param {Number} a
        */
-      'a': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return a; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.a');
-          /*END_DEBUG*/
-          a = n;
-        }
-      },
+      'a': (function () {
+        var mat_a = 1;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_a; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.a');
+            /*END_DEBUG*/
+            mat_a = n;
+          }
+        };
+      }()),
 
       /* The value that affects the positioning of pixels along the y axis
        * when rotating or skewing an image.
        * @param {Number} b
        */
-      'b': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return b; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.b');
-          /*END_DEBUG*/
-          b = n;
-        }
-      },
+      'b': (function () {
+        var mat_b = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_b; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.b');
+            /*END_DEBUG*/
+            mat_b = n;
+          }
+        };
+      }()),
 
       /* The value that affects the positioning of pixels along the x axis
        * when rotating or skewing an image.
        * @param {Number} c
        */
-      'c': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return c; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.c');
-          /*END_DEBUG*/
-          c = n;
-        }
-      },
+      'c': (function () {
+        var mat_c = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_c; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.c');
+            /*END_DEBUG*/
+            mat_c = n;
+          }
+        };
+      }()),
 
       /* The value that affects the positioning of pixels along the y axis
        * when scaling or rotating an image.
        * @param {Number} d
        */
-      'd': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return d; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.d');
-          /*END_DEBUG*/
-          d = n;
-        }
-      },
+      'd': (function () {
+        var mat_d = 1;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_d; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.d');
+            /*END_DEBUG*/
+            mat_d = n;
+          }
+        };
+      }()),
 
       /* The distance by which to translate each point along the x axis.
        * @param {Number} tx
        */
-      'tx': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return tx; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.tx');
-          /*END_DEBUG*/
-          tx = n;
-        }
-      },
+      'tx': (function () {
+        var mat_tx = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_tx; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.tx');
+            /*END_DEBUG*/
+            mat_tx = n;
+          }
+        };
+      }()),
 
       /* The distance by which to translate each point along the y axis.
        * @param {Number} ty
        */
-      'ty': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return ty; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.ty');
-          /*END_DEBUG*/
-          ty = n;
-        }
-      }
+      'ty': (function () {
+        var mat_ty = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mat_ty; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.ty');
+            /*END_DEBUG*/
+            mat_ty = n;
+          }
+        };
+      }())
     });//end defineProperties
 
     //initialize matrix
-    if (arg_len === 0) {
-      //default instantiation: 1,0,0,1,0,0
-      matrix.identity();
-    } else if (arg_len === 6) {
+    switch (arg_len) {
+    case 0:
+      //defaults to 1,0,0,1,0,0
+      break;
+    case 6:
       //standard instantiation
       matrix.compose(a, b, c, d, tx, ty);
-    } else {
-      //passed an initialization obj
+      break;
+    case 1:
+      //passed an initialization obj: matrix, array, function
       init_obj = arguments[0];
       a = undefined;
-      
+
       if (typeof init_obj === 'function') {
-        matrix.identity();
         init_obj.call(matrix);
-      }  else if (Array.isArray(init_obj)) {
+      } else if (Array.isArray(init_obj)) {
         /*DEBUG*/
         if (init_obj.length !== 6) {
           throw new SyntaxError("[object Matrix]([a, b, c, d, tx, ty]): Invalid array parameter.");
@@ -3801,9 +3955,13 @@ Object.defineProperties(doodle.TextEvent, {
         /*DEBUG*/
         check_matrix_type(init_obj, '[object Matrix](matrix)');
         /*END_DEBUG*/
-        matrix.compose(init_obj.a, init_obj.b, init_obj.c,
-                       init_obj.d, init_obj.tx, init_obj.ty);
+        matrix.compose(init_obj.a, init_obj.b, init_obj.c, init_obj.d, init_obj.tx, init_obj.ty);
       }
+      break;
+    default:
+      /*DEBUG*/
+      throw new SyntaxError("[object Matrix](a, b, c, d, tx, ty): Invalid number of parameters.");
+      /*END_DEBUG*/
     }
     
     return matrix;
@@ -3811,6 +3969,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   matrix_static_properties = {
+    
     /* Set values of this matrix with the specified parameters.
      * @param {Number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
      * @param {Number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
@@ -3821,7 +3980,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'compose': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (a, b, c, d, tx, ty) {
@@ -3847,7 +4006,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Array}
      */
     'toArray': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -3866,7 +4025,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -3880,7 +4039,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Boolean}
      */
     'equals': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m) {
@@ -3902,7 +4061,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'identity': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value:  function () {
@@ -3921,7 +4080,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'clone': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -3935,7 +4094,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'multiply': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m) {
@@ -3958,7 +4117,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'rotate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (radians) {
@@ -3967,7 +4126,14 @@ Object.defineProperties(doodle.TextEvent, {
         /*END_DEBUG*/
         var c = cos(radians),
             s = sin(radians),
-            m = doodle_Matrix(c, s, -s, c, 0, 0);
+            m = temp_matrix;
+        m.a = c;
+        m.b = s;
+        m.c = -s;
+        m.d = c;
+        m.tx = 0;
+        m.ty = 0;
+        
         return this.multiply(m);
       }
     },
@@ -3977,7 +4143,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'deltaRotate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (radians) {
@@ -4004,7 +4170,6 @@ Object.defineProperties(doodle.TextEvent, {
       },
       /* Set a new rotation for matrix.
        * @param {Number} angle, in radians
-       * @return {Matrix}
        */
       set: function (radians) {
         /*DEBUG*/
@@ -4012,7 +4177,7 @@ Object.defineProperties(doodle.TextEvent, {
         /*END_DEBUG*/
         var c = cos(radians),
             s = sin(radians);
-        return this.compose(c, s, -s, c, this.tx, this.ty);
+        this.compose(c, s, -s, c, this.tx, this.ty);
       }
     },
 
@@ -4022,7 +4187,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'scale': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (sx, sy) {
@@ -4030,7 +4195,14 @@ Object.defineProperties(doodle.TextEvent, {
         check_number_type(sx, this+'.scale', '*sx*, sy');
         check_number_type(sy, this+'.scale', 'sx, *sy*');
         /*END_DEBUG*/
-        var m = doodle_Matrix(sx, 0, 0, sy, 0, 0);
+        var m = temp_matrix;
+        m.a = sx;
+        m.b = 0;
+        m.c = 0;
+        m.d = sy;
+        m.tx = 0;
+        m.ty = 0;
+        
         return this.multiply(m);
       }
     },
@@ -4041,7 +4213,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'deltaScale': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (sx, sy) {
@@ -4064,7 +4236,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'translate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (dx, dy) {
@@ -4084,7 +4256,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'skew': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (skewX, skewY) {
@@ -4094,7 +4266,14 @@ Object.defineProperties(doodle.TextEvent, {
         /*END_DEBUG*/
         var sx = tan(skewX),
             sy = tan(skewY),
-            m = doodle_Matrix(1, sy, sx, 1, 0, 0);
+            m = temp_matrix;
+        m.a = 1;
+        m.b = sy;
+        m.c = sx;
+        m.d = 1;
+        m.tx = 0;
+        m.ty = 0;
+        
         return this.multiply(m);
       }
     },
@@ -4105,7 +4284,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'deltaSkew': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (skewX, skewY) {
@@ -4127,7 +4306,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'add': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m) {
@@ -4148,7 +4327,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'invert': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -4169,7 +4348,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Point}
      */
     'transformPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -4181,6 +4360,25 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /* Same as transformPoint, but modifies the point object argument.
+     * @internal
+     */
+    '__transformPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.__transformPoint', '*point*');
+        /*END_DEBUG*/
+        var x = point.x,
+            y = point.y;
+        point.x = this.a * x + this.c * y + this.tx;
+        point.y = this.b * x + this.d * y + this.ty;
+        return point;
+      }
+    },
+
     /* Given a point in the pretransform coordinate space, returns
      * the coordinates of that point after the transformation occurs.
      * Unlike 'transformPoint', does not consider translation.
@@ -4188,7 +4386,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Point}
      */
     'deltaTransformPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -4199,9 +4397,28 @@ Object.defineProperties(doodle.TextEvent, {
                             this.b * pt.x + this.d * pt.y);
       }
     },
+
+    /* Same as deltaTransformPoint, but modifies the point object argument.
+     * @internal
+     */
+    '__deltaTransformPoint': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.__deltaTransformPoint', '*point*');
+        /*END_DEBUG*/
+        var x = point.x,
+            y = point.y;
+        point.x = this.a * x + this.c * y;
+        point.y = this.b * x + this.d * y;
+        return point;
+      }
+    },
     
     'rotateAroundExternalPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt, radians) {
@@ -4209,37 +4426,49 @@ Object.defineProperties(doodle.TextEvent, {
         check_point_type(pt, this+'.rotateAroundExternalPoint', '*point*, radians');
         check_number_type(radians, this+'.rotateAroundExternalPoint', 'point, *radians*');
         /*END_DEBUG*/
-        var parent_matrix = doodle_Matrix().rotate(radians), //global space
-            reg_pt, //new registration point
-            dx = pt.x,
-            dy = pt.y;
-        
-        this.translate(-dx, -dy);
-        
-        reg_pt = parent_matrix.transformPoint({x:this.tx, y:this.ty});
+        var c = cos(radians),
+            s = sin(radians),
+            m = temp_matrix,
+            reg_pt = temp_point; //new registration point
+        //parent rotation matrix, global space
+        m.a = c;
+        m.b = s;
+        m.c = -s;
+        m.d = c;
+        m.tx = 0;
+        m.ty = 0;
+        //move this matrix
+        this.translate(-pt.x, -pt.y);
+        //parent transform this position
+        reg_pt.x = m.a * this.tx + m.c * this.ty + m.tx;
+        reg_pt.y = m.b * this.tx + m.d * this.ty + m.ty;
+        //assign new position
         this.tx = reg_pt.x;
         this.ty = reg_pt.y;
         //apply parents rotation, and put back
-        return this.multiply(parent_matrix).translate(dx, dy);
+        return this.multiply(m).translate(pt.x, pt.y);
       }
     },
     
     'rotateAroundInternalPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
-      value: function (pt, radians) {
+      value: function (point, radians) {
         /*DEBUG*/
-        check_point_type(pt, this+'.rotateAroundInternalPoint', '*point*, radians');
+        check_point_type(point, this+'.rotateAroundInternalPoint', '*point*, radians');
         check_number_type(radians, this+'.rotateAroundInternalPoint', 'point, *radians*');
         /*END_DEBUG*/
-        var p = this.transformPoint(pt);
-        return this.rotateAroundExternalPoint(p, radians);
+        var pt = temp_point;
+        pt.x = this.a * point.x + this.c * point.y + this.tx;
+        pt.y = this.b * point.x + this.d * point.y + this.ty;
+        
+        return this.rotateAroundExternalPoint(pt, radians);
       }
     },
     
     'matchInternalPointWithExternal': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt_int, pt_ext) {
@@ -4247,10 +4476,12 @@ Object.defineProperties(doodle.TextEvent, {
         check_point_type(pt_int, this+'.matchInternalPointWithExternal', '*pt_int*, pt_ext');
         check_point_type(pt_ext, this+'.matchInternalPointWithExternal', 'pt_int, *pt_ext*');
         /*END_DEBUG*/
-        var pt = this.transformPoint(pt_int),
-            dx = pt_ext.x - pt.x,
-            dy = pt_ext.y - pt.y;
-        return this.translate(dx, dy);
+        var pt = temp_point;
+        //transform point
+        pt.x = this.a * pt_int.x + this.c * pt_int.y + this.tx;
+        pt.y = this.b * pt_int.x + this.d * pt_int.y + this.ty;
+        
+        return this.translate(pt_ext.x - pt.x, pt_ext.y - pt.y);
       }
     },
 
@@ -4259,7 +4490,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Matrix}
      */
     'interpolate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (m, t) {
@@ -4276,7 +4507,6 @@ Object.defineProperties(doodle.TextEvent, {
         return this;
       }
     }
-    
   };//end matrix_static_properties defintion
 
   
@@ -4296,6 +4526,7 @@ Object.defineProperties(doodle.TextEvent, {
             typeof m.tx === 'number' && typeof m.ty === 'number');
   };
 
+  /*DEBUG*/
   check_matrix_type = doodle.utils.types.check_matrix_type = function (m, caller_name) {
     if (!isMatrix(m)) {
       caller_name = (caller_name === undefined) ? "check_matrix_type" : caller_name;
@@ -4304,100 +4535,118 @@ Object.defineProperties(doodle.TextEvent, {
       return true;
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle*/
+
 (function () {
   var rect_static_properties,
-      doodle_Rectangle, 
       isRect,
+      /*DEBUG*/
       check_rect_type,
       check_number_type = doodle.utils.types.check_number_type,
-      check_point_type = doodle.utils.types.check_point_type;
+      check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
+      //lookup help
+      doodle_Rectangle,
+      max = Math.max,
+      min = Math.min;
   
-  /* Super constructor
-   * @param {Number|Array|Rectangle|Function} (x,y,w,h)|initializer
-   * @return {Object}
+  /* Rectangle
+   * @constructor
+   * @param {Number=} x
+   * @param {Number=} y
+   * @param {Number=} width
+   * @param {Number=} height
+   * @return {Rectangle}
    */
   doodle_Rectangle = doodle.geom.Rectangle = function (x, y, width, height) {
     var rect = {},
         arg_len = arguments.length,
         init_obj;
 
-    /*DEBUG*/
-    if (arg_len !== 0 && arg_len !== 1 && arg_len !== 4) {
-      throw new SyntaxError("[object Rectangle](x, y, width, height): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
-
     Object.defineProperties(rect, rect_static_properties);
     //properties that require privacy
     Object.defineProperties(rect, {
-      'x': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return x; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.x');
-          /*END_DEBUG*/
-          x = n;
-        }
-      },
+      'x': (function () {
+        var rect_x = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_x; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.x');
+            /*END_DEBUG*/
+            rect_x = n;
+          }
+        };
+      }()),
       
-      'y': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return y; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.y');
-          /*END_DEBUG*/
-          y = n;
-        }
-      },
+      'y': (function () {
+        var rect_y = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_y; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.y');
+            /*END_DEBUG*/
+            rect_y = n;
+          }
+        };
+      }()),
       
-      'width': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return width; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.width');
-          /*END_DEBUG*/
-          width = n;
-        }
-      },
+      'width': (function () {
+        var rect_width = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_width; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.width');
+            /*END_DEBUG*/
+            rect_width = n;
+          }
+        };
+      }()),
       
-      'height': {
-        enumerable: true,
-        configurable: false,
-        get: function () { return height; },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.height');
-          /*END_DEBUG*/
-          height = n;
-        }
-      }
+      'height': (function () {
+        var rect_height = 0;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return rect_height; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.height');
+            /*END_DEBUG*/
+            rect_height = n;
+          }
+        };
+      }())
     });//end defineProperties
 
     //initialize rectangle
-    if (arg_len === 0) {
-      //default instantiation: {x:0, y:0, width:0, height:0}
-      rect.compose(0, 0, 0, 0);
-    } else if (arg_len === 4) {
+    switch (arg_len) {
+    case 0:
+      //defaults to {x:0, y:0, width:0, height:0}
+      break;
+    case 4:
       //standard instantiation
       rect.compose(x, y, width, height);
-    } else {
-      //passed an initialization obj
+      break;
+    case 1:
+      //passed an initialization obj: point, array, function
       init_obj = arguments[0];
       x = undefined;
       
       if (typeof init_obj === 'function') {
-        rect.compose(0, 0, 0, 0);
         init_obj.call(rect);
-      }  else if (Array.isArray(init_obj)) {
+      } else if (Array.isArray(init_obj)) {
         /*DEBUG*/
         if (init_obj.length !== 4) {
           throw new SyntaxError("[object Rectangle]([x, y, width, height]): Invalid array parameter.");
@@ -4410,6 +4659,11 @@ Object.defineProperties(doodle.TextEvent, {
         /*END_DEBUG*/
         rect.compose(init_obj.x, init_obj.y, init_obj.width, init_obj.height);
       }
+      break;
+    default:
+      /*DEBUG*/
+      throw new SyntaxError("[object Rectangle](x, y, width, height): Invalid number of parameters.");
+      /*END_DEBUG*/
     }
 
     return rect;
@@ -4479,17 +4733,8 @@ Object.defineProperties(doodle.TextEvent, {
      * METHODS
      */
     
-    'clone': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function () {
-        return doodle_Rectangle(this.x, this.y, this.width, this.height);
-      }
-    },
-    
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -4498,11 +4743,16 @@ Object.defineProperties(doodle.TextEvent, {
     },
     
     'toArray': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
-        return [this.top, this.right, this.bottom, this.left];
+        var a = new Array(4);
+        a[0] = this.top;
+        a[1] = this.right;
+        a[2] = this.bottom;
+        a[3] = this.left;
+        return a;
       }
     },
     
@@ -4514,7 +4764,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Rectangle}
      */
     'compose': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (x, y, width, height) {
@@ -4532,13 +4782,40 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /* Same as compose, but takes a rectangle parameter.
+     */
+    '__compose': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.__compose', '*rect*');
+        /*END_DEBUG*/
+        this.x = rect.x;
+        this.y = rect.y;
+        this.width = rect.width;
+        this.height = rect.height;
+        return this;
+      }
+    },
+
+    'clone': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return doodle_Rectangle(this.x, this.y, this.width, this.height);
+      }
+    },
+
     /* Adjusts the location of the rectangle, as determined by
      * its top-left corner, by the specified amounts.
      * @param {Number} dx
      * @param {Number} dy
      */
     'offset': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (dx, dy) {
@@ -4560,7 +4837,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @param {Number} dy
      */
     'inflate': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (dx, dy) {
@@ -4581,7 +4858,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Boolean}
      */
     'equals': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -4596,11 +4873,28 @@ Object.defineProperties(doodle.TextEvent, {
     /* Determines whether or not this Rectangle object is empty.
      */
     'isEmpty': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
         return (this.width >= 0 || this.height >= 0);
+      }
+    },
+
+    /* Determines whether the specified point is contained within the
+     * rectangular region defined by this Rectangle object.
+     */
+    'contains': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (x, y) {
+        /*DEBUG*/
+        check_number_type(x, this+'.contains', '*x*, y');
+        check_number_type(y, this+'.contains', 'x, *y*');
+        /*END_DEBUG*/
+        return (x >= this.left && x <= this.right &&
+                y >= this.top && y <= this.bottom);
       }
     },
 
@@ -4609,7 +4903,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Boolean}
      */
     'containsPoint': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (pt) {
@@ -4623,12 +4917,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    
+
     /* Determines whether the rectangle argument is contained within this rectangle.
      * @param {Rectangle} rect
      * @return {Boolean}
      */
     'containsRect': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -4636,10 +4932,10 @@ Object.defineProperties(doodle.TextEvent, {
         check_rect_type(rect, this+'.containsRect', '*rect*');
         /*END_DEBUG*/
         //check each corner
-        return (this.containsPoint({x: rect.x, y: rect.y}) &&           //top-left
-                this.containsPoint({x: rect.right, y: rect.y}) &&       //top-right
-                this.containsPoint({x: rect.right, y: rect.bottom}) &&  //bot-right
-                this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
+        return (this.contains(rect.x, rect.y) &&           //top-left
+                this.contains(rect.right, rect.y) &&       //top-right
+                this.contains(rect.right, rect.bottom) &&  //bot-right
+                this.contains(rect.x, rect.bottom));       //bot-left
       }
     },
 
@@ -4648,7 +4944,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Boolean}
      */
     'intersects': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
@@ -4656,10 +4952,10 @@ Object.defineProperties(doodle.TextEvent, {
         check_rect_type(rect, this+'.intersects', '*rect*');
         /*END_DEBUG*/
         //check each corner
-        return (this.containsPoint({x: rect.x, y: rect.y}) ||           //top-left
-                this.containsPoint({x: rect.right, y: rect.y}) ||       //top-right
-                this.containsPoint({x: rect.right, y: rect.bottom}) ||  //bot-right
-                this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
+        return (this.contains(rect.x, rect.y) ||           //top-left
+                this.contains(rect.right, rect.y) ||       //top-right
+                this.contains(rect.right, rect.bottom) ||  //bot-right
+                this.contains(rect.x, rect.bottom));       //bot-left
       }
     },
 
@@ -4671,6 +4967,27 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Rectangle}
      */
     'intersection': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.intersection', '*rect*');
+        /*END_DEBUG*/
+        var r = doodle_Rectangle(0, 0, 0, 0);
+        if (this.intersects(rect)) {
+          r.left = max(this.left, rect.left);
+          r.top = max(this.top, rect.top);
+          r.right = min(this.right, rect.right);
+          r.bottom = min(this.bottom, rect.bottom);
+        }
+        return r;
+      }
+    },
+
+    /* Same as intersection, but modifies this rectangle in place.
+     */
+    '__intersection': {
       enumerable: false,
       writable: false,
       configurable: false,
@@ -4678,14 +4995,13 @@ Object.defineProperties(doodle.TextEvent, {
         /*DEBUG*/
         check_rect_type(rect, this+'.intersection', '*rect*');
         /*END_DEBUG*/
-        var r = doodle_Rectangle();
         if (this.intersects(rect)) {
-          r.left = Math.max(this.left, rect.left);
-          r.top = Math.max(this.top, rect.top);
-          r.right = Math.min(this.right, rect.right);
-          r.bottom = Math.min(this.bottom, rect.bottom);
+          this.left = max(this.left, rect.left);
+          this.top = max(this.top, rect.top);
+          this.right = min(this.right, rect.right);
+          this.bottom = min(this.bottom, rect.bottom);
         }
-        return r;
+        return this;
       }
     },
 
@@ -4695,19 +5011,37 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Rectangle}
      */
     'union': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
         check_rect_type(rect, this+'.union', '*rect*');
         /*END_DEBUG*/
-        var r = doodle_Rectangle();
-        r.left = Math.min(this.left, rect.left);
-        r.top = Math.min(this.top, rect.top);
-        r.right = Math.max(this.right, rect.right);
-        r.bottom = Math.max(this.bottom, rect.bottom);
+        var r = doodle_Rectangle(0, 0, 0, 0);
+        r.left = min(this.left, rect.left);
+        r.top = min(this.top, rect.top);
+        r.right = max(this.right, rect.right);
+        r.bottom = max(this.bottom, rect.bottom);
         return r;
+      }
+    },
+
+    /* Same as union, but modifies this rectangle in place.
+     */
+    '__union': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (rect) {
+        /*DEBUG*/
+        check_rect_type(rect, this+'.__union', '*rect*');
+        /*END_DEBUG*/
+        this.left = min(this.left, rect.left);
+        this.top = min(this.top, rect.top);
+        this.right = max(this.right, rect.right);
+        this.bottom = max(this.bottom, rect.bottom);
+        return this;
       }
     }
     
@@ -4730,6 +5064,7 @@ Object.defineProperties(doodle.TextEvent, {
             typeof rect.left  === "number" && typeof rect.right  === "number");
   };
 
+  /*DEBUG*/
   check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller_name) {
     if (!isRect(rect)) {
       caller_name = (caller_name === undefined) ? "check_rect_type" : caller_name;
@@ -4738,6 +5073,7 @@ Object.defineProperties(doodle.TextEvent, {
       return true;
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle*/
@@ -4753,9 +5089,13 @@ Object.defineProperties(doodle.TextEvent, {
       check_function_type = doodle.utils.types.check_function_type,
       check_event_type = doodle.utils.types.check_event_type,
       /*END_DEBUG*/
+      //lookup help
       CAPTURING_PHASE = doodle.Event.CAPTURING_PHASE,
       AT_TARGET = doodle.Event.AT_TARGET,
-      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE;
+      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE,
+      //lookup help
+      Array_indexOf = Array.prototype.indexOf,
+      Array_splice = Array.prototype.splice;
   
   /* Super constructor
    * @param {Function} initializer
@@ -4799,7 +5139,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -4812,7 +5152,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Object}
      */
     'modify': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (fn) {
@@ -4831,7 +5171,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @param {Boolean} useCapture
      */
     'addEventListener': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
@@ -4841,17 +5181,17 @@ Object.defineProperties(doodle.TextEvent, {
         check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
         check_boolean_type(useCapture, this+'.addEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
+        var eventListeners = this.eventListeners;
         
-        var self = this;
         //if new event type, create it's array to store callbacks
-        if (!this.eventListeners[type]) {
-          this.eventListeners[type] = {capture:[], bubble:[]};
+        if (!eventListeners.hasOwnProperty(type)) {
+          eventListeners[type] = {capture:[], bubble:[]};
         }
-        this.eventListeners[type][useCapture ? 'capture':'bubble'].push(listener);
+        eventListeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
         
         //object ready for events, add to receivers if not already there
-        if (dispatcher_queue.every(function(obj) { return self !== obj; })) {
-          dispatcher_queue.push(self);
+        if (dispatcher_queue.indexOf(this) === -1) {
+          dispatcher_queue.push(this);
         }
       }
     },
@@ -4862,7 +5202,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @param {Boolean} useCapture
      */
     'removeEventListener': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
@@ -4872,22 +5212,27 @@ Object.defineProperties(doodle.TextEvent, {
         check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
         check_boolean_type(useCapture, this+'.removeEventListener', 'type, listener, *useCapture*');
         /*END_DEBUG*/
+        var eventListeners = this.eventListeners,
+            handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
+            listeners,
+            //lookup help
+            disp_queue,
+            indexOf = Array_indexOf,
+            splice = Array_splice;
         
         //make sure event type exists
-        if (this.eventListeners[type]) {
-          //grab our event type array and remove the callback function
-          var evt_type = this.eventListeners[type],
-          listeners = evt_type[useCapture ? 'capture':'bubble'];
-
-          listeners.splice(listeners.indexOf(listener), 1);
-          
-          //if none left, remove event type
-          if (evt_type.capture.length === 0 && evt_type.bubble.length === 0) {
-            delete this.eventListeners[type];
+        if (handler) {
+          listeners = handler[useCapture ? 'capture' : 'bubble'];
+          //remove handler function
+          splice.call(listeners, indexOf.call(listeners, listener), 1);
+          //if none left, remove handler type
+          if (handler.capture.length === 0 && handler.bubble.length === 0) {
+            delete eventListeners[type];
           }
           //if no more listeners, remove from object queue
-          if (Object.keys(this.eventListeners).length === 0) {
-            dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
+          if (Object.keys(eventListeners).length === 0) {
+            disp_queue = dispatcher_queue;
+            splice.call(disp_queue, indexOf.call(disp_queue, this), 1);
           }
         }
       }
@@ -4898,7 +5243,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Boolean} true if node has listeners of event type.
      */
     'handleEvent': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (event) {
@@ -4963,6 +5308,10 @@ Object.defineProperties(doodle.TextEvent, {
         //events are dispatched from the child,
         //capturing goes down to the child, bubbling then goes back up
         var target,
+            evt_type = event.type,
+            hasOwnProperty = Object.prototype.hasOwnProperty,
+            //check this node for event handler
+            evt_handler_p = hasOwnProperty.call(this.eventListeners, evt_type),
             node,
             node_path = [],
             len, //count of nodes up to root
@@ -4986,17 +5335,26 @@ Object.defineProperties(doodle.TextEvent, {
         target = event.target;
         //path starts at node parent
         node = target.parent || null;
-
+        
         //create path from node's parent to top of tree
         while (node) {
+          //only want to dispatch if there's a reason to
+          if (!evt_handler_p) {
+            evt_handler_p = hasOwnProperty.call(node.eventListeners, evt_type);
+          }
           node_path.push(node);
           node = node.parent;
+        }
+
+        //if no handlers for event type, no need to dispatch
+        if (!evt_handler_p) {
+          return true;
         }
 
         //enter capture phase: down the tree
         event.__setEventPhase(CAPTURING_PHASE);
         i = len = node_path.length;
-        while ((i=i-1) >= 0) {
+        while (i--) {
           node_path[i].handleEvent(event);
           //was the event stopped inside the handler?
           if (event.__cancel) {
@@ -5034,16 +5392,17 @@ Object.defineProperties(doodle.TextEvent, {
     /* Dispatches an event to every object with an active listener.
      * Ignores propagation path, objects come from 
      * @param {Event} event
-     * @return {Boolean} true if the event was successfully dispatched.
+     * @return {Boolean} True if the event was successfully dispatched.
      */
     'broadcastEvent': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (event) {
-        var receivers, //event listeners of correct type
-            len, //count of event listeners
-            i = 0; //counter
+        var evt_type = event.type,
+            hasOwnProperty = Object.prototype.hasOwnProperty,
+            disp_queue = dispatcher_queue,
+            dq_count = disp_queue.length;
         
         /*DEBUG*/
         check_event_type(event, this+'.broadcastEvent', '*event*');
@@ -5058,15 +5417,12 @@ Object.defineProperties(doodle.TextEvent, {
         if (!event.target) {
           event.__setTarget(this);
         }
-        
-        //pare down to eligible receivers with event type listener
-        receivers = dispatcher_queue.filter(function (obj) {
-          return obj.hasEventListener(event.type);
-        });
-        
-        //and call each
-        for (len = receivers.length; i < len; i=i+1) {
-          receivers[i].handleEvent(event);
+
+        while (dq_count--) {
+          //hasEventListener
+          if (hasOwnProperty.call(disp_queue[dq_count].eventListeners, evt_type)) {
+            disp_queue[dq_count].handleEvent(event);
+          }
           //event cancelled in listener?
           if (event.__cancel) {
             break;
@@ -5083,14 +5439,14 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Boolean}
      */
     'hasEventListener': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type) {
         /*DEBUG*/
         check_string_type(type, this+'.hasEventListener', '*type*');
         /*END_DEBUG*/
-        return this.eventListeners !== null && this.eventListeners.hasOwnProperty(type);
+        return this.eventListeners.hasOwnProperty(type);
       }
     },
 
@@ -5104,24 +5460,23 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {Boolean}
      */
     'willTrigger': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (type) {
         /*DEBUG*/
         check_string_type(type, this+'.willTrigger', '*type*');
         /*END_DEBUG*/
-        
-        if (this.hasEventListener(type)) {
+        if (this.eventListeners.hasOwnProperty(type)) {
+          //hasEventListener
           return true;
-        } else if (!this.children || this.children.length === 0) {
-          //requires scene graph be in place to proceed down the tree
-          return false;
-        } else {
-          for (var i in this.children) {
-            if (this.children[i].willTrigger(type)) {
-              return true;
-            }
+        }
+        var children = this.children,
+            child_count = children ? children.length : 0;
+
+        while (child_count--) {
+          if (children[child_count].willTrigger(type)) {
+            return true;
           }
         }
         return false;
@@ -5168,6 +5523,7 @@ Object.defineProperties(doodle.TextEvent, {
     return false;
   };
 
+  /*DEBUG*/
   doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
     if (inheritsEventDispatcher(obj)) {
       return true;
@@ -5177,30 +5533,38 @@ Object.defineProperties(doodle.TextEvent, {
       throw new TypeError(caller + param +": Parameter must be an EventDispatcher.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
+/*jslint nomen: false, plusplus: false*/
+/*globals doodle, check_display_type*/
+
 (function () {
   var node_count = 0,
       node_static_properties,
       isNode,
       inheritsNode,
-      check_node_type,
-      inDisplayList,
       /*DEBUG*/
+      check_node_type,
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
+      //recycled events
+      evt_addedEvent = doodle.Event(doodle.Event.ADDED, true),
+      evt_removedEvent = doodle.Event(doodle.Event.REMOVED, true),
+      //lookup help
       doodle_Point = doodle.geom.Point,
-      doodle_Event = doodle.Event,
-      to_degrees = 180 / Math.PI,
-      to_radians = Math.PI / 180;
+      doodle_Matrix = doodle.geom.Matrix,
+      doodle_Rectangle = doodle.geom.Rectangle,
+      create_scene_path = doodle.utils.create_scene_path,
+      PI = Math.PI;
   
   /* Super constructor
-   * @param {Function} init_fn
-   * @return {Object}
+   * @param {String|Function} id|initializer
+   * @return {Node}
    */
   doodle.Node = function (id) {
     var node = Object.create(doodle.EventDispatcher());
@@ -5215,8 +5579,32 @@ Object.defineProperties(doodle.TextEvent, {
     //properties that require privacy
     Object.defineProperties(node, {
       
+      /*DEBUG*/
+      'debug': {
+        //Debugging oprions
+        enumerable: true,
+        configurable: false,
+        value: Object.create(null, {
+          'boundingBox': (function () {
+            var show_bounds = false;
+            return {
+              enumerable: true,
+              configurable: false,
+              get: function () {
+                return show_bounds;
+              },
+              set: function (showBoundingBox) {
+                show_bounds = showBoundingBox === true;
+              }
+            };
+          }())
+        })
+      },
+      /*END_DEBUG*/
+      
       'id': (function () {
-        var node_id;
+        var node_id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
+        node_count += 1;
         return {
           enumerable: true,
           configurable: true,
@@ -5239,9 +5627,8 @@ Object.defineProperties(doodle.TextEvent, {
           set: function (node) {
             /*DEBUG*/
             if (node !== null) {
-              if (!inheritsNode(node)) {
-                throw new TypeError(this+".root: Parameter must be a node.");
-              }
+              //because it's defined later, global declared in prologue
+              check_display_type(node, this+'.root');
             }
             /*END_DEBUG*/
             root = node;
@@ -5258,9 +5645,7 @@ Object.defineProperties(doodle.TextEvent, {
           set: function (node) {
             /*DEBUG*/
             if (node !== null) {
-              if (!inheritsNode(node)) {
-                throw new TypeError(this+".parent: Parameter must be a node.");
-              }
+              check_node_type(node, this+'.parent');
             }
             /*END_DEBUG*/
             parent = node;
@@ -5280,7 +5665,7 @@ Object.defineProperties(doodle.TextEvent, {
       }()),
       
       'transform': (function () {
-        var transform = doodle.geom.Matrix();
+        var transform = doodle_Matrix();
         return {
           enumerable: true,
           configurable: false,
@@ -5310,20 +5695,72 @@ Object.defineProperties(doodle.TextEvent, {
       }()),
 
       'alpha': (function () {
-        var alpha = 1;
+        var alpha = 1; //alpha is between 0 and 1
         return {
           enumerable: true,
           configurable: true,
           get: function () { return alpha; },
-          set: function (alphaValue) {
+          set: function (alphaArg) {
             /*DEBUG*/
-            check_number_type(alphaValue, node+'.alpha');
+            check_number_type(alphaArg, node+'.alpha');
             /*END_DEBUG*/
-            //alpha is between 0 and 1
-            alpha = (alphaValue > 1) ? 1 : ((alphaValue < 0) ? 0 : alphaValue);
+            alpha = (alphaArg > 1) ? 1 : ((alphaArg < 0) ? 0 : alphaArg);
           }
         };
-      }())
+      }()),
+
+      /* The bounding box of a Node is a union of all it's child Sprite's bounds.
+       * @param {Node} targetCoordSpace
+       * @return {Rectangle|Null}
+       */
+      'getBounds': {
+        enumerable: true,
+        writable: true,
+        configurable: false,
+        value: function (targetCoordSpace) {
+          /*DEBUG*/
+          check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
+          /*END_DEBUG*/
+          return this.__getBounds(targetCoordSpace).clone();
+        }
+      },
+
+      /* Same as getBounds, but reuses an internal rectangle.
+       * Since it's passed by reference, you don't want to modify it, but
+       * it's more efficient for checking bounds.
+       */
+      '__getBounds': {
+        enumerable: false,
+        writable: true,
+        configurable: false,
+        value: (function () {
+          var rect = doodle_Rectangle(); //recycle
+          
+          return function (targetCoordSpace) {
+            /*DEBUG*/
+            check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+            /*END_DEBUG*/
+            var bounding_box = null,
+                child_bounds,
+                children = this.children,
+                len = children.length;
+          
+            while (len--) {
+              child_bounds = children[len].__getBounds(targetCoordSpace);
+              
+              if (child_bounds === null) {
+                continue;
+              }
+              if (bounding_box === null) {
+                bounding_box = rect.__compose(child_bounds);
+              } else {
+                bounding_box.__union(child_bounds);
+              }
+            }
+            return bounding_box;
+          };
+        }())
+      }
     });//end defineProperties
 
     //passed an initialization function
@@ -5332,30 +5769,9 @@ Object.defineProperties(doodle.TextEvent, {
       id = undefined;
     }
 
-    //node defaults
-    if (node.id === undefined) {
-      node.id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
-      node_count += 1;
-    }
-
     return node;
   };
 
-  
-  /* Dispatches and event type from all of a nodes children and grandchildren.
-   * @param {Node} node
-   * @param {String} event_type
-   * @param {Function} child_action
-   */
-  function children_dispatch_event (node, event_type, child_action) {
-    node.children.forEach(function (child) {
-      if (typeof child_action === 'function') {
-        child_action(child);
-      }
-      child.dispatchEvent(doodle_Event(event_type, true));
-      children_dispatch_event(child, event_type, child_action);
-    });
-  }
 
   node_static_properties = {
     
@@ -5365,11 +5781,11 @@ Object.defineProperties(doodle.TextEvent, {
       get: function () {
         return this.transform.tx;
       },
-      set: function (d) {
+      set: function (n) {
         /*DEBUG*/
-        check_number_type(d, this+'.x');
+        check_number_type(n, this+'.x');
         /*END_DEBUG*/
-        this.transform.tx = d;
+        this.transform.tx = n;
       }
     },
     
@@ -5379,21 +5795,20 @@ Object.defineProperties(doodle.TextEvent, {
       get: function () {
         return this.transform.ty;
       },
-      set: function (d) {
+      set: function (n) {
         /*DEBUG*/
-        check_number_type(d, this+'.y');
+        check_number_type(n, this+'.y');
         /*END_DEBUG*/
-        this.transform.ty = d;
+        this.transform.ty = n;
       }
     },
 
+    /**
     //registration point
     'axis': {
-      //temp value
       value: {x: this.x, y: this.y}
     },
 
-    /*
     'rotate': { //around external point?
       value: function (deg) {
       
@@ -5406,28 +5821,30 @@ Object.defineProperties(doodle.TextEvent, {
         }
       }
     },
-    */
+    **/
 
-    'rotate': { //around external point?
+    'rotate': {
+      enumerable: true,
+      configurable: false,
       value: function (deg) {
         /*DEBUG*/
-        check_number_type(deg, this+'.rotate');
+        check_number_type(deg, this+'.rotate', '*degrees*');
         /*END_DEBUG*/
-        this.transform.rotate(deg * to_radians);
+        this.transform.rotate(deg * PI / 180);
       }
     },
     
     'rotation': {
       enumerable: true,
-      configurable: true,
+      configurable: false,
       get: function () {
-        return this.transform.rotation * to_degrees;
+        return this.transform.rotation * 180 / PI;
       },
       set: function (deg) {
         /*DEBUG*/
         check_number_type(deg, this+'.rotation', '*degrees*');
         /*END_DEBUG*/
-        this.transform.rotation = deg * to_radians;
+        this.transform.rotation = deg * PI / 180;
       }
     },
 
@@ -5467,7 +5884,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -5476,43 +5893,53 @@ Object.defineProperties(doodle.TextEvent, {
     },
 
     'addChildAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node, index) {
-        //if already a child then ignore
-        if (this.children.indexOf(node) !== -1) {
-          return false;
-        }
+        var children = this.children,
+            display = this.root,
+            node_parent = node.parent,
+            i;
 
         /*DEBUG*/
         check_node_type(node, this+'.addChildAt', '*node*, index');
         check_number_type(index, this+'.addChildAt', 'node, *index*');
         /*END_DEBUG*/
         
-        //make sure parent/child share same root
-        if (node.root !== this.root) {
-          node.root = this.root;
+        //if already a child then ignore
+        if (children.indexOf(node) !== -1) {
+          return false;
         }
-        //if has previous parent, remove from it's children
-        if (node.parent !== null && node.parent !== this) {
+
+        //if it had another parent, remove from their children
+        if (node_parent !== null && node_parent !== this) {
           node.parent.removeChild(node);
         }
         node.parent = this;
-        this.children.splice(index, 0, node);
-        
-        //is the node now a part of the display list?
-        if (inDisplayList(node)) {
-          node.dispatchEvent(doodle_Event(doodle_Event.ADDED, true));
-          children_dispatch_event(node, doodle_Event.ADDED);
-        }
+        //add child
+        children.splice(index, 0, node);
 
+        //are we on the display path and node not previously on path
+        if (display && node.root !== display) {
+          //resort scene graph
+          display.__sortAllChildren();
+          children = create_scene_path(node, []);
+          i = children.length;
+          while (i--) {
+            node = children[i];
+            //set new root for all descendants
+            node.root = display;
+            //fire Event.ADDED if now on display list
+            node.dispatchEvent(evt_addedEvent.__setTarget(null));
+          }
+        }
         return node;
       }
     },
     
     'addChild': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node) {
@@ -5524,43 +5951,39 @@ Object.defineProperties(doodle.TextEvent, {
     },
     
     'removeChildAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
-      value: (function () {
-        /* Called on every child of removed node with a context.
-         * Ensures it's old bounds are cleared before being re-parented.
-         */
-        function clear_node_bounds (child, context) {
-          var bounds = child.getBounds(child.root);
-          if (context) {
-            context.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
-          }
-          child.root = null;
-        }
+      value: function (index) {
+        /*DEBUG*/
+        check_number_type(index, this+'.removeChildAt', '*index*');
+        /*END_DEBUG*/
+        var children = this.children,
+            child = children[index],
+            display = this.root,
+            child_descendants = create_scene_path(child, []), //includes child
+            i = child_descendants.length,
+            j = i;
         
-        return function (index) {
-          /*DEBUG*/
-          check_number_type(index, this+'.removeChildAt', '*index*');
-          /*END_DEBUG*/
-          var node = this.children[index],
-          ctx = node.context;
-          
-          this.children.splice(index, 1);
-
-          //is it no longer a part of the display list?
-          if (ctx) {
-            clear_node_bounds(node, ctx);
-            node.dispatchEvent(doodle_Event(doodle_Event.REMOVED, true));
-            children_dispatch_event(node, doodle_Event.REMOVED, function (child) {
-              clear_node_bounds(child, ctx);
-            });
+        //event dispatching depends on an intact scene graph
+        if (display) {
+          while (i--) {
+            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
           }
-          //these are needed for final transversal
-          node.root = null;
-          node.parent = null;
-        };
-      }())
+        }
+        //un-adopt child
+        children.splice(index, 1);
+        
+        //reset child and descendants
+        child.parent = null;
+        while (j--) {
+          child_descendants[j].root = null;
+        }
+        //reorder this display's scene path
+        if (display) {
+          display.__sortAllChildren();
+        }
+      }
     },
     
     'removeChild': {
@@ -5576,7 +5999,7 @@ Object.defineProperties(doodle.TextEvent, {
     },
     
     'removeChildById': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (id) {
@@ -5588,32 +6011,42 @@ Object.defineProperties(doodle.TextEvent, {
     },
     
     'removeAllChildren': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
-        //just assign an empty array to this.children?
         var i = this.children.length;
-        while ((i -= 1) >= 0) {
+        while (i--) {
           this.removeChildAt(i);
         }
       }
     },
     
     'getChildById': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (id) {
         /*DEBUG*/
         check_string_type(id, this+'.getChildById', '*id*');
         /*END_DEBUG*/
-        return this.children.filter(function (child) {
-          return child.id === id;
-        })[0];
+        var children = this.children,
+            len = children.length,
+            i = 0;
+        for (; i < len; i++) {
+          if (children[i].id === id) {
+            return children[i];
+          }
+        }
+        return null;
       }
     },
 
+    /* Changes the position of an existing child in the node's children array.
+     * This affects the layering of child objects.
+     * @param {Node} child
+     * @param {Number} index
+     */
     'setChildIndex': {
       enumerable: true,
       writable: false,
@@ -5624,21 +6057,25 @@ Object.defineProperties(doodle.TextEvent, {
         check_number_type(index, this+'.setChildIndex', 'child, *index*');
         /*END_DEBUG*/
         var children = this.children,
-        len = children.length,
-        pos = children.indexOf(child);
+            len = children.length,
+            pos = children.indexOf(child);
+        /*DEBUG*/
         if (pos === -1) {
           throw new ReferenceError(this+'.setChildIndex(*child*, index): ' + child + ' does not exist on child list.');
         }
         if (index > len || index < -len) {
           throw new RangeError(this+'.setChildIndex(child, *index*): ' + index + ' does not exist on child list.');
         }
-        children.splice(pos, 1); //remove element
-        children.splice(index, 0, child); //set new position
+        /*END_DEBUG*/
+        children.splice(pos, 1); //remove child
+        children.splice(index, 0, child); //place child at new position
       }
     },
-    
+
+    /* Swaps the child nodes at the two specified index positions in the child list.
+     */
     'swapChildrenAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (index1, index2) {
@@ -5646,13 +6083,13 @@ Object.defineProperties(doodle.TextEvent, {
         check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
         check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
         /*END_DEBUG*/
-        var a = this.children;
-        a[index1] = a.splice(index2, 1, a[index1])[0];
+        var children = this.children;
+        children[index1] = children.splice(index2, 1, children[index1])[0];
       }
     },
     
     'swapChildren': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node1, node2) {
@@ -5665,88 +6102,129 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    //change this nodes depth in parent
+    /* Swap positions with another node in the parents child list.
+     * @param {Node} node
+     */
     'swapDepths': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function I(node) {
+        var parent = this.parent,
+            children;
         /*DEBUG*/
         check_node_type(node, this+'.swapDepths', '*node*');
-        /*END_DEBUG*/
-        var parent = this.parent;
-        if (!parent || !Array.isArray(parent.children)) {
-          throw new Error(this+".swapDepths: no parent found.");
-        } else {
-          parent.swapChildren(this, node);
+        check_node_type(parent, this+'.swapDepths(node): No parent node found.');
+        if (node.parent !== parent) {
+          throw new ReferenceError(this+".swapDepths(node): "+ this.id +" node and "+ node.id + " node do not share a parent.");
         }
+        /*END_DEBUG*/
+        children = parent.children;
+        parent.swapChildrenAt(children.indexOf(this), children.indexOf(node));
       }
     },
 
+    /* Swap positions with another node at a given index in the parents child list.
+     * @param {Number} index
+     */
     'swapDepthAt': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (index) {
+        var parent = this.parent;
         /*DEBUG*/
         check_number_type(index, this+'.swapDepthAt', '*index*');
+        check_node_type(parent, this+'.swapDepthAt(node): No parent node found.');
         /*END_DEBUG*/
-        var parent = this.parent;
-        if (!parent || !Array.isArray(parent.children)) {
-          throw new Error(this+".swapDepthAt: no parent found.");
-        } else {
-          parent.swapChildrenAt(index, parent.children.indexOf(this));
-        }
+        parent.swapChildrenAt(index, parent.children.indexOf(this));
       }
     },
     
     /* Determine if node is among it's children, grandchildren, etc.
+     * @param {Node} node
      * @return {Boolean}
-     *
-     * THIS ONLY CHECKS PARENTS / GRANDPARENTS
      */
     'contains': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function (node) {
-        while (node) {
-          if (node === this) {
-            return true;
-          }
-          node = node.parent;
-        }
-        return false;
+        /*DEBUG*/
+        check_node_type(node, this+'.contains', '*node*');
+        /*END_DEBUG*/
+        return (create_scene_path(this, []).indexOf(node) !== -1) ? true : false;
       }
     },
 
     'localToGlobal': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.localToGlobal', '*point*');
+        /*END_DEBUG*/
+        var node = this.parent;
+        //apply each transformation from this node up to root
+        point = this.transform.transformPoint(point); //new point
+        while (node) {
+          node.transform.__transformPoint(point); //modify point
+          node = node.parent;
+        }
+        return point;
+      }
+    },
+
+    /* Same as localToGlobal, but modifies a point in place.
+     */
+    '__localToGlobal': {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (pt) {
+      value: function (point) {
         /*DEBUG*/
-        check_point_type(pt, this+'.localToGlobal', '*point*');
+        check_point_type(point, this+'.localToGlobal', '*point*');
         /*END_DEBUG*/
         var node = this;
+        //apply each transformation from this node up to root
         while (node) {
-          pt = node.transform.transformPoint(pt);
+          node.transform.__transformPoint(point); //modify point
           node = node.parent;
         }
-        return pt;
+        return point;
       }
     },
 
     'globalToLocal': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (point) {
+        /*DEBUG*/
+        check_point_type(point, this+'.globalToLocal', '*point*');
+        /*END_DEBUG*/
+        var global_pt = {x:0, y:0};
+        this.__localToGlobal(global_pt);
+        return doodle_Point(point.x - global_pt.x, point.y - global_pt.y);
+      }
+    },
+
+    /* Same as globalToLocal, but modifies a point in place.
+     */
+    '__globalToLocal': {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (pt) {
+      value: function (point) {
         /*DEBUG*/
-        check_point_type(pt, this+'.globalToLocal', '*point*');
+        check_point_type(point, this+'.globalToLocal', '*point*');
         /*END_DEBUG*/
-        var global_pos = this.localToGlobal({x: 0, y: 0});
-        return doodle_Point(pt.x - global_pos.x, pt.y - global_pos.y);
+        var global_pt = {x:0, y:0};
+        this.__localToGlobal(global_pt);
+        point.x = point.x - global_pt.x;
+        point.y = point.y - global_pt.y;
+        return point;
       }
     }
   };//end node_static_properties
@@ -5786,6 +6264,7 @@ Object.defineProperties(doodle.TextEvent, {
     return false;
   };
 
+  /*DEBUG*/
   check_node_type = doodle.utils.types.check_node_type = function (node, caller, param) {
     if (inheritsNode(node)) {
       return true;
@@ -5795,29 +6274,19 @@ Object.defineProperties(doodle.TextEvent, {
       throw new TypeError(caller + param +": Parameter must be a Node.");
     }
   };
-
-  /* A node is part of the display list if it can find a context to
-   * draw on in it's scene graph.
-   */
-  inDisplayList = doodle.Node.inDisplayList = function (node) {
-    while (node) {
-      if (node.context) {
-        return true;
-      }
-      node = node.parent;
-    }
-    return false;
-  };
+  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle, Image*/
 (function () {
   var graphics_static_properties,
+      /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_array_type = doodle.utils.types.check_array_type,
       check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
       doodle_Event = doodle.Event,
@@ -6503,17 +6972,15 @@ Object.defineProperties(doodle.TextEvent, {
   var sprite_static_properties,
       isSprite,
       inheritsSprite,
-      check_sprite_type,
-      hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
-      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       /*DEBUG*/
+      check_sprite_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_point_type = doodle.utils.types.check_point_type,
-      check_rect_type = doodle.utils.types.check_rect_type,
+      check_node_type = doodle.utils.types.check_node_type,
       check_context_type = doodle.utils.types.check_context_type,
       /*END_DEBUG*/
-      inheritsNode = doodle.Node.inheritsNode,
+      //lookup help
       doodle_Rectangle = doodle.geom.Rectangle;
 
   /* Super constructor
@@ -6591,7 +7058,7 @@ Object.defineProperties(doodle.TextEvent, {
         }()),
 
         /*
-         * @param {Node|Matrix} targetCoordSpace
+         * @param {Node} targetCoordSpace
          * @return {Rectangle}
          */
         'getBounds': {
@@ -6600,37 +7067,70 @@ Object.defineProperties(doodle.TextEvent, {
           configurable: false,
           value: function (targetCoordSpace) {
             /*DEBUG*/
-            if (!inheritsNode(targetCoordSpace)) {
-              throw new TypeError(this+'.getBounds(targetCoordinateSpace): Parameter must inherit from doodle.Node.');
-            }
+            check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
             /*END_DEBUG*/
-            var bounding_box = doodle_Rectangle(),
-                w = this.width,
-                h = this.height,
-                min = Math.min,
-                max = Math.max,
-                //transform corners to global
-                tl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y}), //top left
-                tr = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y}), //top right
-                br = this.localToGlobal({x: extrema.min_x+w, y: extrema.min_y+h}), //bot right
-                bl = this.localToGlobal({x: extrema.min_x, y: extrema.min_y+h}); //bot left
-            
-            //transform global to target space
-            tl = targetCoordSpace.globalToLocal(tl);
-            tr = targetCoordSpace.globalToLocal(tr);
-            br = targetCoordSpace.globalToLocal(br);
-            bl = targetCoordSpace.globalToLocal(bl);
-
-            //set rect with extremas
-            bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
-            bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
-            bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
-            bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
-
-            return bounding_box;
+            return this.__getBounds(targetCoordSpace).clone();
           }
         },
-        
+
+        /* Same as getBounds, but reuses an internal rectangle.
+         * Since it's passed by reference, you don't want to modify it, but
+         * it's more efficient for checking bounds.
+         */
+        '__getBounds': {
+          enumerable: false,
+          writable: true,
+          configurable: false,
+          value: (function () {
+            var rect = doodle_Rectangle(); //recycle
+            
+            return function (targetCoordSpace) {
+              /*DEBUG*/
+              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              /*END_DEBUG*/
+              var children = this.children,
+                  len = children.length,
+                  bounding_box = rect,
+                  child_bounds,
+                  w = this.width,
+                  h = this.height,
+                  min = Math.min,
+                  max = Math.max,
+                  tl = {x: extrema.min_x, y: extrema.min_y},
+                  tr = {x: extrema.min_x+w, y: extrema.min_y},
+                  br = {x: extrema.min_x+w, y: extrema.min_y+h},
+                  bl = {x: extrema.min_x, y: extrema.min_y+h};
+              
+              //transform corners to global
+              this.__localToGlobal(tl); //top left
+              this.__localToGlobal(tr); //top right
+              this.__localToGlobal(br); //bot right
+              this.__localToGlobal(bl); //bot left
+              //transform global to target space
+              targetCoordSpace.__globalToLocal(tl);
+              targetCoordSpace.__globalToLocal(tr);
+              targetCoordSpace.__globalToLocal(br);
+              targetCoordSpace.__globalToLocal(bl);
+
+              //set rect with extremas
+              bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
+              bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
+              bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
+              bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
+
+              //add child bounds to this
+              while (len--) {
+                child_bounds = children[len].__getBounds(targetCoordSpace);
+                if (child_bounds !== null) {
+                  bounding_box.__union(child_bounds);
+                }
+              }
+              return bounding_box;
+            };
+          }())
+        },
+
+        /** not ready
         'hitArea': (function () {
           var hit_area = null;
           return {
@@ -6646,15 +7146,14 @@ Object.defineProperties(doodle.TextEvent, {
             set: function (rect) {
               //accepts null/false or rectangle area for now
               rect = (rect === false) ? null : rect;
-              /*DEBUG*/
               if (rect !== null) {
                 check_rect_type(rect, this+'.hitArea');
               }
-              /*END_DEBUG*/
               hit_area = rect;
             }
           };
         }()),
+        **/
 
         'hitTestObject': {
           enumerable: true,
@@ -6680,7 +7179,7 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        //drawing context to use
+        //drawing context to use - don't think I need to keep this
         'context': {
           get: function () {
             //will keep checking parent for context till found or null
@@ -6723,35 +7222,6 @@ Object.defineProperties(doodle.TextEvent, {
               cmd.call(sprite, ctx);
             });
           }
-        },
-
-        /* Debug
-         */
-        'debug': {
-          enumerable: true,
-          configurable: false,
-          value: Object.create(null, {
-            'boundingBox': (function () {
-              var debug_boundingBox = "rgb(0,0,255)";
-              return {
-                enumerable: true,
-                configurable: false,
-                get: function () {
-                  return rgb_str_to_hex(debug_boundingBox);
-                },
-                set: function (color) {
-                  /*DEBUG*/
-                  if (typeof color === 'number') {
-                    color = hex_to_rgb_str(color);
-                  } else if (typeof color === 'string' && color[0] === '#') {
-                    color = hex_to_rgb_str(color);
-                  }
-                  /*END_DEBUG*/
-                  debug_boundingBox = color;
-                }
-              };
-            }())
-          })
         }
       };
     }()));//end defineProperties
@@ -6857,6 +7327,7 @@ Object.defineProperties(doodle.TextEvent, {
     return false;
   };
 
+  /*DEBUG*/
   check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, param) {
     if (inheritsSprite(sprite)) {
       return true;
@@ -6866,75 +7337,350 @@ Object.defineProperties(doodle.TextEvent, {
       throw new TypeError(caller + param +": Parameter must inherit from Sprite.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle*/
+
 (function () {
   var node_static_properties,
-      doodle_utils = doodle.utils,
+      url_regexp = new RegExp("^url\\((.*)\\)"),
+      isElementNode,
+      inheritsElementNode,
       /*DEBUG*/
-      check_number_type = doodle_utils.types.check_number_type,
-      check_string_type = doodle_utils.types.check_string_type,
-      check_boolean_type = doodle_utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
+      check_string_type = doodle.utils.types.check_string_type,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_node_type = doodle.utils.types.check_node_type,
       /*END_DEBUG*/
-      rgb_str_to_hex = doodle_utils.rgb_str_to_hex,
-      hex_to_rgb_str = doodle_utils.hex_to_rgb_str,
-      get_element = doodle_utils.get_element,
-      get_element_property = doodle_utils.get_element_property,
-      set_element_property = doodle_utils.set_element_property;
+      //lookup help
+      doodle_Rectangle = doodle.geom.Rectangle,
+      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
+      hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+      get_element = doodle.utils.get_element,
+      get_element_property = doodle.utils.get_element_property,
+      set_element_property = doodle.utils.set_element_property;
   
   /* Super constructor
    * @param {String|Function} id|initializer
    * @return {Object}
    */
-  doodle.ElementNode = function (id, element) {
+  doodle.ElementNode = function (element, id/*optional*/) {
     var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
-
-    /*DEBUG*/
-    if (arguments.length > 2) {
-      throw new SyntaxError("[object ElementNode](id, element): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
 
     Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
-    Object.defineProperties(element_node, {
-      'element': (function () {
-        var dom_element = null;
-        return {
+    Object.defineProperties(element_node, (function () {
+      //defaults
+      var dom_element = null,
+          node_id = element_node.id, //inherit from node
+          alpha = element_node.alpha,
+          visible = element_node.visible,
+          width = 0,
+          height = 0,
+          bg_color = null,
+          bg_image = null,
+          bg_repeat = 'repeat';
+      
+      return {
+        'element': {
+          enumerable: true,
           configurable: true,
-          get: function () {
-            return dom_element;
-          },
+          get: function () { return dom_element; },
           set: function (elementArg) {
+            var color,
+                image,
+                id,
+                w, h;
+            
             if (elementArg === null) {
+              //check if removing an element
+              if (dom_element !== null) {
+                //class specific tasks when removing an element
+                if (typeof this.__removeDomElement === 'function') {
+                  this.__removeDomElement(dom_element);
+                }
+                //reset some values on the doodle object
+                bg_color = null;
+                bg_image = null;
+                bg_repeat = 'repeat';
+                //keep values of parent
+                if (!this.parent) {
+                  width = 0;
+                  height = 0;
+                }
+              }
+              //element be'gone!
               dom_element = null;
+              
             } else {
+              //assign a dom element
               elementArg = get_element(elementArg);
               /*DEBUG*/
               if (!elementArg) {
-                throw new TypeError("[object ElementNode]: Parameter must be a DOM Element");
+                throw new ReferenceError(this+".element: Invalid element.");
               }
               /*END_DEBUG*/
               dom_element = elementArg;
+              
+              /* Some classes require special handling of their element.
+               */
+              switch (this.toString()) {
+              case '[object Layer]':
+                this.__addDomElement(dom_element);
+                break;
+              case '[object Display]':
+                this.__addDomElement(dom_element);
+                w = get_element_property(dom_element, 'width', 'int', false) || dom_element.width;
+                h = get_element_property(dom_element, 'height', 'int', false) || dom_element.height;
+                if (typeof w === 'number') { this.width = w; }
+                if (typeof h === 'number') { this.height = h; }
+                break;
+              default:
+                //get information from element - images, etc.  
+                w = get_element_property(dom_element, 'width', 'int') || dom_element.width;
+                h = get_element_property(dom_element, 'height', 'int') || dom_element.height;
+                if (typeof w === 'number') { width = w; }
+                if (typeof h === 'number') { height = h; }
+                break;
+              }
+
+              /* These go for every dom element passed.
+               */
+              id = get_element_property(dom_element, 'id');
+              //if element has an id, rename node. Else, set element to this id.
+              if (id) {
+                node_id = id;
+              } else {
+                this.id = node_id;
+              }
+              //background color and image
+              bg_repeat = get_element_property(dom_element, 'backgroundRepeat') || bg_repeat;
+              color = get_element_property(dom_element, 'backgroundColor');
+              bg_color = color ? rgb_str_to_hex(color) : bg_color;
+              //parse image path from url format
+              image = get_element_property(dom_element, 'backgroundImage');
+              image = (!image || image === "none") ? null : bg_image.match(url_regexp);
+              bg_image = image ? image[1] : bg_image;
             }
           }
-        };
-      }())
-    });//end defineProperties
+        },
+        
+        /* Evidently it's not very efficent to query the dom for property values,
+         * as it might initiate a re-flow. Cache values instead.
+         */
+        
+        'id': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return node_id; },
+          set: function (name) {
+            /*DEBUG*/
+            check_string_type(name, this+'.id');
+            /*END_DEBUG*/
+            node_id = set_element_property(this.element, 'id', name, 'html');
+          }
+        },
+        
+        'width': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return width; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.width');
+            /*END_DEBUG*/
+            set_element_property(this.element, 'width', n+"px");
+            width = n;
+          }
+        },
+        
+        'height': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return height; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.height');
+            /*END_DEBUG*/
+            set_element_property(this.element, 'height', n+"px");
+            height = n;
+          }
+        },
+        
+        'backgroundColor': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return bg_color; },
+          set: function (color) {
+            if (typeof color === 'number') {
+              color = hex_to_rgb_str(color);
+            }
+            set_element_property(this.element, 'backgroundColor', color);
+            //the dom will convert the color to 'rgb(n,n,n)' format
+            bg_color = rgb_str_to_hex(get_element_property(this.element, 'backgroundColor'));
+          }
+        },
+        
+        'backgroundImage': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return bg_image; },
+          set: function (image) {
+            if (!image) {
+              bg_image = set_element_property(this.element, 'backgroundImage', null);
+              return;
+            }
+            //a string can be a page element or url
+            if (typeof image === 'string') {
+              if (image[0] === '#') {
+                image = get_element(image).src;
+              }
+            } else if (image && image.tagName === 'IMG') {
+              //passed an image element
+              image = image.src;
+            }
+            /*DEBUG*/
+            check_string_type(image, this+'.backgroundImage');
+            /*END_DEBUG*/
+            //url path at this point, make sure it's in the proper format
+            if (!url_regexp.test(image)) {
+              image = "url("+ encodeURI(image) +")";
+            }
+            bg_image = set_element_property(this.element, 'backgroundImage', image);
+          }
+        },
 
-    //passed an initialization function
-    if (typeof arguments[0] === 'function') {
-      /*DEBUG*/
-      if (arguments.length > 1) {
-        throw new SyntaxError("[object ElementNode](function): Invalid number of parameters.");
+        'backgroundRepeat': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return bg_repeat; },
+          set: function (repeat) {
+            /*DEBUG*/
+            check_string_type(repeat, this+'.backgroundRepeat');
+            switch (repeat) {
+            case 'repeat':
+            case 'repeat-x':
+            case 'repeat-y':
+            case 'no-repeat':
+            case 'inherit':
+              break;
+            default:
+              throw new SyntaxError(this+'.backgroundRepeat: Invalid CSS value.');
+            }
+            /*END_DEBUG*/
+            bg_repeat = set_element_property(this.element, 'backgroundRepeat', repeat);
+          }
+        },
+
+        'alpha': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return alpha; },
+          set: function (alpha) {
+            /*DEBUG*/
+            check_number_type(alpha, this+'.alpha');
+            alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
+            /*END_DEBUG*/
+            alpha = set_element_property(this.element, 'opacity', alpha);
+          }
+        },
+
+        'visible': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return visible; },
+          set: function (isVisible) {
+            /*DEBUG*/
+            check_boolean_type(isVisible, this+'.visible');
+            /*END_DEBUG*/
+            if (isVisible) {
+              set_element_property(this.element, 'visibility', 'visible');
+            } else {
+              set_element_property(this.element, 'visibility', 'hidden');
+            }
+            visible =  isVisible;
+          }
+        },
+
+        '__getBounds': {
+          enumerable: true,
+          configurable: true,
+          value: (function () {
+            var rect = doodle_Rectangle(); //recycle
+            
+            return function (targetCoordSpace) {
+              /*DEBUG*/
+              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              /*END_DEBUG*/
+              var children = this.children,
+                  len = children.length,
+                  bounding_box = rect,
+                  child_bounds,
+                  w = this.width,
+                  h = this.height,
+                  tl = {x: 0, y: 0},
+                  tr = {x: w, y: 0},
+                  br = {x: w, y: h},
+                  bl = {x: 0, y: h},
+                  min = Math.min,
+                  max = Math.max;
+              
+              //transform corners to global
+              this.__localToGlobal(tl); //top left
+              this.__localToGlobal(tr); //top right
+              this.__localToGlobal(br); //bot right
+              this.__localToGlobal(bl); //bot left
+              //transform global to target space
+              targetCoordSpace.__globalToLocal(tl);
+              targetCoordSpace.__globalToLocal(tr);
+              targetCoordSpace.__globalToLocal(br);
+              targetCoordSpace.__globalToLocal(bl);
+
+              //set rect with extremas
+              bounding_box.left = min(tl.x, tr.x, br.x, bl.x);
+              bounding_box.right = max(tl.x, tr.x, br.x, bl.x);
+              bounding_box.top = min(tl.y, tr.y, br.y, bl.y);
+              bounding_box.bottom = max(tl.y, tr.y, br.y, bl.y);
+
+              //add child bounds to this
+              while (len--) {
+                child_bounds = children[len].__getBounds(targetCoordSpace);
+                if (child_bounds !== null) {
+                  bounding_box.__union(child_bounds);
+                }
+              }
+              return bounding_box;
+            };
+          }())
+        }
+        
+      };
+    }()));//end defineProperties
+
+    //check args
+    switch (arguments.length) {
+    case 0:
+      break;
+    case 1:
+      //passed function
+      if (typeof arguments[0] === 'function') {
+        arguments[0].call(element_node);
+        element = undefined;
+      } else {
+        //passed element
+        element_node.element = element;
       }
-      /*END_DEBUG*/
-      arguments[0].call(element_node);
-      id = undefined;
-    } else if (element !== undefined) {
-      //standard instantiation
-      element_node.element = element;
+      break;
+    case 2:
+      //standard instantiation (element, id)
+      if (element) {
+        //can be undefined
+        element_node.element = element;
+      }
+      break;
+    default:
+      throw new SyntaxError("[object ElementNode](element, id): Invalid number of parameters.");
     }
 
     return element_node;
@@ -6942,165 +7688,11 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   node_static_properties = {
-    'id': {
-      get: function () {
-        return get_element_property(this.element, 'id');
-      },
-      set: function (name) {
-        /*DEBUG*/
-        check_string_type(name, this+'.id');
-        /*END_DEBUG*/
-        return set_element_property(this.element, 'id', name, 'html');
-      }
-    },
-    
-    'width': {
-      enumerable: true,
-      configurable: true,
-      get: function () {
-        return get_element_property(this.element, 'width', 'int');
-      },
-      set: function (n) {
-        /*DEBUG*/
-        check_number_type(n, this+'.width');
-        /*END_DEBUG*/
-        set_element_property(this.element, 'width', n+"px");
-        return n;
-      }
-    },
-    
-    'height': {
-      enumerable: true,
-      configurable: true,
-      get: function () {
-        return get_element_property(this.element, 'height', 'int');
-      },
-      set: function (n) {
-        /*DEBUG*/
-        check_number_type(n, this+'.height');
-        /*END_DEBUG*/
-        set_element_property(this.element, 'height', n+"px");
-        return n;
-      }
-    },
-
-    'backgroundColor': {
-      get: function () {
-        return rgb_str_to_hex(get_element_property(this.element, 'backgroundColor'));
-      },
-      set: function (color) {
-        if (typeof color === 'number') {
-          color = hex_to_rgb_str(color);
-        }
-        return set_element_property(this.element, 'backgroundColor', color);
-      }
-    },
-
-    'backgroundImage': (function () {
-      var url_regexp = new RegExp("^url\\((.*)\\)");
-      return {
-        get: function () {
-          var url = get_element_property(this.element, 'backgroundImage');
-          url = (url === "none") ? null : url.match(url_regexp);
-          //returns the captured substring match
-          return url ? url[1] : null;
-        },
-        set: function (image) {
-          if (!image) {
-            return set_element_property(this.element, 'backgroundImage', null);
-          }
-          //a string can be a page element or url
-          if (typeof image === 'string') {
-            if (image[0] === '#') {
-              image = get_element(image).src;
-            }
-          } else if (image && image.tagName === 'IMG') {
-            //passed an image element
-            image = image.src;
-          }
-          /*DEBUG*/
-          check_string_type(image, this+'.backgroundImage');
-          /*END_DEBUG*/
-
-          //url path at this point, make sure it's in the proper format
-          if (!url_regexp.test(image)) {
-            image = "url("+ encodeURI(image) +")";
-          }
-          return set_element_property(this.element, 'backgroundImage', image);
-        }
-      };
-    }()),
-
-    /* Default is repeat.
-     */
-    'backgroundRepeat': {
-      get: function () {
-        return get_element_property(this.element, 'backgroundRepeat');
-      },
-      set: function (repeat) {
-        /*DEBUG*/
-        check_string_type(repeat, this+'.backgroundRepeat');
-        switch (repeat) {
-        case 'repeat':
-        case 'repeat-x':
-        case 'repeat-y':
-        case 'no-repeat':
-        case 'inherit':
-          break;
-        default:
-          throw new SyntaxError(this+'.backgroundRepeat: Invalid CSS value.');
-        }
-        /*END_DEBUG*/
-        return set_element_property(this.element, 'backgroundRepeat', repeat);
-      }
-    },
-
-    'alpha': {
-      get: function () {
-        return get_element_property(this.element, 'opacity', 'float');
-      },
-      set: function (alpha) {
-        /*DEBUG*/
-        check_number_type(alpha, this+'.alpha');
-        alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
-        /*END_DEBUG*/
-        return set_element_property(this.element, 'opacity', alpha);
-      }
-    },
-
-    'visible': {
-      get: function () {
-        switch (get_element_property(this.element, 'visibility')) {
-        case 'visible':
-          return true;
-        case 'hidden':
-          return false;
-        default:
-          throw new ReferenceError(this+".visible: Unable to determine visibility.");
-        }
-      },
-      set: function (isVisible) {
-        /*DEBUG*/
-        check_boolean_type(isVisible, this+'.visible');
-        /*END_DEBUG*/
-        if (isVisible) {
-          set_element_property(this.element, 'visibility', 'visible');
-        } else {
-          set_element_property(this.element, 'visibility', 'hidden');
-        }
-        return isVisible;
-      }
-    },
-
-    /*
-     * METHODS
-     */
-
     /* Returns the string representation of the specified object.
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
@@ -7108,6 +7700,52 @@ Object.defineProperties(doodle.TextEvent, {
       }
     }
   };//end node_static_properties
+
+  /*
+   * CLASS METHODS
+   */
+
+  /* Test if an object is an node.
+   * Not the best way to test object, but it'll do for now.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  isElementNode = doodle.ElementNode.isElementNode = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
+    return (obj.toString() === '[object ElementNode]');
+  };
+
+  /* Check if object inherits from node.
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  inheritsElementNode = doodle.ElementNode.inheritsElementNode = function (obj) {
+    while (obj) {
+      if (isElementNode(obj)) {
+        return true;
+      } else {
+        if (typeof obj !== 'object') {
+          return false;
+        }
+        obj = Object.getPrototypeOf(obj);
+      }
+    }
+    return false;
+  };
+
+  /*DEBUG*/
+  doodle.utils.types.check_elementnode_type = function (node, caller, param) {
+    if (inheritsElementNode(node)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_elementnode_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be an ElementNode.");
+    }
+  };
+  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle, document*/
@@ -7121,8 +7759,6 @@ Object.defineProperties(doodle.TextEvent, {
       check_number_type = doodle.utils.types.check_number_type,
       check_canvas_type = doodle.utils.types.check_canvas_type,
       /*END_DEBUG*/
-      get_element = doodle.utils.get_element,
-      get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property;
   
   /* Super constructor
@@ -7131,58 +7767,102 @@ Object.defineProperties(doodle.TextEvent, {
    */
   doodle.Layer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
-        layer = Object.create(doodle.ElementNode(layer_name));
-    
-    /*DEBUG*/
-    if (arguments.length > 2) {
-      throw new SyntaxError("[object Layer](id, element): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
+        layer = Object.create(doodle.ElementNode(undefined, layer_name));
 
     Object.defineProperties(layer, layer_static_properties);
     //properties that require privacy
-    Object.defineProperties(layer, {
-      'element': (function () {
-        var dom_element = null;
-        return {
-          get: function () {
-            return dom_element;
-          },
-          set: function (canvasArg) {
-            if (canvasArg === null) {
-              dom_element = null;
-            } else {
-              canvasArg = get_element(canvasArg);
-              /*DEBUG*/
-              check_canvas_type(canvasArg, this+'.element');
-              /*END_DEBUG*/
-              dom_element = canvasArg;
-              set_element_property(dom_element, 'id', layer_name, 'html');
-              if (this.parent) {
-                //set to display dimensions
-                this.width = this.parent.width;
-                this.height = this.parent.height;
-              }
-              //need to stack canvas elements inside div
-              set_element_property(dom_element, 'position', 'absolute');
-            }
+    Object.defineProperties(layer, (function () {
+      //defaults
+      var width = 0,
+          height = 0,
+          context = null;
+      
+      return {
+        /* Canvas dimensions need to apply to HTML attributes.
+         */
+        'width': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return width; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.width');
+            /*END_DEBUG*/
+            width = set_element_property(this.element, 'width', n, 'html');
           }
-        };
-      }())
-    });
+        },
+        
+        'height': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return height; },
+          set: function (n) {
+            /*DEBUG*/
+            check_number_type(n, this+'.height');
+            /*END_DEBUG*/
+            height = set_element_property(this.element, 'height', n, 'html');
+          }
+        },
 
-    //passed an initialization function
-    if (typeof arguments[0] === 'function') {
-      /*DEBUG*/
-      if (arguments.length > 1) {
-        throw new SyntaxError("[object Layer](function): Invalid number of parameters.");
+        'context': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return context; }
+        },
+
+        /* Layer specific things to setup when adding a dom element.
+         * Called in ElementNode.element
+         */
+        '__addDomElement': {
+          enumerable: false,
+          writable: false,
+          value: function (elementArg) {
+            /*DEBUG*/
+            check_canvas_type(elementArg, this+'.element');
+            /*END_DEBUG*/
+            //need to stack canvas elements inside div
+            set_element_property(elementArg, 'position', 'absolute');
+            //set to display dimensions if there
+            if (this.parent) {
+              this.width = this.parent.width;
+              this.height = this.parent.height;
+            }
+            //set rendering context
+            context = elementArg.getContext('2d');
+          }
+        },
+
+        '__removeDomElement': {
+          enumerable: false,
+          writable: false,
+          value: function (elementArg) {
+            context = null;
+          }
+        }
+        
+      };
+    }()));//end defineProperties
+
+    switch (arguments.length) {
+    case 0:
+      break;
+    case 1:
+      //passed function or id string
+      if (typeof arguments[0] === 'function') {
+        arguments[0].call(layer);
+        id = undefined;
       }
+      break;
+    case 2:
+      /*DEBUG*/
+      check_canvas_type(element, '[object Layer]', 'id, *element*');
       /*END_DEBUG*/
-      arguments[0].call(layer);
-      id = undefined;
+      layer.element = element;
+      break;
+    default:
+      throw new SyntaxError("[object Layer](id, element): Invalid number of parameters.");
     }
-    
-    //layer defaults - if not set in init function
+
     if (layer.element === null) {
       layer.element = document.createElement('canvas');
     }
@@ -7194,51 +7874,30 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   layer_static_properties = {
-    'context': {
-      get: function () {
-        return this.element.getContext('2d');
-      }
-    },
-
-    /* Canvas dimensions need to apply to HTML attributes.
-     */
-    'width': {
-        get: function () {
-          return get_element_property(this.element, 'width', 'int');
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.width');
-          /*END_DEBUG*/
-          set_element_property(this.element, 'width', n, 'html');
-          return n;
-        }
-      },
-      
-      'height': {
-        get: function () {
-          return get_element_property(this.element, 'height', 'int');
-        },
-        set: function (n) {
-          /*DEBUG*/
-          check_number_type(n, this+'.height');
-          /*END_DEBUG*/
-          set_element_property(this.element, 'height', n, 'html');
-          return n;
-        }
-      },
-
     /* Returns the string representation of the specified object.
      * @return {String}
      */
     'toString': {
-      enumerable: false,
+      enumerable: true,
       writable: false,
       configurable: false,
       value: function () {
         return "[object Layer]";
       }
-    } 
+    },
+
+    /* This is always the same, so we'll save some computation.
+     */
+    '__getBounds': {
+      enumerable: true,
+      configurable: true,
+      value: (function () {
+        var rect = doodle.geom.Rectangle(); //recycle
+        return function () {
+          return rect.compose(0, 0, this.width, this.height);
+        };
+      }())
+    }
   };//end layer_static_properties
 
   /*
@@ -7274,7 +7933,8 @@ Object.defineProperties(doodle.TextEvent, {
     }
     return false;
   };
-  
+
+  /*DEBUG*/
   doodle.utils.types.check_layer_type = function (layer, caller, param) {
     if (inheritsLayer(layer)) {
       return true;
@@ -7284,451 +7944,487 @@ Object.defineProperties(doodle.TextEvent, {
       throw new TypeError(caller + param +": Parameter must be a Layer.");
     }
   };
+  /*END_DEBUG*/
   
 }());//end class closure
+/*jslint nomen: false, plusplus: false*/
+/*globals doodle, document, setInterval, clearInterval, Stats, check_display_type*/
+
 (function () {
   var display_static_properties,
+      display_count = 0,
+      frame_count = 0,
+      isDisplay,
+      dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,//needed?
+      create_frame,
+      clear_scene_graph,
+      draw_scene_graph,
+      draw_bounding_box,
+      redraw_scene_graph,
+      dispatch_mouse_event,
+      dispatch_mousemove_event,
+      dispatch_mouseleave_event,
+      dispatch_keyboard_event,
+      /*DEBUG*/
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_layer_type = doodle.utils.types.check_layer_type,
-      check_context_type = doodle.utils.types.check_context_type,
       check_block_element = doodle.utils.types.check_block_element,
+      check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
+      create_scene_path = doodle.utils.create_scene_path,
       isLayer = doodle.Layer.isLayer,
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
-      inheritsSprite = doodle.Sprite.inheritsSprite,
+      doodle_Layer = doodle.Layer,
       doodle_Event = doodle.Event,
       doodle_MouseEvent = doodle.MouseEvent,
-      ENTER_FRAME = doodle_Event.ENTER_FRAME,
-      enterFrame = doodle_Event(ENTER_FRAME),
-      dispatcher_queue = doodle.EventDispatcher.dispatcher_queue;
+      //doodle_TouchEvent = doodle.TouchEvent,
+      //recycle these event objects
+      evt_mouseEvent = doodle.MouseEvent(''),
+      //evt_touchEvent = doodle.TouchEvent(''),
+      evt_keyboardEvent = doodle.KeyboardEvent(''),
+      enterFrame = doodle_Event(doodle.Event.ENTER_FRAME),
+      ENTER_FRAME = doodle.Event.ENTER_FRAME;
+      
   
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /* Display
+   * @constructor
+   * @param {HTMLElement} element
+   * @return {Display}
    */
   doodle.Display = function (element) {
-    var arg_len = arguments.length,
-        initializer,
-        display = Object.create(doodle.ElementNode()),
-        frame_count = 0,
-        mouseX = 0,
-        mouseY = 0,
-        debug_stats = null, //stats object
-        debug_bounding_box = false;
-    
-    //check if passed an init function
-    if (arg_len === 1 && typeof arguments[0] === 'function') {
-      initializer = arguments[0];
-      element = undefined;
-    } else if (arg_len > 1) {
-      throw new SyntaxError("[object Display]: Invalid number of parameters.");
+    var display,
+        display_name;
+
+    /*DEBUG*/
+    if (arguments.length > 1) {
+      throw new SyntaxError("[object Display](element): Invalid number of parameters.");
     }
+    /*END_DEBUG*/
+    
+    if (typeof element !== 'function') {
+      element = get_element(element);
+      /*DEBUG*/
+      check_block_element(element, '[object Display](element)');
+      /*END_DEBUG*/
+      if (element) {
+        display_name = get_element_property(element, 'id');
+      }
+    }
+
+    display_name = (typeof display_name === 'string') ? display_name : "display"+ String('00'+display_count).slice(-2);
+    //assign element after display properties have been set up
+    display = Object.create(doodle.ElementNode(undefined, display_name));
 
     Object.defineProperties(display, display_static_properties);
     //properties that require privacy
-    Object.defineProperties(display, {
-      'element': {
-        get: function () {
-          return element;
-        },
-        set: function (id) {
-          //get by name or actual element
-          //element = document.getElementById(id);
-          var e = get_element(id, '[object Display]'),
-              type,
-              w, h;
-          
-          /*DEBUG*/
-          check_block_element(e, this+'.element');
-          /*END_DEBUG*/
-          
-          element = e;
+    Object.defineProperties(display, (function () {
+      var width = 0,
+          height = 0,
+          layers = display.children,
+          display_scene_path = [],
+          mouseX = 0,
+          mouseY = 0,
+          //recycle
+          mouseEvent = evt_mouseEvent,
+          //lookup help
+          this_display = display,
+          //move to a closer scope since we're calling these often
+          dispatch_mouse_evt = dispatch_mouse_event,
+          dispatch_mousemove_evt = dispatch_mousemove_event,
+          dispatch_mouseleave_evt = dispatch_mouseleave_event;
 
-          //we need to stack the canvas elements on top of each other
-          element.style.position = "relative";
-          //init rest - can you transfer layers to another div?
-          this.root = this;
+      function on_mouse_event (evt) {
+        var path = display_scene_path,
+            path_count = path.length;
+        dispatch_mouse_evt(evt, mouseEvent, path, path_count, evt.offsetX, evt.offsetY, this_display);
+      }
 
-          //check for default values
-          w = e.getAttribute('width');
-          h = e.getAttribute('height');
-          if (w) { this.width = parseInt(w); }
-          if (h) { this.height = parseInt(h); }
+      function on_mouse_move (evt) {
+        var path = display_scene_path,
+            path_count = path.length,
+            x, y;
+        mouseX = x = evt.offsetX;
+        mouseY = y = evt.offsetY;
+        dispatch_mousemove_evt(evt, mouseEvent, path, path_count, x, y, this_display);
+      }
 
-          //add listeners to dom events that we'll re-dispatch to the scene graph
-          for (type in doodle_MouseEvent) {
-            element.addEventListener(doodle_MouseEvent[type], dispatch_mouse_event, false);
-          }
+      function on_mouse_leave (evt) {
+        dispatch_mouseleave_evt(evt, mouseEvent, display_scene_path, layers, layers.length, this_display);
+      }
 
-          element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, function (evt) {
-            mouseX = evt.offsetX;
-            mouseY = evt.offsetY;
-          }, false);
-          
-          //add keyboard listeners to document
-          //how to make this work for multiple displays?
-          document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event, false);
-          document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event, false);
-          document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event, false);
-          
-        }
-      },
+      function add_dom_handlers (element) {
+        //MouseEvents
+        element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+        //this dispatches mouseleave and mouseout for display and layers
+        element.addEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+        //
+        element.addEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+        element.addEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+        /*//TouchEvents
+        element.addEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
+        element.addEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
+        element.addEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
+        element.addEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
+        */
+      }
 
-      /* Determines the interval to dispatch the event type Event.ENTER_FRAME.
-       * This event is dispatched simultaneously to all display objects listenting
-       * for this event. It does not go through a "capture phase" and is dispatched
-       * directly to the target, whether the target is on the display list or not.
-       */
-      'frameRate': (function () {
-        var frame_rate = false, //fps
-            framerate_interval_id;
-        return {
-          get: function () { return frame_rate; },
-          set: function (fps) {
-            //turn off interval
-            if (fps === 0 || fps === false) {
-              frame_rate = false;
-              clearInterval(framerate_interval_id);
-            } else if (typeof fps === 'number' && isFinite(1000/fps)) {
-              frame_rate = fps;
-              clearInterval(framerate_interval_id);
-              framerate_interval_id = setInterval(create_frame, 1000/frame_rate);
-            } else {
-              throw new TypeError('[object Display].frameRate: Parameter must be a valid number or false.');
-            }
-          }
-        }
-      }()),
-
-      'mouseX': {
-        enumerable: false,
-        configurable: false,
-        get: function () {
-          return mouseX;
-        }
-      },
-
-      'mouseY': {
-        enumerable: false,
-        configurable: false,
-        get: function () {
-          return mouseY;
-        }
-      },
-
-      /* For debugging
-       */
-      'debug': {
-        enumerable: true,
-        configurable: false,
-        value: Object.create(null, {
-          'stats': {
-            enumerable: true,
-            configurable: false,
-            get: function () {
-              return debug_stats ? true : false;
-            },
-            set: function (useStats) {
-              /*DEBUG*/
-              check_boolean_type(useStats, display+'.debug.stats');
-              /*END_DEBUG*/
-              if (useStats && !debug_stats) {
-                //fps counter from http://github.com/mrdoob/stats.js
-                debug_stats = new Stats();
-                display.element.appendChild(debug_stats.domElement);
-              } else if (!useStats && debug_stats) {
-                display.element.removeChild(debug_stats.domElement);
-                debug_stats = null;
-              }
-            }
-          },
-          'boundingBox': {
-            enumerable: true,
-            configurable: false,
-            get: function () {
-              return debug_bounding_box;
-            },
-            set: function (showBoundingBox) {
-              /*DEBUG*/
-              check_boolean_type(showBoundingBox, display+'.debug.boundingBox');
-              /*END_DEBUG*/
-              debug_bounding_box = showBoundingBox;
-            }
-          }
-        })
+      function remove_dom_handlers (element) {
+        //MouseEvents
+        element.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+        //
+        element.removeEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+        //
+        element.removeEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+        element.removeEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+        /*//TouchEvents
+        element.removeEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
+        element.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
+        element.removeEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
+        element.removeEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
+        */
       }
       
-    });
+      return {
 
-    //passed an initialization object: function
-    if (initializer) {
-      initializer.call(display);
+        'width': {
+          get: function () { return width; },
+          set: function (n) {
+            var i = layers.length;
+            /*DEBUG*/
+            check_number_type(n, this+'.width');
+            /*END_DEBUG*/
+            set_element_property(this.element, 'width', n+"px");
+            width = n;
+            //cascade down to our canvas layers
+            while(i--) {
+              layers[i].width = n;
+            }
+            return n;
+          }
+        },
+
+        'height': {
+          get: function () { return height; },
+          set: function (n) {
+            var i = layers.length;
+            /*DEBUG*/
+            check_number_type(n, this+'.height');
+            /*END_DEBUG*/
+            set_element_property(this.element, 'height', n+"px");
+            height = n;
+            //cascade down to our canvas layers
+            while(i--) {
+              layers[i].height = n;
+            }
+            return n;
+          }
+        },
+        
+        /* Display specific things to setup when adding a dom element.
+         * Called in ElementNode.element
+         */
+        '__addDomElement': {
+          enumerable: false,
+          writable: false,
+          value: function (elementArg) {
+            /*DEBUG*/
+            check_block_element(elementArg, this+'.element');
+            /*END_DEBUG*/
+            //need to stack the canvas elements on top of each other
+            set_element_property(elementArg, 'position', 'relative');
+            add_dom_handlers(elementArg);
+          }
+        },
+
+        '__removeDomElement': {
+          enumerable: false,
+          writable: false,
+          value: function (elementArg) {
+            remove_dom_handlers(elementArg);
+          }
+        },
+        
+        /* Determines the interval to dispatch the event type Event.ENTER_FRAME.
+         * This event is dispatched simultaneously to all display objects listenting
+         * for this event. It does not go through a "capture phase" and is dispatched
+         * directly to the target, whether the target is on the display list or not.
+         * @param {Number|false} fps
+         * @return {Number|false}
+         */
+        'frameRate': (function () {
+          var frame_rate = false, //fps
+              framerate_interval_id;
+          return {
+            get: function () { return frame_rate; },
+            set: function (fps) {
+              /*DEBUG*/
+              if (fps !== false && fps !== 0) {
+                check_number_type(fps, this+'.frameRate');
+                if (fps < 0 || !isFinite(1000/fps)) {
+                  throw new RangeError(this+'.frameRate: Invalid framerate.');
+                }
+              }
+              /*END_DEBUG*/
+              if (fps === 0 || fps === false) {
+                //turn off interval
+                frame_rate = false;
+                if (framerate_interval_id !== undefined) {
+                  clearInterval(framerate_interval_id);
+                }
+              } else {
+                //non-zero number, ignore if given same value
+                if (fps !== frame_rate) {
+                  if (framerate_interval_id !== undefined) {
+                    clearInterval(framerate_interval_id);
+                  }
+                  framerate_interval_id = setInterval(create_frame.bind(this), 1000/fps);
+                  frame_rate = fps;
+                }
+              }
+            }
+          };
+        }()),
+
+        'mouseX': {
+          enumerable: false,
+          configurable: false,
+          get: function () {
+            return mouseX;
+          }
+        },
+
+        'mouseY': {
+          enumerable: false,
+          configurable: false,
+          get: function () {
+            return mouseY;
+          }
+        },
+
+        'allChildren': {
+          enumerable: true,
+          configurable: false,
+          get: function () {
+            return display_scene_path;
+          }
+        },
+        
+        '__sortAllChildren': {
+          enumerable: false,
+          configurable: false,
+          value: function () {
+            create_scene_path(this, display_scene_path, true).reverse();
+            /*DEBUG*/
+            if (display_scene_path.length === 0) {
+              throw new RangeError(this+'.__sortAllChildren: display_scene_path array should never be zero.');
+            }
+            /*END_DEBUG*/
+          }
+        },
+
+        'getNodesUnderPoint': {
+          enumerable: true,
+          configurable: false,
+          value: function (point) {
+            /*DEBUG*/
+            check_point_type(point, this+'.getNodesUnderPoint', '*point*');
+            /*END_DEBUG*/
+            var nodes = [],
+                scene_path = display_scene_path,
+                i = scene_path.length,
+                x = point.x,
+                y = point.y,
+                node;
+            
+            while (i--) {
+              node = scene_path[i];
+              if(node.__getBounds(this).contains(x, y)) {
+                nodes.push(node);
+              }
+            }
+            return nodes;
+          }
+        },
+
+        /*DEBUG_STATS*/
+        'debug': {
+          enumerable: true,
+          configurable: false,
+          value: Object.create(null, {
+            /*DEBUG*/
+            //color of the bounding box
+            //individual bounds are displayed with node.debug.boundingBox = true
+            'boundingBox': (function () {
+              var bounds_color = "#ff0000";
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () {
+                  return  bounds_color;
+                },
+                set: function (boundingBoxColor) {
+                  bounds_color = boundingBoxColor;
+                }
+              };
+            }()),
+            /*END_DEBUG*/
+
+            /* Overlay a stats meter on the display. [http://github.com/mrdoob/stats.js]
+             * Not marked as DEBUG because it's useful in a compiled script.
+             * @param {Boolean}
+             * @return {Stats|false}
+             */
+            'stats': (function () {
+              var debug_stats = false; //stats object
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () { return debug_stats; },
+                set: function (useStats) {
+                  /*DEBUG*/
+                  check_boolean_type(useStats, display+'.debug.stats');
+                  /*END_DEBUG*/
+                  if (useStats && !debug_stats) {
+                    debug_stats = new Stats();
+                    display.element.appendChild(debug_stats.domElement);
+                  } else if (!useStats && debug_stats) {
+                    display.element.removeChild(debug_stats.domElement);
+                    debug_stats = false;
+                  }
+                }
+              };
+            }())
+          })
+        },
+        /*END_DEBUG_STATS*/
+
+        'addChildAt': {
+          enumerable: true,
+          configurable: false,
+          value: (function () {
+            var super_addChildAt = display.addChildAt;
+            return function (layer, index) {
+              /*DEBUG*/
+              check_layer_type(layer, this+'.addChildAt', '*layer*, index');
+              check_number_type(index, this+'.addChildAt', 'layer, *index*');
+              /*END_DEBUG*/
+              //inherit display dimensions
+              layer.width = this.width;
+              layer.height = this.height;
+              //add dom element
+              this.element.appendChild(layer.element);
+              return super_addChildAt.call(this, layer, index);
+            };
+          }())
+        },
+
+        'removeChildAt': {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value: (function () {
+            var super_removeChildAt = display.removeChildAt;
+            return function (index) {
+              /*DEBUG*/
+              check_number_type(index, this+'.removeChildAt', '*index*');
+              /*END_DEBUG*/
+              //remove from dom
+              this.element.removeChild(this.children[index].element);
+              return super_removeChildAt.call(this, index);
+            };
+          }())
+        },
+
+        'swapChildrenAt': {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value: (function () {
+            var super_swapChildrenAt = display.swapChildrenAt;
+            return function (idx1, idx2) {
+              var children = this.children;
+              /*DEBUG*/
+              check_number_type(idx1, this+'.swapChildrenAt', '*index1*, index2');
+              check_number_type(idx2, this+'.swapChildrenAt', 'index1, *index2*');
+              /*END_DEBUG*/
+              //swap dom elements
+              if (idx1 > idx2) {
+                this.element.insertBefore(children[idx2].element, children[idx1].element);
+              } else {
+                this.element.insertBefore(children[idx1].element, children[idx2].element);
+              }
+              return super_swapChildrenAt.call(this, idx1, idx2);
+            };
+          }())
+        }
+        
+      };//end return object
+    }()));//end defineProperties
+    
+
+    //passed an initialization function
+    if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arguments.length > 1) {
+        throw new SyntaxError("[object Display](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      arguments[0].call(display);
+      element = undefined;
     } else {
-      //init
+      //standard instantiation
+      /*DEBUG*/
+      if (arguments.length > 1) {
+        throw new SyntaxError("[object Display](element): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
       display.element = element;
     }
 
-    if (!display.element) {
-      throw new ReferenceError("[object Display]: Requires a HTML element.");
-    }
+    /*DEBUG*/
+    //can't proceed with initialization without an element to work with
+    check_block_element(display.element, '[object Display].element');
+    /*END_DEBUG*/
+
+    display.root = display;
+    display_count += 1;
+
+    
 
     /* Redraw scene graph when children are added and removed.
      */
-    display.addEventListener(doodle_Event.ADDED, redraw_scene_graph);
-    display.addEventListener(doodle_Event.REMOVED, redraw_scene_graph);
+    display.addEventListener(doodle.Event.ADDED, redraw_scene_graph.bind(display));
+    display.addEventListener(doodle.Event.REMOVED, redraw_scene_graph.bind(display));
 
+    /* Add keyboard listeners to document.
+     */
+    document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event.bind(display), false);
+    document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event.bind(display), false);
+    document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event.bind(display), false);
+
+    
     //draw_scene_graph(display);
-    redraw_scene_graph();
+    redraw_scene_graph.call(display);
+    
     return display;
-
-    
-    /* Clear, move, draw.
-     * Dispatches Event.ENTER_FRAME to all objects listening to it,
-     * reguardless if it's on the scene graph or not.
-     */
-    function create_frame () {
-      clear_scene_graph(display);
-      dispatcher_queue.forEach(function dispatch_enterframe_evt (obj) {
-        if (obj.hasEventListener(ENTER_FRAME)) {
-          enterFrame.__setTarget(obj);
-          obj.handleEvent(enterFrame);
-        }
-      });
-      draw_scene_graph(display);
-      frame_count += 1;
-      //update our stats counter if needed
-      if (debug_stats) {
-        debug_stats.update();
-      }
-    }
-    
-    function clear_scene_graph (node, context) {
-      /* Brute way, clear entire layer in big rect.
-       */
-      display.children.forEach(function (layer) {
-        var ctx = layer.context;
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
-        ctx.clearRect(0, 0, layer.width, layer.height);
-        ctx.restore();
-      });
-      /*
-      node.children.forEach(function (child) {
-        context = context || child.context;
-        context.clearRect(0, 0, child.width, child.height);
-      });
-      */
-      
-      /* Clear each object individually by clearing it's bounding box.
-       * Will need to test speed, and it's not working now.
-       *
-      node.children.forEach(function (child) {
-        
-        context = context || child.context;
-        check_context_type(context, this+'.clear_scene_graph', 'context');
-        context.save();
-        context.setTransform(1, 0, 0, 1, 0, 0); //reset
-        
-        if (typeof child.getBounds === 'function') {
-          var bounds = child.getBounds(display);
-          //console.log(bounds.toString());
-          //take into account bounding box border
-          context.clearRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
-          //context.fillRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
-        }
-        context.restore();
-        clear_scene_graph(child, context);
-      });
-      */
-    }
-    
-    function draw_scene_graph (node, context) {
-      var m, //child transform matrix
-          bounding_box,
-          global_pt; //transformed point for bounding box
-      
-      node.children.forEach(function draw_child (child) {
-        //if node is invisible, don't draw it or it's children
-        //this is the behavior in as3
-        if (child.visible) {
-          context = context || child.context;
-          m = child.transform.toArray();
-          context.save();
-          context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-
-          if (debug_bounding_box) {
-            draw_bounding_box(child, context);
-          }
-          
-          //apply alpha to node and it's children
-          if (!isLayer(child)) {
-            if (child.alpha !== 1) {
-              context.globalAlpha = child.alpha;
-            }
-          }
-          
-          if (typeof child.__draw === 'function') {
-            child.__draw(context);
-          };
-          
-          draw_scene_graph(child, context); //recursive
-          context.restore();
-        }
-      });
-    }
-
-    function draw_bounding_box (sprite, context) {
-      if (typeof sprite.getBounds === 'function') {
-        //calculate bounding box relative to parent
-        var bbox = sprite.getBounds(display);
-        
-        context.save();
-        context.setTransform(1, 0, 0, 1, 0, 0); //reset
-        //bounding box
-        context.lineWidth = 0.5;
-        context.strokeStyle = sprite.debug.boundingBox;
-        context.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
-        context.restore();
-      }
-    }
-    
-    function redraw_scene_graph (evt) {
-      clear_scene_graph(display);
-      draw_scene_graph(display);
-    }
-
-    /* Event dispatching - not ready for prime-time.
-     */
-    function dispatch_mouse_event (event) {
-      //console.log(event.type + ", " + event);
-      //last_event = event;
-      //position on canvas element
-      //offset is relative to div, however this implementation adds 1 to y?
-      var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-          dq_len = dispatcher_queue.length,
-          MOUSE_OVER = doodle_MouseEvent.MOUSE_OVER,
-          MOUSE_OUT = doodle_MouseEvent.MOUSE_OUT,
-          MOUSE_MOVE = doodle_MouseEvent.MOUSE_MOVE,
-          evt = doodle_MouseEvent(event), //wrap dom event in doodle event
-          evt_type = evt.type,
-          local_pt;
-
-      /* Hack --
-       * The idea is that I only want to dispatch a mouse event to the display
-       * if there are no other objects under the point to dispatch to.
-       */
-      var evt_dispatched_p = false;
-      
-      dispatcher_queue.forEach(function (obj) {
-        if (inheritsSprite(obj)) {
-          var point_in_bounds = obj.getBounds(display).containsPoint({x: evt.offsetX,
-                                                                      y: evt.offsetY});
-
-          evt.__setTarget(null); //dom setting target as canvas element
-
-          if (point_in_bounds && obj.hasEventListener(evt_type)) {
-            obj.dispatchEvent(evt);
-
-            evt_dispatched_p = true;
-            
-          }
-          
-          //have to manufacture mouse over/out since dom element won't know
-          if (point_in_bounds && obj.hasEventListener(MOUSE_OVER)) {
-            // __mouse_over property is only used here
-            if (!obj.__mouse_over) {
-              obj.__mouse_over = true;
-              evt.__setType(MOUSE_OVER)
-              obj.dispatchEvent(evt);
-
-              evt_dispatched_p = true;
-            }
-          }
-          if (!point_in_bounds && obj.hasEventListener(MOUSE_OUT)) {
-            if (obj.__mouse_over) {
-              obj.__mouse_over = false;
-              evt.__setType(MOUSE_OUT)
-              obj.dispatchEvent(evt);
-
-              evt_dispatched_p = true;
-            }
-          }
-          
-        } else if (obj.hasEventListener(evt_type)) {
-          //if in queue and not sprite, could be ElementNode - display, layer
-          //don't want these going off if sprite is in front
-          evt.__setTarget(null);
-          obj.dispatchEvent(evt);
-          evt_dispatched_p = true;
-        }
-      });
-
-      //dispatch to display if no other object under cursor has
-      dispatcher_queue.forEach(function (obj) {
-        if (obj === display && !evt_dispatched_p && obj.hasEventListener(MOUSE_MOVE)) {
-          if (evt_type === MOUSE_MOVE) {
-            evt.__setType(MOUSE_MOVE)
-          }
-          evt.__setTarget(null)
-          obj.dispatchEvent(evt);
-          
-          evt_dispatched_p = true;
-        }
-      });
-    }
-
-    function dispatch_keyboard_event (event) {
-      //console.log("event type: " + event.type + ", bubbles: " + event.bubbles);
-      var dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
-          evt = doodle.KeyboardEvent(event); //wrap dom event in doodle event
-      
-      dispatcher_queue.forEach(function (obj) {
-        if (obj.hasEventListener(evt.type)) {
-          obj.handleEvent(evt);
-        }
-      });
-    }
 
   };//end doodle.Display
 
   
   display_static_properties = {
-    'width': {
-      get: function () {
-        return get_element_property(this.element, 'width', 'int');
-      },
-      set: function (n) {
-        /*DEBUG*/
-        check_number_type(n, this+'.width');
-        /*END_DEBUG*/
-        set_element_property(this.element, 'width', n+"px");
-        //cascade down to our canvas layers
-        this.children.forEach(function (layer) {
-          layer.width = n;
-        });
-        return n;
-      }
-    },
-
-    'height': {
-      get: function () {
-        return get_element_property(this.element, 'height', 'int');
-      },
-      set: function (n) {
-        /*DEBUG*/
-        check_number_type(n, this+'.height');
-        /*END_DEBUG*/
-        set_element_property(this.element, 'height', n+"px");
-        //cascade down to our canvas layers
-        this.children.forEach(function (layer) {
-          layer.height = n;
-        });
-        return n;
-      }
-    },
+    
 
     'toString': {
       enumerable: false,
@@ -7739,6 +8435,7 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /**
     'toDataUrl': {
       value: function () {
         //iterate over each canvas layer,
@@ -7747,77 +8444,18 @@ Object.defineProperties(doodle.TextEvent, {
         return;
       }
     },
-
-    'addChildAt': {
-      value: function (layer, index) {
-        /*DEBUG*/
-        check_layer_type(layer, this+'.addChildAt', '*layer*, index');
-        check_number_type(index, this+'.addChildAt', 'layer, *index*');
-        /*END_DEBUG*/
-        
-        //if has previous parent, remove from it's children
-        if (layer.parent !== null && layer.parent !== this) {
-          layer.parent.removeChild(node);
-        }
-        //set ancestry
-        layer.root = this;
-        layer.parent = this;
-        //set layer size to display size
-        layer.width = this.width;
-        layer.height = this.height;
-        //add to children
-        this.children.splice(index, 0, layer);
-        //add dom element
-        this.element.appendChild(layer.element);
-        return this;
-      }
-    },
-
-    'removeChildAt': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (index) {
-        /*DEBUG*/
-        check_number_type(index, this+'.removeChildAt', '*index*');
-        /*END_DEBUG*/
-        var layer = this.children[index];
-        layer.root = null;
-        layer.parent = null;
-        //remove from children
-        this.children.splice(index, 1);
-        //remove from dom
-        this.element.removeChild(layer.element);
-      }
-    },
-
-    'swapChildrenAt': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (index1, index2) {
-        /*DEBUG*/
-        check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
-        check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
-        /*END_DEBUG*/
-        var a = this.children;
-        a[index1] = a.splice(index2, 1, a[index1])[0];
-        //swap dom elements
-        if (index1 > index2) {
-          this.element.insertBefore(a[index2].element, a[index1].element);
-        } else {
-          this.element.insertBefore(a[index1].element, a[index2].element);
-        }
-      }
-    },
+    **/
 
     /* Convenience methods.
      */
     'addLayer': {
       value: function (id) {
-        var layer = doodle.Layer(id); //layer will auto-name
-        this.addChild(layer);
-        return layer;
+        /*DEBUG*/
+        if (id !== undefined) {
+          check_string_type(id, this+'.addLayer', '*id*');
+        }
+        /*END_DEBUG*/
+        return this.addChild(doodle_Layer(id));
       }
     },
 
@@ -7826,9 +8464,255 @@ Object.defineProperties(doodle.TextEvent, {
         /*DEBUG*/
         check_string_type(id, this+'.removeLayer', '*id*');
         /*END_DEBUG*/
-        this.removeChildById(id);
+        return this.removeChildById(id);
       }
+    },
+
+    /* This is always the same, so we'll save some computation.
+     */
+    '__getBounds': {
+      enumerable: true,
+      configurable: true,
+      value: (function () {
+        var rect = doodle.geom.Rectangle(); //recycle
+        return function () {
+          return rect.compose(0, 0, this.width, this.height);
+        };
+      }())
     }
     
   };//end display_static_properties
+
+
+  /* Clear, move, draw.
+   * Dispatches Event.ENTER_FRAME to all objects listening to it,
+   * reguardless if it's on the scene graph or not.
+   */
+  create_frame = function () {
+    clear_scene_graph(this);
+    dispatcher_queue.forEach(function dispatch_enterframe_evt (obj) {
+      if (obj.hasEventListener(ENTER_FRAME)) {
+        enterFrame.__setTarget(obj);
+        obj.handleEvent(enterFrame);
+      }
+    });
+    draw_scene_graph.call(this, this);
+    frame_count += 1;
+    
+    /*DEBUG*/
+    //update stats monitor if needed
+    if (this.debug.stats !== false) {
+      this.debug.stats.update();
+    }
+    /*END_DEBUG*/
+  };
+
+  /*
+   * @param {Node} node
+   */
+  clear_scene_graph = function (node) {
+    /* Brute way, clear entire layer in big rect.
+     */
+    node.children.forEach(function (layer) {
+      var ctx = layer.context;
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
+      ctx.clearRect(0, 0, layer.width, layer.height);
+      ctx.restore();
+    });
+    /*
+      node.children.forEach(function (child) {
+      context = context || child.context;
+      context.clearRect(0, 0, child.width, child.height);
+      });
+    */
+    
+    /* Clear each object individually by clearing it's bounding box.
+     * Will need to test speed, and it's not working now.
+     *
+     node.children.forEach(function (child) {
+     
+     context = context || child.context;
+     check_context_type(context, this+'.clear_scene_graph', 'context');
+     context.save();
+     context.setTransform(1, 0, 0, 1, 0, 0); //reset
+     
+     if (typeof child.getBounds === 'function') {
+     var bounds = child.getBounds(display);
+     //console.log(bounds.toString());
+     //take into account bounding box border
+     context.clearRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
+     //context.fillRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
+     }
+     context.restore();
+     clear_scene_graph(child, context);
+     });
+    */
+  };
+  
+  draw_scene_graph = function (node, context) {
+    var display = this,
+        m; //child transform matrix
+    
+    node.children.forEach(function draw_child (child) {
+      
+      /*DEBUG*/
+      if (child.debug.boundingBox) {
+        draw_bounding_box.call(display, child, context);
+      }
+      /*END_DEBUG*/
+
+      //if node is invisible, don't draw it or it's children
+      //this is the behavior in as3
+      if (child.visible) {
+        context = context || child.context;
+        m = child.transform.toArray();
+        context.save();
+        context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        
+        //apply alpha to node and it's children
+        if (!isLayer(child)) {
+          if (child.alpha !== 1) {
+            context.globalAlpha = child.alpha;
+          }
+        }
+        
+        if (typeof child.__draw === 'function') {
+          child.__draw(context);
+        }
+        
+        draw_scene_graph.call(display, child, context); //recursive
+        context.restore();
+      }
+    });
+  };
+
+  draw_bounding_box = function (node, context) {
+    //calculate bounding box relative to parent
+    var bbox = node.__getBounds(this); //this = display
+    if (bbox) {
+      context.save();
+      context.setTransform(1, 0, 0, 1, 0, 0); //reset
+      //bounding box
+      context.lineWidth = 0.5;
+      context.strokeStyle = this.debug.boundingBox;
+      context.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
+      context.restore();
+    }
+  };
+  
+  redraw_scene_graph = function () {
+    clear_scene_graph(this);
+    draw_scene_graph.call(this, this);
+  };
+  
+
+  /*
+   * EVENT DISPATCHING
+   */
+
+ dispatch_mouse_event = function (evt/*dom*/, mouseEvent/*doodle*/,
+                                  scene_path, count, x, y, display) {
+    var node;
+   
+    while (count--) {
+      node = scene_path[count];
+      //recycle rect object
+      if(node.__getBounds(display).contains(x, y)) {
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+  };
+
+  
+  dispatch_mousemove_event = function (evt/*dom*/, mouseEvent/*doodle*/,
+                                       scene_path, count, x, y, display) {
+    var node;
+
+    while (count--) {
+      node = scene_path[count];
+
+      if(node.__getBounds(display).contains(x, y)) {
+        //point in bounds
+        if (!node.__pointInBounds) {
+          node.__pointInBounds = true;
+          //dispatch events to node and up parent chain
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          return true;
+        }
+        //while in-bounds, dispatch mousemove
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      } else {
+        //point not on sprite
+        if (node.__pointInBounds) {
+          node.__pointInBounds = false;
+          //dispatch events to node and up parent chain
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+          return true;
+        }
+      }
+    }
+  };
+  
+  dispatch_mouseleave_event = function (evt, mouseEvent, scene_path,
+                                        layers, layer_count, top_node/*display*/) {
+    if (layer_count === 0) {
+      //no layers so no scene path, display will dispatch
+      top_node.__pointInBounds = false;
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      return true;
+    } else {
+      //reusing var - this is the top layer
+      top_node = layers[layer_count-1];
+      //reusing var - scene path count
+      layer_count = scene_path.length;
+      while (layer_count--) {
+        //all nodes out-of-bounds
+        scene_path[layer_count].__pointInBounds = false;
+      }
+      //top layer dispatch
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      return true;
+    }
+  };
+
+  /*
+   */
+  dispatch_keyboard_event = function (evt) {
+    this.broadcastEvent(evt_keyboardEvent.__copyKeyboardEventProperties(evt, null));
+  };
+
+  
+  /*
+   * CLASS METHODS
+   */
+  
+  isDisplay = doodle.Display.isDisplay = function (obj) {
+    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
+      return false;
+    }
+    return (obj.toString() === '[object Display]');
+  };
+
+  /* check_display_type is a doodle global defined in prologue.js
+   */
+  /*DEBUG*/
+  check_display_type = doodle.utils.types.check_display_type = function (display, caller, param) {
+    if (isDisplay(display)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_display_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Display.");
+    }
+  };
+  /*END_DEBUG*/
+  
 }());//end class closure
+}());
