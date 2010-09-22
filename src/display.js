@@ -267,7 +267,7 @@
             
             while (i--) {
               node = scene_path[i];
-              if(node.__getBounds(this).__containsPoint(x, y)) {
+              if(node.__getBounds(this).contains(x, y)) {
                 nodes.push(node);
               }
             }
@@ -555,8 +555,11 @@
     }
     /*END_DEBUG*/
   };
-  
-  clear_scene_graph = function (node, context) {
+
+  /*
+   * @param {Node} node
+   */
+  clear_scene_graph = function (node) {
     /* Brute way, clear entire layer in big rect.
      */
     node.children.forEach(function (layer) {
@@ -664,7 +667,7 @@
     while (count--) {
       node = scene_path[count];
       //recycle rect object
-      if(node.__getBounds(display).__containsPoint(x, y)) {
+      if(node.__getBounds(display).contains(x, y)) {
         node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
@@ -679,7 +682,7 @@
     while (count--) {
       node = scene_path[count];
 
-      if(node.__getBounds(display).__containsPoint(x, y)) {
+      if(node.__getBounds(display).contains(x, y)) {
         //point in bounds
         if (!node.__pointInBounds) {
           node.__pointInBounds = true;
