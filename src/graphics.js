@@ -1,11 +1,13 @@
 /*globals doodle, Image*/
 (function () {
   var graphics_static_properties,
+      /*DEBUG*/
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       check_function_type = doodle.utils.types.check_function_type,
       check_array_type = doodle.utils.types.check_array_type,
       check_point_type = doodle.utils.types.check_point_type,
+      /*END_DEBUG*/
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
       doodle_Event = doodle.Event,
