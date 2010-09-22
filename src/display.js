@@ -41,9 +41,10 @@
       ENTER_FRAME = doodle.Event.ENTER_FRAME;
       
   
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /* Display
+   * @constructor
+   * @param {HTMLElement} element
+   * @return {Display}
    */
   doodle.Display = function (element) {
     var display,
@@ -66,12 +67,16 @@
     }
 
     display_name = (typeof display_name === 'string') ? display_name : "display"+ String('00'+display_count).slice(-2);
-    display = Object.create(doodle.ElementNode(element, display_name));
+    //assign element after display properties have been set up
+    display = Object.create(doodle.ElementNode(undefined, display_name));
 
     Object.defineProperties(display, display_static_properties);
     //properties that require privacy
     Object.defineProperties(display, (function () {
-      var display_scene_path = [],
+      var width = 0,
+          height = 0,
+          layers = display.children,
+          display_scene_path = [],
           mouseX = 0,
           mouseY = 0,
           //recycle
@@ -99,12 +104,7 @@
       }
 
       function on_mouse_leave (evt) {
-        var path = display_scene_path,
-            node_count = path.length,
-            display = this_display,
-            layers = display.children,
-            layer_count = layers.length;
-        dispatch_mouseleave_evt(evt, mouseEvent, path, node_count, layers, layer_count, display);
+        dispatch_mouseleave_evt(evt, mouseEvent, display_scene_path, layers, layers.length, this_display);
       }
 
       function add_dom_handlers (element) {
@@ -149,6 +149,40 @@
       
       return {
 
+        'width': {
+          get: function () { return width; },
+          set: function (n) {
+            var i = layers.length;
+            /*DEBUG*/
+            check_number_type(n, this+'.width');
+            /*END_DEBUG*/
+            set_element_property(this.element, 'width', n+"px");
+            width = n;
+            //cascade down to our canvas layers
+            while(i--) {
+              layers[i].width = n;
+            }
+            return n;
+          }
+        },
+
+        'height': {
+          get: function () { return height; },
+          set: function (n) {
+            var i = layers.length;
+            /*DEBUG*/
+            check_number_type(n, this+'.height');
+            /*END_DEBUG*/
+            set_element_property(this.element, 'height', n+"px");
+            height = n;
+            //cascade down to our canvas layers
+            while(i--) {
+              layers[i].height = n;
+            }
+            return n;
+          }
+        },
+        
         /* Display specific things to setup when adding a dom element.
          * Called in ElementNode.element
          */
@@ -441,39 +475,6 @@
 
   
   display_static_properties = {
-    'width': {
-      get: function () {
-        return get_element_property(this.element, 'width', 'int');
-      },
-      set: function (n) {
-        /*DEBUG*/
-        check_number_type(n, this+'.width');
-        /*END_DEBUG*/
-        set_element_property(this.element, 'width', n+"px");
-        //cascade down to our canvas layers
-        this.children.forEach(function (layer) {
-          layer.width = n;
-        });
-        return n;
-      }
-    },
-
-    'height': {
-      get: function () {
-        return get_element_property(this.element, 'height', 'int');
-      },
-      set: function (n) {
-        /*DEBUG*/
-        check_number_type(n, this+'.height');
-        /*END_DEBUG*/
-        set_element_property(this.element, 'height', n+"px");
-        //cascade down to our canvas layers
-        this.children.forEach(function (layer) {
-          layer.height = n;
-        });
-        return n;
-      }
-    },
 
     'toString': {
       enumerable: false,
@@ -687,11 +688,13 @@
         if (!node.__pointInBounds) {
           node.__pointInBounds = true;
           //dispatch events to node and up parent chain
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
           return true;
         }
+        //while in-bounds, dispatch mousemove
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
       } else {
         //point not on sprite
         if (node.__pointInBounds) {
@@ -704,22 +707,27 @@
       }
     }
   };
-
-  dispatch_mouseleave_event = function (evt, mouseEvent, scene_path, node_count,
-                                        layers, layer_count, display) {
-    //mouse left display
-    while (node_count--) {
-      scene_path[node_count].__pointInBounds = false;
-    }
+  
+  dispatch_mouseleave_event = function (evt, mouseEvent, scene_path,
+                                        layers, layer_count, top_node/*display*/) {
     if (layer_count === 0) {
-      //no layers, so display will dispatch
-      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      //no layers so no scene path, display will dispatch
+      top_node.__pointInBounds = false;
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
       return true;
     } else {
-      //top layer
-      layers[layer_count-1].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-      layers[layer_count-1].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      //reusing var - this is the top layer
+      top_node = layers[layer_count-1];
+      //reusing var - scene path count
+      layer_count = scene_path.length;
+      while (layer_count--) {
+        //all nodes out-of-bounds
+        scene_path[layer_count].__pointInBounds = false;
+      }
+      //top layer dispatch
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
       return true;
     }
   };
