@@ -89,10 +89,10 @@
                 break;
               case '[object Display]':
                 this.__addDomElement(dom_element);
-                w = get_element_property(dom_element, 'width', 'int') || dom_element.width;
-                h = get_element_property(dom_element, 'height', 'int') || dom_element.height;
-                if (typeof w === 'number') { width = w; }
-                if (typeof h === 'number') { height = h; }
+                w = get_element_property(dom_element, 'width', 'int', false) || dom_element.width;
+                h = get_element_property(dom_element, 'height', 'int', false) || dom_element.height;
+                if (typeof w === 'number') { this.width = w; }
+                if (typeof h === 'number') { this.height = h; }
                 break;
               default:
                 //get information from element - images, etc.  
