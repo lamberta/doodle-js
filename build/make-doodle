@@ -3,25 +3,31 @@
 function print_help_and_exit {
     echo "Usage: $(basename $0) [options]"
     echo "  -h      Show this usage guide."
+    echo "  -c      Clean."
+    echo "  -J=jar  Location of the Closure compiler."
+    echo " Build Options:"
     echo "  -d      Also build debug version."
     echo "  -D      Only build debug version."
-    echo "  -S      Leave stats monitor in compiled build."
     echo "  -P      Profiling build. Debugging stripped but not compiled."
-    echo "  -c      Clean."
-    echo "  -w=n    Compiler warning level. [0, 1, 2]"
-    echo "  -C=jar  Location of the Closure compiler."
+    echo "  -S      Leave stats monitor in compiled build."
+    echo " Compiler Options:"
+    echo -e "  -W=n    Warning level.\t(0:quiet, 1:default, 2:vebose)"
+    echo -e "  -C=n    Compilation level.\t(0:whitespace, 1:simple, 2:advanced)"
     exit 0
 }
 
-#using a relative path.
 #this script is in the ./build dir
 cd "$(dirname $(readlink -f $0))"
 cd ..
+#file location using a relative path
 PROJECT_HOME="$PWD"
 DEBUG_OUT_FILE="$PROJECT_HOME/build/doodle-debug.js"
 MIN_OUT_FILE="$PROJECT_HOME/build/doodle.js"
 CLOSURE_COMPILER="$PROJECT_HOME/build/compiler.jar"
-WARNING_LEVEL=1
+#compiler options
+COMPILATION_LEVEL=1 #whitespace, [simple], advanced
+WARNING_LEVEL=1 #quiet, [default], verbose
+
 
 function build_full {
     cat ./build/prologue.js > "$DEBUG_OUT_FILE"
@@ -42,7 +48,7 @@ function build_full {
     cat ./src/events/event.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/uievent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/mouseevent.js >> "$DEBUG_OUT_FILE"
-    cat ./src/events/touchevent.js >> "$DEBUG_OUT_FILE"
+    #cat ./src/events/touchevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/textevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/keyboardevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/constants.js >> "$DEBUG_OUT_FILE"
@@ -64,9 +70,11 @@ function build_full {
     echo "}());" >> "$DEBUG_OUT_FILE"
 }
 
+
 function strip_debugging {
     sed '/\/\*DEBUG\*\//,/\/\*END_DEBUG\*\//d' "$DEBUG_OUT_FILE" > "$MIN_OUT_FILE"
 }
+
 
 function strip_stats {
     local pattern='/\/\*DEBUG_STATS\*\//,/\/\*END_DEBUG_STATS\*\//d'
@@ -74,40 +82,57 @@ function strip_stats {
     mv "$MIN_OUT_FILE.tmp" "$MIN_OUT_FILE"
 }
 
-function print_compiler_warning {
-    echo -e "\n\tWarning: Unable to locate the Closure compiler."
-    echo -e "\tIt can be obtained from http://code.google.com/closure/compiler/"
-    echo -e "\tContinuing without file compilation.\n"
+
+function parse_compiler_options {
+    #check warning level
+    if [ "$WARNING_LEVEL" -eq 0 ]; then
+        WARNING_LEVEL="QUIET"
+    elif [ "$WARNING_LEVEL" -eq 1 ]; then
+        WARNING_LEVEL="DEFAULT"
+    elif [ "$WARNING_LEVEL" -eq 2 ]; then
+        WARNING_LEVEL="VERBOSE"
+    else
+        echo "Compiler option error: Unknown warning level."
+        exit 1;
+    fi
+    #check compilation level
+    if [ "$COMPILATION_LEVEL" -eq 0 ]; then
+        COMPILATION_LEVEL="WHITESPACE_ONLY"
+    elif [ "$COMPILATION_LEVEL" -eq 1 ]; then
+        COMPILATION_LEVEL="SIMPLE_OPTIMIZATIONS"
+    elif [ "$COMPILATION_LEVEL" -eq 2 ]; then
+        COMPILATION_LEVEL="ADVANCED_OPTIMIZATIONS"
+    else
+        echo "Compiler option error: Unknown compilation level."
+        exit 1;
+    fi
 }
 
-function compile_file {
-    if [ ! -f "$CLOSURE_COMPILER" ]; then
-        print_compiler_warning
-    else
-        #check warning level
-        if [ "$WARNING_LEVEL" -eq 0 ]; then
-            WARNING_LEVEL="QUIET"
-        elif [ "$WARNING_LEVEL" -eq 1 ]; then
-            WARNING_LEVEL="DEFAULT"
-        elif [ "$WARNING_LEVEL" -eq 2 ]; then
-            WARNING_LEVEL="VERBOSE"
-        else
-            echo "Compiler error: Unknown warning level."
-            exit 1 
-        fi
 
+function compile_file {
+    #if we can't locate compiler.jar we'll just skip compilation
+    if [ ! -f "$CLOSURE_COMPILER" ]; then
+        echo -e "\n\tWarning: Unable to locate the Closure compiler."
+        echo -e "\tPlace compiler.jar in the build directory or use -J=path"
+        echo -e "\tContinuing without compilation...\n"
+    else
         mv "$MIN_OUT_FILE" "$MIN_OUT_FILE.tmp"
         echo -n -e "\tCompiling file... "
-        if java -jar "$CLOSURE_COMPILER" --js "$MIN_OUT_FILE.tmp" \
+        if java -jar "$CLOSURE_COMPILER" \
+                --js "$MIN_OUT_FILE.tmp" \
                 --js_output_file "$MIN_OUT_FILE" \
-                --warning_level "$WARNING_LEVEL"; then
-            echo "done."
+                --summary_detail_level 3 \
+                --warning_level "$WARNING_LEVEL" \
+                --compilation_level "$COMPILATION_LEVEL"; then
+
             rm "$MIN_OUT_FILE.tmp"
         else
-            mv "$MIN_OUT_FILE.tmp" "$MIN_OUT_FILE.error" #move back
+            #error during compilation, save to look at
+            mv "$MIN_OUT_FILE.tmp" "$MIN_OUT_FILE.error"
         fi
     fi
 }
+
 
 function clean_up {
     echo "Clean:"
@@ -131,19 +156,22 @@ function clean_up {
 
 
 #parse args
-while getopts "hcdDPSC:w:" option; do
+while getopts "hcJ:dDPSW:C:" option; do
     case $option in
+        h) print_help_and_exit;;
+        c) clean_up; exit 0;;
+        J) CLOSURE_COMPILER="$OPTARG";;
         d) BUILD_DEBUG=1;;
         D) BUILD_DEBUG=1; BUILD_DEBUG_ONLY=1;;
         P) BUILD_STRIP=1;;
         S) BUILD_STATS=1;;
-        C) CLOSURE_COMPILER="$OPTARG";;
-        w) WARNING_LEVEL="$OPTARG";;
-        c) clean_up; exit 0;;
-        h) print_help_and_exit;;
+        W) WARNING_LEVEL="$OPTARG";;
+        C) COMPILATION_LEVEL="$OPTARG";;
         \?) print_help_and_exit;;
     esac
 done
+
+parse_compiler_options
 
 echo "For more options: $(basename $0) -h"
 
