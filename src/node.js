@@ -360,51 +360,42 @@
       configurable: false,
       value: function (node, index) {
         var children = this.children,
-            this_display = this.root,
-            node_display = node.root,
+            display = this.root,
             node_parent = node.parent,
-            //was the node already on the display list?
-            on_scene_graph_p = (node_display && node_display === this_display) ? true : false,
-            node_descendants,
             i;
-        
-        //if already a child then ignore
-        if (children.indexOf(node) !== -1) {
-          return false;
-        }
+
         /*DEBUG*/
         check_node_type(node, this+'.addChildAt', '*node*, index');
         check_number_type(index, this+'.addChildAt', 'node, *index*');
         /*END_DEBUG*/
         
-        //make sure parent/child share same root
-        if (node_display !== this_display) {
-          node.root = this_display;
+        //if already a child then ignore
+        if (children.indexOf(node) !== -1) {
+          return false;
         }
+
         //if it had another parent, remove from their children
         if (node_parent !== null && node_parent !== this) {
           node.parent.removeChild(node);
         }
-        //adopt node
         node.parent = this;
+        //add child
         children.splice(index, 0, node);
 
-        //now part of display list
-        if (this_display) {
-          //reorder scene path
-          this_display.__sortAllChildren();
-          //if it wasn't on the scene graph before, tell everyone now
-          if (!on_scene_graph_p) {
-            //fire off Event.ADDED for node and all it's descendants
-            node_descendants = create_scene_path(node, []);
-            i = node_descendants.length;
-            while(i--) {
-              //recycle our Event.ADDED
-              node_descendants[i].dispatchEvent(evt_addedEvent.__setTarget(null));
-            }
+        //are we on the display path and node not previously on path
+        if (display && node.root !== display) {
+          //resort scene graph
+          display.__sortAllChildren();
+          children = create_scene_path(node, []);
+          i = children.length;
+          while (i--) {
+            node = children[i];
+            //set new root for all descendants
+            node.root = display;
+            //fire Event.ADDED if now on display list
+            node.dispatchEvent(evt_addedEvent.__setTarget(null));
           }
         }
-
         return node;
       }
     },
@@ -431,13 +422,13 @@
         /*END_DEBUG*/
         var children = this.children,
             child = children[index],
-            this_display = this.root,
+            display = this.root,
             child_descendants = create_scene_path(child, []), //includes child
             i = child_descendants.length,
             j = i;
         
         //event dispatching depends on an intact scene graph
-        if (this_display) {
+        if (display) {
           while (i--) {
             child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
           }
@@ -451,8 +442,8 @@
           child_descendants[j].root = null;
         }
         //reorder this display's scene path
-        if (this_display) {
-          this_display.__sortAllChildren();
+        if (display) {
+          display.__sortAllChildren();
         }
       }
     },

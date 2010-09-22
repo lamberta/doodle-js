@@ -24,10 +24,12 @@
       check_block_element = doodle.utils.types.check_block_element,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
+      create_scene_path = doodle.utils.create_scene_path,
       isLayer = doodle.Layer.isLayer,
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
+      doodle_Layer = doodle.Layer,
       doodle_Event = doodle.Event,
       doodle_MouseEvent = doodle.MouseEvent,
       //doodle_TouchEvent = doodle.TouchEvent,
@@ -66,7 +68,6 @@
     display_name = (typeof display_name === 'string') ? display_name : "display"+ String('00'+display_count).slice(-2);
     display = Object.create(doodle.ElementNode(element, display_name));
 
-
     Object.defineProperties(display, display_static_properties);
     //properties that require privacy
     Object.defineProperties(display, (function () {
@@ -77,7 +78,6 @@
           mouseEvent = evt_mouseEvent,
           //lookup help
           this_display = display,
-          create_scene_path = doodle.utils.create_scene_path,
           //move to a closer scope since we're calling these often
           dispatch_mouse_evt = dispatch_mouse_event,
           dispatch_mousemove_evt = dispatch_mousemove_event,
@@ -275,6 +275,66 @@
           }
         },
 
+        'addChildAt': {
+          enumerable: true,
+          configurable: false,
+          value: (function () {
+            var super_addChildAt = display.addChildAt;
+            return function (layer, index) {
+              /*DEBUG*/
+              check_layer_type(layer, this+'.addChildAt', '*layer*, index');
+              check_number_type(index, this+'.addChildAt', 'layer, *index*');
+              /*END_DEBUG*/
+              //inherit display dimensions
+              layer.width = this.width;
+              layer.height = this.height;
+              //add dom element
+              this.element.appendChild(layer.element);
+              return super_addChildAt.call(this, layer, index);
+            };
+          }())
+        },
+
+        'removeChildAt': {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value: (function () {
+            var super_removeChildAt = display.removeChildAt;
+            return function (index) {
+              /*DEBUG*/
+              check_number_type(index, this+'.removeChildAt', '*index*');
+              /*END_DEBUG*/
+              //remove from dom
+              this.element.removeChild(this.children[index].element);
+              return super_removeChildAt.call(this, index);
+            };
+          }())
+        },
+
+        'swapChildrenAt': {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value: (function () {
+            var super_swapChildrenAt = display.swapChildrenAt;
+            return function (idx1, idx2) {
+              var children = this.children;
+              /*DEBUG*/
+              check_number_type(idx1, this+'.swapChildrenAt', '*index1*, index2');
+              check_number_type(idx2, this+'.swapChildrenAt', 'index1, *index2*');
+              /*END_DEBUG*/
+              //swap dom elements
+              if (idx1 > idx2) {
+                this.element.insertBefore(children[idx2].element, children[idx1].element);
+              } else {
+                this.element.insertBefore(children[idx1].element, children[idx2].element);
+              }
+              return super_swapChildrenAt.call(this, idx1, idx2);
+            };
+          }())
+        },
+
         /* Debugging options
          */
         'debug': {
@@ -423,6 +483,7 @@
       }
     },
 
+    /**
     'toDataUrl': {
       value: function () {
         //iterate over each canvas layer,
@@ -431,69 +492,7 @@
         return;
       }
     },
-
-    'addChildAt': {
-      value: function (layer, index) {
-        /*DEBUG*/
-        check_layer_type(layer, this+'.addChildAt', '*layer*, index');
-        check_number_type(index, this+'.addChildAt', 'layer, *index*');
-        /*END_DEBUG*/
-        
-        //if has previous parent, remove from it's children
-        if (layer.parent !== null && layer.parent !== this) {
-          layer.parent.removeChild(layer);
-        }
-        //set ancestry
-        layer.root = this;
-        layer.parent = this;
-        //set layer size to display size
-        layer.width = this.width;
-        layer.height = this.height;
-        //add to children
-        this.children.splice(index, 0, layer);
-        //add dom element
-        this.element.appendChild(layer.element);
-        return this;
-      }
-    },
-
-    'removeChildAt': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (index) {
-        /*DEBUG*/
-        check_number_type(index, this+'.removeChildAt', '*index*');
-        /*END_DEBUG*/
-        var layer = this.children[index];
-        layer.root = null;
-        layer.parent = null;
-        //remove from children
-        this.children.splice(index, 1);
-        //remove from dom
-        this.element.removeChild(layer.element);
-      }
-    },
-
-    'swapChildrenAt': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (index1, index2) {
-        /*DEBUG*/
-        check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
-        check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
-        /*END_DEBUG*/
-        var a = this.children;
-        a[index1] = a.splice(index2, 1, a[index1])[0];
-        //swap dom elements
-        if (index1 > index2) {
-          this.element.insertBefore(a[index2].element, a[index1].element);
-        } else {
-          this.element.insertBefore(a[index1].element, a[index2].element);
-        }
-      }
-    },
+    **/
 
     /* Convenience methods.
      */
@@ -504,9 +503,7 @@
           check_string_type(id, this+'.addLayer', '*id*');
         }
         /*END_DEBUG*/
-        var layer = doodle.Layer(id);
-        this.addChild(layer);
-        return layer;
+        return this.addChild(doodle_Layer(id));
       }
     },
 
@@ -515,7 +512,7 @@
         /*DEBUG*/
         check_string_type(id, this+'.removeLayer', '*id*');
         /*END_DEBUG*/
-        this.removeChildById(id);
+        return this.removeChildById(id);
       }
     },
 
