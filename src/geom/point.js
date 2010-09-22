@@ -13,9 +13,11 @@
       sin = Math.sin,
       sqrt = Math.sqrt;
   
-  /* Super constructor
-   * @param {Number|Array|Point|Function} (x,y)|initializer
-   * @return {Object}
+  /* Point
+   * @constructor
+   * @param {Number=} x
+   * @param {Number=} y
+   * @return {Point}
    */
   doodle_Point = doodle.geom.Point = function (x, y) {
     var point = {},

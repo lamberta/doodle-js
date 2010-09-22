@@ -3,13 +3,14 @@
 (function () {
   var matrix_static_properties,
       isMatrix,
+      //recycle object for internal calculations
+      temp_point = {x: null, y: null},
+      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       /*DEBUG*/
       check_matrix_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_point_type = doodle.utils.types.check_point_type,
       /*END_DEBUG*/
-      //recycle object for internal calculations
-      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       //lookup help
       doodle_Matrix,
       doodle_Point = doodle.geom.Point,
@@ -18,9 +19,15 @@
       atan2 = Math.atan2,
       tan = Math.tan;
   
-  /* Super constructor
-   * @param {Number|Array|Matrix|Function} (a, b, c, d, tx, ty)|initializer
-   * @return {Object}
+  /* Matrix
+   * @constructor
+   * @param {Number=} a
+   * @param {Number=} b
+   * @param {Number=} c
+   * @param {Number=} d
+   * @param {Number=} tx
+   * @param {Number=} ty
+   * @return {Matrix}
    */
   doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
@@ -341,15 +348,16 @@
         check_number_type(radians, this+'.rotate', '*radians*');
         /*END_DEBUG*/
         var c = cos(radians),
-            s = sin(radians);
-        temp_matrix.a = c;
-        temp_matrix.b = s;
-        temp_matrix.c = -s;
-        temp_matrix.d = c;
-        temp_matrix.tx = 0;
-        temp_matrix.ty = 0;
+            s = sin(radians),
+            m = temp_matrix;
+        m.a = c;
+        m.b = s;
+        m.c = -s;
+        m.d = c;
+        m.tx = 0;
+        m.ty = 0;
         
-        return this.multiply(temp_matrix);
+        return this.multiply(m);
       }
     },
 
@@ -410,14 +418,15 @@
         check_number_type(sx, this+'.scale', '*sx*, sy');
         check_number_type(sy, this+'.scale', 'sx, *sy*');
         /*END_DEBUG*/
-        temp_matrix.a = sx;
-        temp_matrix.b = 0;
-        temp_matrix.c = 0;
-        temp_matrix.d = sy;
-        temp_matrix.tx = 0;
-        temp_matrix.ty = 0;
+        var m = temp_matrix;
+        m.a = sx;
+        m.b = 0;
+        m.c = 0;
+        m.d = sy;
+        m.tx = 0;
+        m.ty = 0;
         
-        return this.multiply(temp_matrix);
+        return this.multiply(m);
       }
     },
 
@@ -479,15 +488,16 @@
         check_number_type(skewY, this+'.skew', 'skewX, *skewY*');
         /*END_DEBUG*/
         var sx = tan(skewX),
-            sy = tan(skewY);
-        temp_matrix.a = 1;
-        temp_matrix.b = sy;
-        temp_matrix.c = sx;
-        temp_matrix.d = 1;
-        temp_matrix.tx = 0;
-        temp_matrix.ty = 0;
+            sy = tan(skewY),
+            m = temp_matrix;
+        m.a = 1;
+        m.b = sy;
+        m.c = sx;
+        m.d = 1;
+        m.tx = 0;
+        m.ty = 0;
         
-        return this.multiply(temp_matrix);
+        return this.multiply(m);
       }
     },
 
@@ -639,17 +649,27 @@
         check_point_type(pt, this+'.rotateAroundExternalPoint', '*point*, radians');
         check_number_type(radians, this+'.rotateAroundExternalPoint', 'point, *radians*');
         /*END_DEBUG*/
-        var parent_matrix = doodle_Matrix().rotate(radians), //global space
-            reg_pt, //new registration point
-            dx = pt.x,
-            dy = pt.y;
-        
-        this.translate(-dx, -dy);
-        reg_pt = parent_matrix.transformPoint({x:this.tx, y:this.ty});
+        var c = cos(radians),
+            s = sin(radians),
+            m = temp_matrix,
+            reg_pt = temp_point; //new registration point
+        //parent rotation matrix, global space
+        m.a = c;
+        m.b = s;
+        m.c = -s;
+        m.d = c;
+        m.tx = 0;
+        m.ty = 0;
+        //move this matrix
+        this.translate(-pt.x, -pt.y);
+        //parent transform this position
+        reg_pt.x = m.a * this.tx + m.c * this.ty + m.tx;
+        reg_pt.y = m.b * this.tx + m.d * this.ty + m.ty;
+        //assign new position
         this.tx = reg_pt.x;
         this.ty = reg_pt.y;
         //apply parents rotation, and put back
-        return this.multiply(parent_matrix).translate(dx, dy);
+        return this.multiply(m).translate(pt.x, pt.y);
       }
     },
     
@@ -657,13 +677,16 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (pt, radians) {
+      value: function (point, radians) {
         /*DEBUG*/
-        check_point_type(pt, this+'.rotateAroundInternalPoint', '*point*, radians');
+        check_point_type(point, this+'.rotateAroundInternalPoint', '*point*, radians');
         check_number_type(radians, this+'.rotateAroundInternalPoint', 'point, *radians*');
         /*END_DEBUG*/
-        var p = this.transformPoint(pt);
-        return this.rotateAroundExternalPoint(p, radians);
+        var pt = temp_point;
+        pt.x = this.a * point.x + this.c * point.y + this.tx;
+        pt.y = this.b * point.x + this.d * point.y + this.ty;
+        
+        return this.rotateAroundExternalPoint(pt, radians);
       }
     },
     
@@ -676,10 +699,12 @@
         check_point_type(pt_int, this+'.matchInternalPointWithExternal', '*pt_int*, pt_ext');
         check_point_type(pt_ext, this+'.matchInternalPointWithExternal', 'pt_int, *pt_ext*');
         /*END_DEBUG*/
-        var pt = this.transformPoint(pt_int),
-            dx = pt_ext.x - pt.x,
-            dy = pt_ext.y - pt.y;
-        return this.translate(dx, dy);
+        var pt = temp_point;
+        //transform point
+        pt.x = this.a * pt_int.x + this.c * pt_int.y + this.tx;
+        pt.y = this.b * pt_int.x + this.d * pt_int.y + this.ty;
+        
+        return this.translate(pt_ext.x - pt.x, pt_ext.y - pt.y);
       }
     },
 

@@ -13,9 +13,13 @@
       max = Math.max,
       min = Math.min;
   
-  /* Super constructor
-   * @param {Number|Array|Rectangle|Function} (x,y,w,h)|initializer
-   * @return {Object}
+  /* Rectangle
+   * @constructor
+   * @param {Number=} x
+   * @param {Number=} y
+   * @param {Number=} width
+   * @param {Number=} height
+   * @return {Rectangle}
    */
   doodle_Rectangle = doodle.geom.Rectangle = function (x, y, width, height) {
     var rect = {},
@@ -337,6 +341,23 @@
       }
     },
 
+    /* Determines whether the specified point is contained within the
+     * rectangular region defined by this Rectangle object.
+     */
+    'contains': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function (x, y) {
+        /*DEBUG*/
+        check_number_type(x, this+'.contains', '*x*, y');
+        check_number_type(y, this+'.contains', 'x, *y*');
+        /*END_DEBUG*/
+        return (x >= this.left && x <= this.right &&
+                y >= this.top && y <= this.bottom);
+      }
+    },
+
     /* Determines whether the specified point is contained within this rectangle object.
      * @param {Point} pt
      * @return {Boolean}
@@ -356,21 +377,7 @@
       }
     },
 
-    /* Same as containsPoint, but with 2 number parameters.
-     */
-    '__containsPoint': {
-      enumerable: false,
-      writable: false,
-      configurable: false,
-      value: function (x, y) {
-        /*DEBUG*/
-        check_number_type(x, this+'.containsPoint', '*x*, y');
-        check_number_type(y, this+'.containsPoint', 'x, *y*');
-        /*END_DEBUG*/
-        return (x >= this.left && x <= this.right &&
-                y >= this.top && y <= this.bottom);
-      }
-    },
+    
 
     /* Determines whether the rectangle argument is contained within this rectangle.
      * @param {Rectangle} rect
@@ -385,10 +392,10 @@
         check_rect_type(rect, this+'.containsRect', '*rect*');
         /*END_DEBUG*/
         //check each corner
-        return (this.containsPoint({x: rect.x, y: rect.y}) &&           //top-left
-                this.containsPoint({x: rect.right, y: rect.y}) &&       //top-right
-                this.containsPoint({x: rect.right, y: rect.bottom}) &&  //bot-right
-                this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
+        return (this.contains(rect.x, rect.y) &&           //top-left
+                this.contains(rect.right, rect.y) &&       //top-right
+                this.contains(rect.right, rect.bottom) &&  //bot-right
+                this.contains(rect.x, rect.bottom));       //bot-left
       }
     },
 
@@ -405,10 +412,10 @@
         check_rect_type(rect, this+'.intersects', '*rect*');
         /*END_DEBUG*/
         //check each corner
-        return (this.containsPoint({x: rect.x, y: rect.y}) ||           //top-left
-                this.containsPoint({x: rect.right, y: rect.y}) ||       //top-right
-                this.containsPoint({x: rect.right, y: rect.bottom}) ||  //bot-right
-                this.containsPoint({x: rect.x, y: rect.bottom}));       //bot-left
+        return (this.contains(rect.x, rect.y) ||           //top-left
+                this.contains(rect.right, rect.y) ||       //top-right
+                this.contains(rect.right, rect.bottom) ||  //bot-right
+                this.contains(rect.x, rect.bottom));       //bot-left
       }
     },
 
@@ -427,7 +434,7 @@
         /*DEBUG*/
         check_rect_type(rect, this+'.intersection', '*rect*');
         /*END_DEBUG*/
-        var r = doodle_Rectangle();
+        var r = doodle_Rectangle(0, 0, 0, 0);
         if (this.intersects(rect)) {
           r.left = max(this.left, rect.left);
           r.top = max(this.top, rect.top);
@@ -471,7 +478,7 @@
         /*DEBUG*/
         check_rect_type(rect, this+'.union', '*rect*');
         /*END_DEBUG*/
-        var r = doodle_Rectangle();
+        var r = doodle_Rectangle(0, 0, 0, 0);
         r.left = min(this.left, rect.left);
         r.top = min(this.top, rect.top);
         r.right = max(this.right, rect.right);
