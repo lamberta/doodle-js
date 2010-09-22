@@ -168,7 +168,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
 /* TOUCH EVENT
  * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
- */
+ *
 Object.defineProperties(doodle.TouchEvent, {
   
   'TOUCH_START': {
@@ -200,7 +200,7 @@ Object.defineProperties(doodle.TouchEvent, {
   }
   
 });
-
+***/
 
 /* KEYBOARD EVENT
  */
