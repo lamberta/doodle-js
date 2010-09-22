@@ -1,33 +1,27 @@
 /*globals doodle, document*/
+
 doodle.utils = {
   rgb_to_hex: function (r, g, b) {
     /*DEBUG*/
-    if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number') {
-      throw new TypeError("rgb_to_hex: Color values must be numbers.");
-    }
+    var check_number_type = doodle.utils.types.check_number_type;
+    check_number_type(r, 'rgb_to_hex', '*r*, g, b');
+    check_number_type(g, 'rgb_to_hex', 'r, *g*, b');
+    check_number_type(b, 'rgb_to_hex', 'r, g, *b*');
     /*END_DEBUG*/
     var hex_color = (b | (g << 8) | (r << 16)).toString(16);
     return '#'+ String('000000'+hex_color).slice(-6); //pad out
   },
 
   rgb_str_to_hex: function (rgb_str) {
-    var utils = doodle.utils,
-        rgb;
-    
     /*DEBUG*/
-    if (typeof rgb_str !== 'string') {
-      throw new TypeError('rgb_str_to_hex(rgb_str): Parameter must be a string.');
-    }
-    /*END_DEBUG*/
-    
-    rgb = utils.rgb_str_to_rgb(rgb_str);
-    
+    doodle.utils.types.check_string_type(rgb_str, 'rgb_str_to_hex', '*rgb_str*');
+    /*END_DEBUG*/   
+    var doodle_utils = doodle.utils,
+        rgb = doodle_utils.rgb_str_to_rgb(rgb_str);
     /*DEBUG*/
-    if (!Array.isArray(rgb)) {
-      throw new SyntaxError('rgb_str_to_hex(rgb_str): Parameter must be in the format: "rgb(n, n, n)".');
-    }
+    doodle.utils.types.check_array_type(rgb, 'rgb_str_to_hex::rgb');
     /*END_DEBUG*/
-    return utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
+    return doodle_utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
   },
   
   rgb_to_rgb_str: function (r, g, b, a) {
@@ -55,9 +49,8 @@ doodle.utils = {
       /*END_DEBUG*/
       color = color.trim().match(rgb_regexp);
       /*DEBUG*/
-      if (!Array.isArray(color)) {
-        throw new SyntaxError('rgb_str_to_rgb(color): Parameter must be in the format: "rgba(n, n, n, n)".');
-      }
+      //if it's not an array, it didn't parse correctly
+      doodle.utils.types.check_array_type(color, 'rgb_str_to_rgb', "*color{'rgba(n, n, n, n)'}*");
       /*END_DEBUG*/
       var rgb = [parseInt(color[1], 10),
                  parseInt(color[2], 10),
@@ -77,23 +70,19 @@ doodle.utils = {
       color = parseInt(color, 16);
     }
     /*DEBUG*/
-    if (typeof color !== 'number') {
-      throw new TypeError("hex_to_rgb: Color in invalid hex format.");
-    }
+    doodle.utils.types.check_number_type(color, 'hex_to_rgb', "*color{0xffffff|#ffffff}*");
     /*END_DEBUG*/
     return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
   },
 
   hex_to_rgb_str: function (color, alpha) {
-    var utils = doodle.utils;
+    var doodle_utils = doodle.utils;
     alpha = (alpha === undefined) ? 1 : alpha;
     /*DEBUG*/
-    if (typeof alpha !== 'number') {
-      throw new TypeError("hex_to_rgb_str(color, *alpha*): Parameter must be a number.");
-    }
+    doodle.utils.types.check_number_type(alpha, 'hex_to_rgb_str', '*color*');
     /*END_DEBUG*/
-    color = utils.hex_to_rgb(color);
-    return utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
+    color = doodle_utils.hex_to_rgb(color);
+    return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
   }
 };
 
@@ -103,6 +92,7 @@ doodle.utils = {
  * check_rect_type
  * These can't be added to utils.types until they're created.
  */
+/*DEBUG*/
 doodle.utils.types = (function () {
   function throw_type_error (type, caller, param) {
     if (typeof type !== 'string') {
@@ -162,7 +152,7 @@ doodle.utils.types = (function () {
     
   };
 }());
-
+/*END_DEBUG*/
 
 /* Returns HTML element from id name or element itself.
  */
@@ -262,21 +252,28 @@ doodle.utils.set_element_property = function (element, property, value, type) {
   return value;
 };
 
-/* Creates a scene graph path from a given node and all it's descendants.
- * @param {Node} node
- * @param {Array} array Array to store the path nodes in.
- * @param {Boolean} clearArray Empty array passed as parameter before storing nodes in it.
- * @return {Array} The array passed to the function (modified in place).
- */
 (function () {
+  /**
+   * Creates a scene graph path from a given node and all it's descendants.
+   * @param {Node} node
+   * @param {Array=} array Array to store the path nodes in.
+   * @param {Boolean=} clearArray Empty array passed as parameter before storing nodes in it.
+   * @return {Array} The array passed to the function (modified in place).
+   */
   doodle.utils.create_scene_path = function create_path (node, array, clearArray) {
+    array = (array === undefined) ? [] : array;
+    clearArray = (clearArray === undefined) ? false : clearArray;
+    /*DEBUG*/
+    doodle.utils.types.check_array_type(array, 'create_scene_path');
+    doodle.utils.types.check_boolean_type(clearArray, 'create_scene_path');
+    /*END_DEBUG*/
     var i = node.children.length;
     if (clearArray) {
       array.splice(0, array.length);
     }
     if (i !== 0) {
       while (i--) {
-        create_path(node.children[i], array);
+        create_path(node.children[i], array, false);
       }
     }
     array.push(node);
