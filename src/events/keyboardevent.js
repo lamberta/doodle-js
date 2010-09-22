@@ -88,8 +88,12 @@
           evt_metaKey = false,
           evt_altGraphKey = false;
 
+      /* @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+       */
       copy_keyboardevent_properties = function (evt) {
-        //only looking for KeyboardEvent properties
+        /*DEBUG*/
+        check_keyboardevent_type(evt, 'copy_keyboardevent_properties', '*event*');
+        /*END_DEBUG*/
         if (evt.keyIdentifier !== undefined) { evt_keyIdentifier = evt.keyIdentifier; }
         if (evt.keyLocation !== undefined) { evt_keyLocation = evt.keyLocation; }
         if (evt.repeat !== undefined) { evt_repeat = evt.repeat; }
@@ -203,7 +207,9 @@
          */
         'getModifierState': {
           value: function (key) {
+            /*DEBUG*/
             check_string_type(key, this+'.getModifierState', '*key*');
+            /*END_DEBUG*/
             switch (key) {
             case 'Alt':
               return evt_altKey;
@@ -228,8 +234,16 @@
           enumerable: false,
           configurable: false,
           value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*, resetTarget, resetType');
+            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyKeyboardEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyKeyboardEventProperties', 'event, target, *type*');
+            }
             /*END_DEBUG*/
             copy_keyboardevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);

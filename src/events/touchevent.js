@@ -108,8 +108,12 @@
           evt_scale = 1,
           evt_rotation = 0;
 
+      /* @param {TouchEvent} evt TouchEvent to copy properties from.
+       */
       copy_touchevent_properties = function (evt) {
-        //only looking for TouchEvent properties
+        /*DEBUG*/
+        check_touchevent_type(evt, 'copy_touchevent_properties', '*event*');
+        /*END_DEBUG*/
         if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
         if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
         if (evt.clientX !== undefined) { evt_clientX = evt.clientX; }
@@ -270,7 +274,9 @@
          */
         'getModifierState': {
           value: function (key) {
+            /*DEBUG*/
             check_string_type(key, this+'.getModifierState', '*key*');
+            /*DEBUG*/
             switch (key) {
             case 'Alt':
               return evt_altKey;
@@ -290,13 +296,23 @@
          * Allows for the reuse of this object for further dispatch.
          * @internal
          * @param {TouchEvent} evt
+         * @param {Node=} resetTarget
+         * @param {String=} resetType
          */
         '__copyTouchEventProperties': {
           enumerable: false,
           configurable: false,
           value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_touchevent_type(evt, this+'.__copyTouchEventProperties', '*event*, resetTarget, resetType');
+            check_touchevent_type(evt, this+'.__copyTouchEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyTouchEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyTouchEventProperties', 'event, target, *type*');
+            }
             /*END_DEBUG*/
             copy_touchevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);

@@ -78,8 +78,13 @@
       var evt_data = '',
           evt_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
 
+      
+      /* @param {TextEvent} evt TextEvent to copy properties from.
+       */
       copy_textevent_properties = function (evt) {
-        //only looking for TextEvent properties
+        /*DEBUG*/
+        check_textevent_type(evt, 'copy_textevent_properties', '*event*');
+        /*END_DEBUG*/
         if (evt.data !== undefined) { evt_data = evt.data; }
         if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }
       };
@@ -129,8 +134,16 @@
           enumerable: false,
           configurable: false,
           value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*, resetTarget, resetType');
+            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyTextEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyTextEventProperties', 'event, target, *type*');
+            }
             /*END_DEBUG*/
             copy_textevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);

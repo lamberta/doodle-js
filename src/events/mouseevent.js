@@ -104,8 +104,12 @@
           evt_button = 0,
           evt_relatedTarget = null;
 
+      /* @param {MouseEvent} evt MouseEvent to copy properties from.
+       */
       copy_mouseevent_properties = function (evt) {
-        //only looking for MouseEvent properties
+        /*DEBUG*/
+        check_mouseevent_type(evt, 'copy_mouseevent_properties', '*event*');
+        /*END_DEBUG*/
         evt_x = (evt.x !== undefined) ? evt.x : 0;
         evt_y = (evt.y !== undefined) ? evt.y : 0;
         evt_offsetX = (evt.offsetX !== undefined) ? evt.offsetX : 0;
@@ -265,7 +269,9 @@
          */
         'getModifierState': {
           value: function (key) {
+            /*DEBUG*/
             check_string_type(key, this+'.getModifierState', '*key*');
+            /*END_DEBUG*/
             switch (key) {
             case 'Alt':
               return evt_altKey;
@@ -290,8 +296,16 @@
           enumerable: false,
           configurable: false,
           value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*, resetTarget, resetType');
+            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyMouseEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyMouseEventProperties', 'event, target, *type*');
+            }
             /*END_DEBUG*/
             copy_mouseevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);

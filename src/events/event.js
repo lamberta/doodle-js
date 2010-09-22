@@ -12,6 +12,7 @@
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
+      check_node_type = doodle.utils.types.check_node_type,
       /*END_DEBUG*/
       isEvent;
   
@@ -56,12 +57,22 @@
           __cancel = false,
           __cancelNow = false;
 
-      copy_event_properties = function  (evt, resetTarget, resetType) {
-        resetTarget = (resetTarget === undefined) ? false : resetTarget;
+      /**
+       * @param {Event} evt Event to copy properties from.
+       * @param {?Node|Boolean} resetTarget Set new event target or null.
+       * @param {String|Boolean} resetType Set new event type.
+       */
+      copy_event_properties = function (evt, resetTarget, resetType) {
+        /*DEBUG*/
+        check_event_type(evt, 'copy_event_properties', '*event*, target, type');
+        if (resetTarget !== false && resetTarget !== null) {
+          check_node_type(evt, 'copy_event_properties', 'event, *target*, type');
+        }
+        if (resetType !== false) {
+          check_string_type(resetType, 'copy_event_properties', 'event, target, *type*');
+        }
+        /*END_DEBUG*/
         if (resetType) {
-          /*DEBUG*/
-          check_string_type(resetType, event+'::copy_event_properties', 'evt, resetTarget, *resetType*');
-          /*END_DEBUG*/
           evt_type = resetType;
         } else {
           evt_type = evt.type;
@@ -282,13 +293,23 @@
          * Allows for the reuse of this object for further dispatch.
          * @internal
          * @param {Event} evt
+         * @param {Node=} resetTarget
+         * @param {String=} resetType
          */
         '__copyEventProperties': {
           enumerable: false,
           configurable: false,
           value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_event_type(evt, this+'.__copyEventProperties', '*event*, resetTarget, resetType');
+            check_event_type(evt, this+'.__copyEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyEventProperties', 'event, target, *type*');
+            }
             /*END_DEBUG*/
             copy_event_properties(evt, resetTarget, resetType);
             return this;
@@ -317,7 +338,7 @@
         /*END_DEBUG*/
       } else {
         //passed a doodle or dom event object
-        copy_event_properties(init_obj);
+        copy_event_properties(init_obj, false, false);
       }
     } else {
       //standard instantiation

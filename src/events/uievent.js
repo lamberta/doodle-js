@@ -83,8 +83,12 @@
           evt_pageX = 0,
           evt_pageY = 0;
 
+      /* @param {UIEvent} evt UIEvent to copy properties from.
+       */
       copy_uievent_properties = function (evt) {
-        //only looking for UIEvent properties
+        /*DEBUG*/
+        check_uievent_type(evt, 'copy_uievent_properties', '*event*');
+        /*END_DEBUG*/
         if (evt.view !== undefined) { evt_view = evt.view; }
         if (evt.detail !== undefined) { evt_detail = evt.detail; }
         if (evt.which !== undefined) { evt_which = evt.which; }
@@ -176,13 +180,23 @@
          * Allows for the reuse of this object for further dispatch.
          * @internal
          * @param {UIEvent} evt
+         * @param {Node=} resetTarget
+         * @param {String=} resetType
          */
         '__copyUIEventProperties': {
           enumerable: false,
           configurable: false,
           value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*, resetTarget, resetType');
+            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyUIEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyUIEventProperties', 'event, target, *type*');
+            }
             /*END_DEBUG*/
             copy_uievent_properties(evt);
             return this.__copyEventProperties(evt, resetTarget, resetType);
