@@ -5,8 +5,10 @@ function print_help_and_exit {
     echo "  -h      Show this usage guide."
     echo "  -d      Also build debug version."
     echo "  -D      Only build debug version."
-    echo "  -S      Strip debugging code (for profiling)."
+    echo "  -S      Leave stats monitor in compiled build."
+    echo "  -P      Profiling build. Debugging stripped but not compiled."
     echo "  -c      Clean."
+    echo "  -w=n    Compiler warning level. [0, 1, 2]"
     echo "  -C=jar  Location of the Closure compiler."
     exit 0
 }
@@ -19,12 +21,16 @@ PROJECT_HOME="$PWD"
 DEBUG_OUT_FILE="$PROJECT_HOME/build/doodle-debug.js"
 MIN_OUT_FILE="$PROJECT_HOME/build/doodle.js"
 CLOSURE_COMPILER="$PROJECT_HOME/build/compiler.jar"
+WARNING_LEVEL=1
 
 function build_full {
     cat ./build/prologue.js > "$DEBUG_OUT_FILE"
     cat ./src/compat/es5.js >> "$DEBUG_OUT_FILE"
     cat ./src/utils.js >> "$DEBUG_OUT_FILE"
-    cat ./lib/Stats.js >> "$DEBUG_OUT_FILE"
+    
+    echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
+    cat ./lib/stats/src/Stats.js >> "$DEBUG_OUT_FILE"
+    echo "/*END_DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
 
     #constants
     cat ./src/constants/keyboard.js >> "$DEBUG_OUT_FILE"
@@ -62,6 +68,12 @@ function strip_debugging {
     sed '/\/\*DEBUG\*\//,/\/\*END_DEBUG\*\//d' "$DEBUG_OUT_FILE" > "$MIN_OUT_FILE"
 }
 
+function strip_stats {
+    local pattern='/\/\*DEBUG_STATS\*\//,/\/\*END_DEBUG_STATS\*\//d'
+    sed "$pattern" "$MIN_OUT_FILE" > "$MIN_OUT_FILE.tmp"
+    mv "$MIN_OUT_FILE.tmp" "$MIN_OUT_FILE"
+}
+
 function print_compiler_warning {
     echo -e "\n\tWarning: Unable to locate the Closure compiler."
     echo -e "\tIt can be obtained from http://code.google.com/closure/compiler/"
@@ -72,15 +84,27 @@ function compile_file {
     if [ ! -f "$CLOSURE_COMPILER" ]; then
         print_compiler_warning
     else
+        #check warning level
+        if [ "$WARNING_LEVEL" -eq 0 ]; then
+            WARNING_LEVEL="QUIET"
+        elif [ "$WARNING_LEVEL" -eq 1 ]; then
+            WARNING_LEVEL="DEFAULT"
+        elif [ "$WARNING_LEVEL" -eq 2 ]; then
+            WARNING_LEVEL="VERBOSE"
+        else
+            echo "Compiler error: Unknown warning level."
+            exit 1 
+        fi
+
         mv "$MIN_OUT_FILE" "$MIN_OUT_FILE.tmp"
         echo -n -e "\tCompiling file... "
         if java -jar "$CLOSURE_COMPILER" --js "$MIN_OUT_FILE.tmp" \
-                --js_output_file "$MIN_OUT_FILE"; then
+                --js_output_file "$MIN_OUT_FILE" \
+                --warning_level "$WARNING_LEVEL"; then
             echo "done."
             rm "$MIN_OUT_FILE.tmp"
         else
-            print_compiler_warning
-            mv "$MIN_OUT_FILE.tmp" "$MIN_OUT_FILE" #move back
+            mv "$MIN_OUT_FILE.tmp" "$MIN_OUT_FILE.error" #move back
         fi
     fi
 }
@@ -99,17 +123,23 @@ function clean_up {
         rm "$DEBUG_OUT_FILE"
         echo -e "\tRemoved $DEBUG_OUT_FILE"
     fi
+    if [ -f "$MIN_OUT_FILE.error" ]; then
+        rm "$MIN_OUT_FILE.error"
+        echo -e "\tRemoved $MIN_OUT_FILE.error"
+    fi
 }
 
 
 #parse args
-while getopts "hdDcC:S" option; do
+while getopts "hcdDPSC:w:" option; do
     case $option in
         d) BUILD_DEBUG=1;;
         D) BUILD_DEBUG=1; BUILD_DEBUG_ONLY=1;;
-        c) clean_up; exit 0;;
+        P) BUILD_STRIP=1;;
+        S) BUILD_STATS=1;;
         C) CLOSURE_COMPILER="$OPTARG";;
-        S) BUILD_STRIP=1;;
+        w) WARNING_LEVEL="$OPTARG";;
+        c) clean_up; exit 0;;
         h) print_help_and_exit;;
         \?) print_help_and_exit;;
     esac
@@ -128,6 +158,14 @@ if [ -z "$BUILD_DEBUG_ONLY" ]; then
     if strip_debugging; then
         echo "done."
     fi
+
+    if [ -z "$BUILD_STATS" ]; then
+        echo -n -e "\tRemove stats monitor code... "
+        if strip_stats; then
+            echo "done"
+        fi
+    fi
+
     #only stripped build is useful for profiling
     if [ -z "$BUILD_STRIP" ]; then
         compile_file

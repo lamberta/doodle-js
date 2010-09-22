@@ -275,6 +275,58 @@
           }
         },
 
+        /*DEBUG_STATS*/
+        'debug': {
+          enumerable: true,
+          configurable: false,
+          value: Object.create(null, {
+            /*DEBUG*/
+            //color of the bounding box
+            //individual bounds are displayed with node.debug.boundingBox = true
+            'boundingBox': (function () {
+              var bounds_color = "#ff0000";
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () {
+                  return  bounds_color;
+                },
+                set: function (boundingBoxColor) {
+                  bounds_color = boundingBoxColor;
+                }
+              };
+            }()),
+            /*END_DEBUG*/
+
+            /* Overlay a stats meter on the display. [http://github.com/mrdoob/stats.js]
+             * Not marked as DEBUG because it's useful in a compiled script.
+             * @param {Boolean}
+             * @return {Stats|false}
+             */
+            'stats': (function () {
+              var debug_stats = false; //stats object
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () { return debug_stats; },
+                set: function (useStats) {
+                  /*DEBUG*/
+                  check_boolean_type(useStats, display+'.debug.stats');
+                  /*END_DEBUG*/
+                  if (useStats && !debug_stats) {
+                    debug_stats = new Stats();
+                    display.element.appendChild(debug_stats.domElement);
+                  } else if (!useStats && debug_stats) {
+                    display.element.removeChild(debug_stats.domElement);
+                    debug_stats = false;
+                  }
+                }
+              };
+            }())
+          })
+        },
+        /*END_DEBUG_STATS*/
+
         'addChildAt': {
           enumerable: true,
           configurable: false,
@@ -333,59 +385,8 @@
               return super_swapChildrenAt.call(this, idx1, idx2);
             };
           }())
-        },
-
-        /* Debugging options
-         */
-        'debug': {
-          enumerable: true,
-          configurable: false,
-          value: Object.create(null, {
-            /*DEBUG*/
-            //color of the bounding box
-            //individual bounds are displayed with node.debug.boundingBox = true
-            'boundingBox': (function () {
-              var bounds_color = "#ff0000";
-              return {
-                enumerable: true,
-                configurable: false,
-                get: function () {
-                  return  bounds_color;
-                },
-                set: function (boundingBoxColor) {
-                  bounds_color = boundingBoxColor;
-                }
-              };
-            }()),
-            /*END_DEBUG*/
-
-            /* Overlay a stats meter on the display. [http://github.com/mrdoob/stats.js]
-             * Not marked as DEBUG because it's useful in a compiled script.
-             * @param {Boolean}
-             * @return {Stats|false}
-             */
-            'stats': (function () {
-              var debug_stats = false; //stats object
-              return {
-                enumerable: true,
-                configurable: false,
-                get: function () { return debug_stats; },
-                set: function (useStats) {
-                  /*DEBUG*/
-                  check_boolean_type(useStats, display+'.debug.stats');
-                  /*END_DEBUG*/
-                  if (useStats && !debug_stats) {
-                    debug_stats = new Stats();
-                    display.element.appendChild(debug_stats.domElement);
-                  } else if (!useStats && debug_stats) {
-                    display.element.removeChild(debug_stats.domElement);
-                    debug_stats = false;
-                  }
-                }
-              };
-            }())
-          })
-        }//end debug
+        }
+        
       };//end return object
     }()));//end defineProperties
     
@@ -718,7 +719,6 @@
       layers[layer_count-1].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
       return true;
     }
-    return false;
   };
 
   /*
