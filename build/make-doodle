@@ -115,6 +115,7 @@ function compile_file {
     #if we can't locate compiler.jar we'll just skip compilation
     if [ ! -f "$CLOSURE_COMPILER" ]; then
         echo -e "\n\tWarning: Unable to locate the Closure compiler."
+        echo -e "\tDownload available at http://code.google.com/closure/compiler/"
         echo -e "\tPlace compiler.jar in the build directory or use -J=path"
         echo -e "\tContinuing without compilation...\n"
     else
