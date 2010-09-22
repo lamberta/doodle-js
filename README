@@ -1,19 +1,23 @@
-Doodle-js v0.2
+Doodle-js - An Animation Library for JavaScript
 
-Completely rewritten using ES5 features available in newer
-JavaScript engines. Version 0.1 still runs on JS2 and is
-located in the downloads section as a source archive.
+Testing on Chrome, marginal success on Firefox 4.
+Requires a browser with some ECMAScript 5 capabilities.
 
-Some of the new features:
-  * Supports multiple displays, each containing multiple layers.
-  * Added a scene graph.
-  * Has a new event handling system for Doodle objects.
-  * Bounding Box for sprites.
-
-Some features work, some don't.
+Some of the features:
+  * Use the Canvas drawing API with sprites and a scene graph.
+  * Event handling and dispatch for objects.
+  * Nodes maintain transforms, bounds, and other useful properties.
+  * If you're coming from ActionScript 3, you'll feel right at home!
 
 Basic build instructions:
-git clone git://github.com/biilly/doodle-js.git
-./build/make-doodle => ./build/doodle.js
+  git clone git://github.com/biilly/doodle-js.git
+  git submodule init
+  git submodule update
+  ./build/make-doodle => ./build/doodle.js
 
-Take a look at some of the demos in ./doc/making_things_move/
+Debugging version (some useful error messages):
+  ./build/make-doodle -D => ./build/doodle-debug.js
+
+For more options: ./build/make-doodle -h
+
+Take a look at some demos in ./doc/making_things_move/
