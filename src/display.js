@@ -1,5 +1,5 @@
 /*jslint nomen: false, plusplus: false*/
-/*globals doodle, document, setInterval, clearInterval, Stats, check_display_type*/
+/*globals doodle, document, setInterval, clearInterval, Stats*/
 
 (function () {
   var display_static_properties,
@@ -37,7 +37,7 @@
       evt_mouseEvent = doodle.MouseEvent(''),
       //evt_touchEvent = doodle.TouchEvent(''),
       evt_keyboardEvent = doodle.KeyboardEvent(''),
-      enterFrame = doodle_Event(doodle.Event.ENTER_FRAME),
+      evt_enterFrame = doodle_Event(doodle.Event.ENTER_FRAME),
       ENTER_FRAME = doodle.Event.ENTER_FRAME;
       
   
@@ -76,24 +76,26 @@
       var width = 0,
           height = 0,
           layers = display.children,
-          display_scene_path = [],
+          display_scene_path = [], //all descendants
           mouseX = 0,
           mouseY = 0,
-          //recycle
-          mouseEvent = evt_mouseEvent,
-          //lookup help
-          this_display = display,
           //move to a closer scope since we're calling these often
+          this_display = display,
+          mouseEvent = evt_mouseEvent, //recycle
           dispatch_mouse_evt = dispatch_mouse_event,
           dispatch_mousemove_evt = dispatch_mousemove_event,
           dispatch_mouseleave_evt = dispatch_mouseleave_event;
 
+      /* @param {MouseEvent} evt
+       */
       function on_mouse_event (evt) {
         var path = display_scene_path,
             path_count = path.length;
         dispatch_mouse_evt(evt, mouseEvent, path, path_count, evt.offsetX, evt.offsetY, this_display);
       }
 
+      /* @param {MouseEvent} evt
+       */
       function on_mouse_move (evt) {
         var path = display_scene_path,
             path_count = path.length,
@@ -103,52 +105,36 @@
         dispatch_mousemove_evt(evt, mouseEvent, path, path_count, x, y, this_display);
       }
 
+      /* @param {MouseEvent} evt
+       */
       function on_mouse_leave (evt) {
         dispatch_mouseleave_evt(evt, mouseEvent, display_scene_path, layers, layers.length, this_display);
       }
 
-      function add_dom_handlers (element) {
-        //MouseEvents
-        element.addEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
-        //this dispatches mouseleave and mouseout for display and layers
-        element.addEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
-        //
-        element.addEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
-        element.addEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-        element.addEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-        element.addEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
-        element.addEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-        element.addEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
-        /*//TouchEvents
-        element.addEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
-        element.addEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
-        element.addEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
-        element.addEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
-        */
-      }
-
-      function remove_dom_handlers (element) {
-        //MouseEvents
-        element.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
-        //
-        element.removeEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
-        //
-        element.removeEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
-        element.removeEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-        element.removeEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-        element.removeEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
-        element.removeEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-        element.removeEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
-        /*//TouchEvents
-        element.removeEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
-        element.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
-        element.removeEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
-        element.removeEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
-        */
-      }
       
       return {
 
+        /* Mouse x position on display.
+         */
+        'mouseX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mouseX; }
+        },
+
+        /* Mouse y position on display.
+         */
+        'mouseY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return mouseY; }
+        },
+        
+        /* Display width. Setting this affects all it's children layers.
+         * @param {Number} n
+         * @return {Number}
+         * @override
+         */
         'width': {
           get: function () { return width; },
           set: function (n) {
@@ -166,6 +152,11 @@
           }
         },
 
+        /* Display height. Setting this affects all it's children layers.
+         * @param {Number} n
+         * @return {Number}
+         * @override
+         */
         'height': {
           get: function () { return height; },
           set: function (n) {
@@ -183,8 +174,10 @@
           }
         },
         
-        /* Display specific things to setup when adding a dom element.
+        /* Gets size of display element and adds event handlers.
          * Called in ElementNode.element
+         * @param {HTMLElement}
+         * @override
          */
         '__addDomElement': {
           enumerable: false,
@@ -195,15 +188,60 @@
             /*END_DEBUG*/
             //need to stack the canvas elements on top of each other
             set_element_property(elementArg, 'position', 'relative');
-            add_dom_handlers(elementArg);
+            
+            //computed style will return the entire window size
+            var w = get_element_property(elementArg, 'width', 'int', false) || elementArg.width,
+                h = get_element_property(elementArg, 'height', 'int', false) || elementArg.height;
+            //setting this also sets child layers
+            if (typeof w === 'number') { this.width = w; }
+            if (typeof h === 'number') { this.height = h; }
+
+            //add event handlers
+            //MouseEvents
+            elementArg.addEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            //this dispatches mouseleave and mouseout for display and layers
+            elementArg.addEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            //
+            elementArg.addEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.addEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.addEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.addEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            /*//TouchEvents
+            elementArg.addEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
+            elementArg.addEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
+            elementArg.addEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
+            elementArg.addEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
+            */
           }
         },
 
+        /* Removes event handlers from display element.
+         * @param {HTMLElement}
+         */
         '__removeDomElement': {
           enumerable: false,
           writable: false,
           value: function (elementArg) {
-            remove_dom_handlers(elementArg);
+            //remove event handlers
+            //MouseEvents
+            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            //
+            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            //
+            elementArg.removeEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.removeEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            /*//TouchEvents
+            elementArg.removeEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
+            elementArg.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
+            elementArg.removeEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
+            elementArg.removeEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
+            */
           }
         },
         
@@ -248,30 +286,17 @@
           };
         }()),
 
-        'mouseX': {
-          enumerable: false,
-          configurable: false,
-          get: function () {
-            return mouseX;
-          }
-        },
-
-        'mouseY': {
-          enumerable: false,
-          configurable: false,
-          get: function () {
-            return mouseY;
-          }
-        },
-
+        /* All descendants of the display, in scene graph order.
+         */
         'allChildren': {
           enumerable: true,
           configurable: false,
-          get: function () {
-            return display_scene_path;
-          }
+          get: function () { return display_scene_path; }
         },
-        
+
+        /* Re-creates the display's scene path.
+         * Called when adding child nodes.
+         */
         '__sortAllChildren': {
           enumerable: false,
           configurable: false,
@@ -285,6 +310,10 @@
           }
         },
 
+        /* Returns a list of nodes under a given display position.
+         * @param {Point} point
+         * @param {Array}
+         */
         'getNodesUnderPoint': {
           enumerable: true,
           configurable: false,
@@ -298,7 +327,6 @@
                 x = point.x,
                 y = point.y,
                 node;
-            
             while (i--) {
               node = scene_path[i];
               if(node.__getBounds(this).contains(x, y)) {
@@ -315,16 +343,17 @@
           configurable: false,
           value: Object.create(null, {
             /*DEBUG*/
-            //color of the bounding box
-            //individual bounds are displayed with node.debug.boundingBox = true
+            /* Color of the bounding box outline for nodes on the display.
+             * Display a particular node's bounds with node.debug.boundingBox = true
+             * @param {String} color
+             * @return {String}
+             */
             'boundingBox': (function () {
               var bounds_color = "#ff0000";
               return {
                 enumerable: true,
                 configurable: false,
-                get: function () {
-                  return  bounds_color;
-                },
+                get: function () { return  bounds_color; },
                 set: function (boundingBoxColor) {
                   bounds_color = boundingBoxColor;
                 }
@@ -332,10 +361,11 @@
             }()),
             /*END_DEBUG*/
 
-            /* Overlay a stats meter on the display. [http://github.com/mrdoob/stats.js]
-             * Not marked as DEBUG because it's useful in a compiled script.
+            /* Overlay a stats meter on the display.
+             * See http://github.com/mrdoob/stats.js for more info.
+             * To include in a compiled build, use ./build/make-doodle -S
              * @param {Boolean}
-             * @return {Stats|false}
+             * @return {Stats|Boolean}
              */
             'stats': (function () {
               var debug_stats = false; //stats object
@@ -361,6 +391,13 @@
         },
         /*END_DEBUG_STATS*/
 
+        /* Add a layer to the display's children at the given array position.
+         * Layer inherits the dimensions of the display.
+         * @param {Layer} layer
+         * @param {Number} index
+         * @return {Layer}
+         * @override
+         */
         'addChildAt': {
           enumerable: true,
           configurable: false,
@@ -381,6 +418,10 @@
           }())
         },
 
+        /* Remove a layer from the display's children at the given array position.
+         * @param {Number} index
+         * @override
+         */
         'removeChildAt': {
           enumerable: true,
           writable: false,
@@ -398,6 +439,11 @@
           }())
         },
 
+        /* Change the display order of two child layers at the given index. 
+         * @param {Number} idx1
+         * @param {Number} idx2
+         * @override
+         */
         'swapChildrenAt': {
           enumerable: true,
           writable: false,
@@ -476,13 +522,14 @@
   
   display_static_properties = {
 
+    /* Returns the string representation of the specified object.
+     * @override
+     */
     'toString': {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Display]";
-      }
+      value: function () { return "[object Display]"; }
     },
 
     /**
@@ -496,7 +543,9 @@
     },
     **/
 
-    /* Convenience methods.
+    /* Add a new layer to the display's children.
+     * @param {String} id
+     * @return {Layer}
      */
     'addLayer': {
       value: function (id) {
@@ -509,6 +558,9 @@
       }
     },
 
+    /* Remove a layer with a given name from the display's children.
+     * @param {String} id
+     */
     'removeLayer': {
       value: function (id) {
         /*DEBUG*/
@@ -518,10 +570,12 @@
       }
     },
 
-    /* This is always the same, so we'll save some computation.
+    /* The bounds of a display is always it's dimensions.
+     * @return {Rectangle} This object is reused with each call.
+     * @override
      */
     '__getBounds': {
-      enumerable: true,
+      enumerable: false,
       configurable: true,
       value: (function () {
         var rect = doodle.geom.Rectangle(); //recycle
@@ -530,7 +584,6 @@
         };
       }())
     }
-    
   };//end display_static_properties
 
 
@@ -542,8 +595,8 @@
     clear_scene_graph(this);
     dispatcher_queue.forEach(function dispatch_enterframe_evt (obj) {
       if (obj.hasEventListener(ENTER_FRAME)) {
-        enterFrame.__setTarget(obj);
-        obj.handleEvent(enterFrame);
+        evt_enterFrame.__setTarget(obj);
+        obj.handleEvent(evt_enterFrame);
       }
     });
     draw_scene_graph.call(this, this);
@@ -661,31 +714,58 @@
    * EVENT DISPATCHING
    */
 
- dispatch_mouse_event = function (evt/*dom*/, mouseEvent/*doodle*/,
-                                  scene_path, count, x, y, display) {
-    var node;
-   
+  /* Dispatches the following dom mouse events to doodle nodes on the display path:
+   * 'click', 'doubleclick', 'mousedown', 'mouseup', 'contextmenu', 'mousewheel'.
+   * An event is dispatched to the first node on the display path which
+   * mouse position is within their bounds. The event then follows the event path.
+   * The doodle mouse event is recycled by copying properties from the dom event.
+   *
+   * @param {MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {Array} path Reference to the display's scene path.
+   * @param {Number} count Number of nodes in the scene path array.
+   * @param {Number} x Position of the mouse x coordiante.
+   * @param {Number} y Position of the mouse y coorindate.
+   * @param {Display} display Reference to the display object.
+   * @return {Boolean} True if event gets dispatched.
+   * @private
+   */
+  dispatch_mouse_event = function (evt, mouseEvent, path, count, x, y, display) {
     while (count--) {
-      node = scene_path[count];
-      //recycle rect object
-      if(node.__getBounds(display).contains(x, y)) {
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      if(path[count].__getBounds(display).contains(x, y)) {
+        path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
+    return false;
   };
 
-  
-  dispatch_mousemove_event = function (evt/*dom*/, mouseEvent/*doodle*/,
-                                       scene_path, count, x, y, display) {
+  /* Called on every mousemove event from the dom.
+   * Dispatches the following events to doodle nodes on the display path:
+   * 'mousemove', 'mouseover', 'mouseenter', 'mouseout', 'mouseleave'
+   * Maintains mouse over/out information by assigning a boolean value to
+   * the node.__pointInBounds property. This is only accessed in this function,
+   * and is reset in 'dispatch_mouseleave_event'.
+   *
+   * @param {MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {Array} path Reference to the display's scene path.
+   * @param {Number} count Number of nodes in the scene path array.
+   * @param {Number} x Position of the mouse x coordiante.
+   * @param {Number} y Position of the mouse y coorindate.
+   * @param {Display} display Reference to the display object.
+   * @return {Boolean} True on dispatch. (Always true because display will trigger it.)
+   * @private
+   */
+  dispatch_mousemove_event = function (evt, mouseEvent, path, count, x, y, display) {
     var node;
-
     while (count--) {
-      node = scene_path[count];
+      node = path[count];
 
       if(node.__getBounds(display).contains(x, y)) {
         //point in bounds
         if (!node.__pointInBounds) {
+          /* @type {Boolean} */
           node.__pointInBounds = true;
           //dispatch events to node and up parent chain
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
@@ -698,6 +778,7 @@
       } else {
         //point not on sprite
         if (node.__pointInBounds) {
+          /* @type {Boolean} */
           node.__pointInBounds = false;
           //dispatch events to node and up parent chain
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
@@ -707,11 +788,24 @@
       }
     }
   };
-  
-  dispatch_mouseleave_event = function (evt, mouseEvent, scene_path,
-                                        layers, layer_count, top_node/*display*/) {
+
+  /* Called when the mouse leaves the display element.
+   * Dispatches 'mouseout' and 'mouseleave' to the display and resets
+   * the __pointInBounds property for all nodes.
+   *
+   * @param {MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {Array} path Reference to the display's scene path.
+   * @param {Array} layers Reference to display's children array.
+   * @param {Number} layer_count Number of nodes in the layers array. Later reused to be node scene path count.
+   * @param {Node} top_node Reference to the display object. Later reused to be the top layer.
+   * @return {Boolean} True on dispatch. (Always true because display will trigger it.)
+   * @private
+   */
+  dispatch_mouseleave_event = function (evt, mouseEvent, path, layers, layer_count, top_node) {
     if (layer_count === 0) {
       //no layers so no scene path, display will dispatch
+      /* @type {Boolean} */
       top_node.__pointInBounds = false;
       top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
       top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
@@ -720,10 +814,11 @@
       //reusing var - this is the top layer
       top_node = layers[layer_count-1];
       //reusing var - scene path count
-      layer_count = scene_path.length;
+      layer_count = path.length;
       while (layer_count--) {
         //all nodes out-of-bounds
-        scene_path[layer_count].__pointInBounds = false;
+        /* @type {Boolean} */
+        path[layer_count].__pointInBounds = false;
       }
       //top layer dispatch
       top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
@@ -732,17 +827,25 @@
     }
   };
 
-  /*
+  /* Called when the dom detects a keypress.
+   * Doodle KeyboardEvent is reused by copying the dom event properties.
+   * @param {Event} evt DOM keyboard event to copy properties from.
+   * @return {Boolean}
+   * @private
    */
   dispatch_keyboard_event = function (evt) {
     this.broadcastEvent(evt_keyboardEvent.__copyKeyboardEventProperties(evt, null));
+    return true;
   };
 
-  
   /*
    * CLASS METHODS
    */
-  
+
+  /* Test if an object is of the display type.
+   * @param {Object} obj Object to test.
+   * @return {Boolean} True if object is a Doodle Display.
+   */
   isDisplay = doodle.Display.isDisplay = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
       return false;
@@ -750,16 +853,20 @@
     return (obj.toString() === '[object Display]');
   };
 
-  /* check_display_type is a doodle global defined in prologue.js
-   */
   /*DEBUG*/
-  check_display_type = doodle.utils.types.check_display_type = function (display, caller, param) {
+  /* Type-checking for a Doodle Display object. Throws a TypeError if the test fails.
+   * @param {Object} display Object to test.
+   * @param {String=} caller Function name to print in error message.
+   * @param {String=} param Parameters to print in error message.
+   * @return {Boolean} True if object is a Doodle Display.
+   */
+  doodle.utils.types.check_display_type = function (display, caller, params) {
     if (isDisplay(display)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_display_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Display.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must be a Display.");
     }
   };
   /*END_DEBUG*/
