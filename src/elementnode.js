@@ -83,25 +83,7 @@
               
               /* Some classes require special handling of their element.
                */
-              switch (this.toString()) {
-              case '[object Layer]':
-                this.__addDomElement(dom_element);
-                break;
-              case '[object Display]':
-                this.__addDomElement(dom_element);
-                w = get_element_property(dom_element, 'width', 'int', false) || dom_element.width;
-                h = get_element_property(dom_element, 'height', 'int', false) || dom_element.height;
-                if (typeof w === 'number') { this.width = w; }
-                if (typeof h === 'number') { this.height = h; }
-                break;
-              default:
-                //get information from element - images, etc.  
-                w = get_element_property(dom_element, 'width', 'int') || dom_element.width;
-                h = get_element_property(dom_element, 'height', 'int') || dom_element.height;
-                if (typeof w === 'number') { width = w; }
-                if (typeof h === 'number') { height = h; }
-                break;
-              }
+              this.__addDomElement(dom_element); //may be overridden
 
               /* These go for every dom element passed.
                */
@@ -258,6 +240,18 @@
               set_element_property(this.element, 'visibility', 'hidden');
             }
             visible =  isVisible;
+          }
+        },
+
+        '__addDomElement': {
+          enumerable: false,
+          configurable: true,
+          value: function (elementArg) {
+            //default method obtaining element dimensions  
+            var w = get_element_property(elementArg, 'width', 'int') || elementArg.width,
+                h = get_element_property(elementArg, 'height', 'int') || elementArg.height;
+            if (typeof w === 'number') { width = w; }
+            if (typeof h === 'number') { height = h; }
           }
         },
 
