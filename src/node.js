@@ -89,8 +89,8 @@
           set: function (node) {
             /*DEBUG*/
             if (node !== null) {
-              //because it's defined later, global declared in prologue
-              check_display_type(node, this+'.root');
+              //no lookup help since it's not defined until display.js
+              doodle.utils.types.check_display_type(node, this+'.root');
             }
             /*END_DEBUG*/
             root = node;

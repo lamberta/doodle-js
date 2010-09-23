@@ -67,9 +67,6 @@ function build_full {
     cat ./src/elementnode.js >> "$DEBUG_OUT_FILE"
     cat ./src/layer.js >> "$DEBUG_OUT_FILE"
     cat ./src/display.js >> "$DEBUG_OUT_FILE"
-
-    #epilogue...
-    echo "}());" >> "$DEBUG_OUT_FILE"
 }
 
 
