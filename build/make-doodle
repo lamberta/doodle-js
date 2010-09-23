@@ -152,6 +152,21 @@ function clean_up {
         rm "$MIN_OUT_FILE.error"
         echo -e "\tRemoved $MIN_OUT_FILE.error"
     fi
+    #etags
+    if [ -f "$PROJECT_HOME/src/TAGS" ]; then
+        rm "$PROJECT_HOME/src/TAGS"
+        echo -e "\tRemoved $PROJECT_HOME/src/TAGS"
+    fi
+}
+
+
+function make_etags {
+    local ctags=$(which ctags)
+    if [ -x "$ctags" ]; then
+        if "$ctags" -e -f "$PROJECT_HOME/src/TAGS" -R "$PROJECT_HOME/src/"; then
+            echo -e "\tGenerated etags: $PROJECT_HOME/src/TAGS"
+        fi
+    fi
 }
 
 
@@ -184,6 +199,9 @@ parse_compiler_options
 echo "For more options: $(basename $0) -h"
 
 echo "Build:"
+
+make_etags
+
 #creates debug version
 build_full
 echo -e "\tCreated $DEBUG_OUT_FILE"

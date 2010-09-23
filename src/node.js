@@ -298,7 +298,7 @@
     
     'rotation': {
       enumerable: true,
-      configurable: false,
+      configurable: true,
       get: function () {
         return this.transform.rotation * 180 / PI;
       },

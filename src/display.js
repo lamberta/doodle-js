@@ -7,6 +7,7 @@
       frame_count = 0,
       isDisplay,
       dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,//needed?
+      add_display_handlers,
       create_frame,
       clear_scene_graph,
       draw_scene_graph,
@@ -48,28 +49,22 @@
    */
   doodle.Display = function (element) {
     var display,
-        display_name;
+        id;
 
-    /*DEBUG*/
-    if (arguments.length > 1) {
-      throw new SyntaxError("[object Display](element): Invalid number of parameters.");
-    }
-    /*END_DEBUG*/
-    
-    if (typeof element !== 'function') {
+    //extract id from element
+    if (element && typeof element !== 'function') {
       element = get_element(element);
       /*DEBUG*/
       check_block_element(element, '[object Display](element)');
       /*END_DEBUG*/
-      if (element) {
-        display_name = get_element_property(element, 'id');
-      }
+      id = get_element_property(element, 'id');
     }
 
-    display_name = (typeof display_name === 'string') ? display_name : "display"+ String('00'+display_count).slice(-2);
-    //assign element after display properties have been set up
-    display = Object.create(doodle.ElementNode(undefined, display_name));
+    id = (typeof id === 'string') ? id : "display"+ String('00'+display_count).slice(-2);
+    //won't assign element until after display properties are set up
+    display = Object.create(doodle.ElementNode(undefined, id));
 
+    
     Object.defineProperties(display, display_static_properties);
     //properties that require privacy
     Object.defineProperties(display, (function () {
@@ -79,19 +74,19 @@
           display_scene_path = [], //all descendants
           mouseX = 0,
           mouseY = 0,
-          //move to a closer scope since we're calling these often
-          this_display = display,
-          mouseEvent = evt_mouseEvent, //recycle
-          dispatch_mouse_evt = dispatch_mouse_event,
-          dispatch_mousemove_evt = dispatch_mousemove_event,
-          dispatch_mouseleave_evt = dispatch_mouseleave_event;
+          //move to closer scope since they're called frequently
+          $display = display,
+          $mouseEvent = evt_mouseEvent, //recycle
+          $dispatch_mouse_event = dispatch_mouse_event,
+          $dispatch_mousemove_event = dispatch_mousemove_event,
+          $dispatch_mouseleave_event = dispatch_mouseleave_event;
 
       /* @param {MouseEvent} evt
        */
       function on_mouse_event (evt) {
         var path = display_scene_path,
             path_count = path.length;
-        dispatch_mouse_evt(evt, mouseEvent, path, path_count, evt.offsetX, evt.offsetY, this_display);
+        $dispatch_mouse_event(evt, $mouseEvent, path, path_count, evt.offsetX, evt.offsetY, $display);
       }
 
       /* @param {MouseEvent} evt
@@ -102,13 +97,13 @@
             x, y;
         mouseX = x = evt.offsetX;
         mouseY = y = evt.offsetY;
-        dispatch_mousemove_evt(evt, mouseEvent, path, path_count, x, y, this_display);
+        $dispatch_mousemove_event(evt, $mouseEvent, path, path_count, x, y, $display);
       }
 
       /* @param {MouseEvent} evt
        */
       function on_mouse_leave (evt) {
-        dispatch_mouseleave_evt(evt, mouseEvent, display_scene_path, layers, layers.length, this_display);
+        $dispatch_mouseleave_event(evt, $mouseEvent, display_scene_path, layers, layers.length, $display);
       }
 
       
@@ -469,25 +464,26 @@
         
       };//end return object
     }()));//end defineProperties
-    
 
-    //passed an initialization function
-    if (typeof arguments[0] === 'function') {
-      /*DEBUG*/
-      if (arguments.length > 1) {
-        throw new SyntaxError("[object Display](function): Invalid number of parameters.");
+    //check args
+    switch (arguments.length) {
+    case 0:
+      break;
+    case 1:
+      //passed function
+      if (typeof arguments[0] === 'function') {
+        arguments[0].call(element);
+        element = undefined;
+      } else {
+        //passed element
+        /*DEBUG*/
+        check_block_element(element, '[object Display](element)');
+        /*END_DEBUG*/
+        display.element = element;
       }
-      /*END_DEBUG*/
-      arguments[0].call(display);
-      element = undefined;
-    } else {
-      //standard instantiation
-      /*DEBUG*/
-      if (arguments.length > 1) {
-        throw new SyntaxError("[object Display](element): Invalid number of parameters.");
-      }
-      /*END_DEBUG*/
-      display.element = element;
+      break;
+    default:
+      throw new SyntaxError("[object Display](element): Invalid number of parameters.");
     }
 
     /*DEBUG*/
@@ -495,28 +491,16 @@
     check_block_element(display.element, '[object Display].element');
     /*END_DEBUG*/
 
+    //set defaults
     display.root = display;
     display_count += 1;
 
-    
-
-    /* Redraw scene graph when children are added and removed.
-     */
-    display.addEventListener(doodle.Event.ADDED, redraw_scene_graph.bind(display));
-    display.addEventListener(doodle.Event.REMOVED, redraw_scene_graph.bind(display));
-
-    /* Add keyboard listeners to document.
-     */
-    document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event.bind(display), false);
-    document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event.bind(display), false);
-    document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event.bind(display), false);
-
+    add_display_handlers(display);
     
     //draw_scene_graph(display);
     redraw_scene_graph.call(display);
     
     return display;
-
   };//end doodle.Display
 
   
@@ -586,6 +570,20 @@
     }
   };//end display_static_properties
 
+  
+  /* @param {Display} display
+   */
+  add_display_handlers = function (display) {
+    //Redraw scene graph when children are added and removed.
+    display.addEventListener(doodle.Event.ADDED, redraw_scene_graph.bind(display));
+    display.addEventListener(doodle.Event.REMOVED, redraw_scene_graph.bind(display));
+    
+    //Add keyboard listeners to document.
+    document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event.bind(display), false);
+    document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event.bind(display), false);
+    document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event.bind(display), false);
+  };
+    
 
   /* Clear, move, draw.
    * Dispatches Event.ENTER_FRAME to all objects listening to it,

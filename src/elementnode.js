@@ -96,7 +96,7 @@
               }
               //background color and image
               bg_repeat = get_element_property(dom_element, 'backgroundRepeat') || bg_repeat;
-              color = get_element_property(dom_element, 'backgroundColor');
+              color = get_element_property(dom_element, 'backgroundColor', false, false);
               bg_color = color ? rgb_str_to_hex(color) : bg_color;
               //parse image path from url format
               image = get_element_property(dom_element, 'backgroundImage');
