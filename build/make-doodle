@@ -162,8 +162,14 @@ function clean_up {
 
 function make_etags {
     local ctags=$(which ctags)
+    local TAGS_FILE="$PROJECT_HOME/src/TAGS"
+    #remove old version if exists
+    if [ -f "$TAGS_FILE" ]; then
+        rm "$TAGS_FILE"
+    fi
+    #create new one, using my javascript regex's in ~/.ctags
     if [ -x "$ctags" ]; then
-        if "$ctags" -e -f "$PROJECT_HOME/src/TAGS" -R "$PROJECT_HOME/src/"; then
+        if "$ctags" -e -f "$TAGS_FILE" -R "$PROJECT_HOME/src/"; then
             echo -e "\tGenerated etags: $PROJECT_HOME/src/TAGS"
         fi
     fi
