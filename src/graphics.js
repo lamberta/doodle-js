@@ -15,20 +15,52 @@
       RADIAL = doodle.GradientType.RADIAL;
   
   /* Super constructor
-   * @param {Sprite} Reference to sprite object.
    * @param {Array} Reference to draw commands array.
    * @param {Object} Reference to object's extrema points.
    * @return {Object}
+   * @this {Sprite}
    */
-  doodle.Graphics = function (sprite, draw_commands, extrema) {
-    var graphics = Object.create(null),
+  doodle.Graphics = function (draw_commands, extrema) {
+    var graphics = {},
+        gfx_node = this,
         cursor_x = 0,
-        cursor_y = 0;
+        cursor_y = 0,
+        //line defaults
+        line_width = 1,
+        line_cap = doodle.LineCap.BUTT,
+        line_join = doodle.LineJoin.MITER,
+        line_miter = 10;
     
     Object.defineProperties(graphics, graphics_static_properties);
     //properties that require privacy
     Object.defineProperties(graphics, {
+      /*
+       * PROPERTIES
+       */
+      'lineWidth': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return line_width; }
+      },
+      
+      'lineCap': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return line_cap; }
+      },
 
+      'lineJoin': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return line_join; }
+      },
+
+      'lineMiter': {
+        enumerable: true,
+        configurable: false,
+        get: function () { return line_miter; }
+      },
+      
       /*
        * METHODS
        */
@@ -51,7 +83,7 @@
         configurable: false,
         value: function (fn) {
           /*DEBUG*/
-          check_function_type(fn, this+'.graphics.draw', '*function*');
+          check_function_type(fn, gfx_node+'.graphics.draw', '*function*');
           /*END_DEBUG*/
           draw_commands.push(fn);
         }
@@ -64,18 +96,13 @@
         writable: false,
         configurable: false,
         value: function () {
-          //should probably test, better to assign new empty array?
-          var i = draw_commands.length;
-          while ((i=i-1) >= 0) {
-            draw_commands.splice(i, 1);
-          }
+          draw_commands.length = 0;
           //reset dimensions
-          sprite.width = 0;
-          sprite.height = 0;
+          gfx_node.width = 0;
+          gfx_node.height = 0;
 
           extrema.min_x = extrema.min_y = extrema.max_x = extrema.max_y = 0;
           cursor_x = cursor_y = 0;
-          
         }
       },
 
@@ -91,10 +118,10 @@
         configurable: false,
         value: function (x, y, width, height) {
           /*DEBUG*/
-          check_number_type(x, this+'.graphics.rect', '*x*, y, width, height');
-          check_number_type(y, this+'.graphics.rect', 'x, *y*, width, height');
-          check_number_type(width, this+'.graphics.rect', 'x, y, *width*, height');
-          check_number_type(height, this+'.graphics.rect', 'x, y, width, *height*');
+          check_number_type(x, gfx_node+'.graphics.rect', '*x*, y, width, height');
+          check_number_type(y, gfx_node+'.graphics.rect', 'x, *y*, width, height');
+          check_number_type(width, gfx_node+'.graphics.rect', 'x, y, *width*, height');
+          check_number_type(height, gfx_node+'.graphics.rect', 'x, y, width, *height*');
           /*END_DEBUG*/
 
           //update extremas
@@ -104,8 +131,8 @@
           extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
           
           //update size for bounding box
-          sprite.width = -extrema.min_x + extrema.max_x;
-          sprite.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -extrema.min_x + extrema.max_x;
+          gfx_node.height = -extrema.min_y + extrema.max_y;
           
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -128,9 +155,9 @@
         configurable: false,
         value: function (x, y, radius) {
           /*DEBUG*/
-          check_number_type(x, this+'.graphics.circle', '*x*, y, radius');
-          check_number_type(y, this+'.graphics.circle', 'x, *y*, radius');
-          check_number_type(radius, this+'.graphics.circle', 'x, y, *radius*');
+          check_number_type(x, gfx_node+'.graphics.circle', '*x*, y, radius');
+          check_number_type(y, gfx_node+'.graphics.circle', 'x, *y*, radius');
+          check_number_type(radius, gfx_node+'.graphics.circle', 'x, y, *radius*');
           /*END_DEBUG*/
 
           //update extremas
@@ -140,8 +167,8 @@
           extrema.max_y = Math.max(0, y, y+radius, extrema.max_y);
           
           //update size for bounding box
-          sprite.width = -extrema.min_x + extrema.max_x;
-          sprite.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -extrema.min_x + extrema.max_x;
+          gfx_node.height = -extrema.min_y + extrema.max_y;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -167,10 +194,10 @@
         value: function (x, y, width, height) {
           height = (height === undefined) ? width : height; //default to circle
           /*DEBUG*/
-          check_number_type(x, this+'.graphics.ellipse', '*x*, y, width, height');
-          check_number_type(y, this+'.graphics.ellipse', 'x, *y*, width, height');
-          check_number_type(width, this+'.graphics.ellipse', 'x, y, *width*, height');
-          check_number_type(height, this+'.graphics.ellipse', 'x, y, width, *height*');
+          check_number_type(x, gfx_node+'.graphics.ellipse', '*x*, y, width, height');
+          check_number_type(y, gfx_node+'.graphics.ellipse', 'x, *y*, width, height');
+          check_number_type(width, gfx_node+'.graphics.ellipse', 'x, y, *width*, height');
+          check_number_type(height, gfx_node+'.graphics.ellipse', 'x, y, width, *height*');
           /*END_DEBUG*/
           var rx = width / 2,
               ry = height / 2,
@@ -184,8 +211,8 @@
           extrema.max_y = Math.max(0, y, y+ry, extrema.max_y);
           
           //update size for bounding box
-          sprite.width = -extrema.min_x + extrema.max_x;
-          sprite.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -extrema.min_x + extrema.max_x;
+          gfx_node.height = -extrema.min_y + extrema.max_y;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -218,12 +245,12 @@
           rx = (rx === undefined) ? 0 : rx; //default to rectangle
           ry = (ry === undefined) ? 0 : ry;
           /*DEBUG*/
-          check_number_type(x, this+'.graphics.roundRect', '*x*, y, width, height, rx, ry');
-          check_number_type(y, this+'.graphics.roundRect', 'x, *y*, width, height, rx, ry');
-          check_number_type(width, this+'.graphics.roundRect', 'x, y, *width*, height, rx, ry');
-          check_number_type(height, this+'.graphics.roundRect', 'x, y, width, *height*, rx, ry');
-          check_number_type(rx, this+'.graphics.roundRect', 'x, y, width, height, *rx*, ry');
-          check_number_type(ry, this+'.graphics.roundRect', 'x, y, width, height, rx, *ry*');
+          check_number_type(x, gfx_node+'.graphics.roundRect', '*x*, y, width, height, rx, ry');
+          check_number_type(y, gfx_node+'.graphics.roundRect', 'x, *y*, width, height, rx, ry');
+          check_number_type(width, gfx_node+'.graphics.roundRect', 'x, y, *width*, height, rx, ry');
+          check_number_type(height, gfx_node+'.graphics.roundRect', 'x, y, width, *height*, rx, ry');
+          check_number_type(rx, gfx_node+'.graphics.roundRect', 'x, y, width, height, *rx*, ry');
+          check_number_type(ry, gfx_node+'.graphics.roundRect', 'x, y, width, height, rx, *ry*');
           /*END_DEBUG*/
           var x3 = x + width,
               x2 = x3 - rx,
@@ -239,8 +266,8 @@
           extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
           
           //update size for bounding box
-          sprite.width = -extrema.min_x + extrema.max_x;
-          sprite.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -extrema.min_x + extrema.max_x;
+          gfx_node.height = -extrema.min_y + extrema.max_y;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -272,8 +299,8 @@
         configurable: false,
         value: function (x, y) {
           /*DEBUG*/
-          check_number_type(x, this+'.graphics.moveTo', '*x*, y');
-          check_number_type(y, this+'.graphics.moveTo', 'x, *y*');
+          check_number_type(x, gfx_node+'.graphics.moveTo', '*x*, y');
+          check_number_type(y, gfx_node+'.graphics.moveTo', 'x, *y*');
           /*END_DEBUG*/
           draw_commands.push(function (ctx) {
             ctx.moveTo(x, y);
@@ -295,8 +322,8 @@
         configurable: false,
         value: function (x, y) {
           /*DEBUG*/
-          check_number_type(x, this+'.graphics.lineTo', '*x*, y');
-          check_number_type(y, this+'.graphics.lineTo', 'x, *y*');
+          check_number_type(x, gfx_node+'.graphics.lineTo', '*x*, y');
+          check_number_type(y, gfx_node+'.graphics.lineTo', 'x, *y*');
           /*END_DEBUG*/
 
           //update extremas
@@ -306,8 +333,8 @@
           extrema.max_y = Math.max(0, y, cursor_y, extrema.max_y);
           
           //update size for bounding box
-          sprite.width = extrema.max_x - extrema.min_x;
-          sprite.height = extrema.max_y - extrema.min_y;
+          gfx_node.width = extrema.max_x - extrema.min_x;
+          gfx_node.height = extrema.max_y - extrema.min_y;
           
           draw_commands.push(function (ctx) {
             ctx.lineTo(x, y);
@@ -330,8 +357,8 @@
         configurable: false,
         value: function (pt1, pt2) {
           /*DEBUG*/
-          check_point_type(pt1, this+'.graphics.curveTo', '*ctl_point*, point');
-          check_point_type(pt2, this+'.graphics.curveTo', 'ctl_point, *point*');
+          check_point_type(pt1, gfx_node+'.graphics.curveTo', '*ctl_point*, point');
+          check_point_type(pt2, gfx_node+'.graphics.curveTo', 'ctl_point, *point*');
           /*END_DEBUG*/
           var x0 = cursor_x,
               y0 = cursor_y,
@@ -362,8 +389,8 @@
           extrema.max_y = Math.max(0, y0, cy, y2, extrema.max_y);
           
           //update size for bounding box
-          sprite.width = -extrema.min_x + extrema.max_x;
-          sprite.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -extrema.min_x + extrema.max_x;
+          gfx_node.height = -extrema.min_y + extrema.max_y;
 
           draw_commands.push(function (ctx) {
             ctx.quadraticCurveTo(x1, y1, x2, y2);
@@ -387,9 +414,9 @@
         configurable: false,
         value: function (pt1, pt2, pt3) {
           /*DEBUG*/
-          check_point_type(pt1, this+'.graphics.bezierCurveTo', '*ctl_point1*, ctl_point2, point');
-          check_point_type(pt2, this+'.graphics.bezierCurveTo', 'ctl_point1, *ctl_point2*, point');
-          check_point_type(pt3, this+'.graphics.bezierCurveTo', 'ctl_point1, ctl_point2, *point*');
+          check_point_type(pt1, gfx_node+'.graphics.bezierCurveTo', '*ctl_point1*, ctl_point2, point');
+          check_point_type(pt2, gfx_node+'.graphics.bezierCurveTo', 'ctl_point1, *ctl_point2*, point');
+          check_point_type(pt3, gfx_node+'.graphics.bezierCurveTo', 'ctl_point1, ctl_point2, *point*');
           /*END_DEBUG*/
           var pow = Math.pow,
               max = Math.max,
@@ -435,8 +462,8 @@
           extrema.max_y = max(0, y0, cy_max, y3, extrema.max_y);
           
           //update size for bounding box
-          sprite.width = -extrema.min_x + extrema.max_x;
-          sprite.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -extrema.min_x + extrema.max_x;
+          gfx_node.height = -extrema.min_y + extrema.max_y;
 
           draw_commands.push(function (ctx) {
             ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
@@ -461,7 +488,7 @@
         value: function (color, alpha) {
           alpha = (alpha === undefined) ? 1 : alpha;
           /*DEBUG*/
-          check_number_type(alpha, this+'.graphics.beginFill', 'color, *alpha*');
+          check_number_type(alpha, gfx_node+'.graphics.beginFill', 'color, *alpha*');
           /*END_DEBUG*/
           draw_commands.push(function (ctx) {
             ctx.fillStyle = hex_to_rgb_str(color, alpha);
@@ -475,12 +502,12 @@
         configurable: false,
         value: function (type, pt1, pt2, ratios, colors, alphas) {
           /*DEBUG*/
-          check_point_type(pt1, this+'.graphics.beginGradientFill', 'type, *point1*, point2, ratios, colors, alphas');
-          check_point_type(pt2, this+'.graphics.beginGradientFill', 'type, point1, *point2*, ratios, colors, alphas');
-          check_array_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-          check_number_type(ratios, this+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-          check_array_type(colors, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, *colors*, alphas');
-          check_array_type(alphas, this+'.graphics.beginGradientFill', 'type, point1, point2, ratios, colors, *alphas*');
+          check_point_type(pt1, gfx_node+'.graphics.beginGradientFill', 'type, *point1*, point2, ratios, colors, alphas');
+          check_point_type(pt2, gfx_node+'.graphics.beginGradientFill', 'type, point1, *point2*, ratios, colors, alphas');
+          check_array_type(ratios, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
+          check_number_type(ratios, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
+          check_array_type(colors, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, ratios, *colors*, alphas');
+          check_array_type(alphas, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, ratios, colors, *alphas*');
           /*END_DEBUG*/
           
           draw_commands.push(function (ctx) {
@@ -490,18 +517,18 @@
                 i = 0;
             
             if (type === LINEAR) {
-              //not really too keen on creating this here, but I need access to the context
+              //not really too keen on creating gfx_node here, but I need access to the context
               gradient = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
               
             } else if (type === RADIAL) {
               /*DEBUG*/
-              check_number_type(pt1.radius, this+'.graphics.beginGradientFill', 'type, *circle1.radius*, circle2, ratios, colors, alphas');
-              check_number_type(pt2.radius, this+'.graphics.beginGradientFill', 'type, circle1, *circle2.radius*, ratios, colors, alphas');
+              check_number_type(pt1.radius, gfx_node+'.graphics.beginGradientFill', 'type, *circle1.radius*, circle2, ratios, colors, alphas');
+              check_number_type(pt2.radius, gfx_node+'.graphics.beginGradientFill', 'type, circle1, *circle2.radius*, ratios, colors, alphas');
               /*END_DEBUG*/
               gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
                                                   pt2.x, pt2.y, pt2.radius);
             } else {
-              throw new TypeError(this+'.graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.');
+              throw new TypeError(gfx_node+'.graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.');
             }
             //add color ratios to our gradient
             for (; i < len; i+=1) {
@@ -523,17 +550,17 @@
           
           repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
           /*DEBUG*/
-          check_string_type(repeat, this+'.graphics.beginPatternFill', 'image, *repeat*');
+          check_string_type(repeat, gfx_node+'.graphics.beginPatternFill', 'image, *repeat*');
           /*END_DEBUG*/
           if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
               repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
-            throw new SyntaxError(this+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
+            throw new SyntaxError(gfx_node+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
           }
           
           if (typeof image === 'string') {
             //element id
             if (image[0] === '#') {
-              image = get_element(image, this+'.beginPatternFill');
+              image = get_element(image, gfx_node+'.graphics..beginPatternFill');
             } else {
               //url
               (function () {
@@ -546,7 +573,7 @@
           
           /*DEBUG*/
           if (image && image.tagName !== 'IMG') {
-            throw new TypeError(this+'.graphics.beginPatternFill(*image*, repeat): Parameter must be an src url, image object, or element id.');
+            throw new TypeError(gfx_node+'.graphics.beginPatternFill(*image*, repeat): Parameter must be an src url, image object, or element id.');
           }
           /*END_DEBUG*/
 
@@ -557,10 +584,10 @@
             //if not, assign load handlers
             image.onload = function () {
               img_loaded = image;
-              sprite.dispatchEvent(doodle_Event(doodle_Event.LOAD));
+              gfx_node.dispatchEvent(doodle_Event(doodle_Event.LOAD));
             };
             on_image_error = function () {
-              throw new URIError(this+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + image.src);
+              throw new URIError(gfx_node+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + image.src);
             };
             image.onerror = on_image_error;
             image.onabort = on_image_error;
@@ -590,28 +617,46 @@
           caps = (caps === undefined) ? doodle.LineCap.BUTT : caps;
           joints = (joints === undefined) ? doodle.LineJoin.MITER : joints;
           miterLimit = (miterLimit === undefined) ? 10 : miterLimit;
-          
           /*DEBUG*/
-          check_number_type(thickness, this+'.graphics.lineStyle', '*thickness*, color, alpha, caps, joints, miterLimit');
-          check_number_type(alpha, this+'.graphics.lineStyle', 'thickness, color, *alpha*, caps, joints, miterLimit');
-          check_string_type(caps, this+'.graphics.lineStyle', 'thickness, color, alpha, *caps*, joints, miterLimit');
-          check_string_type(joints, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, *joints*, miterLimit');
-          check_number_type(miterLimit, this+'.graphics.lineStyle', 'thickness, color, alpha, caps, joints, *miterLimit*');
+          check_number_type(thickness, gfx_node+'.graphics.lineStyle', '*thickness*, color, alpha, caps, joints, miterLimit');
+          check_number_type(alpha, gfx_node+'.graphics.lineStyle', 'thickness, color, *alpha*, caps, joints, miterLimit');
+          check_string_type(caps, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, *caps*, joints, miterLimit');
+          check_string_type(joints, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, caps, *joints*, miterLimit');
+          check_number_type(miterLimit, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, caps, joints, *miterLimit*');
+          //check values
+          if (thickness <= 0 || isNaN(thickness) || !isFinite(thickness)) {
+            throw new SyntaxError(gfx_node+'.graphics.lineStyle(*thickness*, color, alpha, caps, joints, miterLimit): Value must be a positive number.');
+          }
+          if (caps !== doodle.LineCap.BUTT && caps !== doodle.LineCap.ROUND &&
+              caps !== doodle.LineCap.SQUARE) {
+            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, *caps*, joints, miterLimit): Invalid LineCap value.');
+          }
+          if (joints !== doodle.LineJoin.BEVEL && joints !== doodle.LineJoin.MITER &&
+              joints !== doodle.LineJoin.ROUND) {
+            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, caps, *joints*, miterLimit): Invalid LineJoin value.');
+          }
+          if (miterLimit <= 0 || isNaN(miterLimit) || !isFinite(miterLimit)) {
+            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, caps, joints, *miterLimit*): Value must be a positive number.');
+          }
           /*END_DEBUG*/
+          line_width = thickness;
+          line_join = joints;
+          line_cap = caps;
+          line_miter = miterLimit;
           
           //convert color to canvas rgb() format
           if (typeof color === 'string' || typeof color === 'number') {
             color = hex_to_rgb_str(color, alpha);
           } else {
-            throw new TypeError(this+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
+            throw new TypeError(gfx_node+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
           }
 
           draw_commands.push(function (ctx) {
-            ctx.lineWidth = thickness;
+            ctx.lineWidth = line_width;
             ctx.strokeStyle = color;
-            ctx.lineCap = caps;
-            ctx.lineJoin = joints;
-            ctx.miterLimit = miterLimit;
+            ctx.lineCap = line_cap;
+            ctx.lineJoin = line_join;
+            ctx.miterLimit = line_miter;
           });
           
         }
@@ -676,6 +721,7 @@
   
 
   graphics_static_properties = {
+
     'toString': {
       enumerable: false,
       writable: false,
@@ -684,6 +730,7 @@
         return "[object Graphics]";
       }
     }
+    
   };
 
 }());//end class closure
