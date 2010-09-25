@@ -2,7 +2,10 @@
 
 (function () {
   var point_static_properties,
+      distance,
       isPoint,
+      temp_array = new Array(2),
+      temp_point = {x:0, y:0},
       /*DEBUG*/
       check_point_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -26,43 +29,58 @@
 
     Object.defineProperties(point, point_static_properties);
     //properties that require privacy
-    Object.defineProperties(point, {
-      /* The horizontal coordinate of the point.
-       * @param {Number} x
-       */
-      'x': (function () {
-        var pt_x = 0;
-        return {
+    Object.defineProperties(point, (function () {
+      var x = 0,
+          y = 0,
+          $temp_array = temp_array;
+      
+      return {
+        /* The horizontal coordinate of the point.
+         * @param {Number} x
+         */
+        'x': {
           enumerable: true,
           configurable: false,
-          get: function () { return pt_x; },
+          get: function () { return x; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.x');
             /*END_DEBUG*/
-            pt_x = n;
+            x = n;
           }
-        };
-      }()),
+        },
 
-      /* The vertical coordinate of the point.
-       * @param {Number} y
-       */
-      'y': (function () {
-        var pt_y = 0;
-        return {
+        /* The vertical coordinate of the point.
+         * @param {Number} y
+         */
+        'y': {
           enumerable: true,
           configurable: false,
-          get: function () { return pt_y; },
+          get: function () { return y; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.y');
             /*END_DEBUG*/
-            pt_y = n;
+            y = n;
           }
-        };
-      }())
-    });//end defineProperties
+        },
+
+        /* Same as toArray, but reuses array object.
+         */
+        '__toArray': {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: function () {
+            var pt = $temp_array;
+            pt[0] = x;
+            pt[1] = y;
+            return pt;
+          }
+        }
+
+      };
+    }()));//end defineProperties
 
     //initialize point
     switch (arg_len) {
@@ -112,7 +130,7 @@
       enumerable: true,
       configurable: false,
       get: function () {
-        return this.distance({x:0,y:0}, this);
+        return distance(temp_point, this);
       }
     },
 
@@ -128,10 +146,7 @@
       writable: false,
       configurable: false,
       value: function () {
-        var a = new Array(2);
-        a[0] = this.x;
-        a[1] = this.y;
-        return a;
+        return this.__toArray().concat();
       }
     },
     
@@ -211,9 +226,7 @@
         /*DEBUG*/
         check_point_type(pt, this+'.add', '*point*');
         /*END_DEBUG*/
-        var x = this.x + pt.x,
-            y = this.y + pt.y;
-        return doodle_Point(x, y);
+        return doodle_Point(this.x + pt.x, this.y + pt.y);
       }
     },
 
@@ -230,9 +243,7 @@
         /*DEBUG*/
         check_point_type(pt, this+'.subtract', '*point*');
         /*END_DEBUG*/
-        var x = this.x - pt.x,
-            y = this.y - pt.y;
-        return doodle_Point(x, y);
+        return doodle_Point(this.x - pt.x, this.y - pt.y);
       }
     },
 
@@ -251,24 +262,6 @@
       }
     },
 
-    /* Returns the distance between pt1 and pt2.
-     * @return {Number}
-     */
-    'distance': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (pt1, pt2) {
-        /*DEBUG*/
-        check_point_type(pt1, this+'.distance', '*pt1*, pt2');
-        check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
-        /*END_DEBUG*/
-        var dx = pt2.x - pt1.x,
-            dy = pt2.y - pt1.x;
-        return sqrt(dx*dx + dy*dy);
-      }
-    },
-
     /* Scales the line segment between (0,0) and the
      * current point to a set length.
      * @param {Number} thickness The scaling value.
@@ -282,9 +275,8 @@
         /*DEBUG*/
         check_number_type(thickness, this+'.normalize', '*thickness*');
         /*END_DEBUG*/
-        var len = this.length;
-        this.x = (this.x / len) * thickness;
-        this.y = (this.y / len) * thickness;
+        this.x = (this.x / this.length) * thickness;
+        this.y = (this.y / this.length) * thickness;
         return this;
         /*correct version?
           var angle:Number = Math.atan2(this.y, this.x);
@@ -311,9 +303,8 @@
         check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
         check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
         /*END_DEBUG*/
-        var x = pt1.x + (pt2.x - pt1.x) * t,
-            y = pt1.y + (pt2.y - pt1.y) * t;
-        return doodle_Point(x, y);
+        return doodle_Point(pt1.x + (pt2.x - pt1.x) * t,
+                            pt1.y + (pt2.y - pt1.y) * t);
 
         /* correct version?
            var nx = pt2.x - pt1.x;
@@ -342,9 +333,7 @@
         check_number_type(len, this+'.polar', '*len*, angle');
         check_number_type(angle, this+'.polar', 'len, *angle*');
         /*END_DEBUG*/
-        var x = len * cos(angle),
-            y = len * sin(angle);
-        return doodle_Point(x, y);
+        return doodle_Point(len*cos(angle), len*sin(angle));
       }
     }
     
@@ -353,6 +342,19 @@
   /*
    * CLASS FUNCTIONS
    */
+
+  /* Returns the distance between pt1 and pt2.
+   * @return {Number}
+   */
+  distance = doodle.geom.Point.distance = function (pt1, pt2) {
+    /*DEBUG*/
+    check_point_type(pt1, this+'.distance', '*pt1*, pt2');
+    check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
+    /*END_DEBUG*/
+    var dx = pt2.x - pt1.x,
+        dy = pt2.y - pt1.y;
+    return sqrt(dx*dx + dy*dy);
+  };
 
   /* Check if a given object contains a numeric x and y property.
    * Does not check if a point is actually a doodle.geom.point.

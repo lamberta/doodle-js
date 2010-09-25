@@ -3,6 +3,7 @@
 (function () {
   var rect_static_properties,
       isRect,
+      temp_array = new Array(4),
       /*DEBUG*/
       check_rect_type,
       check_number_type = doodle.utils.types.check_number_type,
@@ -28,67 +29,81 @@
 
     Object.defineProperties(rect, rect_static_properties);
     //properties that require privacy
-    Object.defineProperties(rect, {
-      'x': (function () {
-        var rect_x = 0;
-        return {
+    Object.defineProperties(rect, (function () {
+      var x = 0,
+          y = 0,
+          width = 0,
+          height = 0,
+          $temp_array = temp_array;
+      
+      return {
+        
+        'x': {
           enumerable: true,
           configurable: false,
-          get: function () { return rect_x; },
+          get: function () { return x; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.x');
             /*END_DEBUG*/
-            rect_x = n;
+            x = n;
           }
-        };
-      }()),
-      
-      'y': (function () {
-        var rect_y = 0;
-        return {
+        },
+
+        'y': {
           enumerable: true,
           configurable: false,
-          get: function () { return rect_y; },
+          get: function () { return y; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.y');
             /*END_DEBUG*/
-            rect_y = n;
+            y = n;
           }
-        };
-      }()),
-      
-      'width': (function () {
-        var rect_width = 0;
-        return {
+        },
+
+        'width': {
           enumerable: true,
           configurable: false,
-          get: function () { return rect_width; },
+          get: function () { return width; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.width');
             /*END_DEBUG*/
-            rect_width = n;
+            width = n;
           }
-        };
-      }()),
-      
-      'height': (function () {
-        var rect_height = 0;
-        return {
+        },
+
+        'height': {
           enumerable: true,
           configurable: false,
-          get: function () { return rect_height; },
+          get: function () { return height; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.height');
             /*END_DEBUG*/
-            rect_height = n;
+            height = n;
           }
-        };
-      }())
-    });//end defineProperties
+        },
+
+        /* Same as toArray, but reuses array object.
+         */
+        '__toArray': {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: function () {
+            var rect = $temp_array;
+            rect[0] = x;
+            rect[1] = y;
+            rect[2] = width;
+            rect[3] = height;
+            return rect;
+          }
+        }
+        
+      };
+    }()));//end defineProperties
 
     //initialize rectangle
     switch (arg_len) {
@@ -207,12 +222,7 @@
       writable: false,
       configurable: false,
       value: function () {
-        var a = new Array(4);
-        a[0] = this.top;
-        a[1] = this.right;
-        a[2] = this.bottom;
-        a[3] = this.left;
-        return a;
+        return this.__toArray().concat();
       }
     },
     
@@ -252,10 +262,7 @@
         /*DEBUG*/
         check_rect_type(rect, this+'.__compose', '*rect*');
         /*END_DEBUG*/
-        this.x = rect.x;
-        this.y = rect.y;
-        this.width = rect.width;
-        this.height = rect.height;
+        this.compose.apply(this, rect.__toArray());
         return this;
       }
     },
@@ -370,14 +377,9 @@
         /*DEBUG*/
         check_point_type(pt, this+'.containsPoint', '*point*');
         /*END_DEBUG*/
-        var x = pt.x,
-            y = pt.y;
-        return (x >= this.left && x <= this.right &&
-                y >= this.top && y <= this.bottom);
+        return this.contains(pt.x, pt.y);
       }
     },
-
-    
 
     /* Determines whether the rectangle argument is contained within this rectangle.
      * @param {Rectangle} rect
@@ -497,10 +499,16 @@
         /*DEBUG*/
         check_rect_type(rect, this+'.__union', '*rect*');
         /*END_DEBUG*/
-        this.left = min(this.left, rect.left);
-        this.top = min(this.top, rect.top);
-        this.right = max(this.right, rect.right);
-        this.bottom = max(this.bottom, rect.bottom);
+        //a bit tricky, if applied directly it doesn't work
+        var l = min(this.left, rect.left),
+            t = min(this.top, rect.top),
+            r = max(this.right, rect.right),
+            b = max(this.bottom, rect.bottom);
+        this.left = l;
+        this.top = t;
+        this.right = r;
+        this.bottom = b;
+        
         return this;
       }
     }

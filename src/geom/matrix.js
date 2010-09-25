@@ -4,6 +4,7 @@
   var matrix_static_properties,
       isMatrix,
       //recycle object for internal calculations
+      temp_array = new Array(6),
       temp_point = {x: null, y: null},
       temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       /*DEBUG*/
@@ -36,120 +37,132 @@
     
     Object.defineProperties(matrix, matrix_static_properties);
     //properties that require privacy
-    Object.defineProperties(matrix, {
+    Object.defineProperties(matrix, (function () {
+      var a = 1,
+          b = 0,
+          c = 0,
+          d = 1,
+          tx = 0,
+          ty = 0,
+          $temp_array = temp_array;
+      
+      return {
 
-      /* The value that affects the positioning of pixels along the x axis
-       * when scaling or rotating an image.
-       * @param {Number} a
-       */
-      'a': (function () {
-        var mat_a = 1;
-        return {
+        /* The value that affects the positioning of pixels along the x axis
+         * when scaling or rotating an image.
+         * @param {Number} a
+         */
+        'a': {
           enumerable: true,
           configurable: false,
-          get: function () { return mat_a; },
+          get: function () { return a; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.a');
             /*END_DEBUG*/
-            mat_a = n;
+            a = n;
           }
-        };
-      }()),
+        },
 
-      /* The value that affects the positioning of pixels along the y axis
-       * when rotating or skewing an image.
-       * @param {Number} b
-       */
-      'b': (function () {
-        var mat_b = 0;
-        return {
+        /* The value that affects the positioning of pixels along the y axis
+         * when rotating or skewing an image.
+         * @param {Number} b
+         */
+        'b': {
           enumerable: true,
           configurable: false,
-          get: function () { return mat_b; },
+          get: function () { return b; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.b');
             /*END_DEBUG*/
-            mat_b = n;
+            b = n;
           }
-        };
-      }()),
+        },
 
-      /* The value that affects the positioning of pixels along the x axis
-       * when rotating or skewing an image.
-       * @param {Number} c
-       */
-      'c': (function () {
-        var mat_c = 0;
-        return {
+        /* The value that affects the positioning of pixels along the x axis
+         * when rotating or skewing an image.
+         * @param {Number} c
+         */
+        'c': {
           enumerable: true,
           configurable: false,
-          get: function () { return mat_c; },
+          get: function () { return c; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.c');
             /*END_DEBUG*/
-            mat_c = n;
+            c = n;
           }
-        };
-      }()),
+        },
 
-      /* The value that affects the positioning of pixels along the y axis
-       * when scaling or rotating an image.
-       * @param {Number} d
-       */
-      'd': (function () {
-        var mat_d = 1;
-        return {
+        /* The value that affects the positioning of pixels along the y axis
+         * when scaling or rotating an image.
+         * @param {Number} d
+         */
+        'd': {
           enumerable: true,
           configurable: false,
-          get: function () { return mat_d; },
+          get: function () { return d; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.d');
             /*END_DEBUG*/
-            mat_d = n;
+            d = n;
           }
-        };
-      }()),
+        },
 
-      /* The distance by which to translate each point along the x axis.
-       * @param {Number} tx
-       */
-      'tx': (function () {
-        var mat_tx = 0;
-        return {
+        /* The distance by which to translate each point along the x axis.
+         * @param {Number} tx
+         */
+        'tx': {
           enumerable: true,
           configurable: false,
-          get: function () { return mat_tx; },
+          get: function () { return tx; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.tx');
             /*END_DEBUG*/
-            mat_tx = n;
+            tx = n;
           }
-        };
-      }()),
+        },
 
-      /* The distance by which to translate each point along the y axis.
-       * @param {Number} ty
-       */
-      'ty': (function () {
-        var mat_ty = 0;
-        return {
+        /* The distance by which to translate each point along the y axis.
+         * @param {Number} ty
+         */
+        'ty': {
           enumerable: true,
           configurable: false,
-          get: function () { return mat_ty; },
+          get: function () { return ty; },
           set: function (n) {
             /*DEBUG*/
             check_number_type(n, this+'.ty');
             /*END_DEBUG*/
-            mat_ty = n;
+            ty = n;
           }
-        };
-      }())
-    });//end defineProperties
+        },
+
+        /* Same as toArray, but reuses array object.
+         */
+        '__toArray': {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: function () {
+            var matrix = $temp_array;
+            matrix[0] = a;
+            matrix[1] = b;
+            matrix[2] = c;
+            matrix[3] = d;
+            matrix[4] = tx;
+            matrix[5] = ty;
+            return matrix;
+          }
+        }
+        
+      };
+    }()));//end defineProperties
+    
 
     //initialize matrix
     switch (arg_len) {
@@ -233,14 +246,7 @@
       writable: false,
       configurable: false,
       value: function () {
-        var a = new Array(6);
-        a[0] = this.a;
-        a[1] = this.b;
-        a[2] = this.c;
-        a[3] = this.d;
-        a[4] = this.tx;
-        a[5] = this.ty;
-        return a;
+        return this.__toArray().concat();
       }
     },
     
