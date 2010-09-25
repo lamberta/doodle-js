@@ -13,6 +13,7 @@
       check_string_type = doodle.utils.types.check_string_type,
       check_matrix_type = doodle.utils.types.check_matrix_type,
       check_point_type = doodle.utils.types.check_point_type,
+      check_context_type = doodle.utils.types.check_context_type,
       /*END_DEBUG*/
       //recycled events
       evt_addedEvent = doodle.Event(doodle.Event.ADDED, true),
@@ -338,6 +339,43 @@
       }
     },
 
+    //drawing context to use
+    'context': {
+      get: function () {
+        //will keep checking parent for context till found or null
+        var node = this.parent;
+        while (node) {
+          if (node.context) {
+            /*DEBUG*/
+            check_context_type(node.context, this+'.context (traversal)');
+            /*END_DEBUG*/
+            return node.context;
+          }
+          node = node.parent;
+        }
+        return null;
+      }
+    },
+
+    '__allTransforms': {
+      enumerable: false,
+      configurable: false,
+      get: (function () {
+        var transform = doodle_Matrix();
+        return function () {
+          var $transform = transform,
+              node = this.parent;
+          $transform.compose.apply($transform, this.transform.__toArray());
+          
+          while (node) {
+            $transform.multiply(node.transform);
+            node = node.parent;
+          }
+          return $transform;
+        };
+      }())
+    },
+    
     /*
      * METHODS
      */

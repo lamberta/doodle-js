@@ -42,7 +42,7 @@
         'graphics': {
           enumerable: false,
           configurable: false,
-          value:  Object.create(doodle.Graphics(sprite, draw_commands, extrema))
+          value:  Object.create(doodle.Graphics.call(sprite, draw_commands, extrema))
         },
         
         /*
@@ -153,6 +153,7 @@
               //add child bounds to this
               while (len--) {
                 child_bounds = children[len].__getBounds(targetCoordSpace);
+                
                 if (child_bounds !== null) {
                   bounding_box.__union(child_bounds);
                 }
@@ -208,24 +209,6 @@
             check_point_type(pt, this+'.hitTestPoint', '*point*');
             /*END_DEBUG*/
             return this.getBounds(this).containsPoint(this.globalToLocal(pt));
-          }
-        },
-
-        //drawing context to use - don't think I need to keep this
-        'context': {
-          get: function () {
-            //will keep checking parent for context till found or null
-            var node = this.parent;
-            while (node) {
-              if (node.context) {
-                /*DEBUG*/
-                check_context_type(node.context, this+'.context (traversal)');
-                /*END_DEBUG*/
-                return node.context;
-              }
-              node = node.parent;
-            }
-            return null;
           }
         },
 
