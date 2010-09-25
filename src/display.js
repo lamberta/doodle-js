@@ -4,15 +4,11 @@
 (function () {
   var display_static_properties,
       display_count = 0,
-      frame_count = 0,
       isDisplay,
-      dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,//needed?
-      add_display_handlers,
       create_frame,
       clear_scene_graph,
       draw_scene_graph,
       draw_bounding_box,
-      redraw_scene_graph,
       dispatch_mouse_event,
       dispatch_mousemove_event,
       dispatch_mouseleave_event,
@@ -31,21 +27,22 @@
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
       doodle_Layer = doodle.Layer,
-      doodle_Event = doodle.Event,
-      doodle_MouseEvent = doodle.MouseEvent,
       //doodle_TouchEvent = doodle.TouchEvent,
       //recycle these event objects
+      evt_enterFrame = doodle.Event(doodle.Event.ENTER_FRAME),
       evt_mouseEvent = doodle.MouseEvent(''),
       //evt_touchEvent = doodle.TouchEvent(''),
-      evt_keyboardEvent = doodle.KeyboardEvent(''),
-      evt_enterFrame = doodle_Event(doodle.Event.ENTER_FRAME),
-      ENTER_FRAME = doodle.Event.ENTER_FRAME;
-      
+      evt_keyboardEvent = doodle.KeyboardEvent('');
   
-  /* Display
-   * @constructor
+  /**
+   * @name Display
+   * @description
    * @param {HTMLElement} element
    * @return {Display}
+   *
+   * @constructor
+   * @namespace doodle
+   * @extends doodle.ElementNode
    */
   doodle.Display = function (element) {
     var display,
@@ -60,7 +57,7 @@
       id = get_element_property(element, 'id');
     }
 
-    id = (typeof id === 'string') ? id : "display"+ String('00'+display_count).slice(-2);
+    id = (typeof id === 'string') ? id : "display"+ String('00'+display_count++).slice(-2);
     //won't assign element until after display properties are set up
     display = Object.create(doodle.ElementNode(undefined, id));
 
@@ -71,22 +68,28 @@
       var width = 0,
           height = 0,
           layers = display.children,
+          dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
           display_scene_path = [], //all descendants
           mouseX = 0,
           mouseY = 0,
           //move to closer scope since they're called frequently
           $display = display,
-          $mouseEvent = evt_mouseEvent, //recycle
           $dispatch_mouse_event = dispatch_mouse_event,
           $dispatch_mousemove_event = dispatch_mousemove_event,
-          $dispatch_mouseleave_event = dispatch_mouseleave_event;
+          $dispatch_mouseleave_event = dispatch_mouseleave_event,
+          $dispatch_keyboard_event = dispatch_keyboard_event,
+          $create_frame = create_frame,
+          //recycled event objects
+          $evt_enterFrame = evt_enterFrame,
+          $evt_mouseEvent = evt_mouseEvent,
+          $evt_keyboardEvent = evt_keyboardEvent;
 
       /* @param {MouseEvent} evt
        */
       function on_mouse_event (evt) {
         var path = display_scene_path,
             path_count = path.length;
-        $dispatch_mouse_event(evt, $mouseEvent, path, path_count, evt.offsetX, evt.offsetY, $display);
+        $dispatch_mouse_event(evt, $evt_mouseEvent, path, path_count, evt.offsetX, evt.offsetY, $display);
       }
 
       /* @param {MouseEvent} evt
@@ -97,19 +100,50 @@
             x, y;
         mouseX = x = evt.offsetX;
         mouseY = y = evt.offsetY;
-        $dispatch_mousemove_event(evt, $mouseEvent, path, path_count, x, y, $display);
+        $dispatch_mousemove_event(evt, $evt_mouseEvent, path, path_count, x, y, $display);
       }
 
       /* @param {MouseEvent} evt
        */
       function on_mouse_leave (evt) {
-        $dispatch_mouseleave_event(evt, $mouseEvent, display_scene_path, layers, layers.length, $display);
+        $dispatch_mouseleave_event(evt, $evt_mouseEvent, display_scene_path, layers, layers.length, $display);
       }
 
+      function on_keyboard_event (evt) {
+        $dispatch_keyboard_event(evt, $evt_keyboardEvent, $display);
+      }
+
+      /*
+       */
+      function on_create_frame () {
+        $create_frame(layers, layers.length,
+                      dispatcher_queue, dispatcher_queue.length, $evt_enterFrame,
+                      display_scene_path, display_scene_path.length,
+                      $display);
+      }
+      
+      //Add display handlers
+      //Redraw scene graph when children are added and removed.
+      $display.addEventListener(doodle.Event.ADDED, on_create_frame);
+      $display.addEventListener(doodle.Event.REMOVED, on_create_frame);
+      //Add keyboard listeners to document.
+      document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
+      document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
+      document.addEventListener(doodle.KeyboardEvent.KEY_UP, on_keyboard_event, false);
       
       return {
-
-        /* Mouse x position on display.
+        /* Display always returns itself as root.
+         * @override
+         */
+        'root': {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value: $display
+        },
+        
+        /**
+         * Mouse x position on display.
          */
         'mouseX': {
           enumerable: true,
@@ -117,7 +151,8 @@
           get: function () { return mouseX; }
         },
 
-        /* Mouse y position on display.
+        /**
+         * Mouse y position on display.
          */
         'mouseY': {
           enumerable: true,
@@ -125,7 +160,8 @@
           get: function () { return mouseY; }
         },
         
-        /* Display width. Setting this affects all it's children layers.
+        /**
+         * Display width. Setting this affects all it's children layers.
          * @param {Number} n
          * @return {Number}
          * @override
@@ -147,7 +183,8 @@
           }
         },
 
-        /* Display height. Setting this affects all it's children layers.
+        /**
+         * Display height. Setting this affects all it's children layers.
          * @param {Number} n
          * @return {Number}
          * @override
@@ -193,16 +230,16 @@
 
             //add event handlers
             //MouseEvents
-            elementArg.addEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            elementArg.addEventListener(doodle.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
             //this dispatches mouseleave and mouseout for display and layers
-            elementArg.addEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            elementArg.addEventListener(doodle.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
             //
-            elementArg.addEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
-            elementArg.addEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-            elementArg.addEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-            elementArg.addEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
-            elementArg.addEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-            elementArg.addEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            elementArg.addEventListener(doodle.MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.addEventListener(doodle.MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.addEventListener(doodle.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.addEventListener(doodle.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
             /*//TouchEvents
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
@@ -221,16 +258,16 @@
           value: function (elementArg) {
             //remove event handlers
             //MouseEvents
-            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
             //
-            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
             //
-            elementArg.removeEventListener(doodle_MouseEvent.CLICK, on_mouse_event, false);
-            elementArg.removeEventListener(doodle_MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_UP, on_mouse_event, false);
-            elementArg.removeEventListener(doodle_MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-            elementArg.removeEventListener(doodle_MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
             /*//TouchEvents
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
@@ -239,8 +276,194 @@
             */
           }
         },
-        
-        /* Determines the interval to dispatch the event type Event.ENTER_FRAME.
+
+        /**
+         * All descendants of the display, in scene graph order.
+         */
+        'allChildren': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return display_scene_path; }
+        },
+
+        /* Re-creates the display's scene path.
+         * Called when adding child nodes.
+         */
+        '__sortAllChildren': {
+          enumerable: false,
+          configurable: false,
+          value: function () {
+            create_scene_path(this, display_scene_path, true).reverse();
+            /*DEBUG*/
+            if (display_scene_path.length === 0) {
+              throw new RangeError(this+'.__sortAllChildren: display_scene_path array should never be zero.');
+            }
+            /*END_DEBUG*/
+          }
+        },
+
+        /**
+         * Returns a list of nodes under a given display position.
+         * @param {Point} point
+         * @return {Array}
+         */
+        'getNodesUnderPoint': {
+          enumerable: true,
+          configurable: false,
+          value: function (point) {
+            /*DEBUG*/
+            check_point_type(point, this+'.getNodesUnderPoint', '*point*');
+            /*END_DEBUG*/
+            var nodes = [],
+                scene_path = display_scene_path,
+                i = scene_path.length,
+                x = point.x,
+                y = point.y,
+                node;
+            while (i--) {
+              node = scene_path[i];
+              if(node.__getBounds(this).contains(x, y)) {
+                nodes.push(node);
+              }
+            }
+            return nodes;
+          }
+        },
+
+        /**
+         * Add a layer to the display's children at the given array position.
+         * Layer inherits the dimensions of the display.
+         * @param {Layer} layer
+         * @param {Number} index
+         * @return {Layer}
+         * @override
+         */
+        'addChildAt': {
+          enumerable: true,
+          configurable: false,
+          value: (function () {
+            var super_addChildAt = $display.addChildAt;
+            return function (layer, index) {
+              /*DEBUG*/
+              check_layer_type(layer, this+'.addChildAt', '*layer*, index');
+              check_number_type(index, this+'.addChildAt', 'layer, *index*');
+              /*END_DEBUG*/
+              //inherit display dimensions
+              layer.width = this.width;
+              layer.height = this.height;
+              //add dom element
+              this.element.appendChild(layer.element);
+              return super_addChildAt.call(this, layer, index);
+            };
+          }())
+        },
+
+        /**
+         * Remove a layer from the display's children at the given array position.
+         * @param {Number} index
+         * @override
+         */
+        'removeChildAt': {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value: (function () {
+            var super_removeChildAt = $display.removeChildAt;
+            return function (index) {
+              /*DEBUG*/
+              check_number_type(index, this+'.removeChildAt', '*index*');
+              /*END_DEBUG*/
+              //remove from dom
+              this.element.removeChild(layers[index].element);
+              return super_removeChildAt.call(this, index);
+            };
+          }())
+        },
+
+        /**
+         * Change the display order of two child layers at the given index. 
+         * @override
+         */
+        'swapChildrenAt': {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value: (function () {
+            var super_swapChildrenAt = $display.swapChildrenAt;
+            return function (idx1, idx2) {
+              /*DEBUG*/
+              check_number_type(idx1, this+'.swapChildrenAt', '*index1*, index2');
+              check_number_type(idx2, this+'.swapChildrenAt', 'index1, *index2*');
+              /*END_DEBUG*/
+              //swap dom elements
+              if (idx1 > idx2) {
+                this.element.insertBefore(layers[idx2].element, layers[idx1].element);
+              } else {
+                this.element.insertBefore(layers[idx1].element, layers[idx2].element);
+              }
+              return super_swapChildrenAt.call(this, idx1, idx2);
+            };
+          }())
+        },
+
+        /*DEBUG_STATS*/
+        'debug': {
+          enumerable: true,
+          configurable: false,
+          value: Object.create(null, {
+            /*DEBUG*/
+            /**
+             * Color of the bounding box outline for nodes on the display.
+             * Display a particular node's bounds with node.debug.boundingBox = true
+             * @param {String} color
+             * @return {String}
+             */
+            'boundingBox': (function () {
+              var bounds_color = "#ff0000";
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () { return  bounds_color; },
+                set: function (boundingBoxColor) {
+                  bounds_color = boundingBoxColor;
+                }
+              };
+            }()),
+            /*END_DEBUG*/
+
+            /**
+             * Overlay a stats meter on the display.
+             * See http://github.com/mrdoob/stats.js for more info.
+             * To include in a compiled build, use ./build/make-doodle -S
+             * @param {Boolean}
+             * @return {Stats|Boolean}
+             */
+            'stats': (function () {
+              var debug_stats = false; //stats object
+              return {
+                enumerable: true,
+                configurable: false,
+                get: function () { return debug_stats; },
+                set: function (useStats) {
+                  /*DEBUG*/
+                  check_boolean_type(useStats, $display+'.debug.stats');
+                  /*END_DEBUG*/
+                  if (useStats && !debug_stats) {
+                    debug_stats = new Stats();
+                    $display.element.appendChild(debug_stats.domElement);
+                  } else if (!useStats && debug_stats) {
+                    $display.element.removeChild(debug_stats.domElement);
+                    debug_stats = false;
+                  }
+                }
+              };
+            }())
+          })
+        },
+        /*END_DEBUG_STATS*/
+
+        /**
+         * Determines the interval to dispatch the event type Event.ENTER_FRAME.
          * This event is dispatched simultaneously to all display objects listenting
          * for this event. It does not go through a "capture phase" and is dispatched
          * directly to the target, whether the target is on the display list or not.
@@ -273,194 +496,13 @@
                   if (framerate_interval_id !== undefined) {
                     clearInterval(framerate_interval_id);
                   }
-                  framerate_interval_id = setInterval(create_frame.bind(this), 1000/fps);
+                  framerate_interval_id = setInterval(on_create_frame, 1000/fps);
                   frame_rate = fps;
                 }
               }
             }
           };
-        }()),
-
-        /* All descendants of the display, in scene graph order.
-         */
-        'allChildren': {
-          enumerable: true,
-          configurable: false,
-          get: function () { return display_scene_path; }
-        },
-
-        /* Re-creates the display's scene path.
-         * Called when adding child nodes.
-         */
-        '__sortAllChildren': {
-          enumerable: false,
-          configurable: false,
-          value: function () {
-            create_scene_path(this, display_scene_path, true).reverse();
-            /*DEBUG*/
-            if (display_scene_path.length === 0) {
-              throw new RangeError(this+'.__sortAllChildren: display_scene_path array should never be zero.');
-            }
-            /*END_DEBUG*/
-          }
-        },
-
-        /* Returns a list of nodes under a given display position.
-         * @param {Point} point
-         * @param {Array}
-         */
-        'getNodesUnderPoint': {
-          enumerable: true,
-          configurable: false,
-          value: function (point) {
-            /*DEBUG*/
-            check_point_type(point, this+'.getNodesUnderPoint', '*point*');
-            /*END_DEBUG*/
-            var nodes = [],
-                scene_path = display_scene_path,
-                i = scene_path.length,
-                x = point.x,
-                y = point.y,
-                node;
-            while (i--) {
-              node = scene_path[i];
-              if(node.__getBounds(this).contains(x, y)) {
-                nodes.push(node);
-              }
-            }
-            return nodes;
-          }
-        },
-
-        /*DEBUG_STATS*/
-        'debug': {
-          enumerable: true,
-          configurable: false,
-          value: Object.create(null, {
-            /*DEBUG*/
-            /* Color of the bounding box outline for nodes on the display.
-             * Display a particular node's bounds with node.debug.boundingBox = true
-             * @param {String} color
-             * @return {String}
-             */
-            'boundingBox': (function () {
-              var bounds_color = "#ff0000";
-              return {
-                enumerable: true,
-                configurable: false,
-                get: function () { return  bounds_color; },
-                set: function (boundingBoxColor) {
-                  bounds_color = boundingBoxColor;
-                }
-              };
-            }()),
-            /*END_DEBUG*/
-
-            /* Overlay a stats meter on the display.
-             * See http://github.com/mrdoob/stats.js for more info.
-             * To include in a compiled build, use ./build/make-doodle -S
-             * @param {Boolean}
-             * @return {Stats|Boolean}
-             */
-            'stats': (function () {
-              var debug_stats = false; //stats object
-              return {
-                enumerable: true,
-                configurable: false,
-                get: function () { return debug_stats; },
-                set: function (useStats) {
-                  /*DEBUG*/
-                  check_boolean_type(useStats, display+'.debug.stats');
-                  /*END_DEBUG*/
-                  if (useStats && !debug_stats) {
-                    debug_stats = new Stats();
-                    display.element.appendChild(debug_stats.domElement);
-                  } else if (!useStats && debug_stats) {
-                    display.element.removeChild(debug_stats.domElement);
-                    debug_stats = false;
-                  }
-                }
-              };
-            }())
-          })
-        },
-        /*END_DEBUG_STATS*/
-
-        /* Add a layer to the display's children at the given array position.
-         * Layer inherits the dimensions of the display.
-         * @param {Layer} layer
-         * @param {Number} index
-         * @return {Layer}
-         * @override
-         */
-        'addChildAt': {
-          enumerable: true,
-          configurable: false,
-          value: (function () {
-            var super_addChildAt = display.addChildAt;
-            return function (layer, index) {
-              /*DEBUG*/
-              check_layer_type(layer, this+'.addChildAt', '*layer*, index');
-              check_number_type(index, this+'.addChildAt', 'layer, *index*');
-              /*END_DEBUG*/
-              //inherit display dimensions
-              layer.width = this.width;
-              layer.height = this.height;
-              //add dom element
-              this.element.appendChild(layer.element);
-              return super_addChildAt.call(this, layer, index);
-            };
-          }())
-        },
-
-        /* Remove a layer from the display's children at the given array position.
-         * @param {Number} index
-         * @override
-         */
-        'removeChildAt': {
-          enumerable: true,
-          writable: false,
-          configurable: false,
-          value: (function () {
-            var super_removeChildAt = display.removeChildAt;
-            return function (index) {
-              /*DEBUG*/
-              check_number_type(index, this+'.removeChildAt', '*index*');
-              /*END_DEBUG*/
-              //remove from dom
-              this.element.removeChild(this.children[index].element);
-              return super_removeChildAt.call(this, index);
-            };
-          }())
-        },
-
-        /* Change the display order of two child layers at the given index. 
-         * @param {Number} idx1
-         * @param {Number} idx2
-         * @override
-         */
-        'swapChildrenAt': {
-          enumerable: true,
-          writable: false,
-          configurable: false,
-          value: (function () {
-            var super_swapChildrenAt = display.swapChildrenAt;
-            return function (idx1, idx2) {
-              var children = this.children;
-              /*DEBUG*/
-              check_number_type(idx1, this+'.swapChildrenAt', '*index1*, index2');
-              check_number_type(idx2, this+'.swapChildrenAt', 'index1, *index2*');
-              /*END_DEBUG*/
-              //swap dom elements
-              if (idx1 > idx2) {
-                this.element.insertBefore(children[idx2].element, children[idx1].element);
-              } else {
-                this.element.insertBefore(children[idx1].element, children[idx2].element);
-              }
-              return super_swapChildrenAt.call(this, idx1, idx2);
-            };
-          }())
-        }
+        }())
         
       };//end return object
     }()));//end defineProperties
@@ -490,23 +532,32 @@
     //can't proceed with initialization without an element to work with
     check_block_element(display.element, '[object Display].element');
     /*END_DEBUG*/
-
-    //set defaults
-    display.root = display;
-    display_count += 1;
-
-    add_display_handlers(display);
     
-    //draw_scene_graph(display);
-    redraw_scene_graph.call(display);
+    //draw at least 1 frame
+    create_frame(display.children, display.children.length,
+                 doodle.EventDispatcher.dispatcher_queue,
+                 doodle.EventDispatcher.dispatcher_queue.length,
+                 evt_enterFrame,
+                 display.allChildren, display.allChildren.length,
+                 display);
     
     return display;
   };//end doodle.Display
 
   
   display_static_properties = {
-
-    /* Returns the string representation of the specified object.
+    /* A Display has no parent.
+     * @override
+     */
+    'parent': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: null
+    },
+    
+    /**
+     * Returns the string representation of the specified object.
      * @override
      */
     'toString': {
@@ -527,7 +578,8 @@
     },
     **/
 
-    /* Add a new layer to the display's children.
+    /**
+     * Add a new layer to the display's children.
      * @param {String} id
      * @return {Layer}
      */
@@ -542,7 +594,8 @@
       }
     },
 
-    /* Remove a layer with a given name from the display's children.
+    /**
+     * Remove a layer with a given name from the display's children.
      * @param {String} id
      */
     'removeLayer': {
@@ -571,140 +624,165 @@
   };//end display_static_properties
 
   
-  /* @param {Display} display
-   */
-  add_display_handlers = function (display) {
-    //Redraw scene graph when children are added and removed.
-    display.addEventListener(doodle.Event.ADDED, redraw_scene_graph.bind(display));
-    display.addEventListener(doodle.Event.REMOVED, redraw_scene_graph.bind(display));
-    
-    //Add keyboard listeners to document.
-    document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, dispatch_keyboard_event.bind(display), false);
-    document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, dispatch_keyboard_event.bind(display), false);
-    document.addEventListener(doodle.KeyboardEvent.KEY_UP, dispatch_keyboard_event.bind(display), false);
-  };
-    
-
   /* Clear, move, draw.
    * Dispatches Event.ENTER_FRAME to all objects listening to it,
    * reguardless if it's on the scene graph or not.
+   * @this {Display}
    */
-  create_frame = function () {
-    clear_scene_graph(this);
-    dispatcher_queue.forEach(function dispatch_enterframe_evt (obj) {
-      if (obj.hasEventListener(ENTER_FRAME)) {
-        evt_enterFrame.__setTarget(obj);
-        obj.handleEvent(evt_enterFrame);
-      }
-    });
-    draw_scene_graph.call(this, this);
-    frame_count += 1;
-    
-    /*DEBUG*/
-    //update stats monitor if needed
-    if (this.debug.stats !== false) {
-      this.debug.stats.update();
-    }
-    /*END_DEBUG*/
-  };
+  create_frame = (function () {
+    var frame_count = 0;
+    return function make_frame (layers, layer_count,
+                                receivers, recv_count, enterFrame,
+                                scene_path, path_count,
+                                display, clearRect) {
+      /*** new way
+      var node,
+          i,
+          bounds,
+          ctx;
+      //clear scene - only need top level nodes
+      while (layer_count--) {
+        ctx = layers[layer_count].context;
 
+        node = layers[layer_count].children; //array - top level nodes
+        i = node.length;
+
+        while (i--) {
+          ctx.clearRect.apply(ctx, node[i].__getBounds(display).inflate(2, 2).__toArray());
+        }
+      }
+
+      //update position
+      while (recv_count--) {
+        if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
+          receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
+        }
+      }
+
+      //draw
+      while (path_count--) {
+        node = scene_path[path_count];
+        ctx = node.context;
+        
+        if (ctx && node.visible) {
+          ctx.save();
+          ctx.transform.apply(ctx, node.__allTransforms.__toArray());
+        
+          //apply alpha to node and it's children
+          if (!isLayer(node)) {
+            if (node.alpha !== 1) {
+              ctx.globalAlpha = node.alpha;
+            }
+          }
+          if (typeof node.__draw === 'function') {
+            node.__draw(ctx);
+          }
+
+          //DEBUG//
+          if (node.debug.boundingBox) {
+            bounds = node.__getBounds(display);
+            if (bounds) {
+              ctx.save();
+              ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
+              //bounding box
+              ctx.lineWidth = 0.5;
+              ctx.strokeStyle = display.debug.boundingBox;
+              ctx.strokeRect.apply(ctx, bounds.__toArray());
+              ctx.restore();
+            }
+            
+          }
+          //END_DEBUG//
+          ctx.restore();
+        }
+      }
+      ****/
+
+      /*** old way ***/
+      clear_scene_graph(layers, layer_count);
+      
+      while (recv_count--) {
+        if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
+          receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
+        }
+      }
+
+      draw_scene_graph(scene_path, path_count);
+      
+      /*DEBUG_STATS*/
+      if (display.debug.stats !== false) {
+        //update stats monitor if needed
+        display.debug.stats.update();
+      }
+      /*END_DEBUG_STATS*/
+      frame_count++;
+      /**end old way**/
+      
+    };
+  }());
+
+  
   /*
    * @param {Node} node
    */
-  clear_scene_graph = function (node) {
+  clear_scene_graph = function (layers, count) {
     /* Brute way, clear entire layer in big rect.
      */
-    node.children.forEach(function (layer) {
-      var ctx = layer.context;
+    var ctx;
+    while (count--) {
+      ctx = layers[count].context;
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
-      ctx.clearRect(0, 0, layer.width, layer.height);
+      ctx.clearRect(0, 0, layers[count].width, layers[count].height);
       ctx.restore();
-    });
-    /*
-      node.children.forEach(function (child) {
-      context = context || child.context;
-      context.clearRect(0, 0, child.width, child.height);
-      });
-    */
-    
-    /* Clear each object individually by clearing it's bounding box.
-     * Will need to test speed, and it's not working now.
-     *
-     node.children.forEach(function (child) {
-     
-     context = context || child.context;
-     check_context_type(context, this+'.clear_scene_graph', 'context');
-     context.save();
-     context.setTransform(1, 0, 0, 1, 0, 0); //reset
-     
-     if (typeof child.getBounds === 'function') {
-     var bounds = child.getBounds(display);
-     //console.log(bounds.toString());
-     //take into account bounding box border
-     context.clearRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
-     //context.fillRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2);
-     }
-     context.restore();
-     clear_scene_graph(child, context);
-     });
-    */
-  };
-  
-  draw_scene_graph = function (node, context) {
-    var display = this,
-        m; //child transform matrix
-    
-    node.children.forEach(function draw_child (child) {
-      
-      /*DEBUG*/
-      if (child.debug.boundingBox) {
-        draw_bounding_box.call(display, child, context);
-      }
-      /*END_DEBUG*/
-
-      //if node is invisible, don't draw it or it's children
-      //this is the behavior in as3
-      if (child.visible) {
-        context = context || child.context;
-        m = child.transform.toArray();
-        context.save();
-        context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        
-        //apply alpha to node and it's children
-        if (!isLayer(child)) {
-          if (child.alpha !== 1) {
-            context.globalAlpha = child.alpha;
-          }
-        }
-        
-        if (typeof child.__draw === 'function') {
-          child.__draw(context);
-        }
-        
-        draw_scene_graph.call(display, child, context); //recursive
-        context.restore();
-      }
-    });
-  };
-
-  draw_bounding_box = function (node, context) {
-    //calculate bounding box relative to parent
-    var bbox = node.__getBounds(this); //this = display
-    if (bbox) {
-      context.save();
-      context.setTransform(1, 0, 0, 1, 0, 0); //reset
-      //bounding box
-      context.lineWidth = 0.5;
-      context.strokeStyle = this.debug.boundingBox;
-      context.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
-      context.restore();
     }
   };
-  
-  redraw_scene_graph = function () {
-    clear_scene_graph(this);
-    draw_scene_graph.call(this, this);
+
+  draw_scene_graph = function (scene_path, count) {
+    var node,
+        display,
+        ctx,
+        bounds;
+    
+    while (count--) {
+      node = scene_path[count];
+      display = node.root;
+      ctx = node.context;
+      
+      if (ctx && node.visible) {
+        ctx.save();
+        ctx.transform.apply(ctx, node.__allTransforms.__toArray());
+        
+        //apply alpha to node and it's children
+        if (!isLayer(node)) {
+          if (node.alpha !== 1) {
+            ctx.globalAlpha = node.alpha;
+          }
+        }
+        if (typeof node.__draw === 'function') {
+          node.__draw(ctx);
+        }
+        
+        ctx.restore();
+        
+        /*DEBUG*/
+        if (node.debug.boundingBox) {
+          draw_bounding_box(node, ctx, node.root);
+          bounds = node.__getBounds(display);
+          if (bounds) {
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
+            //bounding box
+            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = display.debug.boundingBox;
+            ctx.strokeRect.apply(ctx, bounds.__toArray());
+            ctx.restore();
+          }
+          
+        }
+        /*END_DEBUG*/
+      }
+    }
   };
   
 
@@ -831,8 +909,8 @@
    * @return {Boolean}
    * @private
    */
-  dispatch_keyboard_event = function (evt) {
-    this.broadcastEvent(evt_keyboardEvent.__copyKeyboardEventProperties(evt, null));
+  dispatch_keyboard_event = function (evt, keyboardEvent, display) {
+    display.broadcastEvent(keyboardEvent.__copyKeyboardEventProperties(evt, null));
     return true;
   };
 
@@ -840,7 +918,8 @@
    * CLASS METHODS
    */
 
-  /* Test if an object is of the display type.
+  /**
+   * Test if an object is of the display type.
    * @param {Object} obj Object to test.
    * @return {Boolean} True if object is a Doodle Display.
    */
@@ -852,7 +931,8 @@
   };
 
   /*DEBUG*/
-  /* Type-checking for a Doodle Display object. Throws a TypeError if the test fails.
+  /**
+   * Type-checking for a Doodle Display object. Throws a TypeError if the test fails.
    * @param {Object} display Object to test.
    * @param {String=} caller Function name to print in error message.
    * @param {String=} param Parameters to print in error message.
