@@ -67,11 +67,14 @@
     Object.defineProperties(display, (function () {
       var width = 0,
           height = 0,
+          dom_element = null, //just a reference
           layers = display.children,
           dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
           display_scene_path = [], //all descendants
           mouseX = 0,
           mouseY = 0,
+          //chrome mouseevent has offset info, otherwise need to calculate
+          evt_offset_p = document.createEvent('MouseEvent').offsetX !== undefined,
           //move to closer scope since they're called frequently
           $display = display,
           $dispatch_mouse_event = dispatch_mouse_event,
@@ -87,20 +90,21 @@
       /* @param {MouseEvent} evt
        */
       function on_mouse_event (evt) {
-        var path = display_scene_path,
-            path_count = path.length;
-        $dispatch_mouse_event(evt, $evt_mouseEvent, path, path_count, evt.offsetX, evt.offsetY, $display);
+        $dispatch_mouse_event(evt, $evt_mouseEvent,
+                              display_scene_path, display_scene_path.length,
+                              mouseX, mouseY, $display);
       }
 
       /* @param {MouseEvent} evt
        */
       function on_mouse_move (evt) {
-        var path = display_scene_path,
-            path_count = path.length,
-            x, y;
-        mouseX = x = evt.offsetX;
-        mouseY = y = evt.offsetY;
-        $dispatch_mousemove_event(evt, $evt_mouseEvent, path, path_count, x, y, $display);
+        var x, y;
+        mouseX = x = evt_offset_p ? evt.offsetX : evt.clientX - dom_element.offsetLeft;
+        mouseY = y = evt_offset_p ? evt.offsetY : evt.clientY - dom_element.offsetTop;
+        
+        $dispatch_mousemove_event(evt, $evt_mouseEvent,
+                                  display_scene_path, display_scene_path.length,
+                                  x, y, $display);
       }
 
       /* @param {MouseEvent} evt
@@ -246,6 +250,7 @@
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
             */
+            dom_element = elementArg;
           }
         },
 
@@ -274,6 +279,7 @@
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
             */
+            dom_element = null;
           }
         },
 
@@ -568,17 +574,6 @@
     },
 
     /**
-    'toDataUrl': {
-      value: function () {
-        //iterate over each canvas layer,
-        //output image data and merge in new file
-        //output that image data
-        return;
-      }
-    },
-    **/
-
-    /**
      * Add a new layer to the display's children.
      * @param {String} id
      * @return {Layer}
@@ -738,6 +733,9 @@
     }
   };
 
+  /*
+   *
+   */
   draw_scene_graph = function (scene_path, count) {
     var node,
         display,
@@ -837,7 +835,6 @@
     var node;
     while (count--) {
       node = path[count];
-
       if(node.__getBounds(display).contains(x, y)) {
         //point in bounds
         if (!node.__pointInBounds) {

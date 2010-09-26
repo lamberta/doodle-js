@@ -85,7 +85,7 @@
         var root = null;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return root; },
           set: function (node) {
             /*DEBUG*/
@@ -103,7 +103,7 @@
         var parent = null;
         return {
           enumerable: true,
-          configurable: false,
+          configurable: true,
           get: function () { return parent; },
           set: function (node) {
             /*DEBUG*/
@@ -341,6 +341,8 @@
 
     //drawing context to use
     'context': {
+      enumerable: true,
+      configurable: true,
       get: function () {
         //will keep checking parent for context till found or null
         var node = this.parent;
