@@ -14,17 +14,17 @@
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class UIEvent
+   * @extends Event
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {Number} detail
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {UIEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.UIEvent = function (type, bubbles, cancelable, view, detail) {
     var uievent,
@@ -83,7 +83,11 @@
           evt_pageX = 0,
           evt_pageY = 0;
 
-      /* @param {UIEvent} evt UIEvent to copy properties from.
+      /**
+       * @name copy_uievent_properties
+       * @param {UIEvent} evt UIEvent to copy properties from.
+       * @throws {TypeError}
+       * @private
        */
       copy_uievent_properties = function (evt) {
         /*DEBUG*/
@@ -101,60 +105,115 @@
       };
       
       return {
+        /**
+         * @name view
+         * @return {HTMLElement} [read-only]
+         * @property
+         */
         'view': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_view; }
         },
 
+        /**
+         * @name detail
+         * @return {Number} [read-only]
+         * @property
+         */
         'detail': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_detail; }
         },
 
+        /**
+         * @name which
+         * @return {Number} [read-only]
+         * @property
+         */
         'which': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_which; }
         },
 
+        /**
+         * @name charCode
+         * @return {Number} [read-only]
+         * @property
+         */
         'charCode': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_charCode; }
         },
 
+        /**
+         * @name keyCode
+         * @return {Number} [read-only]
+         * @property
+         */
         'keyCode': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_keyCode; }
         },
 
+        /**
+         * @name layerX
+         * @return {Number} [read-only]
+         * @property
+         */
         'layerX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_layerX; }
         },
 
+        /**
+         * @name layerY
+         * @return {Number} [read-only]
+         * @property
+         */
         'layerY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_layerY; }
         },
 
+        /**
+         * @name pageX
+         * @return {Number} [read-only]
+         * @property
+         */
         'pageX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_pageX; }
         },
 
+        /**
+         * @name pageY
+         * @return {Number} [read-only]
+         * @property
+         */
         'pageY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_pageY; }
         },
-        
+
+        /**
+         * @name initUIEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {Number} detailArg
+         * @return {UIEvent}
+         * @throws {TypeError}
+         */
         'initUIEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg) {
             //parameter defaults
@@ -176,12 +235,16 @@
           }
         },
 
-        /* Copy the properties from another UIEvent.
+        /**
+         * Copy the properties from another UIEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyUIEventProperties
          * @param {UIEvent} evt
          * @param {Node=} resetTarget
          * @param {String=} resetType
+         * @return {Event}
+         * @throws {TypeError}
+         * @private
          */
         '__copyUIEventProperties': {
           enumerable: false,
@@ -232,13 +295,16 @@
 
   
   uievent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object UIEvent]";
-      }
+      value: function () { return "[object UIEvent]"; }
     }
   };
 
@@ -246,6 +312,14 @@
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is an UIEvent or inherits from it.
+   * Returns true on Doodle events as well as DOM events.
+   * @name isUIEvent
+   * @param {Event} event
+   * @return {Boolean}
+   * @static
+   */
   isUIEvent = doodle.UIEvent.isUIEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -261,6 +335,16 @@
   };
 
   /*DEBUG*/
+  /**
+   * @name check_uievent_type
+   * @param {UIEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_uievent_type = doodle.utils.types.check_uievent_type = function (event, caller, param) {
     if (isUIEvent(event)) {
       return true;

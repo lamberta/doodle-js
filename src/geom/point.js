@@ -16,11 +16,14 @@
       sin = Math.sin,
       sqrt = Math.sqrt;
   
-  /* Point
-   * @constructor
-   * @param {Number=} x
-   * @param {Number=} y
+  /**
+   * @class Point
+   * @extends Object
+   * @param {Number} x
+   * @param {Number} y
    * @return {Point}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle_Point = doodle.geom.Point = function (x, y) {
     var point = {},
@@ -35,8 +38,12 @@
           $temp_array = temp_array;
       
       return {
-        /* The horizontal coordinate of the point.
-         * @param {Number} x
+        /**
+         * The horizontal coordinate of the point.
+         * @name x
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'x': {
           enumerable: true,
@@ -50,8 +57,12 @@
           }
         },
 
-        /* The vertical coordinate of the point.
-         * @param {Number} y
+        /**
+         * The vertical coordinate of the point.
+         * @name y
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'y': {
           enumerable: true,
@@ -65,7 +76,11 @@
           }
         },
 
-        /* Same as toArray, but reuses array object.
+        /**
+         * Same as toArray, but reuses array object.
+         * @name __toArray
+         * @return {Point}
+         * @private
          */
         '__toArray': {
           enumerable: false,
@@ -78,7 +93,6 @@
             return pt;
           }
         }
-
       };
     }()));//end defineProperties
 
@@ -123,8 +137,11 @@
 
   
   point_static_properties = {
-    /* The length of the line segment from (0,0) to this point.
+    /**
+     * The length of the line segment from (0,0) to this point.
+     * @name length
      * @return {Number}
+     * @property
      */
     'length': {
       enumerable: true,
@@ -134,11 +151,9 @@
       }
     },
 
-    /*
-     * METHODS
-     */
-
-    /* Returns an array that contains the values of the x and y coordinates.
+    /**
+     * Returns an array that contains the values of the x and y coordinates.
+     * @name toArray
      * @return {Array}
      */
     'toArray': {
@@ -150,7 +165,9 @@
       }
     },
     
-    /* Returns a string that contains the values of the x and y coordinates.
+    /**
+     * Returns a string that contains the values of the x and y coordinates.
+     * @name toString
      * @return {String}
      */
     'toString': {
@@ -162,10 +179,13 @@
       }
     },
 
-    /* Set point coordinates.
+    /**
+     * Set point coordinates.
+     * @name compose
      * @param {Number} x
      * @param {Number} y
      * @return {Point}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: true,
@@ -182,7 +202,9 @@
       }
     },
 
-    /* Creates a copy of this Point object.
+    /**
+     * Creates a copy of this Point object.
+     * @name clone
      * @return {Point}
      */
     'clone': {
@@ -194,9 +216,12 @@
       }
     },
 
-    /* Determines whether two points are equal.
+    /**
+     * Determines whether two points are equal.
+     * @name equals
      * @param {Point} pt The point to be compared.
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'equals': {
       enumerable: true,
@@ -213,10 +238,13 @@
       }
     },
 
-    /* Adds the coordinates of another point to the coordinates of
+    /**
+     * Adds the coordinates of another point to the coordinates of
      * this point to create a new point.
+     * @name add
      * @param {Point} pt The point to be added.
      * @return {Point} The new point.
+     * @throws {TypeError}
      */
     'add': {
       enumerable: true,
@@ -230,10 +258,13 @@
       }
     },
 
-    /* Subtracts the coordinates of another point from the
+    /**
+     * Subtracts the coordinates of another point from the
      * coordinates of this point to create a new point.
+     * @name subtract
      * @param {Point} pt The point to be subtracted.
      * @return {Point} The new point.
+     * @throws {TypeError}
      */
     'subtract': {
       enumerable: true,
@@ -247,6 +278,12 @@
       }
     },
 
+    /**
+     * @name offset
+     * @param {Number} dx
+     * @param {Number} dy
+     * @throws {TypeError}
+     */
     'offset': {
       enumerable: true,
       writable: false,
@@ -262,10 +299,13 @@
       }
     },
 
-    /* Scales the line segment between (0,0) and the
+    /**
+     * Scales the line segment between (0,0) and the
      * current point to a set length.
+     * @name normalize
      * @param {Number} thickness The scaling value.
      * @return {Point}
+     * @throws {TypeError}
      */
     'normalize': {
       enumerable: true,
@@ -286,12 +326,14 @@
       }
     },
 
-    /* Determines a point between two specified points.
-     * @static
+    /**
+     * Determines a point between two specified points.
+     * @name interpolate
      * @param {Point} pt1 The first point.
      * @param {Point} pt2 The second point.
      * @param {Number} t The level of interpolation between the two points, between 0 and 1.
      * @return {Point}
+     * @throws {TypeError}
      */
     'interpolate': {
       enumerable: true,
@@ -318,11 +360,13 @@
       }
     },
 
-    /* Converts a pair of polar coordinates to a Cartesian point coordinate.
-     * @static
+    /**
+     * Converts a pair of polar coordinates to a Cartesian point coordinate.
+     * @name polar
      * @param {Number} len The length coordinate of the polar pair.
      * @param {Number} angle The angle, in radians, of the polar pair.
      * @return {Point}
+     * @throws {TypeError}
      */
     'polar': {
       enumerable: true,
@@ -343,8 +387,14 @@
    * CLASS FUNCTIONS
    */
 
-  /* Returns the distance between pt1 and pt2.
+  /**
+   * Returns the distance between pt1 and pt2.
+   * @name distance
+   * @param {Point} pt1
+   * @param {Point} pt2
    * @return {Number}
+   * @throws {TypeError}
+   * @static
    */
   distance = doodle.geom.Point.distance = function (pt1, pt2) {
     /*DEBUG*/
@@ -356,17 +406,29 @@
     return sqrt(dx*dx + dy*dy);
   };
 
-  /* Check if a given object contains a numeric x and y property.
+  /**
+   * Check if a given object contains a numeric x and y property.
    * Does not check if a point is actually a doodle.geom.point.
-   * @param {Point} point Object with x and y numeric parameters.
-   * @param {String} fn_name Function name to show in TypeError message.
+   * @name isPoint
+   * @param {Point} pt
    * @return {Boolean}
+   * @static
    */
   isPoint = doodle.geom.Point.isPoint = function (pt) {
     return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
   };
 
   /*DEBUG*/
+  /**
+   * @name check_point_type
+   * @param {Object} pt
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_point_type = doodle.utils.types.check_point_type = function (pt, caller, param) {
     if (!isPoint(pt)) {
       caller = (caller === undefined) ? "check_point_type" : caller;

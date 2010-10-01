@@ -14,13 +14,16 @@
       max = Math.max,
       min = Math.min;
   
-  /* Rectangle
-   * @constructor
-   * @param {Number=} x
-   * @param {Number=} y
-   * @param {Number=} width
-   * @param {Number=} height
+  /**
+   * @class Rectangle
+   * @extends Object
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Number} width
+   * @param {Number} height
    * @return {Rectangle}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle_Rectangle = doodle.geom.Rectangle = function (x, y, width, height) {
     var rect = {},
@@ -37,7 +40,12 @@
           $temp_array = temp_array;
       
       return {
-        
+        /**
+         * @name x
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'x': {
           enumerable: true,
           configurable: false,
@@ -50,6 +58,12 @@
           }
         },
 
+        /**
+         * @name y
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'y': {
           enumerable: true,
           configurable: false,
@@ -62,6 +76,12 @@
           }
         },
 
+        /**
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'width': {
           enumerable: true,
           configurable: false,
@@ -74,6 +94,12 @@
           }
         },
 
+        /**
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'height': {
           enumerable: true,
           configurable: false,
@@ -86,7 +112,11 @@
           }
         },
 
-        /* Same as toArray, but reuses array object.
+        /**
+         * Same as toArray, but reuses array object.
+         * @name __toArray
+         * @return {Array}
+         * @private
          */
         '__toArray': {
           enumerable: false,
@@ -146,6 +176,12 @@
 
 
   rect_static_properties = {
+    /**
+     * @name top
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'top': {
       enumerable: true,
       configurable: false,
@@ -160,7 +196,13 @@
         this.height -= n;
       }
     },
-    
+
+    /**
+     * @name right
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'right': {
       enumerable: true,
       configurable: false,
@@ -174,7 +216,13 @@
         this.width = n - this.x;
       }
     },
-    
+
+    /**
+     * @name bottom
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'bottom': {
       enumerable: true,
       configurable: false,
@@ -188,7 +236,13 @@
         this.height = n - this.y;
       }
     },
-    
+
+    /**
+     * @name left
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'left': {
       enumerable: true,
       configurable: false,
@@ -203,11 +257,11 @@
         this.width -= n;
       }
     },
-    
-    /*
-     * METHODS
+
+    /**
+     * @name toString
+     * @return {String}
      */
-    
     'toString': {
       enumerable: true,
       writable: false,
@@ -216,7 +270,11 @@
         return "(x="+ this.x +", y="+ this.y +", w="+ this.width +", h="+ this.height +")";
       }
     },
-    
+
+    /**
+     * @name toArray
+     * @return {Array}
+     */
     'toArray': {
       enumerable: true,
       writable: false,
@@ -226,12 +284,15 @@
       }
     },
     
-    /* Sets this rectangle's parameters.
+    /**
+     * Sets this rectangle's parameters.
+     * @name compose
      * @param {Number} x
      * @param {Number} y
      * @param {Number} width
      * @param {Number} height
      * @return {Rectangle}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: true,
@@ -252,7 +313,13 @@
       }
     },
 
-    /* Same as compose, but takes a rectangle parameter.
+    /**
+     * Same as compose, but takes a rectangle parameter.
+     * @name __compose
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     * @throws {TypeError}
+     * @private
      */
     '__compose': {
       enumerable: false,
@@ -267,6 +334,10 @@
       }
     },
 
+    /**
+     * @name clone
+     * @return {Rectangle}
+     */
     'clone': {
       enumerable: true,
       writable: false,
@@ -276,10 +347,14 @@
       }
     },
 
-    /* Adjusts the location of the rectangle, as determined by
+    /**
+     * Adjusts the location of the rectangle, as determined by
      * its top-left corner, by the specified amounts.
+     * @name offset
      * @param {Number} dx
      * @param {Number} dy
+     * @return {Rectangle}
+     * @throws {TypeError}
      */
     'offset': {
       enumerable: true,
@@ -296,12 +371,16 @@
       }
     },
 
-    /* Increases the size of the rectangle by the specified amounts, in pixels.
+    /**
+     * Increases the size of the rectangle by the specified amounts, in pixels.
      * The center point of the Rectangle object stays the same, and its size
      * increases to the left and right by the dx value, and to the top and the
      * bottom by the dy value.
+     * @name inflate
      * @param {Number} dx
      * @param {Number} dy
+     * @return {Rectangle}
+     * @throws {TypeError}
      */
     'inflate': {
       enumerable: true,
@@ -320,9 +399,12 @@
       }
     },
 
-    /* Determines whether the rectangle argument is equal to this rectangle.
+    /**
+     * Determines whether the rectangle argument is equal to this rectangle.
+     * @name equals
      * @param {Rectangle} rect
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'equals': {
       enumerable: true,
@@ -337,7 +419,10 @@
       }
     },
 
-    /* Determines whether or not this Rectangle object is empty.
+    /**
+     * Determines whether or not this Rectangle object is empty.
+     * @name isEmpty
+     * @return {Boolean}
      */
     'isEmpty': {
       enumerable: true,
@@ -348,8 +433,14 @@
       }
     },
 
-    /* Determines whether the specified point is contained within the
+    /**
+     * Determines whether the specified point is contained within the
      * rectangular region defined by this Rectangle object.
+     * @name contains
+     * @param {Number} x
+     * @param {Number} y
+     * @return {Boolean}
+     * @throws {TypeError}
      */
     'contains': {
       enumerable: false,
@@ -365,9 +456,13 @@
       }
     },
 
-    /* Determines whether the specified point is contained within this rectangle object.
+    /**
+     * Determines whether the specified point is contained within
+     * this rectangle object.
+     * @name containsPoint
      * @param {Point} pt
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'containsPoint': {
       enumerable: true,
@@ -381,9 +476,12 @@
       }
     },
 
-    /* Determines whether the rectangle argument is contained within this rectangle.
+    /**
+     * Determines whether the rectangle argument is contained within this rectangle.
+     * @name containsRect
      * @param {Rectangle} rect
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'containsRect': {
       enumerable: true,
@@ -401,9 +499,12 @@
       }
     },
 
-    /* Determines whether the rectangle argument intersects with this rectangle.
+    /**
+     * Determines whether the rectangle argument intersects with this rectangle.
+     * @name intersects
      * @param {Rectangle} rect
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'intersects': {
       enumerable: true,
@@ -421,12 +522,15 @@
       }
     },
 
-    /* If the rectangle argument intersects with this rectangle, returns
+    /**
+     * If the rectangle argument intersects with this rectangle, returns
      * the area of intersection as a Rectangle object.
      * If the rectangles do not intersect, this method returns an empty
      * Rectangle object with its properties set to 0.
+     * @name intersection
      * @param {Rectangle} rect
      * @return {Rectangle}
+     * @throws {TypeError}
      */
     'intersection': {
       enumerable: true,
@@ -447,7 +551,13 @@
       }
     },
 
-    /* Same as intersection, but modifies this rectangle in place.
+    /**
+     * Same as intersection, but modifies this rectangle in place.
+     * @name __intersection
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     * @throws {TypeError}
+     * @private
      */
     '__intersection': {
       enumerable: false,
@@ -467,10 +577,13 @@
       }
     },
 
-    /* Adds two rectangles together to create a new Rectangle object,
+    /**
+     * Adds two rectangles together to create a new Rectangle object,
      * by filling in the horizontal and vertical space between the two.
+     * @name union
      * @param {Rectangle} rect
      * @return {Rectangle}
+     * @throws {TypeError}
      */
     'union': {
       enumerable: true,
@@ -489,7 +602,13 @@
       }
     },
 
-    /* Same as union, but modifies this rectangle in place.
+    /**
+     * Same as union, but modifies this rectangle in place.
+     * @name __union
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     * @throws {TypeError}
+     * @private
      */
     '__union': {
       enumerable: false,
@@ -519,11 +638,14 @@
    * CLASS FUNCTIONS
    */
 
-  /* Check if a given object contains a numeric rectangle properties including
+  /**
+   * Check if a given object contains a numeric rectangle properties including
    * x, y, width, height, top, bottom, right, left.
    * Does not check if a rectangle is actually a doodle.geom.rectangle.
+   * @name isRect
    * @param {Rectangle} rect Object with numeric rectangle parameters.
    * @return {Boolean}
+   * @static
    */
   isRect = doodle.geom.Rectangle.isRect = function (rect) {
     return (typeof rect.x     === "number" && typeof rect.y      === "number" &&
@@ -533,12 +655,23 @@
   };
 
   /*DEBUG*/
-  check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller_name) {
-    if (!isRect(rect)) {
-      caller_name = (caller_name === undefined) ? "check_rect_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a rectangle.");
-    } else {
+  /**
+   * @name check_rect_type
+   * @param {Rectangle} rect
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller, param) {
+    if (isRect(rect)) {
       return true;
+    } else {
+      caller = (caller === undefined) ? "check_rect_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Rectangle.");
     }
   };
   /*END_DEBUG*/

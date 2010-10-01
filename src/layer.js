@@ -11,9 +11,13 @@
       /*END_DEBUG*/
       set_element_property = doodle.utils.set_element_property;
   
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /**
+   * @class Layer
+   * @extends ElementNode
+   * @param {String} id
+   * @param {HTMLCanvasElement} element
+   * @return {Layer}
+   * @throws {SyntaxError}
    */
   doodle.Layer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
@@ -28,7 +32,13 @@
           context = null;
       
       return {
-        /* Canvas dimensions need to apply to HTML attributes.
+        /**
+         * Canvas dimensions need to apply to HTML attributes.
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         * @override
          */
         'width': {
           enumerable: true,
@@ -41,7 +51,15 @@
             width = set_element_property(this.element, 'width', n, 'html');
           }
         },
-        
+
+        /**
+         * 
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         * @override
+         */
         'height': {
           enumerable: true,
           configurable: true,
@@ -54,14 +72,27 @@
           }
         },
 
+        /**
+         * 
+         * @name context
+         * @return {CanvasRenderingContext2D}
+         * @property
+         * @override
+         */
         'context': {
           enumerable: true,
           configurable: true,
           get: function () { return context; }
         },
 
-        /* Layer specific things to setup when adding a dom element.
+        /**
+         * Layer specific things to setup when adding a dom element.
          * Called in ElementNode.element
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @throws {TypeError}
+         * @override
+         * @private
          */
         '__addDomElement': {
           enumerable: false,
@@ -82,6 +113,14 @@
           }
         },
 
+        /**
+         * Layer specific things to setup when removing a dom element.
+         * Called in ElementNode.element
+         * @name __removeDomElement
+         * @param {HTMLElement} elementArg
+         * @override
+         * @private
+         */
         '__removeDomElement': {
           enumerable: false,
           writable: false,
@@ -124,8 +163,11 @@
 
   
   layer_static_properties = {
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
+     * @override
      */
     'toString': {
       enumerable: true,
@@ -136,7 +178,12 @@
       }
     },
 
-    /* This is always the same, so we'll save some computation.
+    /**
+     * This is always the same size, so we'll save some computation.
+     * @name __getBounds
+     * @return {Rectangle}
+     * @override
+     * @private
      */
     '__getBounds': {
       enumerable: true,
@@ -154,10 +201,12 @@
    * CLASS METHODS
    */
 
-  /* Test if an object is an node.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is a Layer.
+   * @name isLayer
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isLayer = doodle.Layer.isLayer = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -166,9 +215,12 @@
     return (obj.toString() === '[object Layer]');
   };
 
-  /* Check if object inherits from node.
+  /**
+   * Check if object inherits from layer.
+   * @name inheritsLayer
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
     while (obj) {
@@ -185,6 +237,16 @@
   };
 
   /*DEBUG*/
+  /**
+   * @name check_layer_type
+   * @param {Layer} layer
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   doodle.utils.types.check_layer_type = function (layer, caller, param) {
     if (inheritsLayer(layer)) {
       return true;

@@ -15,20 +15,20 @@
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class KeyboardEvent
+   * @extends UIEvent
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {String} keyIdentifier
    * @param {Number} keyLocation
    * @param {String} modifiersList White-space separated list of key modifiers.
    * @param {Boolean} repeat
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {KeyboardEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.KeyboardEvent = function (type, bubbles, cancelable, view,
                                    keyIdentifier, keyLocation, modifiersList, repeat) {
@@ -88,7 +88,11 @@
           evt_metaKey = false,
           evt_altGraphKey = false;
 
-      /* @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+      /**
+       * @name copy_keyboardevent_properties
+       * @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+       * @throws {TypeError}
+       * @private
        */
       copy_keyboardevent_properties = function (evt) {
         /*DEBUG*/
@@ -105,54 +109,107 @@
       };
       
       return {
+        /**
+         * @name keyIdentifier
+         * @return {String} [read-only]
+         * @property
+         */
         'keyIdentifier': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_keyIdentifier; }
         },
 
+        /**
+         * @name keyLocation
+         * @return {Number} [read-only]
+         * @property
+         */
         'keyLocation': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_keyLocation; }
         },
 
+        /**
+         * @name repeat
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'repeat': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_repeat; }
         },
 
+        /**
+         * @name ctrlKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'ctrlKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_ctrlKey; }
         },
-        
+
+        /**
+         * @name altKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'altKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_altKey; }
         },
 
+        /**
+         * @name shiftKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'shiftKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_shiftKey; }
         },
 
+        /**
+         * @name metaKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'metaKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_metaKey; }
         },
 
+        /**
+         * @name altGraphKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'altGraphKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_altGraphKey; }
         },
-
+        
+        /**
+         * @name initKeyboardEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {String} keyIdentifierArg
+         * @param {Number} keyLocationArg
+         * @param {String} modifiersListArg
+         * @param {Boolean} repeatArg
+         * @return {Event}
+         * @throws {TypeError}
+         */
         'initKeyboardEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg,
                            keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
@@ -200,10 +257,12 @@
           }
         },
 
-        /* Queries the state of a modifier using a key identifier.
+        /**
+         * Queries the state of a modifier using a key identifier.
+         * @name getModifierState
          * @param {String} key A modifier key identifier
          * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-         * This is an incomplete list of modifiers.
+         * @throws {TypeError}
          */
         'getModifierState': {
           value: function (key) {
@@ -225,10 +284,16 @@
           }
         },
 
-        /* Copy the properties from another KeyboardEvent.
+        /**
+         * Copy the properties from another KeyboardEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyKeyboardEventProperties
          * @param {KeyboardEvent} evt
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {KeyboardEvent}
+         * @throws {TypeError}
+         * @private
          */
         '__copyKeyboardEventProperties': {
           enumerable: false,
@@ -279,13 +344,16 @@
     
 
   keyboardevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object KeyboardEvent]";
-      }
+      value: function () { return "[object KeyboardEvent]"; }
     }
   };
 
@@ -293,6 +361,13 @@
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is a keyboard event.
+   * @name isKeyboardEvent
+   * @param {Event} event
+   * @return {Boolean}
+   * @static
+   */
   isKeyboardEvent = doodle.KeyboardEvent.isKeyboardEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -303,6 +378,16 @@
   };
 
   /*DEBUG*/
+  /**
+   * @name check_keyboardevent_type
+   * @param {Event} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_keyboardevent_type = doodle.utils.types.check_keyboardevent_type = function (event, caller, param) {
     if (isKeyboardEvent(event)) {
       return true;

@@ -19,9 +19,10 @@
       Array_indexOf = Array.prototype.indexOf,
       Array_splice = Array.prototype.splice;
   
-  /* Super constructor
+  /**
+   * @class {EventDispatcher}
    * @param {Function} initializer
-   * @return {Object}
+   * @return {EventDispatcher}
    */
   doodle.EventDispatcher = function () {
     var evt_disp = {};
@@ -57,7 +58,9 @@
 
   
   evtDisp_static_properties = {
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
      */
     'toString': {
@@ -69,9 +72,12 @@
       }
     },
 
-    /* Call function passing object as 'this'.
+    /**
+     * Call function passing object as 'this'.
+     * @name modify
      * @param {Function} fn
      * @return {Object}
+     * @throws {TypeError}
      */
     'modify': {
       enumerable: true,
@@ -86,11 +92,14 @@
       }
     },
 
-    /* Registers an event listener object with an EventDispatcher object
+    /**
+     * Registers an event listener object with an EventDispatcher object
      * so that the listener receives notification of an event.
+     * @name addEventListener
      * @param {String} type
      * @param {Function} listener
      * @param {Boolean} useCapture
+     * @throws {TypeError}
      */
     'addEventListener': {
       enumerable: true,
@@ -118,10 +127,13 @@
       }
     },
 
-    /* Removes a listener from the EventDispatcher object.
+    /**
+     * Removes a listener from the EventDispatcher object.
+     * @name removeEventListener
      * @param {String} type
      * @param {Function} listener
      * @param {Boolean} useCapture
+     * @throws {TypeError}
      */
     'removeEventListener': {
       enumerable: true,
@@ -160,9 +172,12 @@
       }
     },
 
-    /* Lookup and call listener if registered for specific event type.
+    /**
+     * Lookup and call listener if registered for specific event type.
+     * @name handleEvent
      * @param {Event} event
      * @return {Boolean} true if node has listeners of event type.
+     * @throws {TypeError}
      */
     'handleEvent': {
       enumerable: true,
@@ -217,10 +232,13 @@
       }
     },
     
-    /* Dispatches an event into the event flow. The event target is the
+    /**
+     * Dispatches an event into the event flow. The event target is the
      * EventDispatcher object upon which the dispatchEvent() method is called.
+     * @name dispatchEvent
      * @param {Event} event
      * @return {Boolean} true if the event was successfully dispatched.
+     * @throws {TypeError}
      */
     'dispatchEvent': {
       enumerable: true,
@@ -311,10 +329,14 @@
       }
     },
 
-    /* Dispatches an event to every object with an active listener.
-     * Ignores propagation path, objects come from 
+    /**
+     * Dispatches an event to every object with an active listener.
+     * Ignores propagation path, objects come from
+     * @name broadcastEvent
      * @param {Event} event
      * @return {Boolean} True if the event was successfully dispatched.
+     * @throws {TypeError}
+     * @throws {Error}
      */
     'broadcastEvent': {
       enumerable: true,
@@ -355,10 +377,13 @@
       }
     },
 
-    /* Checks whether the EventDispatcher object has any listeners
+    /**
+     * Checks whether the EventDispatcher object has any listeners
      * registered for a specific type of event.
+     * @name hasEventListener
      * @param {String} type
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'hasEventListener': {
       enumerable: true,
@@ -372,14 +397,17 @@
       }
     },
 
-    /* Checks whether an event listener is registered with this EventDispatcher object
+    /**
+     * Checks whether an event listener is registered with this EventDispatcher object
      * or any of its ancestors for the specified event type.
      * The difference between the hasEventListener() and the willTrigger() methods is
      * that hasEventListener() examines only the object to which it belongs,
      * whereas the willTrigger() method examines the entire event flow for the
      * event specified by the type parameter.
+     * @name willTrigger
      * @param {String} type The type of event.
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'willTrigger': {
       enumerable: true,
@@ -415,10 +443,12 @@
   //holds all objects with event listeners
   dispatcher_queue = doodle.EventDispatcher.dispatcher_queue = [];
 
-  /* Test if an object is an event dispatcher.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is an event dispatcher.
+   * @name isEventDispatcher
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isEventDispatcher = doodle.EventDispatcher.isEventDispatcher = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -427,9 +457,12 @@
     return (obj.toString() === '[object EventDispatcher]');
   };
 
-  /* Check if object inherits from event dispatcher.
+  /**
+   * Check if object inherits from event dispatcher.
+   * @name inheritsEventDispatcher
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsEventDispatcher = doodle.EventDispatcher.inheritsEventDispatcher = function (obj) {
     while (obj) {
@@ -446,6 +479,16 @@
   };
 
   /*DEBUG*/
+  /**
+   * @name check_eventdispatcher_type
+   * @param {EventDispatcher} obj
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
     if (inheritsEventDispatcher(obj)) {
       return true;

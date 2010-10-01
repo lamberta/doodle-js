@@ -19,9 +19,12 @@
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property;
   
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /**
+   * @class ElementNode
+   * @param {HTMLElement|Function} element
+	 * @param {String} id
+   * @return {ElementNode}
+   * @throws {SyntaxError}
    */
   doodle.ElementNode = function (element, id/*optional*/) {
     var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
@@ -41,6 +44,11 @@
           bg_repeat = 'repeat';
       
       return {
+        /**
+         * @name element
+         * @return {HTMLElement}
+         * @property
+         */
         'element': {
           enumerable: true,
           configurable: true,
@@ -109,7 +117,14 @@
         /* Evidently it's not very efficent to query the dom for property values,
          * as it might initiate a re-flow. Cache values instead.
          */
-        
+
+        /**
+         * @name id
+         * @return {String}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'id': {
           enumerable: true,
           configurable: true,
@@ -121,7 +136,14 @@
             node_id = set_element_property(this.element, 'id', name, 'html');
           }
         },
-        
+
+        /**
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'width': {
           enumerable: true,
           configurable: true,
@@ -134,7 +156,14 @@
             width = n;
           }
         },
-        
+
+        /**
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'height': {
           enumerable: true,
           configurable: true,
@@ -147,7 +176,12 @@
             height = n;
           }
         },
-        
+
+        /**
+         * @name backgroundColor
+         * @return {Color}
+         * @property
+         */
         'backgroundColor': {
           enumerable: true,
           configurable: true,
@@ -161,7 +195,13 @@
             bg_color = rgb_str_to_hex(get_element_property(this.element, 'backgroundColor'));
           }
         },
-        
+
+        /**
+         * @name backgroundImage
+         * @return {HTMLImage}
+         * @throws {TypeError}
+         * @property
+         */
         'backgroundImage': {
           enumerable: true,
           configurable: true,
@@ -191,6 +231,13 @@
           }
         },
 
+        /**
+         * @name backgroundRepeat
+         * @return {String}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
+         * @property
+         */
         'backgroundRepeat': {
           enumerable: true,
           configurable: true,
@@ -213,6 +260,13 @@
           }
         },
 
+        /**
+         * @name alpha
+         * @return {Number}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'alpha': {
           enumerable: true,
           configurable: true,
@@ -226,6 +280,13 @@
           }
         },
 
+        /**
+         * @name visible
+         * @return {Boolean}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'visible': {
           enumerable: true,
           configurable: true,
@@ -243,6 +304,13 @@
           }
         },
 
+        /**
+         * Called when a dom element is added. This function will be overridden
+         * for sub-class specific behavior.
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @private
+         */
         '__addDomElement': {
           enumerable: false,
           configurable: true,
@@ -255,12 +323,19 @@
           }
         },
 
+        /**
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @return {Rectangle} Rectangle object is reused for each call.
+         * @throws {TypeError} targetCoordSpace must inherit from Node.
+				 * @override
+         * @private
+         */
         '__getBounds': {
           enumerable: true,
           configurable: true,
           value: (function () {
             var rect = doodle_Rectangle(); //recycle
-            
             return function (targetCoordSpace) {
               /*DEBUG*/
               check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
@@ -340,8 +415,11 @@
 
   
   node_static_properties = {
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
+     * @override
      */
     'toString': {
       enumerable: true,
@@ -357,10 +435,12 @@
    * CLASS METHODS
    */
 
-  /* Test if an object is an node.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is an ElementNode.
+   * @name isElementNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isElementNode = doodle.ElementNode.isElementNode = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -369,9 +449,12 @@
     return (obj.toString() === '[object ElementNode]');
   };
 
-  /* Check if object inherits from node.
+  /**
+   * Check if object inherits from ElementNode.
+   * @name inheritsNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsElementNode = doodle.ElementNode.inheritsElementNode = function (obj) {
     while (obj) {
@@ -388,6 +471,16 @@
   };
 
   /*DEBUG*/
+  /**
+   * @name check_elementnode_type
+   * @param {Node} node
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   doodle.utils.types.check_elementnode_type = function (node, caller, param) {
     if (inheritsElementNode(node)) {
       return true;

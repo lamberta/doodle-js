@@ -14,7 +14,9 @@
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class TouchEvent
+   * @extends UIEvent
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
@@ -28,16 +30,14 @@
    * @param {Boolean} altKey
    * @param {Boolean} shiftKey
    * @param {Boolean} metaKey
-   * @param {} touches
-   * @param {} targetTouches
-   * @param {} changedTouches
+   * @param {Array} touches ?
+   * @param {Array} targetTouches ?
+   * @param {Array} changedTouches ?
    * @param {Number} scale
    * @param {Number} rotation
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {TouchEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.TouchEvent = function (type, bubbles, cancelable, view, detail,
                                 screenX, screenY, clientX, clientY,
@@ -90,7 +90,6 @@
       touchevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
-    
     Object.defineProperties(touchevent, touchevent_static_properties);
     //properties that require privacy
     Object.defineProperties(touchevent, (function () {
@@ -108,7 +107,10 @@
           evt_scale = 1,
           evt_rotation = 0;
 
-      /* @param {TouchEvent} evt TouchEvent to copy properties from.
+      /**
+       * @name copy_touchevent_properties
+       * @param {TouchEvent} evt TouchEvent to copy properties from.
+       * @private
        */
       copy_touchevent_properties = function (evt) {
         /*DEBUG*/
@@ -130,84 +132,172 @@
       };
       
       return {
+        /**
+         * @name screenX
+         * @return {Number} [read-only]
+         * @property
+         */
         'screenX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_screenX; }
         },
 
+        /**
+         * @name screenY
+         * @return {Number} [read-only]
+         * @property
+         */
         'screenY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_screenY; }
         },
 
+        /**
+         * @name clientX
+         * @return {Number} [read-only]
+         * @property
+         */
         'clientX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_clientX; }
         },
 
+        /**
+         * @name clientY
+         * @return {Number} [read-only]
+         * @property
+         */
         'clientY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_clientY; }
         },
-        
+
+        /**
+         * @name ctrlKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'ctrlKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_ctrlKey; }
         },
 
+        /**
+         * @name altKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'altKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_altKey; }
         },
 
+        /**
+         * @name shiftKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'shiftKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_shiftKey; }
         },
 
+        /**
+         * @name metaKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'metaKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_metaKey; }
         },
 
+        /**
+         * @name touches
+         * @return {Array} [read-only]
+         * @property
+         */
         'touches': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_touches; }
         },
 
+        /**
+         * @name targetTouches
+         * @return {Array} [read-only]
+         * @property
+         */
         'targetTouches': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_targetTouches; }
         },
 
+        /**
+         * @name changedTouches
+         * @return {Array} [read-only]
+         * @property
+         */
         'changedTouches': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_changedTouches; }
         },
 
+        /**
+         * @name scale
+         * @return {Number} [read-only]
+         * @property
+         */
         'scale': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_scale; }
         },
 
+        /**
+         * @name rotation
+         * @return {Number} [read-only]
+         * @property
+         */
         'rotation': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_rotation; }
         },
 
+        /**
+         * @name initTouchEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {Number} detailArg
+         * @param {Number} screenXArg
+         * @param {Number} screenYArg
+         * @param {Number} clientXArg
+         * @param {Number} clientYArg
+         * @param {Boolean} ctrlKeyArg
+         * @param {Boolean} altKeyArg
+         * @param {Boolean} shiftKeyArg
+         * @param {Boolean} metaKeyArg
+         * @param {Array} touchesArg
+         * @param {Array} targetTouchesArg
+         * @param {Array} changedTouchesArg
+         * @param {Number} scaleArg
+         * @param {Number} rotationArg
+         * @return {TouchEvent}
+         * @throws {TypeError}
+         */
         'initTouchEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
                            screenXArg, screenYArg, clientXArg, clientYArg,
@@ -267,10 +357,12 @@
           }
         },
 
-        /* Queries the state of a modifier using a key identifier.
+        /**
+         * Queries the state of a modifier using a key identifier.
+         * @name getModifierState
          * @param {String} key A modifier key identifier
          * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-         * This is an incomplete list of modifiers.
+         * @throws {TypeError}
          */
         'getModifierState': {
           value: function (key) {
@@ -292,12 +384,16 @@
           }
         },
 
-        /* Copy the properties from another TouchEvent.
+        /**
+         * Copy the properties from another TouchEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyTouchEventProperties
          * @param {TouchEvent} evt
-         * @param {Node=} resetTarget
-         * @param {String=} resetType
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {TouchEvent}
+         * @throws {TypeError}
+         * @private
          */
         '__copyTouchEventProperties': {
           enumerable: false,
@@ -351,13 +447,16 @@
     
   
   touchevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object TouchEvent]";
-      }
+      value: function () { return "[object TouchEvent]"; }
     }
   };
 
@@ -365,6 +464,13 @@
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is a TouchEvent.
+   * @name isTouchEvent
+   * @param {TouchEvent} event
+   * @return {Boolean}
+   * @static
+   */
   isTouchEvent = doodle.TouchEvent.isTouchEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -375,13 +481,23 @@
   };
 
   /*DEBUG*/
-  check_touchevent_type = doodle.utils.types.check_touchevent_type = function (event, caller, param) {
+  /**
+   * @name check_touchevent_type
+   * @param {TouchEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_touchevent_type = doodle.utils.types.check_touchevent_type = function (event, caller, params) {
     if (isTouchEvent(event)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_touchevent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an TouchEvent.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must be an TouchEvent.");
     }
   };
   /*END_DEBUG*/

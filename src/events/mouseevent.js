@@ -14,11 +14,13 @@
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class MouseEvent
+   * @extends UIEvent
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {Number} detail
    * @param {Number} screenX
    * @param {Number} screenY
@@ -30,11 +32,9 @@
    * @param {Boolean} metaKey
    * @param {Number} button Mouse button that caused the event (0|1|2)
    * @param {Node} relatedTarget Secondary target for event (only for some events)
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {MouseEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.MouseEvent = function (type, bubbles, cancelable, view, detail,
                                 screenX, screenY, clientX, clientY, 
@@ -85,7 +85,6 @@
       mouseevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
-    
     Object.defineProperties(mouseevent, mouseevent_static_properties);
     //properties that require privacy
     Object.defineProperties(mouseevent, (function () {
@@ -104,7 +103,11 @@
           evt_button = 0,
           evt_relatedTarget = null;
 
-      /* @param {MouseEvent} evt MouseEvent to copy properties from.
+      /**
+       * @name copy_mouseevent_properties
+       * @param {MouseEvent} evt MouseEvent to copy properties from.
+       * @throws {TypeError}
+       * @private
        */
       copy_mouseevent_properties = function (evt) {
         /*DEBUG*/
@@ -127,90 +130,180 @@
       };
       
       return {
+        /**
+         * @name x
+         * @return {Number} [read-only]
+         * @property
+         */
         'x': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_x; }
         },
 
+        /**
+         * @name y
+         * @return {Number} [read-only]
+         * @property
+         */
         'y': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_y; }
         },
 
+        /**
+         * @name screenX
+         * @return {Number} [read-only]
+         * @property
+         */
         'screenX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_screenX; }
         },
 
+        /**
+         * @name screenY
+         * @return {Number} [read-only]
+         * @property
+         */
         'screenY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_screenY; }
         },
 
+        /**
+         * @name clientX
+         * @return {Number} [read-only]
+         * @property
+         */
         'clientX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_clientX; }
         },
 
+        /**
+         * @name clientY
+         * @return {Number} [read-only]
+         * @property
+         */
         'clientY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_clientY; }
         },
 
+        /**
+         * @name offsetX
+         * @return {Number} [read-only]
+         * @property
+         */
         'offsetX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_offsetX; }
         },
 
+        /**
+         * @name offsetY
+         * @return {Number} [read-only]
+         * @property
+         */
         'offsetY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_offsetY; }
         },
 
+        /**
+         * @name ctrlKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'ctrlKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_ctrlKey; }
         },
 
+        /**
+         * @name altKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'altKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_altKey; }
         },
 
+        /**
+         * @name shiftKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'shiftKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_shiftKey; }
         },
 
+        /**
+         * @name metaKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'metaKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_metaKey; }
         },
 
+        /**
+         * @name button
+         * @return {Number} [read-only]
+         * @property
+         */
         'button': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_button; }
         },
 
+        /**
+         * @name relatedTarget
+         * @return {Node} [read-only]
+         * @property
+         */
         'relatedTarget': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_relatedTarget; }
         },
 
+        /**
+         * @name initMouseEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {Number} detailArg
+         * @param {Number} screenXArg
+         * @param {Number} screenYArg
+         * @param {Number} clientXArg
+         * @param {Number} clientYArg
+         * @param {Boolean} ctrlKeyArg
+         * @param {Boolean} altKeyArg
+         * @param {Boolean} shiftKeyArg
+         * @param {Boolean} metaKeyArg
+         * @param {Number} buttonArg
+         * @param {Node} relatedTargetArg
+         * @return {MouseEvent}
+         * @throws {TypeError}
+         */
         'initMouseEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
                            screenXArg, screenYArg, clientXArg, clientYArg,
@@ -257,15 +350,16 @@
             evt_button = buttonArg;
             evt_relatedTarget = relatedTargetArg;
 
-            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
-            return this;
+            return this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
           }
         },
 
-        /* Queries the state of a modifier using a key identifier.
+        /**
+         * Queries the state of a modifier using a key identifier.
+         * @name getModifierState
          * @param {String} key A modifier key identifier
          * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-         * This is an incomplete list of modifiers.
+         * @throws {TypeError}
          */
         'getModifierState': {
           value: function (key) {
@@ -287,10 +381,16 @@
           }
         },
 
-        /* Copy the properties from another MouseEvent.
+        /**
+         * Copy the properties from another MouseEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyMouseEventProperties
          * @param {MouseEvent} evt
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {MouseEvent}
+         * @throws {TypeError}
+         * @private
          */
         '__copyMouseEventProperties': {
           enumerable: false,
@@ -341,15 +441,17 @@
     return mouseevent;
   };
     
-  
   mouseevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object MouseEvent]";
-      }
+      value: function () { return "[object MouseEvent]"; }
     }
   };
 
@@ -357,6 +459,13 @@
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is a MouseEvent.
+   * @name isMouseEvent
+   * @param {MouseEvent} event
+   * @return {Boolean}
+   * @static
+   */
   isMouseEvent = doodle.MouseEvent.isMouseEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -367,13 +476,23 @@
   };
 
   /*DEBUG*/
-  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, param) {
+  /**
+   * @name check_mouseevent_type
+   * @param {MouseEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, params) {
     if (isMouseEvent(event)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_mouseevent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an MouseEvent.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must be an MouseEvent.");
     }
   };
   /*END_DEBUG*/

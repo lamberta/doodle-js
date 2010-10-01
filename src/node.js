@@ -25,7 +25,9 @@
       create_scene_path = doodle.utils.create_scene_path,
       PI = Math.PI;
   
-  /* Super constructor
+  /**
+   * @class Node
+   * @extends EventDispatcher
    * @param {String|Function} id|initializer
    * @return {Node}
    */
@@ -48,6 +50,11 @@
         enumerable: true,
         configurable: false,
         value: Object.create(null, {
+          /**
+           * @name debug.boundingBox
+           * @return {Boolean}
+           * @property
+           */
           'boundingBox': (function () {
             var show_bounds = false;
             return {
@@ -64,7 +71,12 @@
         })
       },
       /*END_DEBUG*/
-      
+
+      /**
+       * @name id
+       * @return {String}
+       * @property
+       */
       'id': (function () {
         var node_id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
         node_count += 1;
@@ -80,7 +92,12 @@
           }
         };
       }()),
-      
+
+      /**
+       * @name root
+       * @return {Display}
+       * @property
+       */
       'root': (function () {
         var root = null;
         return {
@@ -98,7 +115,12 @@
           }
         };
       }()),
-      
+
+      /**
+       * @name parent
+       * @return {Node}
+       * @property
+       */
       'parent': (function () {
         var parent = null;
         return {
@@ -115,7 +137,12 @@
           }
         };
       }()),
-      
+
+      /**
+       * @name children
+       * @return {Array}
+       * @property
+       */
       'children': (function () {
         var children = [];
         return {
@@ -126,7 +153,12 @@
           }
         };
       }()),
-      
+
+      /**
+       * @name transform
+       * @return {Matrix}
+       * @property
+       */
       'transform': (function () {
         var transform = doodle_Matrix();
         return {
@@ -142,6 +174,11 @@
         };
       }()),
 
+      /**
+       * @name visible
+       * @return {Boolean}
+       * @property
+       */
       'visible': (function () {
         var visible = true;
         return {
@@ -157,6 +194,11 @@
         };
       }()),
 
+      /**
+       * @name alpha
+       * @return {Number}
+       * @property
+       */
       'alpha': (function () {
         var alpha = 1; //alpha is between 0 and 1
         return {
@@ -172,7 +214,9 @@
         };
       }()),
 
-      /* The bounding box of a Node is a union of all it's child Sprite's bounds.
+      /**
+       * The bounding box of a Node is a union of all it's child Sprite's bounds.
+       * @name getBounds
        * @param {Node} targetCoordSpace
        * @return {Rectangle|Null}
        */
@@ -191,6 +235,8 @@
       /* Same as getBounds, but reuses an internal rectangle.
        * Since it's passed by reference, you don't want to modify it, but
        * it's more efficient for checking bounds.
+       * @name __getBounds
+       * @private
        */
       '__getBounds': {
         enumerable: false,
@@ -237,7 +283,12 @@
 
 
   node_static_properties = {
-    
+
+    /**
+     * @name x
+     * @return {Number}
+     * @property
+     */
     'x': {
       enumerable: true,
       configurable: false,
@@ -251,7 +302,12 @@
         this.transform.tx = n;
       }
     },
-    
+
+    /**
+     * @name y
+     * @return {Number}
+     * @property
+     */
     'y': {
       enumerable: true,
       configurable: false,
@@ -266,7 +322,7 @@
       }
     },
 
-    /**
+    /*
     //registration point
     'axis': {
       value: {x: this.x, y: this.y}
@@ -284,8 +340,13 @@
         }
       }
     },
-    **/
+    */
 
+    /**
+     * @name rotate
+     * @param {Number} deg
+     * @return {Number}
+     */
     'rotate': {
       enumerable: true,
       configurable: false,
@@ -296,7 +357,12 @@
         this.transform.rotate(deg * PI / 180);
       }
     },
-    
+
+    /**
+     * @name rotation
+     * @return {Number}
+     * @property
+     */
     'rotation': {
       enumerable: true,
       configurable: true,
@@ -311,6 +377,11 @@
       }
     },
 
+    /**
+     * @name scaleX
+     * @param {Number} sx
+     * @return {Number}
+     */
     'scaleX': {
       enumerable: true,
       configurable: false,
@@ -324,7 +395,12 @@
         this.transform.a = sx;
       }
     },
-    
+
+    /**
+     * @name scaleY
+     * @param {Number} sy
+     * @return {Number}
+     */
     'scaleY': {
       enumerable: true,
       configurable: false,
@@ -339,7 +415,12 @@
       }
     },
 
-    //drawing context to use
+    /**
+     * drawing context to use
+     * @name context
+     * @return {CanvasRenderingContext2D}
+     * @property
+     */
     'context': {
       enumerable: true,
       configurable: true,
@@ -359,6 +440,10 @@
       }
     },
 
+    /*
+     * @name __allTransforms
+     * @private
+     */
     '__allTransforms': {
       enumerable: false,
       configurable: false,
@@ -377,23 +462,27 @@
         };
       }())
     },
-    
-    /*
-     * METHODS
-     */
 
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
+     * @override
      */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Node]";
-      }
+      value: function () { return "[object Node]"; }
     },
 
+    /**
+     * @name addChildAt
+     * @param {Node} node
+     * @param {Number} index
+     * @return {Node}
+     * @throws {TypeError}
+     */
     'addChildAt': {
       enumerable: true,
       writable: false,
@@ -439,7 +528,13 @@
         return node;
       }
     },
-    
+
+    /**
+     * @name addChild
+     * @param {Node} node
+     * @return {Node}
+     * @throws {TypeError}
+     */
     'addChild': {
       enumerable: true,
       writable: false,
@@ -451,7 +546,12 @@
         return this.addChildAt(node, this.children.length);
       }
     },
-    
+
+    /**
+     * @name removeChildAt
+     * @param {Number} index
+     * @throws {TypeError}
+     */
     'removeChildAt': {
       enumerable: true,
       writable: false,
@@ -487,7 +587,12 @@
         }
       }
     },
-    
+
+    /**
+     * @name removeChild
+     * @param {Node} node
+     * @throws {TypeError}
+     */
     'removeChild': {
       enumerable: false,
       writable: false,
@@ -499,7 +604,12 @@
         this.removeChildAt(this.children.indexOf(node));
       }
     },
-    
+
+    /**
+     * @name removeChildById
+     * @param {String} id
+     * @throws {TypeError}
+     */
     'removeChildById': {
       enumerable: true,
       writable: false,
@@ -511,7 +621,11 @@
         this.removeChild(this.getChildById(id));
       }
     },
-    
+
+    /**
+     * @name removeAllChildren
+     * @throws {TypeError}
+     */
     'removeAllChildren': {
       enumerable: true,
       writable: false,
@@ -523,7 +637,13 @@
         }
       }
     },
-    
+
+    /**
+     * @name getChildById
+     * @param {String} id
+     * @return {Node|null}
+     * @throws {TypeError}
+     */
     'getChildById': {
       enumerable: true,
       writable: false,
@@ -544,10 +664,13 @@
       }
     },
 
-    /* Changes the position of an existing child in the node's children array.
+    /**
+     * Changes the position of an existing child in the node's children array.
      * This affects the layering of child objects.
+     * @name setChildIndex
      * @param {Node} child
      * @param {Number} index
+     * @throws {TypeError}
      */
     'setChildIndex': {
       enumerable: true,
@@ -574,7 +697,12 @@
       }
     },
 
-    /* Swaps the child nodes at the two specified index positions in the child list.
+    /**
+     * Swaps the child nodes at the two specified index positions in the child list.
+     * @name swapChildrenAt
+     * @param {Number} index1
+     * @param {Number} index2
+     * @throws {TypeError}
      */
     'swapChildrenAt': {
       enumerable: true,
@@ -589,7 +717,13 @@
         children[index1] = children.splice(index2, 1, children[index1])[0];
       }
     },
-    
+
+    /**
+     * @name swapChildren
+     * @param {Node} node1
+     * @param {Node} node2
+     * @throws {TypeError}
+     */
     'swapChildren': {
       enumerable: true,
       writable: false,
@@ -604,8 +738,12 @@
       }
     },
 
-    /* Swap positions with another node in the parents child list.
+    /**
+     * Swap positions with another node in the parents child list.
+     * @name swapDepths
      * @param {Node} node
+     * @throws {TypeError}
+     * @throws {ReferenceError}
      */
     'swapDepths': {
       enumerable: true,
@@ -626,8 +764,11 @@
       }
     },
 
-    /* Swap positions with another node at a given index in the parents child list.
+    /**
+     * Swap positions with another node at a given index in the parents child list.
+     * @name swapDepthAt
      * @param {Number} index
+     * @throws {TypeError}
      */
     'swapDepthAt': {
       enumerable: true,
@@ -643,9 +784,12 @@
       }
     },
     
-    /* Determine if node is among it's children, grandchildren, etc.
+    /**
+     * Determine if node is among it's children, grandchildren, etc.
+     * @name contains
      * @param {Node} node
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'contains': {
       enumerable: true,
@@ -659,6 +803,12 @@
       }
     },
 
+    /**
+     * @name localToGlobal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     */
     'localToGlobal': {
       enumerable: true,
       writable: false,
@@ -678,7 +828,13 @@
       }
     },
 
-    /* Same as localToGlobal, but modifies a point in place.
+    /**
+		 * Same as localToGlobal, but modifies a point in place.
+     * @name __localToGlobal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     * @private
      */
     '__localToGlobal': {
       enumerable: false,
@@ -698,6 +854,12 @@
       }
     },
 
+    /**
+     * @name globalToLocal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     */
     'globalToLocal': {
       enumerable: true,
       writable: false,
@@ -712,7 +874,13 @@
       }
     },
 
-    /* Same as globalToLocal, but modifies a point in place.
+    /**
+		 * Same as globalToLocal, but modifies a point in place.
+     * @name __globalToLocal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     * @private
      */
     '__globalToLocal': {
       enumerable: false,
@@ -736,10 +904,12 @@
    * CLASS METHODS
    */
 
-  /* Test if an object is an node.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is an node.
+   * @name isNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isNode = doodle.Node.isNode = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -748,9 +918,12 @@
     return (obj.toString() === '[object Node]');
   };
 
-  /* Check if object inherits from node.
+  /**
+   * Check if object inherits from node.
+   * @name inheritsNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsNode = doodle.Node.inheritsNode = function (obj) {
     while (obj) {
@@ -767,6 +940,16 @@
   };
 
   /*DEBUG*/
+  /**
+   * @name check_node_type
+   * @param {Node} node
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_node_type = doodle.utils.types.check_node_type = function (node, caller, param) {
     if (inheritsNode(node)) {
       return true;

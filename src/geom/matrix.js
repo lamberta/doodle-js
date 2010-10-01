@@ -20,15 +20,18 @@
       atan2 = Math.atan2,
       tan = Math.tan;
   
-  /* Matrix
-   * @constructor
-   * @param {Number=} a
-   * @param {Number=} b
-   * @param {Number=} c
-   * @param {Number=} d
-   * @param {Number=} tx
-   * @param {Number=} ty
+  /**
+   * @class Matrix
+   * @extends Object
+   * @param {Number} a
+   * @param {Number} b
+   * @param {Number} c
+   * @param {Number} d
+   * @param {Number} tx
+   * @param {Number} ty
    * @return {Matrix}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
@@ -48,9 +51,13 @@
       
       return {
 
-        /* The value that affects the positioning of pixels along the x axis
+        /**
+         * The value that affects the positioning of pixels along the x axis
          * when scaling or rotating an image.
-         * @param {Number} a
+         * @name a
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'a': {
           enumerable: true,
@@ -64,9 +71,13 @@
           }
         },
 
-        /* The value that affects the positioning of pixels along the y axis
+        /**
+         * The value that affects the positioning of pixels along the y axis
          * when rotating or skewing an image.
-         * @param {Number} b
+         * @name b
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'b': {
           enumerable: true,
@@ -80,9 +91,13 @@
           }
         },
 
-        /* The value that affects the positioning of pixels along the x axis
+        /**
+         * The value that affects the positioning of pixels along the x axis
          * when rotating or skewing an image.
-         * @param {Number} c
+         * @name c
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'c': {
           enumerable: true,
@@ -96,9 +111,13 @@
           }
         },
 
-        /* The value that affects the positioning of pixels along the y axis
+        /**
+         * The value that affects the positioning of pixels along the y axis
          * when scaling or rotating an image.
-         * @param {Number} d
+         * @name d
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'd': {
           enumerable: true,
@@ -112,8 +131,12 @@
           }
         },
 
-        /* The distance by which to translate each point along the x axis.
-         * @param {Number} tx
+        /**
+         * The distance by which to translate each point along the x axis.
+         * @name tx
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'tx': {
           enumerable: true,
@@ -127,8 +150,12 @@
           }
         },
 
-        /* The distance by which to translate each point along the y axis.
-         * @param {Number} ty
+        /**
+         * The distance by which to translate each point along the y axis.
+         * @name ty
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'ty': {
           enumerable: true,
@@ -142,7 +169,10 @@
           }
         },
 
-        /* Same as toArray, but reuses array object.
+        /**
+         * Same as toArray, but reuses array object.
+         * @return {Array}
+         * @private
          */
         '__toArray': {
           enumerable: false,
@@ -205,8 +235,9 @@
 
   
   matrix_static_properties = {
-    
-    /* Set values of this matrix with the specified parameters.
+    /**
+     * Set values of this matrix with the specified parameters.
+     * @name compose
      * @param {Number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
      * @param {Number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
      * @param {Number} c The value that affects the positioning of pixels along the x axis when rotating or skewing an image.
@@ -214,6 +245,7 @@
      * @param {Number} tx The distance by which to translate each point along the x axis.
      * @param {Number} ty The distance by which to translate each point along the y axis.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: true,
@@ -238,7 +270,9 @@
       }
     },
     
-    /* Returns an array value containing the properties of the Matrix object.
+    /**
+     * Returns an array value containing the properties of the Matrix object.
+     * @name toArray
      * @return {Array}
      */
     'toArray': {
@@ -250,7 +284,9 @@
       }
     },
     
-    /* Returns a text value listing the properties of the Matrix object.
+    /**
+     * Returns a text value listing the properties of the Matrix object.
+     * @name toString
      * @return {String}
      */
     'toString': {
@@ -263,9 +299,12 @@
       }
     },
 
-    /* Test if matrix is equal to this one.
+    /**
+     * Test if matrix is equal to this one.
+     * @name equals
      * @param {Matrix} m
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'equals': {
       enumerable: true,
@@ -286,7 +325,9 @@
       }
     },
 
-    /* Sets each matrix property to a value that causes a null transformation.
+    /**
+     * Sets each matrix property to a value that causes a null transformation.
+     * @name identity
      * @return {Matrix}
      */
     'identity': {
@@ -304,8 +345,10 @@
       }
     },
 
-    /* Returns a new Matrix object that is a clone of this matrix,
+    /**
+     * Returns a new Matrix object that is a clone of this matrix,
      * with an exact copy of the contained object.
+     * @name clone
      * @return {Matrix}
      */
     'clone': {
@@ -317,10 +360,13 @@
       }
     },
 
-    /* Multiplies a matrix with the current matrix,
+    /**
+     * Multiplies a matrix with the current matrix,
      * effectively combining the geometric effects of the two.
+     * @name multiply
      * @param {Matrix} m The matrix to be concatenated to the source matrix.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'multiply': {
       enumerable: true,
@@ -341,9 +387,12 @@
       }
     },
 
-    /* Applies a rotation transformation to the Matrix object.
+    /**
+     * Applies a rotation transformation to the Matrix object.
+     * @name rotate
      * @param {Number} angle The rotation angle in radians.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'rotate': {
       enumerable: true,
@@ -367,9 +416,12 @@
       }
     },
 
-    /* Applies a rotation transformation to the Matrix object, ignore translation.
+    /**
+     * Applies a rotation transformation to the Matrix object, ignore translation.
+     * @name deltaRotate
      * @param {Number} angle The rotation angle in radians.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'deltaRotate': {
       enumerable: true,
@@ -388,8 +440,12 @@
       }
     },
 
-    /* Return the angle of rotation in radians.
+    /**
+     * Return the angle of rotation in radians.
+     * @name rotation
      * @return {Number} radians
+     * @throws {TypeError}
+     * @property
      */
     'rotation': {
       enumerable: true,
@@ -397,9 +453,6 @@
       get: function () {
         return atan2(this.b, this.a);
       },
-      /* Set a new rotation for matrix.
-       * @param {Number} angle, in radians
-       */
       set: function (radians) {
         /*DEBUG*/
         check_number_type(radians, this+'.rotation', '*radians*');
@@ -410,10 +463,13 @@
       }
     },
 
-    /* Applies a scaling transformation to the matrix.
+    /**
+     * Applies a scaling transformation to the matrix.
+     * @name scale
      * @param {Number} sx A multiplier used to scale the object along the x axis.
      * @param {Number} sy A multiplier used to scale the object along the y axis.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'scale': {
       enumerable: true,
@@ -436,10 +492,13 @@
       }
     },
 
-    /* Applies a scaling transformation to the matrix, ignores translation.
+    /**
+     * Applies a scaling transformation to the matrix, ignores translation.
+     * @name deltaScale
      * @param {Number} sx A multiplier used to scale the object along the x axis.
      * @param {Number} sy A multiplier used to scale the object along the y axis.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'deltaScale': {
       enumerable: true,
@@ -459,10 +518,13 @@
       }
     },
 
-    /* Translates the matrix along the x and y axes.
+    /**
+     * Translates the matrix along the x and y axes.
+     * @name translate
      * @param {Number} dx The amount of movement along the x axis to the right, in pixels.
      * @param {Number} dy The amount of movement down along the y axis, in pixels.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'translate': {
       enumerable: true,
@@ -479,10 +541,12 @@
       }
     },
 
-    /*
+    /**
+     * @name skew
      * @param {Number} skewX
      * @param {Number} skewY
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'skew': {
       enumerable: true,
@@ -507,10 +571,13 @@
       }
     },
 
-    /* Skew matrix and ignore translation.
+    /**
+     * Skew matrix and ignore translation.
+     * @name deltaSkew
      * @param {Number} skewX
      * @param {Number} skewY
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'deltaSkew': {
       enumerable: true,
@@ -530,9 +597,12 @@
       }
     },
 
-    /* Add a matrix with the current matrix.
+    /**
+     * Add a matrix with the current matrix.
+     * @name add
      * @param {Matrix} m
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'add': {
       enumerable: true,
@@ -552,7 +622,9 @@
       }
     },
 
-    /* Performs the opposite transformation of the original matrix.
+    /**
+     * Performs the opposite transformation of the original matrix.
+     * @name invert
      * @return {Matrix}
      */
     'invert': {
@@ -571,10 +643,13 @@
       }
     },
 
-    /* Returns the result of applying the geometric transformation
+    /**
+     * Returns the result of applying the geometric transformation
      * represented by the Matrix object to the specified point.
+     * @name transformPoint
      * @param {Point} pt
      * @return {Point}
+     * @throws {TypeError}
      */
     'transformPoint': {
       enumerable: true,
@@ -589,8 +664,11 @@
       }
     },
 
-    /* Same as transformPoint, but modifies the point object argument.
-     * @internal
+    /**
+     * Same as transformPoint, but modifies the point object argument.
+     * @name __transformPoint
+     * @throws {TypeError}
+     * @private
      */
     '__transformPoint': {
       enumerable: false,
@@ -608,11 +686,14 @@
       }
     },
 
-    /* Given a point in the pretransform coordinate space, returns
+    /**
+     * Given a point in the pretransform coordinate space, returns
      * the coordinates of that point after the transformation occurs.
      * Unlike 'transformPoint', does not consider translation.
+     * @name deltaTransformPoint
      * @param {Point} pt
      * @return {Point}
+     * @throws {TypeError}
      */
     'deltaTransformPoint': {
       enumerable: true,
@@ -627,8 +708,11 @@
       }
     },
 
-    /* Same as deltaTransformPoint, but modifies the point object argument.
-     * @internal
+    /**
+     * Same as deltaTransformPoint, but modifies the point object argument.
+     * @name __deltaTransformPoint
+     * @throws {TypeError}
+     * @private
      */
     '__deltaTransformPoint': {
       enumerable: false,
@@ -645,7 +729,11 @@
         return point;
       }
     },
-    
+
+    /**
+     * @name rotateAroundExternalPoint
+     * @throws {TypeError}
+     */
     'rotateAroundExternalPoint': {
       enumerable: true,
       writable: false,
@@ -678,7 +766,11 @@
         return this.multiply(m).translate(pt.x, pt.y);
       }
     },
-    
+
+    /**
+     * @name rotateAroundInternalPoint
+     * @throws {TypeError}
+     */
     'rotateAroundInternalPoint': {
       enumerable: true,
       writable: false,
@@ -695,7 +787,11 @@
         return this.rotateAroundExternalPoint(pt, radians);
       }
     },
-    
+
+    /**
+     * @name matchInternalPointWithExternal
+     * @throws {TypeError}
+     */
     'matchInternalPointWithExternal': {
       enumerable: true,
       writable: false,
@@ -714,9 +810,12 @@
       }
     },
 
-    /* Update matrix 'in-between' this and another matrix
+    /**
+     * Update matrix 'in-between' this and another matrix
      * given a value of t bewteen 0 and 1.
+     * @name interpolate
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'interpolate': {
       enumerable: true,
@@ -743,10 +842,13 @@
    * CLASS FUNCTIONS
    */
   
-  /* Check if a given object contains a numeric matrix properties.
+  /**
+   * Check if a given object contains a numeric matrix properties.
    * Does not check if a matrix is actually a doodle.geom.matrix.
-   * @param {Matrix} m Object with numeric matrix parameters.
+   * @name isMatrix
+   * @param {Object} m
    * @return {Boolean}
+   * @static
    */
   isMatrix = doodle.geom.Matrix.isMatrix = function (m) {
     return (m !== undefined && m !== null &&
@@ -756,12 +858,23 @@
   };
 
   /*DEBUG*/
-  check_matrix_type = doodle.utils.types.check_matrix_type = function (m, caller_name) {
-    if (!isMatrix(m)) {
-      caller_name = (caller_name === undefined) ? "check_matrix_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a matrix.");
-    } else {
+  /**
+   * @name check_matrix_type
+   * @param {Object} obj
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_matrix_type = doodle.utils.types.check_matrix_type = function (obj, caller, param) {
+    if (isMatrix(obj)) {
       return true;
+    } else {
+      caller = (caller === undefined) ? "check_matrix_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Matrix.");
     }
   };
   /*END_DEBUG*/

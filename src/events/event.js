@@ -16,15 +16,15 @@
       /*END_DEBUG*/
       isEvent;
   
-  /* Super constructor
+  /**
+   * @class Event
+   * @extends Object
    * @param {String} type
    * @param {Boolean} bubbles = false
    * @param {Boolean} cancelable = false
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
-   * @return {Object}
+   * @return {Event}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.Event = function (type, bubbles, cancelable) {
     var event = Object.create(event_prototype),
@@ -58,9 +58,12 @@
           __cancelNow = false;
 
       /**
+       * @name copy_event_properties
        * @param {Event} evt Event to copy properties from.
        * @param {?Node|Boolean} resetTarget Set new event target or null.
        * @param {String|Boolean} resetType Set new event type.
+       * @throws {TypeError}
+       * @private
        */
       copy_event_properties = function (evt, resetTarget, resetType) {
         /*DEBUG*/
@@ -103,12 +106,23 @@
       };
       
       return {
+        /**
+         * @name type
+         * @return {String} [read-only]
+         * @property
+         */
         'type': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_type; }
         },
-        
+
+        /**
+         * @name __setType
+         * @param {String} typeArg
+         * @throws {TypeError}
+         * @private
+         */
         '__setType': {
           enumerable: false,
           value: function (typeArg) {
@@ -118,19 +132,34 @@
             evt_type = typeArg;
           }
         },
-        
+
+        /**
+         * @name bubbles
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'bubbles': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_bubbles; }
         },
-        
+
+        /**
+         * @name cancelable
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'cancelable': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_cancelable; }
         },
-        
+
+        /**
+         * @name cancelBubble
+         * @param {Boolean} cancelArg
+         * @throws {TypeError}
+         */
         'cancelBubble': {
           enumerable: true,
           configurable: false,
@@ -143,8 +172,12 @@
           }
         },
         
-        /* test if event propagation should stop after this node
-         * @internal
+        /**
+         * Test if event propagation should stop after this node.
+         * @name __cancel
+         * @return {Boolean} [read-only]
+         * @property
+         * @private
          */
         '__cancel': {
           enumerable: false,
@@ -152,24 +185,35 @@
           get: function () { return __cancel; }
         },
         
-        /* test if event propagation should stop immediately,
-         * ignore other handlers on this node
-         * @internal
+        /**
+         * Test if event propagation should stop immediately,
+         * ignore other handlers on this node.
+         * @name __cancelNow
+         * @return {Boolean} [read-only]
+         * @property
+         * @private
          */
         '__cancelNow': {
           enumerable: false,
           configurable: false,
           get: function () { return __cancelNow; }
         },
-        
+
+        /**
+         * @name currentTarget
+         * @return {Node} [read-only]
+         * @property
+         */
         'currentTarget': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_currentTarget; }
         },
         
-        /* currentTarget is read-only, but damnit I need to set it sometimes
-         * @internal
+        /**
+         * @name __setCurrentTarget
+         * @param {Node} targetArg
+         * @private
          */
         '__setCurrentTarget': {
           enumerable: false,
@@ -178,14 +222,22 @@
             return this;
           }
         },
-        
+
+        /**
+         * @name target
+         * @return {Node} [read-only]
+         * @property
+         */
         'target': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_target; }
         },
 
-        /* @internal
+        /**
+         * @name __setTarget
+         * @param {Node} targetArg
+         * @private
          */
         '__setTarget': {
           enumerable: false,
@@ -194,14 +246,23 @@
             return this;
           }
         },
-        
+
+        /**
+         * @name eventPhase
+         * @return {Number} [read-only]
+         * @property
+         */
         'eventPhase': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_eventPhase; }
         },
 
-        /* @internal
+        /**
+         * @name __setEventPhase
+         * @param {Number} phaseArg
+         * @throws {TypeError}
+         * @private
          */
         '__setEventPhase': {
           enumerable: false,
@@ -213,27 +274,47 @@
             return this;
           }
         },
-        
+
+        /**
+         * @name srcElement
+         * @return {EventDispatcher} [read-only]
+         * @property
+         */
         'srcElement': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_srcElement; }
         },
-        
+
+        /**
+         * @name timeStamp
+         * @return {Date} [read-only]
+         * @property
+         */
         'timeStamp': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_timeStamp; }
         },
-        
+
+        /**
+         * @name returnValue
+         * @return {*} [read-only]
+         * @property
+         */
         'returnValue': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_returnValue; }
         },
         
-        /*
-         * METHODS
+        /**
+         * @name initEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @return {Event}
+         * @throws {TypeError}
          */
         'initEvent': {
           enumerable: true,
@@ -247,7 +328,6 @@
             check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
             check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
             /*END_DEBUG*/
-
             evt_type = typeArg;
             evt_bubbles = canBubbleArg;
             evt_cancelable = cancelableArg;
@@ -256,6 +336,9 @@
           }
         },
 
+        /**
+         * @name preventDefault
+         */
         'preventDefault': {
           enumerable: true,
           configurable: false,
@@ -264,6 +347,10 @@
           }
         },
 
+        /**
+         * @name stopPropagation
+         * @throws {Error} If called on event that can not be canceled.
+         */
         'stopPropagation': {
           enumerable: true,
           configurable: false,
@@ -276,6 +363,10 @@
           }
         },
 
+        /**
+         * @name stopImmediatePropagation
+         * @throws {Error} If called on event that can not be canceled.
+         */
         'stopImmediatePropagation': {
           enumerable: true,
           configurable: false,
@@ -289,12 +380,15 @@
           }
         },
 
-        /* Copy the properties from another Event.
+        /**
+         * Copy the properties from another Event.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyEventProperties
          * @param {Event} evt
-         * @param {Node=} resetTarget
-         * @param {String=} resetType
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @throws {TypeError}
+         * @private
          */
         '__copyEventProperties': {
           enumerable: false,
@@ -350,6 +444,9 @@
   
   
   event_static_properties = {
+    /**
+     * @name toString
+     */
     'toString': {
       enumerable: true,
       writable: false,
@@ -361,115 +458,246 @@
   };//end event_static_properties
 
   event_prototype = Object.create({}, {
+    /**
+     * @name CAPTURING_PHASE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'CAPTURING_PHASE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 1
     },
+
+    /**
+     * @name AT_TARGET
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'AT_TARGET': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 2
     },
+
+    /**
+     * @name BUBBLING_PHASE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'BUBBLING_PHASE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 3
     },
-    
+
+    /**
+     * @name MOUSEDOWN
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEDOWN': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 1
     },
+
+    /**
+     * @name MOUSEUP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEUP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 2
     },
+
+    /**
+     * @name MOUSEOVER
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEOVER': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 4
     },
+
+    /**
+     * @name MOUSEOUT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEOUT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 8
     },
+
+    /**
+     * @name MOUSEMOVE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEMOVE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 16
     },
+
+    /**
+     * @name MOUSEDRAG
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEDRAG': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 32
     },
+
+    /**
+     * @name CLICK
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'CLICK': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 64
     },
+
+    /**
+     * @name DBLCLICK
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'DBLCLICK': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 128
     },
+
+    /**
+     * @name KEYDOWN
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'KEYDOWN': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 256
     },
+
+    /**
+     * @name KEYUP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'KEYUP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 512
     },
+
+    /**
+     * @name KEYPRESS
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'KEYPRESS': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 1024
     },
+
+    /**
+     * @name DRAGDROP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'DRAGDROP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 2048
     },
+
+    /**
+     * @name FOCUS
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'FOCUS': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 4096
     },
+
+    /**
+     * @name BLUR
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'BLUR': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 8192
     },
+
+    /**
+     * @name SELECT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'SELECT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 16384
     },
+
+    /**
+     * @name CHANGE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'CHANGE': {
       enumerable: true,
       writable: false,
@@ -482,10 +710,13 @@
    * CLASS METHODS
    */
 
-  /* Test if an object is an event of any kind (Event/MouseEvent/etc).
+  /**
+   * Test if an object is an event of any kind (Event/MouseEvent/etc).
    * Returns true on Doodle events as well as DOM events.
+   * @name isEvent
    * @param {Event} event
    * @return {Boolean}
+   * @static
    */
   isEvent = doodle.Event.isEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
@@ -503,6 +734,16 @@
   };
 
   /*DEBUG*/
+  /**
+   * @name check_event_type
+   * @param {Event} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_event_type = doodle.utils.types.check_event_type = function (event, caller, param) {
     if (isEvent(event)) {
       return true;

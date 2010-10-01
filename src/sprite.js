@@ -15,9 +15,13 @@
       //lookup help
       doodle_Rectangle = doodle.geom.Rectangle;
 
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /**
+	 * An node to display.
+   * @class Sprite
+	 * @extends Node
+   * @param {String|Function} id|initializer Name or initialization function.
+   * @return {Sprite} A sprite object.
+	 * @throws {SyntaxError} Invalid parameters.
    */
   doodle.Sprite = function (id) {
     //only pass id if string, an init function will be called later
@@ -36,21 +40,25 @@
           extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
       
       return {
-        /* The graphics object contains drawing operations to be stored in draw_commands.
+        /**
+         * The graphics object contains drawing operations to be stored in draw_commands.
          * Objects and Arrays are passed by reference, so these will be modified
+         * @name graphics
+         * @return {Graphics}
+         * @property
          */
         'graphics': {
           enumerable: false,
           configurable: false,
           value:  Object.create(doodle.Graphics.call(sprite, draw_commands, extrema))
         },
-        
-        /*
-         * PROPERTIES
-         */
 
-        /* Indicates the width of the sprite, in pixels.
-         * @param {Number}
+        /**
+         * Indicates the width of the sprite, in pixels.
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'width': (function () {
           var width = 0;
@@ -69,8 +77,12 @@
           };
         }()),
 
-        /* Indicates the height of the sprite, in pixels.
-         * @param {Number}
+        /**
+         * Indicates the height of the sprite, in pixels.
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'height': (function () {
           var height = 0;
@@ -89,9 +101,12 @@
           };
         }()),
 
-        /*
+        /**
+         * @name getBounds
          * @param {Node} targetCoordSpace
          * @return {Rectangle}
+         * @throws {TypeError}
+				 * @override
          */
         'getBounds': {
           enumerable: true,
@@ -108,6 +123,8 @@
         /* Same as getBounds, but reuses an internal rectangle.
          * Since it's passed by reference, you don't want to modify it, but
          * it's more efficient for checking bounds.
+         * @name __getBounds
+         * @private
          */
         '__getBounds': {
           enumerable: false,
@@ -188,18 +205,30 @@
         }()),
         **/
 
+        /**
+         * @name hitTestObject
+				 * @param {Node} node
+         * @return {Boolean}
+         * @throws {TypeError}
+         */
         'hitTestObject': {
           enumerable: true,
           writable: true,
           configurable: false,
-          value: function (obj) {
+          value: function (node) {
             /*DEBUG*/
-            check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
+            check_node_type(node, this+'.hitTestObject', '*sprite*');
             /*END_DEBUG*/
-            return this.getBounds(this).intersects(obj.getBounds(this));
+            return this.getBounds(this).intersects(node.getBounds(this));
           }
         },
 
+        /**
+         * @name hitTestPoint
+				 * @param {Point} pt
+         * @return {Boolean}
+         * @throws {TypeError}
+         */
         'hitTestPoint': {
           enumerable: true,
           writable: true,
@@ -212,15 +241,12 @@
           }
         },
 
-        /*
-         * METHODS
-         */
-
         /* When called execute all the draw commands in the stack.
          * This draws from screen 0,0 - transforms are applied when the
          * entire scene graph is drawn.
-         * @private
+         * @name __draw
          * @param {Context} ctx 2d canvas context to draw on.
+         * @private
          */
         '__draw': {
           enumerable: false,
@@ -251,6 +277,12 @@
 
   
   sprite_static_properties = {
+    /**
+     * @name rotation
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'rotation': (function () {
       var to_degrees = 180 / Math.PI,
           to_radians = Math.PI / 180;
@@ -269,12 +301,11 @@
       };
     }()),
 
-    /*
-     * METHODS
-     */
-
-    /* Returns the string representation of the specified object.
-     * @param {String}
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
+     * @return {String}
+     * @override
      */
     'toString': {
       enumerable: false,
@@ -285,12 +316,15 @@
       }
     },
 
-    /* Updates the position and size of this sprite.
+    /**
+     * Updates the position and size of this sprite.
+     * @name compose
      * @param {Number} x
      * @param {Number} y
      * @param {Number} width
      * @param {Number} height
      * @return {Sprite}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: false,
@@ -316,7 +350,13 @@
   /*
    * CLASS METHODS
    */
-  
+
+  /**
+   * @name isSprite
+   * @param {Object} obj
+   * @return {Boolean}
+   * @static
+   */
   isSprite = doodle.Sprite.isSprite = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
       return false;
@@ -324,9 +364,13 @@
     return (obj.toString() === '[object Sprite]');
   };
 
-  /* Check if object inherits from Sprite.
+  /**
+   * Check if object inherits from Sprite.
+   * If it doesn't return false.
+   * @name inheritsSprite
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsSprite = doodle.Sprite.inheritsSprite = function (obj) {
     while (obj) {
@@ -343,13 +387,23 @@
   };
 
   /*DEBUG*/
-  check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, param) {
+  /**
+   * @name check_sprite_type
+   * @param {Sprite} sprite
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, params) {
     if (inheritsSprite(sprite)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_sprite_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must inherit from Sprite.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must inherit from Sprite.");
     }
   };
   /*END_DEBUG*/

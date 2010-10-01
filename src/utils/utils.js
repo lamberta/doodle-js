@@ -1,27 +1,70 @@
 /*globals doodle, document*/
 
+/**
+ * Doodle utilty functions.
+ * @class utils
+ * @static
+ */
 doodle.utils = Object.create({}, {
 
   /*
    * COLOR UTILS
    */
-  
-  'rgb_to_hex': {
+
+  /**
+   * @name hex_to_rgb
+   * @param {Color} color
+   * @return {Array} [r, g, b]
+   * @throws {TypeError}
+   * @static
+   */
+  'hex_to_rgb': {
     enumerable: true,
     writable: false,
     configurable: false,
-    value: function (r, g, b) {
+    value:function (color) {
+      //number in octal format or string prefixed with #
+      if (typeof color === 'string') {
+        color = (color[0] === '#') ? color.slice(1) : color;
+        color = parseInt(color, 16);
+      }
       /*DEBUG*/
-      var check_number_type = doodle.utils.types.check_number_type;
-      check_number_type(r, 'rgb_to_hex', '*r*, g, b');
-      check_number_type(g, 'rgb_to_hex', 'r, *g*, b');
-      check_number_type(b, 'rgb_to_hex', 'r, g, *b*');
+      doodle.utils.types.check_number_type(color, 'hex_to_rgb', "*color{0xffffff|#ffffff}*");
       /*END_DEBUG*/
-      var hex_color = (b | (g << 8) | (r << 16)).toString(16);
-      return '#'+ String('000000'+hex_color).slice(-6); //pad out
+      return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
     }
   },
 
+  /**
+   * @name hex_to_rgb_str
+   * @param {Color} color
+   * @param {Number} alpha
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
+  'hex_to_rgb_str': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: function (color, alpha) {
+      var doodle_utils = doodle.utils;
+      alpha = (alpha === undefined) ? 1 : alpha;
+      /*DEBUG*/
+      doodle.utils.types.check_number_type(alpha, 'hex_to_rgb_str', '*color*');
+      /*END_DEBUG*/
+      color = doodle_utils.hex_to_rgb(color);
+      return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
+    }
+  },
+  
+  /**
+   * @name rgb_str_to_hex
+   * @param {String} rgb_str
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
   'rgb_str_to_hex': {
     enumerable: true,
     writable: false,
@@ -39,6 +82,78 @@ doodle.utils = Object.create({}, {
     }
   },
 
+  /**
+   * @name rgb_str_to_rgb
+   * @param {Color} color
+   * @return {Array}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
+   * @static
+   */
+  'rgb_str_to_rgb': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: (function () {
+      var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?(.*)\\)$");
+      return function (color) {
+        /*DEBUG*/
+        doodle.utils.types.check_string_type(color, 'rgb_str_to_rgb', '*color*');
+        /*END_DEBUG*/
+        color = color.trim().match(rgb_regexp);
+        /*DEBUG*/
+        //if it's not an array, it didn't parse correctly
+        if (!Array.isArray(color)) {
+          throw new SyntaxError("rgb_str_to_rgb(*color*): Invalid rgb color format: 'rgba(n, n, n, n)'.");
+        }
+        /*END_DEBUG*/
+        var rgb = [parseInt(color[1], 10),
+                   parseInt(color[2], 10),
+                   parseInt(color[3], 10)],
+            alpha = parseFloat(color[4]);
+        if (typeof alpha === 'number' && !isNaN(alpha)) {
+          rgb.push(alpha);
+        }
+        return rgb;
+      };
+    }())
+  },
+  
+  /**
+   * @name rgb_to_hex
+   * @param {Number} r
+   * @param {Number} g
+   * @param {Number} b
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
+  'rgb_to_hex': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: function (r, g, b) {
+      /*DEBUG*/
+      var check_number_type = doodle.utils.types.check_number_type;
+      check_number_type(r, 'rgb_to_hex', '*r*, g, b');
+      check_number_type(g, 'rgb_to_hex', 'r, *g*, b');
+      check_number_type(b, 'rgb_to_hex', 'r, g, *b*');
+      /*END_DEBUG*/
+      var hex_color = (b | (g << 8) | (r << 16)).toString(16);
+      return '#'+ String('000000'+hex_color).slice(-6); //pad out
+    }
+  },
+
+  /**
+   * @name rgb_to_rgb_str
+   * @param {Number} r
+   * @param {Number} g
+   * @param {Number} b
+   * @param {Number} a
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
   'rgb_to_rgb_str': {
     enumerable: true,
     writable: false,
@@ -61,70 +176,16 @@ doodle.utils = Object.create({}, {
     }
   },
 
-  'rgb_str_to_rgb': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: (function () {
-      var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?(.*)\\)$");
-      return function (color) {
-        /*DEBUG*/
-        doodle.utils.types.check_string_type(color, 'rgb_str_to_rgb', '*color*');
-        /*END_DEBUG*/
-        color = color.trim().match(rgb_regexp);
-        /*DEBUG*/
-        //if it's not an array, it didn't parse correctly
-        doodle.utils.types.check_array_type(color, 'rgb_str_to_rgb', "*color{'rgba(n, n, n, n)'}*");
-        /*END_DEBUG*/
-        var rgb = [parseInt(color[1], 10),
-                   parseInt(color[2], 10),
-                   parseInt(color[3], 10)],
-            alpha = parseFloat(color[4]);
-        if (typeof alpha === 'number' && !isNaN(alpha)) {
-          rgb.push(alpha);
-        }
-        return rgb;
-      };
-    }())
-  },
-  
-  'hex_to_rgb': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value:function (color) {
-      //number in octal format or string prefixed with #
-      if (typeof color === 'string') {
-        color = (color[0] === '#') ? color.slice(1) : color;
-        color = parseInt(color, 16);
-      }
-      /*DEBUG*/
-      doodle.utils.types.check_number_type(color, 'hex_to_rgb', "*color{0xffffff|#ffffff}*");
-      /*END_DEBUG*/
-      return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
-    }
-  },
-
-  'hex_to_rgb_str': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (color, alpha) {
-      var doodle_utils = doodle.utils;
-      alpha = (alpha === undefined) ? 1 : alpha;
-      /*DEBUG*/
-      doodle.utils.types.check_number_type(alpha, 'hex_to_rgb_str', '*color*');
-      /*END_DEBUG*/
-      color = doodle_utils.hex_to_rgb(color);
-      return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
-    }
-  },
-
   /*
    * DOM ACCESS
    */
 
-  /* Returns HTML element from id name or element itself.
+  /**
+   * Returns HTML element from id name or element itself.
+   * @name get_element
+   * @param {HTMLElement|String} element
+   * @return {HTMLElement}
+   * @static
    */
   'get_element': {
     enumerable: true,
@@ -142,7 +203,16 @@ doodle.utils = Object.create({}, {
     }
   },
 
-  /* Returns css property of element, it's own or inherited.
+  /**
+   * Returns css property of element, it's own or inherited.
+   * @name get_style_property
+   * @param {HTMLElement} element
+   * @param {String} property
+   * @param {Boolean} useComputedStyle
+   * @return {*}
+   * @throws {TypeError}
+   * @throws {ReferenceError}
+   * @static
    */
   'get_style_property': {
     enumerable: true,
@@ -151,7 +221,8 @@ doodle.utils = Object.create({}, {
     value: function (element, property, useComputedStyle) {
       useComputedStyle = (useComputedStyle === undefined) ? true : false;
       /*DEBUG*/
-      doodle.utils.types.check_boolean_type(useComputedStyle, 'get_style_property');
+      doodle.utils.types.check_string_type(property, 'get_style_property', 'element, *property*, useComputedStyle');
+      doodle.utils.types.check_boolean_type(useComputedStyle, 'get_style_property', 'element, property, *useComputedStyle*');
       /*END_DEBUG*/
       try {
         if (useComputedStyle && document.defaultView && document.defaultView.getComputedStyle) {
@@ -169,9 +240,16 @@ doodle.utils = Object.create({}, {
     }
   },
   
-  /* Returns property of an element.
-   * CSS properties take precedence over HTML attributes.
-   * @param type {String} 'int'|'float' Return type.
+  /**
+   * Returns property of an element. CSS properties take precedence over HTML attributes.
+   * @name get_element_property
+   * @param {HTMLElement} element
+   * @param {String} property
+   * @param {String} returnType 'int'|'float' Return type.
+   * @param {Boolean} useComputedStyle
+   * @return {*}
+   * @throws {ReferenceError}
+   * @static
    */
   'get_element_property': {
     enumerable: true,
@@ -220,8 +298,16 @@ doodle.utils = Object.create({}, {
     }
   },
 
-  /*
-   * @param type {String} 'css'|'html' Set CSS property or HTML attribute.
+  /**
+   * @name set_element_property
+   * @param {HTMLElement} element
+   * @param {String} property
+   * @param {*} value
+   * @param {String} type 'css'|'html' Set CSS property or HTML attribute.
+   * @return {*}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
+   * @static
    */
   'set_element_property': {
     enumerable: true,
@@ -252,11 +338,15 @@ doodle.utils = Object.create({}, {
    * SCENE GRAPH
    */
   
-  /* Creates a scene graph path from a given node and all it's descendants.
+  /**
+   * Creates a scene graph path from a given node and all it's descendants.
+   * @name create_scene_path
    * @param {Node} node
-   * @param {Array=} array Array to store the path nodes in.
-   * @param {Boolean=} clearArray Empty array passed as parameter before storing nodes in it.
+   * @param {Array} array Array to store the path nodes in.
+   * @param {Boolean} clearArray Empty array passed as parameter before storing nodes in it.
    * @return {Array} The array passed to the function (modified in place).
+   * @throws {TypeError}
+   * @static
    */
   'create_scene_path': {
     enumerable: true,
@@ -286,121 +376,3 @@ doodle.utils = Object.create({}, {
   }
   
 });
-
-
-/*DEBUG*/
-
-/*
- * TYPE CHECKING
- */
-doodle.utils.types = Object.create({}, (function () {
-
-  /* @param {String} type Name of type.
-   * @param {String=} caller Name of calling function.
-   * @param {String=} params Parameter names for function.
-   */
-  function throw_type_error (type, caller, params) {
-    if (typeof type !== 'string') {
-      throw new TypeError("throw_type_error: type must be a string.");
-    }
-    caller = (caller === undefined) ? "throw_type_error" : caller;
-    params = (params === undefined) ? "" : '('+params+')';
-    throw new TypeError(caller + params +": Parameter must be a "+ type +".");
-  }
-  
-  return {
-    /* Type-checking for a number. Throws a TypeError if the test fails.
-     * @param {Object} n Object to test.
-     * @param {String=} caller Function name to print in error message.
-     * @param {String=} param Parameters to print in error message.
-     * @return {Boolean}
-     */
-    'check_number_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (n, caller, params) {
-        return (typeof n === 'number') ?
-          true : throw_type_error('number', caller || 'check_number_type', params);
-      }
-    },
-
-    'check_boolean_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (bool, caller, params) {
-        return (typeof bool === 'boolean') ?
-          true : throw_type_error('boolean', caller || 'check_boolean_type', params);
-      }
-    },
-
-    'check_string_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (str, caller, params) {
-        return (typeof str === 'string') ?
-          true : throw_type_error('string', caller || 'check_string_type', params);
-      }
-    },
-
-    'check_function_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (fn, caller, params) {
-        return (typeof fn === 'function') ?
-          true : throw_type_error('function', caller || 'check_function_type', params);
-      }
-    },
-
-    'check_array_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (array, caller, params) {
-        return (Array.isArray(array)) ?
-          true : throw_type_error('array', caller || 'check_array_type', params);
-      }
-    },
-
-    'check_canvas_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (canvas, caller, params) {
-        return (canvas && typeof canvas.toString === 'function' &&
-                canvas.toString() === '[object HTMLCanvasElement]') ?
-          true : throw_type_error('canvas element', caller || 'check_canvas_type', params);
-      }
-    },
-
-    'check_context_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (ctx, caller, params) {
-        return (ctx && typeof ctx.toString === 'function' &&
-                ctx.toString() === '[object CanvasRenderingContext2D]') ?
-          true : throw_type_error('canvas context', caller || 'check_context_type', params);
-      }
-    },
-
-    'check_block_element': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (element, caller, params) {
-        try {
-          return (doodle.utils.get_style_property(element, 'display') === 'block') ?
-            true : throw_type_error('HTML block element', caller || 'check_block_type', params);
-        } catch (e) {
-          throw_type_error('HTML block element', caller || 'check_block_type', params);
-        }
-      }
-    }
-    
-  };
-}()));
-/*END_DEBUG*/

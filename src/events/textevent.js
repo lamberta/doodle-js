@@ -14,18 +14,18 @@
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class TextEvent
+   * @extends UIEvent
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {String} data
    * @param {Number} inputMode
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {TextEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
     var textevent,
@@ -78,8 +78,10 @@
       var evt_data = '',
           evt_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
 
-      
-      /* @param {TextEvent} evt TextEvent to copy properties from.
+      /**
+       * @name copy_textevent_properties
+       * @param {TextEvent} evt TextEvent to copy properties from.
+       * @private
        */
       copy_textevent_properties = function (evt) {
         /*DEBUG*/
@@ -90,18 +92,38 @@
       };
       
       return {
+        /**
+         * @name data
+         * @return {String} [read-only]
+         * @property
+         */
         'data': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_data; }
         },
 
+        /**
+         * @name inputMode
+         * @return {Number} [read-only]
+         * @property
+         */
         'inputMode': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_inputMode; }
         },
 
+        /**
+         * @name initTextEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} view
+         * @param {String} dataArg
+         * @param {Number} inputModeArg
+         * @return {TextEvent}
+         */
         'initTextEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, dataArg, inputModeArg) {
             //parameter defaults
@@ -125,10 +147,15 @@
           }
         },
 
-        /* Copy the properties from another TextEvent.
+        /**
+         * Copy the properties from another TextEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyTextEventProperties
          * @param {TextEvent} evt
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {TextEvent}
+         * @private
          */
         '__copyTextEventProperties': {
           enumerable: false,
@@ -178,13 +205,16 @@
   
   
   textevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object TextEvent]";
-      }
+      value: function () { return "[object TextEvent]"; }
     }
   };
 
@@ -192,6 +222,13 @@
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is a TextEvent.
+   * @name isTextEvent
+   * @param {TextEvent} event
+   * @return {Boolean}
+   * @static
+   */
   isTextEvent = doodle.TextEvent.isTextEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -202,13 +239,23 @@
   };
 
   /*DEBUG*/
-  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, param) {
+  /**
+   * @name check_textevent_type
+   * @param {TextEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, params) {
     if (isTextEvent(event)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_textevent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an TextEvent.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must be an TextEvent.");
     }
   };
   /*END_DEBUG*/
