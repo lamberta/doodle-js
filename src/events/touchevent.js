@@ -20,7 +20,7 @@
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {Number} detail
    * @param {Number} screenX
    * @param {Number} screenY
@@ -368,7 +368,7 @@
           value: function (key) {
             /*DEBUG*/
             check_string_type(key, this+'.getModifierState', '*key*');
-            /*DEBUG*/
+            /*END_DEBUG*/
             switch (key) {
             case 'Alt':
               return evt_altKey;

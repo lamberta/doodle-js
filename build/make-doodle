@@ -35,10 +35,10 @@ WARNING_LEVEL=1 #quiet, [default], verbose
 function build_full {
     cat ./build/prologue.js > "$DEBUG_OUT_FILE"
     cat ./src/utils/compat/es5.js >> "$DEBUG_OUT_FILE"
+    cat ./src/utils/utils.js >> "$DEBUG_OUT_FILE"
     echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
     cat ./src/utils/types.js >> "$DEBUG_OUT_FILE"
     echo "/*END_DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
-    cat ./src/utils/utils.js >> "$DEBUG_OUT_FILE"
     
     echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
     cat "$STATS_FILE" >> "$DEBUG_OUT_FILE"
@@ -54,7 +54,7 @@ function build_full {
     cat ./src/events/event.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/uievent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/mouseevent.js >> "$DEBUG_OUT_FILE"
-    #cat ./src/events/touchevent.js >> "$DEBUG_OUT_FILE"
+    cat ./src/events/touchevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/textevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/keyboardevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/constants.js >> "$DEBUG_OUT_FILE"
