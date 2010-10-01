@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Doodle.js - API: Rectangle</title>
+<link href="./style/reset.css" rel="stylesheet" type="text/css">
+<link href="./style/main.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="./style/main.js"></script>
+</head>
+<body>
+
+<nav>
+<ul>
+<li>Display</li>
+<li>ElementNode</li>
+<li>Event</li>
+<li>EventDispatcher</li>
+<li>GradientType</li>
+<li>Keyboard</li>
+<li>KeyboardEvent</li>
+<li>Layer</li>
+<li>LineCap</li>
+<li>LineJoin</li>
+<li>Matrix</li>
+<li>MouseEvent</li>
+<li>Node</li>
+<li>Pattern</li>
+<li>Point</li>
+<li>Rectangle</li>
+<li>Sprite</li>
+<li>TextEvent</li>
+<li>TouchEvent</li>
+<li>UIEvent</li>
+<li>utils</li>
+<li>utils.types</li></ul>
+</nav>
+<div class="main">
+<h1>doodle.Rectangle</h1>
+
+<section>
+<h2>Description:</h2>
+<dl>
+<dt><dfn>Rectangle</dfn> (x:Number, y:Number, width:Number, height:Number) :Rectangle</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Inheritance</h3>
+<ol>
+<li>Object</li>
+</ol>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:Number &#8211; </li>
+<li>y:Number &#8211; </li>
+<li>width:Number &#8211; </li>
+<li>height:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2>Properties</h2>
+<dl>
+<dt><dfn>bottom</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>height</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>left</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>right</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>top</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>width</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>x</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>y</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Methods</h2>
+<dl>
+<dt><dfn>union</dfn> (rect:Rectangle) :Rectangle</dt>
+<dd>
+<p>Adds two rectangles together to create a new Rectangle object, by filling in the horizontal and vertical space between the two.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>rect:Rectangle &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>offset</dfn> (dx:Number, dy:Number) :Rectangle</dt>
+<dd>
+<p>Adjusts the location of the rectangle, as determined by its top-left corner, by the specified amounts.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>dx:Number &#8211; </li>
+<li>dy:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>isEmpty</dfn> () :Boolean</dt>
+<dd>
+<p>Determines whether or not this Rectangle object is empty.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>intersects</dfn> (rect:Rectangle) :Boolean</dt>
+<dd>
+<p>Determines whether the rectangle argument intersects with this rectangle.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>rect:Rectangle &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>containsRect</dfn> (rect:Rectangle) :Boolean</dt>
+<dd>
+<p>Determines whether the rectangle argument is contained within this rectangle.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>rect:Rectangle &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>equals</dfn> (rect:Rectangle) :Boolean</dt>
+<dd>
+<p>Determines whether the rectangle argument is equal to this rectangle.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>rect:Rectangle &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>contains</dfn> (x:Number, y:Number) :Boolean</dt>
+<dd>
+<p>Determines whether the specified point is contained within the rectangular region defined by this Rectangle object.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:Number &#8211; </li>
+<li>y:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>containsPoint</dfn> (pt:Point) :Boolean</dt>
+<dd>
+<p>Determines whether the specified point is contained within this rectangle object.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>pt:Point &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>intersection</dfn> (rect:Rectangle) :Rectangle</dt>
+<dd>
+<p>If the rectangle argument intersects with this rectangle, returns the area of intersection as a Rectangle object. If the rectangles do not intersect, this method returns an empty Rectangle object with its properties set to 0.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>rect:Rectangle &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>inflate</dfn> (dx:Number, dy:Number) :Rectangle</dt>
+<dd>
+<p>Increases the size of the rectangle by the specified amounts, in pixels. The center point of the Rectangle object stays the same, and its size increases to the left and right by the dx value, and to the top and the bottom by the dy value.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>dx:Number &#8211; </li>
+<li>dy:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>clone</dfn> () :Rectangle</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>toArray</dfn> () :Array</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Array &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>toString</dfn> () :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>compose</dfn> (x:Number, y:Number, width:Number, height:Number) :Rectangle</dt>
+<dd>
+<p>Sets this rectangle's parameters.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:Number &#8211; </li>
+<li>y:Number &#8211; </li>
+<li>width:Number &#8211; </li>
+<li>height:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Class Functions</h2>
+<dl>
+<dt><dfn>isRect</dfn> (rect:Rectangle) :Boolean</dt>
+<dd>
+<p>Check if a given object contains a numeric rectangle properties including x, y, width, height, top, bottom, right, left. Does not check if a rectangle is actually a doodle.geom.rectangle.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>rect:Rectangle &#8211; Object with numeric rectangle parameters.</li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+</div>
+</body>
+</html>

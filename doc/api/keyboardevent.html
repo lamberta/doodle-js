@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Doodle.js - API: KeyboardEvent</title>
+<link href="./style/reset.css" rel="stylesheet" type="text/css">
+<link href="./style/main.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="./style/main.js"></script>
+</head>
+<body>
+
+<nav>
+<ul>
+<li>Display</li>
+<li>ElementNode</li>
+<li>Event</li>
+<li>EventDispatcher</li>
+<li>GradientType</li>
+<li>Keyboard</li>
+<li>KeyboardEvent</li>
+<li>Layer</li>
+<li>LineCap</li>
+<li>LineJoin</li>
+<li>Matrix</li>
+<li>MouseEvent</li>
+<li>Node</li>
+<li>Pattern</li>
+<li>Point</li>
+<li>Rectangle</li>
+<li>Sprite</li>
+<li>TextEvent</li>
+<li>TouchEvent</li>
+<li>UIEvent</li>
+<li>utils</li>
+<li>utils.types</li></ul>
+</nav>
+<div class="main">
+<h1>doodle.KeyboardEvent</h1>
+
+<section>
+<h2>Description:</h2>
+<dl>
+<dt><dfn>KeyboardEvent</dfn> (type:String, bubbles:Boolean, cancelable:Boolean, view:HTMLElement, keyIdentifier:String, keyLocation:Number, modifiersList:String, repeat:Boolean) :KeyboardEvent</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Inheritance</h3>
+<ol>
+<li>UIEvent</li>
+<li>Event</li>
+<li>Object</li>
+</ol>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:String &#8211; </li>
+<li>bubbles:Boolean &#8211; </li>
+<li>cancelable:Boolean &#8211; </li>
+<li>view:HTMLElement &#8211; </li>
+<li>keyIdentifier:String &#8211; </li>
+<li>keyLocation:Number &#8211; </li>
+<li>modifiersList:String &#8211; White-space separated list of key modifiers.</li>
+<li>repeat:Boolean &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>KeyboardEvent &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2>Properties</h2>
+<dl>
+<dt><dfn>altGraphKey</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>altKey</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>bubbles</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>cancelable</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>charCode</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>ctrlKey</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>currentTarget</dfn> :Node</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>detail</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>eventPhase</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>keyCode</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>keyIdentifier</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>keyLocation</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>layerX</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>layerY</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>metaKey</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>pageX</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>pageY</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>repeat</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>returnValue</dfn> :*</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>* &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>shiftKey</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>srcElement</dfn> :EventDispatcher</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>EventDispatcher &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>target</dfn> :Node</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>timeStamp</dfn> :Date</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Date &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>type</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>view</dfn> :HTMLElement</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>HTMLElement &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>which</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Methods</h2>
+<dl>
+<dt><dfn>cancelBubble</dfn> (cancelArg:Boolean) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>cancelArg:Boolean &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>initEvent</dfn> (typeArg:String, canBubbleArg:Boolean, cancelableArg:Boolean) :Event</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>typeArg:String &#8211; </li>
+<li>canBubbleArg:Boolean &#8211; </li>
+<li>cancelableArg:Boolean &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Event &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>initKeyboardEvent</dfn> (typeArg:String, canBubbleArg:Boolean, cancelableArg:Boolean, viewArg:HTMLElement, keyIdentifierArg:String, keyLocationArg:Number, modifiersListArg:String, repeatArg:Boolean) :Event</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>typeArg:String &#8211; </li>
+<li>canBubbleArg:Boolean &#8211; </li>
+<li>cancelableArg:Boolean &#8211; </li>
+<li>viewArg:HTMLElement &#8211; </li>
+<li>keyIdentifierArg:String &#8211; </li>
+<li>keyLocationArg:Number &#8211; </li>
+<li>modifiersListArg:String &#8211; </li>
+<li>repeatArg:Boolean &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Event &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>initUIEvent</dfn> (typeArg:String, canBubbleArg:Boolean, cancelableArg:Boolean, viewArg:HTMLElement, detailArg:Number) :UIEvent</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>typeArg:String &#8211; </li>
+<li>canBubbleArg:Boolean &#8211; </li>
+<li>cancelableArg:Boolean &#8211; </li>
+<li>viewArg:HTMLElement &#8211; </li>
+<li>detailArg:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>UIEvent &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>preventDefault</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>stopImmediatePropagation</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>Error &#8211; If called on event that can not be canceled.</li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>stopPropagation</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>Error &#8211; If called on event that can not be canceled.</li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>toString</dfn> () :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>getModifierState</dfn> (key:String) :Boolean</dt>
+<dd>
+<p>Queries the state of a modifier using a key identifier.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>key:String &#8211; A modifier key identifier</li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; True if it is a modifier key and the modifier is activated, false otherwise.</li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Constants</h2>
+<dl>
+<dt><dfn>KEY_DOWN</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_JOYSTICK</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_LEFT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_MOBILE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_NUMPAD</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_RIGHT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_STANDARD</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_PRESS</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_UP</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Class Functions</h2>
+<dl>
+<dt><dfn>isKeyboardEvent</dfn> (event:Event) :Boolean</dt>
+<dd>
+<p>Test if an object is a keyboard event.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>event:Event &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+</div>
+</body>
+</html>

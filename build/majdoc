@@ -1,0 +1,571 @@
+#!/bin/bash
+##
+## More-or-less Another Javascript Doc tool
+##
+##
+
+#this script is in the ./build dir
+cd "$(dirname $(readlink -f $0))"
+cd ..
+#file location using a relative path
+PROJECT_HOME="$PWD"
+SRC_HOME="$PROJECT_HOME/src"
+DOC_HOME="$PROJECT_HOME/doc/api"
+
+
+function print_help {
+    echo "Usage: $(basename $0) [options]"
+    echo "  -h      Show this usage guide."
+    echo "  -d      Generate developer docs."
+    echo "  -S=dir  Directory containing source files. [$SRC_HOME]"
+    echo "  -O=dir  Directory to output docs. [$DOC_HOME]"
+    echo "  -C      Doc cleanup."
+}
+
+declare -A CLASS_SRC      #source path
+declare -A CLASS_INHERITS #easier to define relationships here
+declare -A CLASS_DOCS     #store doc records here
+declare -A CLASS_CONSTANTS
+
+#define classes in our source files
+CLASS_SRC['Matrix']="$SRC_HOME/geom/matrix.js"
+CLASS_INHERITS['Matrix']='Object'
+CLASS_SRC['Point']="$SRC_HOME/geom/point.js"
+CLASS_INHERITS['Point']='Object'
+CLASS_SRC['Rectangle']="$SRC_HOME/geom/rectangle.js"
+CLASS_INHERITS['Rectangle']='Object'
+
+CLASS_SRC['EventDispatcher']="$SRC_HOME/eventdispatcher.js"
+CLASS_INHERITS['EventDispatcher']='Object'
+CLASS_SRC['Node']="$SRC_HOME/node.js"
+CLASS_INHERITS['Node']='EventDispatcher:Object'
+CLASS_SRC['Sprite']="$SRC_HOME/sprite.js"
+CLASS_INHERITS['Sprite']='Node:EventDispatcher:Object'
+
+CLASS_SRC['ElementNode']="$SRC_HOME/elementnode.js"
+CLASS_INHERITS['ElementNode']='Node:EventDispatcher:Object'
+CLASS_SRC['Layer']="$SRC_HOME/layer.js"
+CLASS_INHERITS['Layer']='ElementNode:Node:EventDispatcher:Object'
+CLASS_SRC['Display']="$SRC_HOME/display.js"
+CLASS_INHERITS['Display']='ElementNode:Node:EventDispatcher:Object'
+
+CLASS_SRC['Event']="$SRC_HOME/events/event.js"
+CLASS_INHERITS['Event']='Object'
+CLASS_SRC['UIEvent']="$SRC_HOME/events/uievent.js"
+CLASS_INHERITS['UIEvent']='Event:Object'
+CLASS_SRC['MouseEvent']="$SRC_HOME/events/mouseevent.js"
+CLASS_INHERITS['MouseEvent']='UIEvent:Event:Object'
+CLASS_SRC['TextEvent']="$SRC_HOME/events/textevent.js"
+CLASS_INHERITS['TextEvent']='UIEvent:Event:Object'
+CLASS_SRC['KeyboardEvent']="$SRC_HOME/events/keyboardevent.js"
+CLASS_INHERITS['KeyboardEvent']='UIEvent:Event:Object'
+CLASS_SRC['TouchEvent']="$SRC_HOME/events/touchevent.js"
+CLASS_INHERITS['TouchEvent']='UIEvent:Event:Object'
+
+CLASS_CONSTANTS['Event']="$SRC_HOME/events/constants.js"
+CLASS_CONSTANTS['UIEvent']="$SRC_HOME/events/constants.js"
+CLASS_CONSTANTS['MouseEvent']="$SRC_HOME/events/constants.js"
+CLASS_CONSTANTS['TextEvent']="$SRC_HOME/events/constants.js"
+CLASS_CONSTANTS['KeyboardEvent']="$SRC_HOME/events/constants.js"
+CLASS_CONSTANTS['TouchEvent']="$SRC_HOME/events/constants.js"
+#static classes
+CLASS_SRC['utils']="$SRC_HOME/utils/utils.js"
+CLASS_SRC['utils.types']="$SRC_HOME/utils/types.js"
+CLASS_SRC['GradientType']="$SRC_HOME/constants/gradienttype.js"
+CLASS_SRC['Keyboard']="$SRC_HOME/constants/keyboard.js"
+CLASS_SRC['LineCap']="$SRC_HOME/constants/linecap.js"
+CLASS_SRC['LineJoin']="$SRC_HOME/constants/linejoin.js"
+CLASS_SRC['Pattern']="$SRC_HOME/constants/pattern.js"
+
+#parse multi-line doc comments from source file,
+#separate fields with ';' and concat to single line
+function get_doc_records {
+    #grab entire comment between '/**(EOL)' and '*/(EOL)'
+    local doc_records=$(cat "$1" | sed -n -e '\|/\*\*$|,\|\*/$|p' | \
+        #mark opening as @description
+        #replace trailing comment deliminator with end-or-line marker
+        sed -e 's/\/\*\*/@description /g' -e 's/\*\//@EOL/g' | \
+        #replace tab with space, squeeze empties, remove opening '*'
+        tr '\t' ' ' | tr -s [:blank:] | sed -e 's/ \* / /g' | \
+        #mark fields at '@' using ';', delete newlines
+        sed -e 's/ @/;@/g' | tr -d '\n' | \
+        #replace EOL with newline, remove opening ';', squeeze spaces
+        sed -e 's/;@EOL/\n/g' | sed -e 's/^;//g' | tr -s ' ')
+    echo "$doc_records"
+}
+
+function get_field_number {
+    # $1=pattern, $2=line
+    #counts the number of preceding '|'
+    echo $(echo "$2" | grep -o "^.*$1" | sed 's/[^|]//g' | wc -m)
+}
+
+function get_tag_value {
+    # $1=tag_pattern, $2=line
+    local n=$(echo "$2" | grep -o "^.*$1" | sed 's/[^;]//g' | wc -m)
+    if [ "$n" -ne 0 ]; then
+        local field=$(echo "$2" | cut -d ';' -f "$n")
+        echo $(echo "$field" | sed "s/$1 \(.*\)/\1/")
+    fi
+}
+
+## Populates class doc has with doc string lines, using ';' as delinator.
+##
+function populate_docs {
+    local class_name class_docs tmp_name tmp_docs prop
+    local -a doc_overrides
+    
+    ##populate with base class info, non-inheritence
+    #
+    for class_name in "${!CLASS_SRC[@]}"; do
+        #grab everything in src file, will filter out other memberOf's later
+        class_docs=$(get_doc_records "${CLASS_SRC[$class_name]}")
+        #ignore private members unless building developer version
+        if [ -z "$DEV_DOCS" ]; then
+            CLASS_DOCS["$class_name"]=$(echo "$class_docs" | grep -v "@private")
+        fi
+    done
+
+    ##grab any constants a class may have elsewhere
+    #
+    for class_name in "${!CLASS_CONSTANTS[@]}"; do
+        class_docs="${CLASS_DOCS[$class_name]}"
+        tmp_docs=$(get_doc_records "${CLASS_CONSTANTS[$class_name]}" | \
+                   grep "@memberOf $class_name")
+        CLASS_DOCS["$class_name"]=$(echo -e "$class_docs\n$tmp_docs")
+    done
+
+    ##get properties declared in other packages
+    #
+    for class_name in "${!CLASS_DOCS[@]}"; do
+        class_docs=$(echo "${CLASS_DOCS[$class_name]}")
+        for tmp_name in "${!CLASS_DOCS[@]}"; do
+            tmp_docs=$(echo "${CLASS_DOCS[$tmp_name]}" | grep "@memberOf $class_name")
+            class_docs="$class_docs\n$tmp_docs"
+        done
+        #class docs still contain other memberOf's declared in src file
+        CLASS_DOCS["$class_name"]=$(echo -e "$class_docs")
+    done
+    #now filter out any memberOf properties that belong elsewhere
+    for class_name in "${!CLASS_DOCS[@]}"; do
+        #only memberOf's that belong
+        tmp_docs=$(echo "${CLASS_DOCS[$class_name]}" | grep "@memberOf $class_name")
+        class_docs=$(echo "${CLASS_DOCS[$class_name]}" | grep -v "@memberOf")
+        CLASS_DOCS["$class_name"]=$(echo -e "$class_docs\n$tmp_docs")
+    done
+
+    ##get inherited docs that we don't already have definitions for
+    #
+    for class_name in "${!CLASS_DOCS[@]}"; do
+        class_docs="${CLASS_DOCS[$class_name]}"
+
+        #get list of properties this class will override
+        doc_overrides=() #reset array
+        while read line; do
+            prop=$(get_tag_value "@name" "$line")
+            if [ -n "$prop" ]; then
+                doc_overrides+=("$prop")
+            fi
+        done < <(echo "$class_docs" | grep "@override")
+
+        #add parent docs
+        for tmp_name in $(echo "${CLASS_INHERITS[$class_name]}" | tr ":" "\n"); do
+            #Object is just a dummy class
+            if [ tmp_name = 'Object' ]; then
+                break;
+            fi
+            #get parent docs, minus the class description and static
+            tmp_docs=$(echo "${CLASS_DOCS[$tmp_name]}" | \
+                       grep -v "@class" | grep -v "@static" | grep -v "@constant")
+        
+            #weed out properties on our override list
+            for prop in "${doc_overrides[@]}"; do
+                tmp_docs=$(echo "$tmp_docs"  | grep -v "@name $prop")
+            done
+            #whatever is left is now a part of our class docs
+            class_docs=$(echo -e "$class_docs\n$tmp_docs")
+
+            #reset out overrides list since we may have added more
+            doc_overrides=() #reset array
+            while read line; do
+                prop=$(get_tag_value "@name" "$line")
+                if [ -n "$prop" ]; then
+                    doc_overrides+=("$prop")
+                fi
+            done < <(echo "$class_docs" | grep "@override")
+        done
+        
+        #assign updated doc strings back to our hash, remove duplicates
+        CLASS_DOCS["$class_name"]=$(echo "$class_docs" | sort -u)
+    done
+}
+
+##
+# HTML SECTIONS
+##
+
+function print_header {
+    local class_name="$1" header="<!DOCTYPE html>\n<html>\n<head>
+<meta charset=\"utf-8\" />
+<title>Doodle.js - API: $class_name</title>
+<link href=\"./style/reset.css\" rel=\"stylesheet\" type=\"text/css\">
+<link href=\"./style/main.css\" rel=\"stylesheet\" type=\"text/css\">
+<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js\"></script>
+<script type=\"text/javascript\" src=\"./style/main.js\"></script>
+</head>\n<body>\n"
+    echo -e "$header"
+}
+
+function print_footer {
+    local footer="</div>\n</body>\n</html>"
+    echo -e "$footer"
+}
+
+#navigation menu list, main div starts after
+function print_nav_list {
+    local class_name
+    local nav_list="<nav>\n<ul>"
+    for class_name in $(echo "${!CLASS_DOCS[@]}" | tr ' ' '\n' | sort); do
+        nav_list="$nav_list\n<li>$class_name</li>"
+    done
+    nav_list="$nav_list</ul>\n</nav>\n<div class=\"main\">"
+    echo -e "$nav_list"
+}
+
+#class inheritance list
+function print_inherits_list {
+    local class_name="$1" cls_docs="$2" parent cls_inherits
+    #static classes have no inheritance
+    if ! echo "$cls_docs" | grep -q "@static"; then
+        cls_inherits="<h3>Inheritance</h3>\n<ol>"
+        for parent in $(echo "${CLASS_INHERITS[$class_name]}" | tr ":" "\n"); do
+            cls_inherits="$cls_inherits\n<li>$parent</li>"
+        done
+        cls_inherits="$cls_inherits\n</ol>"
+    fi
+    echo -e "$cls_inherits"
+}
+
+#function parameters
+#prints list for 1 or more params, blank if none found or sees a 'property' tag
+function print_params_list {
+    local prop var type desc params_list _ifs="$IFS"
+    #sed regexps
+    local match_var='s/^.*{.*}[[:blank:]]\([[:alnum:]|]*\).*$/\1/'
+    local match_type='s/^.*{\(.*\)}.*$/\1/'
+    local match_desc='s/^.*{.*}[[:blank:]][[:alnum:]|]*[[:blank:]]\(.*\)$/\1/'
+    #if it's a property, return empty string
+    if echo "$1" | grep -q "@property"; then
+        params_list=''
+    else
+        #if no params, then don't create list
+        if echo "$1" | grep -q "@param"; then
+            params_list="<h3>Parameters</h3>\n<ol>"
+            IFS=";"
+            #iterate over fields to grab all params
+            for prop in $(echo "$1"); do
+                if echo "$prop" | grep -q "@param"; then
+                    var=$(echo "$prop" | sed -e "$match_var")
+                    type=$(echo "$prop" | sed -e "$match_type")
+                    desc=$(echo "$prop" | sed -e "$match_desc")
+                    #if they're the same, no match - set empty
+                    if [ "$type" = "$prop" ]; then type=''; fi
+                    if [ "$desc" = "$prop" ]; then desc=''; fi
+                    params_list="$params_list\n<li>$var:$type &#8211; $desc</li>"
+                fi
+            done
+            IFS="$_ifs"
+            params_list="$params_list\n</ol>"
+        fi
+    fi
+    echo -e "$params_list"
+}
+
+#function returns
+#prints list of return parameters, blank if none exist
+function print_returns_list {
+    #if no returns then don't create list
+    if echo "$1" | grep -q "@return"; then
+        local prop type desc _ifs="$IFS" returns_list="<h3>Returns</h3>\n<ul>"
+        local match_type='s/^.*{\(.*\)}.*$/\1/'
+        local match_desc='s/^.*{.*}[[:blank:]]\(.*\)$/\1/'
+        IFS=";"
+        for prop in $(echo "$1"); do
+            if echo "$prop" | grep -q "@return"; then
+                type=$(echo "$prop" | sed -e "$match_type")
+                desc=$(echo "$prop" | sed -e "$match_desc")
+                #if they're the same, no match - set empty
+                if [ "$type" = "$prop" ]; then type=''; fi
+                if [ "$desc" = "$prop" ]; then desc=''; fi
+                returns_list="$returns_list\n<li>$type &#8211; $desc</li>"
+            fi
+        done
+        IFS="$_ifs"
+        returns_list="$returns_list\n</ul>"
+    fi
+    echo -e "$returns_list"
+}
+
+#function throws
+#prints list of exceptions, or blank if none found
+function print_throws_list {
+    #if no throws then don't create list
+    if echo "$1" | grep -q "@throws"; then
+        local prop type desc _ifs="$IFS" throws_list="<h3>Throws</h3>\n<ul>"
+        local match_type='s/^.*{\(.*\)}.*$/\1/'
+        local match_desc='s/^.*{.*}[[:blank:]]\(.*\)$/\1/'
+        IFS=";"
+        for prop in $(echo "$1"); do
+            if echo "$prop" | grep -q "@throws"; then
+                type=$(echo "$prop" | sed -e "$match_type")
+                desc=$(echo "$prop" | sed -e "$match_desc")
+                #if they're the same, no match - set empty
+                if [ "$type" = "$prop" ]; then type=''; fi
+                if [ "$desc" = "$prop" ]; then desc=''; fi
+                throws_list="$throws_list\n<li>$type &#8211; $desc</li>"
+            fi
+        done
+        IFS="$_ifs"
+        throws_list="$throws_list\n</ul>"
+    fi
+    echo -e "$throws_list"
+}
+
+#property examples
+#prints list of examples, or blank if none found
+function print_examples_list {
+    #if no examples then don't create list
+    if echo "$1" | grep -q "@example"; then
+        local prop example _ifs="$IFS" examples_list="<h3>Examples</h3>\n<ul>"
+        local match_example='s/^@example[[:blank:]]\(.*\)$/\1/'
+        IFS=";"
+        for prop in $(echo "$1"); do
+            if echo "$prop" | grep -q "@example"; then
+                example=$(echo "$prop" | sed -e "$match_example")
+                #if they're the same, no match - set empty
+                if [ "$example" = "$prop" ]; then desc=''; fi
+                examples_list="$examples_list\n<li>\n<code>\n$example\n</code>\n</li>"
+            fi
+        done
+        IFS="$_ifs"
+        throws_list="$examples_list\n</ul>"
+    fi
+    echo -e "$examples_list"
+}
+
+#prints list of params with types and the return value
+#ex fun: '(x:Number, y:Number) :Point', ex prop: ':Number'
+function print_type_sig {
+    local prop var type params returns propertyp _ifs="$IFS"
+    local match_var='s/^.*{.*}[[:blank:]]\([[:alnum:]|]*\).*$/\1/'
+    local match_type='s/^.*{\(.*\)}.*$/\1/'
+    #test if property, won't return params list
+    if echo "$1" | grep -q "@property"; then
+        propertyp="1"
+    fi
+    IFS=";"
+    for prop in $(echo "$1"); do
+        if echo "$prop" | grep -q "@param"; then
+            var=$(echo "$prop" | sed -e "$match_var")
+            type=$(echo "$prop" | sed -e "$match_type")
+            #if they're the same, no match - set empty
+            if [ "$type" = "$prop" ]; then type=''; fi
+            params="$params, $var:$type"
+        fi
+        if echo "$prop" | grep -q "@return"; then
+            type=$(echo "$prop" | sed -e "$match_type")
+            #if they're the same, no match - set empty
+            if [ "$type" = "$prop" ]; then type=''; fi
+            returns="$returns|$type"
+        fi
+    done
+    #remove extra from deliminators
+    params="${params#, }"
+    if [ -z "$returns" ]; then
+        returns="void"
+    else
+        returns="${returns#|}"
+    fi
+    IFS="$_ifs"
+    if [ -z "$propertyp" ]; then
+        echo -e "($params) :$returns"
+    else
+        echo -e ":$returns"
+    fi
+}
+
+function print_class_description {
+    local class_name="$1"
+    local cls_docs=$(echo "${CLASS_DOCS[$class_name]}" | grep "@class")
+    if ! echo "$cls_docs" | grep -q "@static"; then
+        local type_sig=$(print_type_sig "$cls_docs")
+    fi
+    local description=$(get_tag_value "@description" "$cls_docs")
+    local cls_inherits=$(print_inherits_list "$class_name" "$cls_docs")
+    local cls_params=$(print_params_list "$cls_docs")
+    local cls_returns=$(print_returns_list "$cls_docs")
+    local cls_throws=$(print_throws_list "$cls_docs")
+    local cls_examples=""
+    local desc="<h1>doodle.$class_name</h1>
+\n<section>
+<h2>Description:</h2>
+<dl>
+<dt><dfn>$class_name</dfn> $type_sig</dt>
+<dd>
+<p>$description</p>
+<details>
+\n$cls_inherits
+\n$cls_params
+\n$cls_returns
+\n$cls_throws
+\n$cls_examples
+</details>
+</dd>
+</dl>
+</section>"
+    echo -e "$desc"
+}
+
+function print_property_definition {
+    local record="$1"
+    local prop_name=$(get_tag_value "@name" "$record")
+    local prop_desc=$(get_tag_value "@description" "$record")
+    local type_sig=$(print_type_sig "$record")
+    local prop_params=$(print_params_list "$record")
+    local prop_returns=$(print_returns_list "$record")
+    local prop_throws=$(print_throws_list "$record")
+    local prop_examples=$(print_examples_list "$record")
+    local prop_def="<dt><dfn>$prop_name</dfn> $type_sig</dt>
+<dd>
+<p>$prop_desc</p>
+<details>
+\n$prop_params
+\n$prop_returns
+\n$prop_throws
+\n$prop_examples
+</details>
+</dd>"
+    echo -e "$prop_def"
+}
+
+function print_class_properties {
+    local class_name="$1" cls_docs record html_props prop_def
+    
+    #properties, but not constants
+    cls_docs=$(echo "${CLASS_DOCS[$class_name]}" | \
+               grep "@property" | grep -v "@constant")
+    if echo "$cls_docs" | grep -q "@property"; then
+        html_props="<section>\n<h2>Properties</h2>\n<dl>"
+        while read record; do
+            prop_def=$(print_property_definition "$record")
+            html_props="$html_props\n$prop_def"
+        done < <(echo "$cls_docs")
+        html_props="$html_props\n</section>"
+    fi
+
+    #methods - anything without @class, @property and @static tags
+    cls_docs=$(echo "${CLASS_DOCS[$class_name]}" | \
+               grep -v "@property" | grep -v "@class" | grep -v "@static")
+    #make sure there's something left
+    if echo "$cls_docs" | grep -q "@name"; then
+        html_props="$html_props\n<section>\n<h2>Methods</h2>\n<dl>"
+        while read record; do
+            prop_def=$(print_property_definition "$record")
+            html_props="$html_props\n$prop_def"
+        done < <(echo "$cls_docs")
+        html_props="$html_props\n</section>"
+    fi
+
+    #constants
+    cls_docs=$(echo "${CLASS_DOCS[$class_name]}" | grep "@constant")
+    #make sure there's something left
+    if echo "$cls_docs" | grep -q "@constant"; then
+        html_props="$html_props\n<section>\n<h2>Constants</h2>\n<dl>"
+        while read record; do
+            prop_def=$(print_property_definition "$record")
+            html_props="$html_props\n$prop_def"
+        done < <(echo "$cls_docs")
+        html_props="$html_props\n</section>"
+    fi
+
+    #static class functions
+    cls_docs=$(echo "${CLASS_DOCS[$class_name]}" | grep "@static" | \
+               grep -v "@property" | grep -v "@class")
+    #has @static tag and not the @class
+    if echo "$cls_docs" | grep -q "@static"; then
+        html_props="$html_props\n<section>\n<h2>Class Functions</h2>\n<dl>"
+        while read record; do
+            prop_def=$(print_property_definition "$record")
+            html_props="$html_props\n$prop_def"
+        done < <(echo "$cls_docs")
+        html_props="$html_props\n</section>"
+    fi
+    
+    echo -e "$html_props"
+}
+
+## print docs
+#
+function print_docs {
+    local class_name out_file
+    
+    for class_name in "${!CLASS_DOCS[@]}"; do
+        out_file=$(echo "$class_name" | tr [:upper:] [:lower:] | tr '.' '-')
+        out_file="$DOC_HOME/$out_file.html"
+    
+        echo -n -e "\t    Creating $(basename $out_file) "
+        print_header "$class_name" > "$out_file"
+        echo -n "."
+        print_nav_list "$class_name" >> "$out_file"
+        echo -n "."
+        print_class_description "$class_name" >> "$out_file"
+        echo -n "."
+        print_class_properties "$class_name" >> "$out_file"
+        echo -n "."
+
+        print_footer "$class_name" >> "$out_file"
+
+        echo " done."
+    done
+}
+
+
+#parse args
+while getopts "hdCS:O:" option; do
+    case $option in
+        h) print_help; exit 0;;
+        d) DEV_DOCS="1";;
+        C) DOC_CLEAN="1";;
+        S) SRC_HOME="$OPTARG";;
+        O) DOC_HOME="$OPTARG";;
+        \?) print_help; exit 0;;
+    esac
+done
+
+#main
+echo "Docs:"
+
+#only remove the generated html files
+if [ -n "$DOC_CLEAN" ]; then
+    echo -n -e "\tRemoving docs in $DOC_HOME ... "
+    files=$(ls "$DOC_HOME/"*.html 2> /dev/null | wc -l)
+    if [ "$files" != "0" ]; then
+        ls "$DOC_HOME/"*.html | xargs rm
+        echo "done."
+    else
+        echo "none found."
+    fi
+    exit 0
+fi
+
+if [ -n "$DEV_DOCS" ]; then
+    echo -e "\tIncluding developer documentation."
+fi
+
+echo -n -e "\tParsing source files ... "
+if populate_docs; then
+    echo "done."
+fi
+
+echo -e "\tGenerating docs in: $DOC_HOME/"
+print_docs

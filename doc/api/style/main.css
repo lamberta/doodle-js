@@ -1,0 +1,46 @@
+body {
+  margin: 0 auto;
+  width: 100%;
+  font: 14px/22px Helvetica, Arial, sans-serif;
+  background: #f0f0f0;
+}
+
+nav {
+  float: left;
+  padding: 15px;
+  width: 150px;
+}
+
+.main {
+  float: left;
+  width: 600px;
+  padding-top: 15px;
+}
+
+h1 {
+  font: 22px Helvetica, Arial, sans-serif;
+  padding-bottom: 10px;
+}
+
+h2 {
+  font: 18px Helvetica, Arial, sans-serif;
+  padding-bottom: 10px;
+}
+
+.main section {
+  padding: 15px 0;
+}
+
+.main ul, .main ol {
+  margin-left: 1.5em;
+}
+
+dt {
+  padding: 15px 0 5px 0;
+}
+
+dfn {
+  font-weight: bold;
+  background-color: #ffffff;
+  padding: 2px;
+}

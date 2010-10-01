@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Doodle.js - API: ElementNode</title>
+<link href="./style/reset.css" rel="stylesheet" type="text/css">
+<link href="./style/main.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="./style/main.js"></script>
+</head>
+<body>
+
+<nav>
+<ul>
+<li>Display</li>
+<li>ElementNode</li>
+<li>Event</li>
+<li>EventDispatcher</li>
+<li>GradientType</li>
+<li>Keyboard</li>
+<li>KeyboardEvent</li>
+<li>Layer</li>
+<li>LineCap</li>
+<li>LineJoin</li>
+<li>Matrix</li>
+<li>MouseEvent</li>
+<li>Node</li>
+<li>Pattern</li>
+<li>Point</li>
+<li>Rectangle</li>
+<li>Sprite</li>
+<li>TextEvent</li>
+<li>TouchEvent</li>
+<li>UIEvent</li>
+<li>utils</li>
+<li>utils.types</li></ul>
+</nav>
+<div class="main">
+<h1>doodle.ElementNode</h1>
+
+<section>
+<h2>Description:</h2>
+<dl>
+<dt><dfn>ElementNode</dfn> (element:HTMLElement|Function, id:String) :ElementNode</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Inheritance</h3>
+<ol>
+<li>Node</li>
+<li>EventDispatcher</li>
+<li>Object</li>
+</ol>
+
+<h3>Parameters</h3>
+<ol>
+<li>element:HTMLElement|Function &#8211; </li>
+<li>id:String &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>ElementNode &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>SyntaxError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2>Properties</h2>
+<dl>
+<dt><dfn>context</dfn> :CanvasRenderingContext2D</dt>
+<dd>
+<p>drawing context to use</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>CanvasRenderingContext2D &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>alpha</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>backgroundColor</dfn> :Color</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Color &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>backgroundImage</dfn> :HTMLImage</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>HTMLImage &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>backgroundRepeat</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>children</dfn> :Array</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Array &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>debug.boundingBox</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>element</dfn> :HTMLElement</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>HTMLElement &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>height</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>id</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>parent</dfn> :Node</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>root</dfn> :Display</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Display &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>rotation</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>transform</dfn> :Matrix</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Matrix &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>visible</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>width</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>x</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>y</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Methods</h2>
+<dl>
+<dt><dfn>modify</dfn> (fn:Function) :Object</dt>
+<dd>
+<p>Call function passing object as 'this'.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>fn:Function &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Object &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>setChildIndex</dfn> (child:Node, index:Number) :void</dt>
+<dd>
+<p>Changes the position of an existing child in the node's children array. This affects the layering of child objects.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>child:Node &#8211; </li>
+<li>index:Number &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>willTrigger</dfn> (type:String) :Boolean</dt>
+<dd>
+<p>Checks whether an event listener is registered with this EventDispatcher object or any of its ancestors for the specified event type. The difference between the hasEventListener() and the willTrigger() methods is that hasEventListener() examines only the object to which it belongs, whereas the willTrigger() method examines the entire event flow for the event specified by the type parameter.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:String &#8211; The type of event.</li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>hasEventListener</dfn> (type:String) :Boolean</dt>
+<dd>
+<p>Checks whether the EventDispatcher object has any listeners registered for a specific type of event.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:String &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>contains</dfn> (node:Node) :Boolean</dt>
+<dd>
+<p>Determine if node is among it's children, grandchildren, etc.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node:Node &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>dispatchEvent</dfn> (event:Event) :Boolean</dt>
+<dd>
+<p>Dispatches an event into the event flow. The event target is the EventDispatcher object upon which the dispatchEvent() method is called.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>event:Event &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; true if the event was successfully dispatched.</li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>broadcastEvent</dfn> (event:Event) :Boolean</dt>
+<dd>
+<p>Dispatches an event to every object with an active listener. Ignores propagation path, objects come from</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>event:Event &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; True if the event was successfully dispatched.</li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>Error &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>handleEvent</dfn> (event:Event) :Boolean</dt>
+<dd>
+<p>Lookup and call listener if registered for specific event type.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>event:Event &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; true if node has listeners of event type.</li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>addChildAt</dfn> (node:Node, index:Number) :Node</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node:Node &#8211; </li>
+<li>index:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>addChild</dfn> (node:Node) :Node</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node:Node &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>getChildById</dfn> (id:String) :Node|null</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>id:String &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Node|null &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>globalToLocal</dfn> (point:Point) :Point</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>point:Point &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Point &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>localToGlobal</dfn> (point:Point) :Point</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>point:Point &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Point &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>removeAllChildren</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>removeChildAt</dfn> (index:Number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>index:Number &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>removeChildById</dfn> (id:String) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>id:String &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>removeChild</dfn> (node:Node) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node:Node &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>rotate</dfn> (deg:Number) :Number</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>deg:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>scaleX</dfn> (sx:Number) :Number</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>sx:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>scaleY</dfn> (sy:Number) :Number</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>sy:Number &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>swapChildren</dfn> (node1:Node, node2:Node) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node1:Node &#8211; </li>
+<li>node2:Node &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>addEventListener</dfn> (type:String, listener:Function, useCapture:Boolean) :void</dt>
+<dd>
+<p>Registers an event listener object with an EventDispatcher object so that the listener receives notification of an event.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:String &#8211; </li>
+<li>listener:Function &#8211; </li>
+<li>useCapture:Boolean &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>removeEventListener</dfn> (type:String, listener:Function, useCapture:Boolean) :void</dt>
+<dd>
+<p>Removes a listener from the EventDispatcher object.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:String &#8211; </li>
+<li>listener:Function &#8211; </li>
+<li>useCapture:Boolean &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>toString</dfn> () :String</dt>
+<dd>
+<p>Returns the string representation of the specified object.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>swapDepthAt</dfn> (index:Number) :void</dt>
+<dd>
+<p>Swap positions with another node at a given index in the parents child list.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>index:Number &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>swapDepths</dfn> (node:Node) :void</dt>
+<dd>
+<p>Swap positions with another node in the parents child list.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node:Node &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>ReferenceError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>swapChildrenAt</dfn> (index1:Number, index2:Number) :void</dt>
+<dd>
+<p>Swaps the child nodes at the two specified index positions in the child list.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>index1:Number &#8211; </li>
+<li>index2:Number &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle|Null</dt>
+<dd>
+<p>The bounding box of a Node is a union of all it's child Sprite's bounds.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>targetCoordSpace:Node &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle|Null &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Class Functions</h2>
+<dl>
+<dt><dfn>inheritsNode</dfn> (obj:Object) :Boolean</dt>
+<dd>
+<p>Check if object inherits from ElementNode.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>obj:Object &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>isElementNode</dfn> (obj:Object) :Boolean</dt>
+<dd>
+<p>Test if an object is an ElementNode.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>obj:Object &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+</div>
+</body>
+</html>

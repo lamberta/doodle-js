@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Doodle.js - API: Keyboard</title>
+<link href="./style/reset.css" rel="stylesheet" type="text/css">
+<link href="./style/main.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="./style/main.js"></script>
+</head>
+<body>
+
+<nav>
+<ul>
+<li>Display</li>
+<li>ElementNode</li>
+<li>Event</li>
+<li>EventDispatcher</li>
+<li>GradientType</li>
+<li>Keyboard</li>
+<li>KeyboardEvent</li>
+<li>Layer</li>
+<li>LineCap</li>
+<li>LineJoin</li>
+<li>Matrix</li>
+<li>MouseEvent</li>
+<li>Node</li>
+<li>Pattern</li>
+<li>Point</li>
+<li>Rectangle</li>
+<li>Sprite</li>
+<li>TextEvent</li>
+<li>TouchEvent</li>
+<li>UIEvent</li>
+<li>utils</li>
+<li>utils.types</li></ul>
+</nav>
+<div class="main">
+<h1>doodle.Keyboard</h1>
+
+<section>
+<h2>Description:</h2>
+<dl>
+<dt><dfn>Keyboard</dfn> </dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+
+
+</details>
+</dd>
+</dl>
+</section>
+
+<section>
+<h2>Constants</h2>
+<dl>
+<dt><dfn>ALTERNATE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>A</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>BACKQUOTE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>BACKSLASH</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>BACKSPACE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>B</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>CAPS_LOCK</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>COMMAND</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>COMMA</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>CONTROL</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>C</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>DELETE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>DOWN</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>D</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>END</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>ENTER</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>EQUAL</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>E</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>ESCAPE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F10</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F11</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F12</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F13</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F14</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F15</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F1</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F2</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F3</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F4</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F5</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F6</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F7</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F8</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F9</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>F</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>G</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>HOME</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>H</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INSERT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>I</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>J</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_DOWN</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_JOYSTICK</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_LEFT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_MOBILE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_NUMPAD</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_RIGHT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_LOCATION_STANDARD</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_PRESS</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEY_UP</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>K</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>LEFTBRACKET</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>LEFT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>L</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>MINUS</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>M</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>N</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_1</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_2</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_3</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_4</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_5</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_6</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_7</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_8</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMBER_9</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_0</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_1</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_2</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_3</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_4</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_5</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_6</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_7</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_8</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_9</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_ADD</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_DECIMAL</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_DIVIDE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_ENTER</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_MULTIPLY</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>NUMPAD_SUBTRACT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>O</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>PAGE_DOWN</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>PAGE_UP</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>PAUSE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>PERIOD</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>P</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>Q</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>QUOTE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>@name</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>RIGHTBRACKET</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>RIGHT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>R</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>SCROLL</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>SEMICOLON</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>SHIFT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>SLASH</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>SPACE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>S</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>TAB</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>T</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>UP</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>U</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>V</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>WINDOWS_KEY</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>W</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>X</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>Y</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>Z</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+</div>
+</body>
+</html>

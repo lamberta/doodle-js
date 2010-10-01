@@ -10,6 +10,7 @@ function print_help_and_exit {
     echo "  -D      Only build debug version."
     echo "  -P      Profiling build. Debugging stripped but not compiled."
     echo "  -S      Leave stats monitor in compiled build."
+    echo "  -A      Generate API docs."
     echo " Compiler Options:"
     echo -e "  -W=n    Warning level.\t(0:quiet, 1:default, 2:vebose)"
     echo -e "  -C=n    Compilation level.\t(0:whitespace, 1:simple, 2:advanced)"
@@ -33,8 +34,11 @@ WARNING_LEVEL=1 #quiet, [default], verbose
 
 function build_full {
     cat ./build/prologue.js > "$DEBUG_OUT_FILE"
-    cat ./src/compat/es5.js >> "$DEBUG_OUT_FILE"
-    cat ./src/utils.js >> "$DEBUG_OUT_FILE"
+    cat ./src/utils/compat/es5.js >> "$DEBUG_OUT_FILE"
+    echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
+    cat ./src/utils/types.js >> "$DEBUG_OUT_FILE"
+    echo "/*END_DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
+    cat ./src/utils/utils.js >> "$DEBUG_OUT_FILE"
     
     echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
     cat "$STATS_FILE" >> "$DEBUG_OUT_FILE"
@@ -177,7 +181,7 @@ function make_etags {
 
 
 #parse args
-while getopts "hcJ:dDPSW:C:" option; do
+while getopts "hcJ:dDPSW:C:A" option; do
     case $option in
         h) print_help_and_exit;;
         c) clean_up; exit 0;;
@@ -188,6 +192,7 @@ while getopts "hcJ:dDPSW:C:" option; do
         S) BUILD_STATS=1;;
         W) WARNING_LEVEL="$OPTARG";;
         C) COMPILATION_LEVEL="$OPTARG";;
+        A) BUILD_API_DOCS=1;;
         \?) print_help_and_exit;;
     esac
 done
@@ -231,6 +236,10 @@ if [ -z "$BUILD_DEBUG_ONLY" ]; then
         compile_file
     fi
     echo -e "\tCreated $MIN_OUT_FILE"
+fi
+
+if [ -n "$BUILD_API_DOCS" ]; then
+    "$PROJECT_HOME/build/majdoc"
 fi
 
 #cleanup

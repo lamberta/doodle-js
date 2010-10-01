@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Doodle.js - API: Event</title>
+<link href="./style/reset.css" rel="stylesheet" type="text/css">
+<link href="./style/main.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="./style/main.js"></script>
+</head>
+<body>
+
+<nav>
+<ul>
+<li>Display</li>
+<li>ElementNode</li>
+<li>Event</li>
+<li>EventDispatcher</li>
+<li>GradientType</li>
+<li>Keyboard</li>
+<li>KeyboardEvent</li>
+<li>Layer</li>
+<li>LineCap</li>
+<li>LineJoin</li>
+<li>Matrix</li>
+<li>MouseEvent</li>
+<li>Node</li>
+<li>Pattern</li>
+<li>Point</li>
+<li>Rectangle</li>
+<li>Sprite</li>
+<li>TextEvent</li>
+<li>TouchEvent</li>
+<li>UIEvent</li>
+<li>utils</li>
+<li>utils.types</li></ul>
+</nav>
+<div class="main">
+<h1>doodle.Event</h1>
+
+<section>
+<h2>Description:</h2>
+<dl>
+<dt><dfn>Event</dfn> (type:String, bubbles:Boolean, cancelable:Boolean) :Event</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Inheritance</h3>
+<ol>
+<li>Object</li>
+</ol>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:String &#8211; </li>
+<li>bubbles:Boolean &#8211; = false</li>
+<li>cancelable:Boolean &#8211; = false</li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Event &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2>Properties</h2>
+<dl>
+<dt><dfn>bubbles</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>cancelable</dfn> :Boolean</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>currentTarget</dfn> :Node</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>eventPhase</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>returnValue</dfn> :*</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>* &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>srcElement</dfn> :EventDispatcher</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>EventDispatcher &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>target</dfn> :Node</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>timeStamp</dfn> :Date</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Date &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>type</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Methods</h2>
+<dl>
+<dt><dfn>cancelBubble</dfn> (cancelArg:Boolean) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>cancelArg:Boolean &#8211; </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>initEvent</dfn> (typeArg:String, canBubbleArg:Boolean, cancelableArg:Boolean) :Event</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>typeArg:String &#8211; </li>
+<li>canBubbleArg:Boolean &#8211; </li>
+<li>cancelableArg:Boolean &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Event &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>preventDefault</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>stopImmediatePropagation</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>Error &#8211; If called on event that can not be canceled.</li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>stopPropagation</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>Error &#8211; If called on event that can not be canceled.</li>
+</ul>
+
+
+</details>
+</dd>
+<dt><dfn>toString</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Constants</h2>
+<dl>
+<dt><dfn>LOAD</dfn> :String</dt>
+<dd>
+<p>Dispatched when element is loaded.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>ADDED</dfn> :String</dt>
+<dd>
+<p>Dispatched when object is added to display path.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>REMOVED</dfn> :String</dt>
+<dd>
+<p>Dispatched when object is removed from display path.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>AT_TARGET</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>AT_TARGET</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>BLUR</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>BUBBLING_PHASE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>BUBBLING_PHASE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>CAPTURING_PHASE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>CAPTURING_PHASE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>CHANGE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>CHANGE</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>CLICK</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>DBLCLICK</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>DRAGDROP</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>ENTER_FRAME</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>FOCUS</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEYDOWN</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEYPRESS</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>KEYUP</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>MOUSEDOWN</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>MOUSEDRAG</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>MOUSEMOVE</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>MOUSEOUT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>MOUSEOVER</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>MOUSEUP</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>SELECT</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+<section>
+<h2>Class Functions</h2>
+<dl>
+<dt><dfn>isEvent</dfn> (event:Event) :Boolean</dt>
+<dd>
+<p>Test if an object is an event of any kind (Event/MouseEvent/etc). Returns true on Doodle events as well as DOM events.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>event:Event &#8211; </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Boolean &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+</div>
+</body>
+</html>
