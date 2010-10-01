@@ -22,28 +22,71 @@ if (typeof Function.prototype.bind !== 'function') {
 }
 /*globals doodle, document*/
 
+/**
+ * Doodle utilty functions.
+ * @class utils
+ * @static
+ */
 doodle.utils = Object.create({}, {
 
   /*
    * COLOR UTILS
    */
-  
-  'rgb_to_hex': {
+
+  /**
+   * @name hex_to_rgb
+   * @param {Color} color
+   * @return {Array} [r, g, b]
+   * @throws {TypeError}
+   * @static
+   */
+  'hex_to_rgb': {
     enumerable: true,
     writable: false,
     configurable: false,
-    value: function (r, g, b) {
+    value:function (color) {
+      //number in octal format or string prefixed with #
+      if (typeof color === 'string') {
+        color = (color[0] === '#') ? color.slice(1) : color;
+        color = parseInt(color, 16);
+      }
       /*DEBUG*/
-      var check_number_type = doodle.utils.types.check_number_type;
-      check_number_type(r, 'rgb_to_hex', '*r*, g, b');
-      check_number_type(g, 'rgb_to_hex', 'r, *g*, b');
-      check_number_type(b, 'rgb_to_hex', 'r, g, *b*');
+      doodle.utils.types.check_number_type(color, 'hex_to_rgb', "*color{0xffffff|#ffffff}*");
       /*END_DEBUG*/
-      var hex_color = (b | (g << 8) | (r << 16)).toString(16);
-      return '#'+ String('000000'+hex_color).slice(-6); //pad out
+      return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
     }
   },
 
+  /**
+   * @name hex_to_rgb_str
+   * @param {Color} color
+   * @param {Number} alpha
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
+  'hex_to_rgb_str': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: function (color, alpha) {
+      var doodle_utils = doodle.utils;
+      alpha = (alpha === undefined) ? 1 : alpha;
+      /*DEBUG*/
+      doodle.utils.types.check_number_type(alpha, 'hex_to_rgb_str', '*color*');
+      /*END_DEBUG*/
+      color = doodle_utils.hex_to_rgb(color);
+      return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
+    }
+  },
+  
+  /**
+   * @name rgb_str_to_hex
+   * @param {String} rgb_str
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
   'rgb_str_to_hex': {
     enumerable: true,
     writable: false,
@@ -61,6 +104,78 @@ doodle.utils = Object.create({}, {
     }
   },
 
+  /**
+   * @name rgb_str_to_rgb
+   * @param {Color} color
+   * @return {Array}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
+   * @static
+   */
+  'rgb_str_to_rgb': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: (function () {
+      var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?(.*)\\)$");
+      return function (color) {
+        /*DEBUG*/
+        doodle.utils.types.check_string_type(color, 'rgb_str_to_rgb', '*color*');
+        /*END_DEBUG*/
+        color = color.trim().match(rgb_regexp);
+        /*DEBUG*/
+        //if it's not an array, it didn't parse correctly
+        if (!Array.isArray(color)) {
+          throw new SyntaxError("rgb_str_to_rgb(*color*): Invalid rgb color format: 'rgba(n, n, n, n)'.");
+        }
+        /*END_DEBUG*/
+        var rgb = [parseInt(color[1], 10),
+                   parseInt(color[2], 10),
+                   parseInt(color[3], 10)],
+            alpha = parseFloat(color[4]);
+        if (typeof alpha === 'number' && !isNaN(alpha)) {
+          rgb.push(alpha);
+        }
+        return rgb;
+      };
+    }())
+  },
+  
+  /**
+   * @name rgb_to_hex
+   * @param {Number} r
+   * @param {Number} g
+   * @param {Number} b
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
+  'rgb_to_hex': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: function (r, g, b) {
+      /*DEBUG*/
+      var check_number_type = doodle.utils.types.check_number_type;
+      check_number_type(r, 'rgb_to_hex', '*r*, g, b');
+      check_number_type(g, 'rgb_to_hex', 'r, *g*, b');
+      check_number_type(b, 'rgb_to_hex', 'r, g, *b*');
+      /*END_DEBUG*/
+      var hex_color = (b | (g << 8) | (r << 16)).toString(16);
+      return '#'+ String('000000'+hex_color).slice(-6); //pad out
+    }
+  },
+
+  /**
+   * @name rgb_to_rgb_str
+   * @param {Number} r
+   * @param {Number} g
+   * @param {Number} b
+   * @param {Number} a
+   * @return {String}
+   * @throws {TypeError}
+   * @static
+   */
   'rgb_to_rgb_str': {
     enumerable: true,
     writable: false,
@@ -83,70 +198,16 @@ doodle.utils = Object.create({}, {
     }
   },
 
-  'rgb_str_to_rgb': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: (function () {
-      var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?(.*)\\)$");
-      return function (color) {
-        /*DEBUG*/
-        doodle.utils.types.check_string_type(color, 'rgb_str_to_rgb', '*color*');
-        /*END_DEBUG*/
-        color = color.trim().match(rgb_regexp);
-        /*DEBUG*/
-        //if it's not an array, it didn't parse correctly
-        doodle.utils.types.check_array_type(color, 'rgb_str_to_rgb', "*color{'rgba(n, n, n, n)'}*");
-        /*END_DEBUG*/
-        var rgb = [parseInt(color[1], 10),
-                   parseInt(color[2], 10),
-                   parseInt(color[3], 10)],
-            alpha = parseFloat(color[4]);
-        if (typeof alpha === 'number' && !isNaN(alpha)) {
-          rgb.push(alpha);
-        }
-        return rgb;
-      };
-    }())
-  },
-  
-  'hex_to_rgb': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value:function (color) {
-      //number in octal format or string prefixed with #
-      if (typeof color === 'string') {
-        color = (color[0] === '#') ? color.slice(1) : color;
-        color = parseInt(color, 16);
-      }
-      /*DEBUG*/
-      doodle.utils.types.check_number_type(color, 'hex_to_rgb', "*color{0xffffff|#ffffff}*");
-      /*END_DEBUG*/
-      return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
-    }
-  },
-
-  'hex_to_rgb_str': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (color, alpha) {
-      var doodle_utils = doodle.utils;
-      alpha = (alpha === undefined) ? 1 : alpha;
-      /*DEBUG*/
-      doodle.utils.types.check_number_type(alpha, 'hex_to_rgb_str', '*color*');
-      /*END_DEBUG*/
-      color = doodle_utils.hex_to_rgb(color);
-      return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
-    }
-  },
-
   /*
    * DOM ACCESS
    */
 
-  /* Returns HTML element from id name or element itself.
+  /**
+   * Returns HTML element from id name or element itself.
+   * @name get_element
+   * @param {HTMLElement|String} element
+   * @return {HTMLElement}
+   * @static
    */
   'get_element': {
     enumerable: true,
@@ -164,7 +225,16 @@ doodle.utils = Object.create({}, {
     }
   },
 
-  /* Returns css property of element, it's own or inherited.
+  /**
+   * Returns css property of element, it's own or inherited.
+   * @name get_style_property
+   * @param {HTMLElement} element
+   * @param {String} property
+   * @param {Boolean} useComputedStyle
+   * @return {*}
+   * @throws {TypeError}
+   * @throws {ReferenceError}
+   * @static
    */
   'get_style_property': {
     enumerable: true,
@@ -173,7 +243,8 @@ doodle.utils = Object.create({}, {
     value: function (element, property, useComputedStyle) {
       useComputedStyle = (useComputedStyle === undefined) ? true : false;
       /*DEBUG*/
-      doodle.utils.types.check_boolean_type(useComputedStyle, 'get_style_property');
+      doodle.utils.types.check_string_type(property, 'get_style_property', 'element, *property*, useComputedStyle');
+      doodle.utils.types.check_boolean_type(useComputedStyle, 'get_style_property', 'element, property, *useComputedStyle*');
       /*END_DEBUG*/
       try {
         if (useComputedStyle && document.defaultView && document.defaultView.getComputedStyle) {
@@ -191,9 +262,16 @@ doodle.utils = Object.create({}, {
     }
   },
   
-  /* Returns property of an element.
-   * CSS properties take precedence over HTML attributes.
-   * @param type {String} 'int'|'float' Return type.
+  /**
+   * Returns property of an element. CSS properties take precedence over HTML attributes.
+   * @name get_element_property
+   * @param {HTMLElement} element
+   * @param {String} property
+   * @param {String} returnType 'int'|'float' Return type.
+   * @param {Boolean} useComputedStyle
+   * @return {*}
+   * @throws {ReferenceError}
+   * @static
    */
   'get_element_property': {
     enumerable: true,
@@ -242,8 +320,16 @@ doodle.utils = Object.create({}, {
     }
   },
 
-  /*
-   * @param type {String} 'css'|'html' Set CSS property or HTML attribute.
+  /**
+   * @name set_element_property
+   * @param {HTMLElement} element
+   * @param {String} property
+   * @param {*} value
+   * @param {String} type 'css'|'html' Set CSS property or HTML attribute.
+   * @return {*}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
+   * @static
    */
   'set_element_property': {
     enumerable: true,
@@ -274,11 +360,15 @@ doodle.utils = Object.create({}, {
    * SCENE GRAPH
    */
   
-  /* Creates a scene graph path from a given node and all it's descendants.
+  /**
+   * Creates a scene graph path from a given node and all it's descendants.
+   * @name create_scene_path
    * @param {Node} node
-   * @param {Array=} array Array to store the path nodes in.
-   * @param {Boolean=} clearArray Empty array passed as parameter before storing nodes in it.
+   * @param {Array} array Array to store the path nodes in.
+   * @param {Boolean} clearArray Empty array passed as parameter before storing nodes in it.
    * @return {Array} The array passed to the function (modified in place).
+   * @throws {TypeError}
+   * @static
    */
   'create_scene_path': {
     enumerable: true,
@@ -308,45 +398,62 @@ doodle.utils = Object.create({}, {
   }
   
 });
-
-
-/*DEBUG*/
-
-/*
- * TYPE CHECKING
+/*DEBUG_STATS*/
+/**
+ * Doodle type-checking functions.
+ * @class utils.types
+ * @static
  */
 doodle.utils.types = Object.create({}, (function () {
 
-  /* @param {String} type Name of type.
+  /**
+   * @name throw_type_error
+   * @param {String} type Name of type.
    * @param {String=} caller Name of calling function.
    * @param {String=} params Parameter names for function.
+   * @throws {TypeError}
+   * @static
+   * @private
    */
   function throw_type_error (type, caller, params) {
     if (typeof type !== 'string') {
       throw new TypeError("throw_type_error: type must be a string.");
     }
     caller = (caller === undefined) ? "throw_type_error" : caller;
-    params = (params === undefined) ? "" : '('+params+')';
+    params = (params === undefined || params === null) ? "" : '('+params+')';
     throw new TypeError(caller + params +": Parameter must be a "+ type +".");
   }
   
   return {
-    /* Type-checking for a number. Throws a TypeError if the test fails.
-     * @param {Object} n Object to test.
-     * @param {String=} caller Function name to print in error message.
-     * @param {String=} param Parameters to print in error message.
+    /**
+     * Type-checking for a number. Throws a TypeError if the test fails.
+     * @name check_number_type
+     * @param {Object} obj Object to test.
+     * @param {String} caller Function name to print in error message.
+     * @param {String} param Parameters to print in error message.
      * @return {Boolean}
+     * @throws {TypeError}
+     * @static
      */
     'check_number_type': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (n, caller, params) {
-        return (typeof n === 'number') ?
+      value: function (obj, caller, params) {
+        return (typeof obj === 'number') ?
           true : throw_type_error('number', caller || 'check_number_type', params);
       }
     },
 
+    /**
+     * @name check_boolean_type
+     * @param {Boolean} bool
+     * @param {String} caller Function name to print in error message.
+     * @param {String} param Parameters to print in error message.
+     * @return {Boolean}
+     * @throws {TypeError}
+     * @static
+     */
     'check_boolean_type': {
       enumerable: true,
       writable: false,
@@ -357,6 +464,15 @@ doodle.utils.types = Object.create({}, (function () {
       }
     },
 
+    /**
+     * @name check_string_type
+     * @param {String}
+     * @param {String} caller
+     * @param {String} params
+     * @return {Boolean}
+     * @throws {TypeError}
+     * @static
+     */
     'check_string_type': {
       enumerable: true,
       writable: false,
@@ -367,6 +483,15 @@ doodle.utils.types = Object.create({}, (function () {
       }
     },
 
+    /**
+     * @name check_function_type
+     * @param {Function} fn
+     * @param {String} caller
+     * @param {String} params
+     * @return {Boolean}
+     * @throws {TypeError}
+     * @static
+     */
     'check_function_type': {
       enumerable: true,
       writable: false,
@@ -377,6 +502,15 @@ doodle.utils.types = Object.create({}, (function () {
       }
     },
 
+    /**
+     * @name check_array_type
+     * @param {Array} array
+     * @param {String} caller
+     * @param {String} params
+     * @return {Boolean}
+     * @throws {TypeError}
+     * @static
+     */
     'check_array_type': {
       enumerable: true,
       writable: false,
@@ -387,6 +521,15 @@ doodle.utils.types = Object.create({}, (function () {
       }
     },
 
+    /**
+     * @name check_canvas_type
+     * @param {HTMLCanvasElement} canvas
+     * @param {String} caller
+     * @param {String} params
+     * @return {Boolean}
+     * @throws {TypeError}
+     * @static
+     */
     'check_canvas_type': {
       enumerable: true,
       writable: false,
@@ -398,6 +541,15 @@ doodle.utils.types = Object.create({}, (function () {
       }
     },
 
+    /**
+     * @name check_context_type
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {String} caller
+     * @param {String} params
+     * @return {Boolean}
+     * @throws {TypeError}
+     * @static
+     */
     'check_context_type': {
       enumerable: true,
       writable: false,
@@ -409,6 +561,15 @@ doodle.utils.types = Object.create({}, (function () {
       }
     },
 
+    /**
+     * @name check_block_element
+     * @param {HTMLElement} element
+     * @param {String} caller
+     * @param {String} params
+     * @return {Boolean}
+     * @throws {TypeError}
+     * @static
+     */
     'check_block_element': {
       enumerable: true,
       writable: false,
@@ -425,7 +586,7 @@ doodle.utils.types = Object.create({}, (function () {
     
   };
 }()));
-/*END_DEBUG*/
+/*END_DEBUG_STATS*/
 /*DEBUG_STATS*/
 /*
  * stats.js r5
@@ -696,76 +857,162 @@ var Stats = function () {
 
 };
 /*END_DEBUG_STATS*/
-
+/**
+ * @class Keyboard
+ * @static
+ */
 Object.defineProperty(doodle, 'Keyboard', {
   enumerable: true,
   writable: false,
   configurable: false,
   value: Object.create(null, {
-
+    /**
+     * @name BACKSPACE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'BACKSPACE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 8
     },
+
+    /**
+     * @name TAB
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'TAB': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 9
     },
-    
+
+    /**
+     * @name ENTER
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'ENTER': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 13
     },
-    
+
+    /**
+     * @name COMMAND
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'COMMAND': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 15
     },
+
+    /**
+     * @name SHIFT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'SHIFT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 16
     },
+
+    /**
+     * @name CONTROL
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'CONTROL': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 17
     },
+
+    /**
+     * @name ALTERNATE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'ALTERNATE': { //Option key
       enumerable: true,
       writable: false,
       configurable: false,
       value: 18
     },
+
+    /**
+     * @name PAUSE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'PAUSE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 19
     },
+
+    /**
+     * @name CAPS_LOCK
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'CAPS_LOCK': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 20
     },
+
+    /**
+     * @name NUMPAD
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 21
     },
-    
+
+    /**
+     * @name ESCAPE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'ESCAPE': {
       enumerable: true,
       writable: false,
@@ -773,30 +1020,69 @@ Object.defineProperty(doodle, 'Keyboard', {
       value: 27
     },
 
+    /**
+     * @name SPACE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'SPACE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 32
-    },    
+    },
+
+    /**
+     * @name PAGE_UP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'PAGE_UP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 33
     },
+
+    /**
+     * @name PAGE_DOWN
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'PAGE_DOWN': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 34
     },
+
+    /**
+     * @name END
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'END': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 35
     },
+
+    /**
+     * @name HOME
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'HOME': {
       enumerable: true,
       writable: false,
@@ -805,25 +1091,57 @@ Object.defineProperty(doodle, 'Keyboard', {
     },
 
     /* ARROWS
-     */ 
+     */
+
+    /**
+     * @name LEFT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'LEFT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 37
     },
+
+    /**
+     * @name UP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'UP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 38
     },
+
+    /**
+     * @name RIGHT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'RIGHT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 39
     },
+
+    /**
+     * @name DOWN
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'DOWN': {
       enumerable: true,
       writable: false,
@@ -831,7 +1149,12 @@ Object.defineProperty(doodle, 'Keyboard', {
       value: 40
     },
 
-    /*
+    /**
+     * @name INSERT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
      */
     'INSERT': {
       enumerable: true,
@@ -839,6 +1162,14 @@ Object.defineProperty(doodle, 'Keyboard', {
       configurable: false,
       value: 45
     },
+
+    /**
+     * @name DELETE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'DELETE': {
       enumerable: true,
       writable: false,
@@ -848,60 +1179,140 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /* NUMBERS
      */
+
+    /**
+     * @name
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_0': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 48
     },
+
+    /**
+     * @name NUMBER_1
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_1': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 49
     },
+
+    /**
+     * @name NUMBER_2
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_2': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 50
     },
+
+    /**
+     * @name NUMBER_3
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_3': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 51
     },
+
+    /**
+     * @name NUMBER_4
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_4': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 52
     },
+
+    /**
+     * @name NUMBER_5
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_5': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 53
     },
+
+    /**
+     * @name NUMBER_6
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_6': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 54
     },
+
+    /**
+     * @name NUMBER_7
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_7': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 55
     },
+
+    /**
+     * @name NUMBER_8
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_8': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 56
     },
+
+    /**
+     * @name NUMBER_9
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMBER_9': {
       enumerable: true,
       writable: false,
@@ -911,156 +1322,364 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /* LETTERS
      */
+
+    /**
+     * @name A
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'A': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 65
     },
+
+    /**
+     * @name B
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'B': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 66
     },
+
+    /**
+     * @name C
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'C': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 67
     },
+
+    /**
+     * @name D
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'D': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 68
     },
+
+    /**
+     * @name E
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'E': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 69
     },
+
+    /**
+     * @name F
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 70
     },
+
+    /**
+     * @name G
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'G': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 71
     },
+
+    /**
+     * @name H
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'H': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 72
     },
+
+    /**
+     * @name I
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'I': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 73
     },
+
+    /**
+     * @name J
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'J': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 74
     },
+
+    /**
+     * @name K
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'K': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 75
     },
+
+    /**
+     * @name L
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'L': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 76
     },
+
+    /**
+     * @name M
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'M': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 77
     },
+
+    /**
+     * @name N
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'N': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 78
     },
+
+    /**
+     * @name O
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'O': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 79
     },
+
+    /**
+     * @name P
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'P': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 80
     },
+
+    /**
+     * @name Q
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'Q': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 81
     },
+
+    /**
+     * @name R
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'R': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 82
     },
+
+    /**
+     * @name S
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'S': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 83
     },
+
+    /**
+     * @name T
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'T': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 84
     },
+
+    /**
+     * @name U
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'U': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 85
     },
+
+    /**
+     * @name V
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'V': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 86
     },
+
+    /**
+     * @name W
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'W': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 87
     },
+
+    /**
+     * @name X
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'X': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 88
     },
+
+    /**
+     * @name Y
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'Y': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 89
     },
+
+    /**
+     * @name Z
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'Z': {
       enumerable: true,
       writable: false,
@@ -1068,6 +1687,13 @@ Object.defineProperty(doodle, 'Keyboard', {
       value: 90
     },
 
+    /**
+     * @name WINDOWS_KEY
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'WINDOWS_KEY': {
       enumerable: true,
       writable: false,
@@ -1077,96 +1703,224 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /* NUMBER PAD
      */
+
+    /**
+     * @name NUMPAD_0
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_0': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 96
     },
+
+    /**
+     * @name NUMPAD_1
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_1': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 97
     },
+
+    /**
+     * @name NUMPAD_2
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_2': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 98
     },
+
+    /**
+     * @name NUMPAD_3
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_3': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 99
     },
+
+    /**
+     * @name NUMPAD_4
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_4': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 100
     },
+
+    /**
+     * @name NUMPAD_5
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_5': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 101
     },
+
+    /**
+     * @name NUMPAD_6
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_6': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 102
     },
+
+    /**
+     * @name NUMPAD_7
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_7': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 103
     },
+
+    /**
+     * @name NUMPAD_8
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_8': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 104
     },
+
+    /**
+     * @name NUMPAD_9
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_9': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 105
     },
+
+    /**
+     * @name NUMPAD_MULTIPLY
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_MULTIPLY': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 106
     },
+
+    /**
+     * @name NUMPAD_ADD
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_ADD': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 107
     },
+
+    /**
+     * @name NUMPAD_ENTER
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_ENTER': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 108
     },
+
+    /**
+     * @name NUMPAD_SUBTRACT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_SUBTRACT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 109
     },
+
+    /**
+     * @name NUMPAD_DECIMAL
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_DECIMAL': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 110
     },
+
+    /**
+     * @name NUMPAD_DIVIDE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NUMPAD_DIVIDE': {
       enumerable: true,
       writable: false,
@@ -1176,90 +1930,210 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /* FUNCTION KEYS
      */
+
+    /**
+     * @name F1
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F1': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 112
     },
+
+    /**
+     * @name F2
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F2': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 113
     },
+
+    /**
+     * @name F3
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F3': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 114
     },
+
+    /**
+     * @name F4
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F4': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 115
     },
+
+    /**
+     * @name F5
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F5': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 116
     },
+
+    /**
+     * @name F6
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F6': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 117
     },
+
+    /**
+     * @name F7
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F7': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 118
     },
+
+    /**
+     * @name F8
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F8': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 119
     },
+
+    /**
+     * @name F9
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F9': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 120
     },
+
+    /**
+     * @name F10
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F10': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 121
     },
+
+    /**
+     * @name F11
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F11': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 122
     },
+
+    /**
+     * @name F12
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F12': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 123
     },
+
+    /**
+     * @name F13
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F13': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 124
     },
+
+    /**
+     * @name F14
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F14': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 125
     },
+
+    /**
+     * @name F15
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'F15': {
       enumerable: true,
       writable: false,
@@ -1267,6 +2141,13 @@ Object.defineProperty(doodle, 'Keyboard', {
       value: 126
     },
 
+    /**
+     * @name SCROLL
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'SCROLL': {
       enumerable: true,
       writable: false,
@@ -1276,67 +2157,154 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /* PUNCTUATION
      */
+
+    /**
+     * @name SEMICOLON
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'SEMICOLON': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 186
     },
+
+    /**
+     * @name EQUAL
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'EQUAL': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 187
     },
+
+    /**
+     * @name COMMA
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'COMMA': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 188
     },
+
+    /**
+     * @name MINUS
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'MINUS': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 189
     },
+
+    /**
+     * @name PERIOD
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'PERIOD': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 190
     },
+
+    /**
+     * @name SLASH
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'SLASH': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 191
     },
+
+    /**
+     * @name BACKQUOTE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'BACKQUOTE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 192
     },
-    
+
+    /**
+     * @name LEFTBRACKET
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'LEFTBRACKET': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 219
     },
+
+    /**
+     * @name BACKSLASH
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'BACKSLASH': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 220
     },
+
+    /**
+     * @name RIGHTBRACKET
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'RIGHTBRACKET': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 221
     },
+
+    /**
+     * @name QUOTE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'QUOTE': {
       enumerable: true,
       writable: false,
@@ -1346,18 +2314,38 @@ Object.defineProperty(doodle, 'Keyboard', {
     
   })
 });
-
+/**
+ * The GradientType class provides values for the type parameter in the
+ * beginGradientFill() and lineGradientStyle() methods of the Graphics class.
+ * @class GradientType
+ * @static
+ */
 Object.defineProperty(doodle, 'GradientType', {
   enumerable: true,
   writable: false,
   configurable: false,
   value: Object.create(null, {
+    /**
+     * @name LINEAR
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'LINEAR': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'linearGradient'
     },
+    
+    /**
+     * @name RADIAL
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'RADIAL': {
       enumerable: true,
       writable: false,
@@ -1366,33 +2354,64 @@ Object.defineProperty(doodle, 'GradientType', {
     }
   })
 });
-
+/**
+ * @class Pattern
+ * @static
+ */
 Object.defineProperty(doodle, 'Pattern', {
   enumerable: true,
   writable: false,
   configurable: false,
   value: Object.create(null, {
+    /**
+     * @name REPEAT
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'REPEAT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'repeat'
     },
-    
+
+    /**
+     * @name REPEAT_X
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'REPEAT_X': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'repeat-x'
     },
-    
+
+    /**
+     * @name REPEAT_Y
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'REPEAT_Y': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'repeat-y'
     },
-    
+
+    /**
+     * @name NO_REPEAT
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'NO_REPEAT': {
       enumerable: true,
       writable: false,
@@ -1401,25 +2420,50 @@ Object.defineProperty(doodle, 'Pattern', {
     }
   })
 });
-
+/**
+ * @class LineCap
+ * @static
+ */
 Object.defineProperty(doodle, 'LineCap', {
   enumerable: true,
   writable: false,
   configurable: false,
   value: Object.create(null, {
-    //default
+    /**
+     * @name BUTT
+     * @return {String} [read-only] Default
+     * @property
+     * @constant
+     * @static
+     */
     'BUTT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'butt'
     },
+
+    /**
+     * @name ROUND
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'ROUND': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'round'
     },
+
+    /**
+     * @name SQUARE
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'SQUARE': {
       enumerable: true,
       writable: false,
@@ -1428,25 +2472,50 @@ Object.defineProperty(doodle, 'LineCap', {
     }
   })
 });
-
+/**
+ * @class LineJoin
+ * @static
+ */
 Object.defineProperty(doodle, 'LineJoin', {
   enumerable: true,
   writable: false,
   configurable: false,
   value: Object.create(null, {
-    // default
+    /**
+     * @name MITER
+     * @return {String} [read-only] Default
+     * @property
+     * @constant
+     * @static
+     */
     'MITER': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'miter'
     },
+
+    /**
+     * @name ROUND
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'ROUND': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 'round'
     },
+
+    /**
+     * @name BEVEL
+     * @return {String} [read-only]
+     * @property
+     * @constant
+     * @static
+     */
     'BEVEL': {
       enumerable: true,
       writable: false,
@@ -1473,15 +2542,15 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       isEvent;
   
-  /* Super constructor
+  /**
+   * @class Event
+   * @extends Object
    * @param {String} type
    * @param {Boolean} bubbles = false
    * @param {Boolean} cancelable = false
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
-   * @return {Object}
+   * @return {Event}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.Event = function (type, bubbles, cancelable) {
     var event = Object.create(event_prototype),
@@ -1515,9 +2584,12 @@ Object.defineProperty(doodle, 'LineJoin', {
           __cancelNow = false;
 
       /**
+       * @name copy_event_properties
        * @param {Event} evt Event to copy properties from.
        * @param {?Node|Boolean} resetTarget Set new event target or null.
        * @param {String|Boolean} resetType Set new event type.
+       * @throws {TypeError}
+       * @private
        */
       copy_event_properties = function (evt, resetTarget, resetType) {
         /*DEBUG*/
@@ -1560,12 +2632,23 @@ Object.defineProperty(doodle, 'LineJoin', {
       };
       
       return {
+        /**
+         * @name type
+         * @return {String} [read-only]
+         * @property
+         */
         'type': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_type; }
         },
-        
+
+        /**
+         * @name __setType
+         * @param {String} typeArg
+         * @throws {TypeError}
+         * @private
+         */
         '__setType': {
           enumerable: false,
           value: function (typeArg) {
@@ -1575,19 +2658,34 @@ Object.defineProperty(doodle, 'LineJoin', {
             evt_type = typeArg;
           }
         },
-        
+
+        /**
+         * @name bubbles
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'bubbles': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_bubbles; }
         },
-        
+
+        /**
+         * @name cancelable
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'cancelable': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_cancelable; }
         },
-        
+
+        /**
+         * @name cancelBubble
+         * @param {Boolean} cancelArg
+         * @throws {TypeError}
+         */
         'cancelBubble': {
           enumerable: true,
           configurable: false,
@@ -1600,8 +2698,12 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
         
-        /* test if event propagation should stop after this node
-         * @internal
+        /**
+         * Test if event propagation should stop after this node.
+         * @name __cancel
+         * @return {Boolean} [read-only]
+         * @property
+         * @private
          */
         '__cancel': {
           enumerable: false,
@@ -1609,24 +2711,35 @@ Object.defineProperty(doodle, 'LineJoin', {
           get: function () { return __cancel; }
         },
         
-        /* test if event propagation should stop immediately,
-         * ignore other handlers on this node
-         * @internal
+        /**
+         * Test if event propagation should stop immediately,
+         * ignore other handlers on this node.
+         * @name __cancelNow
+         * @return {Boolean} [read-only]
+         * @property
+         * @private
          */
         '__cancelNow': {
           enumerable: false,
           configurable: false,
           get: function () { return __cancelNow; }
         },
-        
+
+        /**
+         * @name currentTarget
+         * @return {Node} [read-only]
+         * @property
+         */
         'currentTarget': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_currentTarget; }
         },
         
-        /* currentTarget is read-only, but damnit I need to set it sometimes
-         * @internal
+        /**
+         * @name __setCurrentTarget
+         * @param {Node} targetArg
+         * @private
          */
         '__setCurrentTarget': {
           enumerable: false,
@@ -1635,14 +2748,22 @@ Object.defineProperty(doodle, 'LineJoin', {
             return this;
           }
         },
-        
+
+        /**
+         * @name target
+         * @return {Node} [read-only]
+         * @property
+         */
         'target': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_target; }
         },
 
-        /* @internal
+        /**
+         * @name __setTarget
+         * @param {Node} targetArg
+         * @private
          */
         '__setTarget': {
           enumerable: false,
@@ -1651,14 +2772,23 @@ Object.defineProperty(doodle, 'LineJoin', {
             return this;
           }
         },
-        
+
+        /**
+         * @name eventPhase
+         * @return {Number} [read-only]
+         * @property
+         */
         'eventPhase': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_eventPhase; }
         },
 
-        /* @internal
+        /**
+         * @name __setEventPhase
+         * @param {Number} phaseArg
+         * @throws {TypeError}
+         * @private
          */
         '__setEventPhase': {
           enumerable: false,
@@ -1670,27 +2800,47 @@ Object.defineProperty(doodle, 'LineJoin', {
             return this;
           }
         },
-        
+
+        /**
+         * @name srcElement
+         * @return {EventDispatcher} [read-only]
+         * @property
+         */
         'srcElement': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_srcElement; }
         },
-        
+
+        /**
+         * @name timeStamp
+         * @return {Date} [read-only]
+         * @property
+         */
         'timeStamp': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_timeStamp; }
         },
-        
+
+        /**
+         * @name returnValue
+         * @return {*} [read-only]
+         * @property
+         */
         'returnValue': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_returnValue; }
         },
         
-        /*
-         * METHODS
+        /**
+         * @name initEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @return {Event}
+         * @throws {TypeError}
          */
         'initEvent': {
           enumerable: true,
@@ -1704,7 +2854,6 @@ Object.defineProperty(doodle, 'LineJoin', {
             check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
             check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
             /*END_DEBUG*/
-
             evt_type = typeArg;
             evt_bubbles = canBubbleArg;
             evt_cancelable = cancelableArg;
@@ -1713,6 +2862,9 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
+        /**
+         * @name preventDefault
+         */
         'preventDefault': {
           enumerable: true,
           configurable: false,
@@ -1721,6 +2873,10 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
+        /**
+         * @name stopPropagation
+         * @throws {Error} If called on event that can not be canceled.
+         */
         'stopPropagation': {
           enumerable: true,
           configurable: false,
@@ -1733,6 +2889,10 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
+        /**
+         * @name stopImmediatePropagation
+         * @throws {Error} If called on event that can not be canceled.
+         */
         'stopImmediatePropagation': {
           enumerable: true,
           configurable: false,
@@ -1746,12 +2906,15 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
-        /* Copy the properties from another Event.
+        /**
+         * Copy the properties from another Event.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyEventProperties
          * @param {Event} evt
-         * @param {Node=} resetTarget
-         * @param {String=} resetType
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @throws {TypeError}
+         * @private
          */
         '__copyEventProperties': {
           enumerable: false,
@@ -1807,6 +2970,9 @@ Object.defineProperty(doodle, 'LineJoin', {
   
   
   event_static_properties = {
+    /**
+     * @name toString
+     */
     'toString': {
       enumerable: true,
       writable: false,
@@ -1818,115 +2984,246 @@ Object.defineProperty(doodle, 'LineJoin', {
   };//end event_static_properties
 
   event_prototype = Object.create({}, {
+    /**
+     * @name CAPTURING_PHASE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'CAPTURING_PHASE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 1
     },
+
+    /**
+     * @name AT_TARGET
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'AT_TARGET': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 2
     },
+
+    /**
+     * @name BUBBLING_PHASE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'BUBBLING_PHASE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 3
     },
-    
+
+    /**
+     * @name MOUSEDOWN
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEDOWN': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 1
     },
+
+    /**
+     * @name MOUSEUP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEUP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 2
     },
+
+    /**
+     * @name MOUSEOVER
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEOVER': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 4
     },
+
+    /**
+     * @name MOUSEOUT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEOUT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 8
     },
+
+    /**
+     * @name MOUSEMOVE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEMOVE': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 16
     },
+
+    /**
+     * @name MOUSEDRAG
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'MOUSEDRAG': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 32
     },
+
+    /**
+     * @name CLICK
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'CLICK': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 64
     },
+
+    /**
+     * @name DBLCLICK
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'DBLCLICK': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 128
     },
+
+    /**
+     * @name KEYDOWN
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'KEYDOWN': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 256
     },
+
+    /**
+     * @name KEYUP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'KEYUP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 512
     },
+
+    /**
+     * @name KEYPRESS
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'KEYPRESS': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 1024
     },
+
+    /**
+     * @name DRAGDROP
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'DRAGDROP': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 2048
     },
+
+    /**
+     * @name FOCUS
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'FOCUS': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 4096
     },
+
+    /**
+     * @name BLUR
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'BLUR': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 8192
     },
+
+    /**
+     * @name SELECT
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'SELECT': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: 16384
     },
+
+    /**
+     * @name CHANGE
+     * @return {Number} [read-only]
+     * @property
+     * @constant
+     */
     'CHANGE': {
       enumerable: true,
       writable: false,
@@ -1939,10 +3236,13 @@ Object.defineProperty(doodle, 'LineJoin', {
    * CLASS METHODS
    */
 
-  /* Test if an object is an event of any kind (Event/MouseEvent/etc).
+  /**
+   * Test if an object is an event of any kind (Event/MouseEvent/etc).
    * Returns true on Doodle events as well as DOM events.
+   * @name isEvent
    * @param {Event} event
    * @return {Boolean}
+   * @static
    */
   isEvent = doodle.Event.isEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
@@ -1960,6 +3260,16 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
 
   /*DEBUG*/
+  /**
+   * @name check_event_type
+   * @param {Event} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_event_type = doodle.utils.types.check_event_type = function (event, caller, param) {
     if (isEvent(event)) {
       return true;
@@ -1988,17 +3298,17 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class UIEvent
+   * @extends Event
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {Number} detail
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {UIEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.UIEvent = function (type, bubbles, cancelable, view, detail) {
     var uievent,
@@ -2057,7 +3367,11 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_pageX = 0,
           evt_pageY = 0;
 
-      /* @param {UIEvent} evt UIEvent to copy properties from.
+      /**
+       * @name copy_uievent_properties
+       * @param {UIEvent} evt UIEvent to copy properties from.
+       * @throws {TypeError}
+       * @private
        */
       copy_uievent_properties = function (evt) {
         /*DEBUG*/
@@ -2075,60 +3389,115 @@ Object.defineProperty(doodle, 'LineJoin', {
       };
       
       return {
+        /**
+         * @name view
+         * @return {HTMLElement} [read-only]
+         * @property
+         */
         'view': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_view; }
         },
 
+        /**
+         * @name detail
+         * @return {Number} [read-only]
+         * @property
+         */
         'detail': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_detail; }
         },
 
+        /**
+         * @name which
+         * @return {Number} [read-only]
+         * @property
+         */
         'which': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_which; }
         },
 
+        /**
+         * @name charCode
+         * @return {Number} [read-only]
+         * @property
+         */
         'charCode': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_charCode; }
         },
 
+        /**
+         * @name keyCode
+         * @return {Number} [read-only]
+         * @property
+         */
         'keyCode': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_keyCode; }
         },
 
+        /**
+         * @name layerX
+         * @return {Number} [read-only]
+         * @property
+         */
         'layerX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_layerX; }
         },
 
+        /**
+         * @name layerY
+         * @return {Number} [read-only]
+         * @property
+         */
         'layerY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_layerY; }
         },
 
+        /**
+         * @name pageX
+         * @return {Number} [read-only]
+         * @property
+         */
         'pageX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_pageX; }
         },
 
+        /**
+         * @name pageY
+         * @return {Number} [read-only]
+         * @property
+         */
         'pageY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_pageY; }
         },
-        
+
+        /**
+         * @name initUIEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {Number} detailArg
+         * @return {UIEvent}
+         * @throws {TypeError}
+         */
         'initUIEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg) {
             //parameter defaults
@@ -2150,12 +3519,16 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
-        /* Copy the properties from another UIEvent.
+        /**
+         * Copy the properties from another UIEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyUIEventProperties
          * @param {UIEvent} evt
          * @param {Node=} resetTarget
          * @param {String=} resetType
+         * @return {Event}
+         * @throws {TypeError}
+         * @private
          */
         '__copyUIEventProperties': {
           enumerable: false,
@@ -2206,13 +3579,16 @@ Object.defineProperty(doodle, 'LineJoin', {
 
   
   uievent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object UIEvent]";
-      }
+      value: function () { return "[object UIEvent]"; }
     }
   };
 
@@ -2220,6 +3596,14 @@ Object.defineProperty(doodle, 'LineJoin', {
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is an UIEvent or inherits from it.
+   * Returns true on Doodle events as well as DOM events.
+   * @name isUIEvent
+   * @param {Event} event
+   * @return {Boolean}
+   * @static
+   */
   isUIEvent = doodle.UIEvent.isUIEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -2235,6 +3619,16 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
 
   /*DEBUG*/
+  /**
+   * @name check_uievent_type
+   * @param {UIEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_uievent_type = doodle.utils.types.check_uievent_type = function (event, caller, param) {
     if (isUIEvent(event)) {
       return true;
@@ -2263,11 +3657,13 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class MouseEvent
+   * @extends UIEvent
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {Number} detail
    * @param {Number} screenX
    * @param {Number} screenY
@@ -2279,11 +3675,9 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @param {Boolean} metaKey
    * @param {Number} button Mouse button that caused the event (0|1|2)
    * @param {Node} relatedTarget Secondary target for event (only for some events)
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {MouseEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.MouseEvent = function (type, bubbles, cancelable, view, detail,
                                 screenX, screenY, clientX, clientY, 
@@ -2334,7 +3728,6 @@ Object.defineProperty(doodle, 'LineJoin', {
       mouseevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
-    
     Object.defineProperties(mouseevent, mouseevent_static_properties);
     //properties that require privacy
     Object.defineProperties(mouseevent, (function () {
@@ -2353,7 +3746,11 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_button = 0,
           evt_relatedTarget = null;
 
-      /* @param {MouseEvent} evt MouseEvent to copy properties from.
+      /**
+       * @name copy_mouseevent_properties
+       * @param {MouseEvent} evt MouseEvent to copy properties from.
+       * @throws {TypeError}
+       * @private
        */
       copy_mouseevent_properties = function (evt) {
         /*DEBUG*/
@@ -2376,90 +3773,180 @@ Object.defineProperty(doodle, 'LineJoin', {
       };
       
       return {
+        /**
+         * @name x
+         * @return {Number} [read-only]
+         * @property
+         */
         'x': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_x; }
         },
 
+        /**
+         * @name y
+         * @return {Number} [read-only]
+         * @property
+         */
         'y': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_y; }
         },
 
+        /**
+         * @name screenX
+         * @return {Number} [read-only]
+         * @property
+         */
         'screenX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_screenX; }
         },
 
+        /**
+         * @name screenY
+         * @return {Number} [read-only]
+         * @property
+         */
         'screenY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_screenY; }
         },
 
+        /**
+         * @name clientX
+         * @return {Number} [read-only]
+         * @property
+         */
         'clientX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_clientX; }
         },
 
+        /**
+         * @name clientY
+         * @return {Number} [read-only]
+         * @property
+         */
         'clientY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_clientY; }
         },
 
+        /**
+         * @name offsetX
+         * @return {Number} [read-only]
+         * @property
+         */
         'offsetX': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_offsetX; }
         },
 
+        /**
+         * @name offsetY
+         * @return {Number} [read-only]
+         * @property
+         */
         'offsetY': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_offsetY; }
         },
 
+        /**
+         * @name ctrlKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'ctrlKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_ctrlKey; }
         },
 
+        /**
+         * @name altKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'altKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_altKey; }
         },
 
+        /**
+         * @name shiftKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'shiftKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_shiftKey; }
         },
 
+        /**
+         * @name metaKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'metaKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_metaKey; }
         },
 
+        /**
+         * @name button
+         * @return {Number} [read-only]
+         * @property
+         */
         'button': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_button; }
         },
 
+        /**
+         * @name relatedTarget
+         * @return {Node} [read-only]
+         * @property
+         */
         'relatedTarget': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_relatedTarget; }
         },
 
+        /**
+         * @name initMouseEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {Number} detailArg
+         * @param {Number} screenXArg
+         * @param {Number} screenYArg
+         * @param {Number} clientXArg
+         * @param {Number} clientYArg
+         * @param {Boolean} ctrlKeyArg
+         * @param {Boolean} altKeyArg
+         * @param {Boolean} shiftKeyArg
+         * @param {Boolean} metaKeyArg
+         * @param {Number} buttonArg
+         * @param {Node} relatedTargetArg
+         * @return {MouseEvent}
+         * @throws {TypeError}
+         */
         'initMouseEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
                            screenXArg, screenYArg, clientXArg, clientYArg,
@@ -2506,15 +3993,16 @@ Object.defineProperty(doodle, 'LineJoin', {
             evt_button = buttonArg;
             evt_relatedTarget = relatedTargetArg;
 
-            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
-            return this;
+            return this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
           }
         },
 
-        /* Queries the state of a modifier using a key identifier.
+        /**
+         * Queries the state of a modifier using a key identifier.
+         * @name getModifierState
          * @param {String} key A modifier key identifier
          * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-         * This is an incomplete list of modifiers.
+         * @throws {TypeError}
          */
         'getModifierState': {
           value: function (key) {
@@ -2536,10 +4024,16 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
-        /* Copy the properties from another MouseEvent.
+        /**
+         * Copy the properties from another MouseEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyMouseEventProperties
          * @param {MouseEvent} evt
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {MouseEvent}
+         * @throws {TypeError}
+         * @private
          */
         '__copyMouseEventProperties': {
           enumerable: false,
@@ -2590,15 +4084,17 @@ Object.defineProperty(doodle, 'LineJoin', {
     return mouseevent;
   };
     
-  
   mouseevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object MouseEvent]";
-      }
+      value: function () { return "[object MouseEvent]"; }
     }
   };
 
@@ -2606,6 +4102,13 @@ Object.defineProperty(doodle, 'LineJoin', {
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is a MouseEvent.
+   * @name isMouseEvent
+   * @param {MouseEvent} event
+   * @return {Boolean}
+   * @static
+   */
   isMouseEvent = doodle.MouseEvent.isMouseEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -2616,13 +4119,528 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
 
   /*DEBUG*/
-  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, param) {
+  /**
+   * @name check_mouseevent_type
+   * @param {MouseEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, params) {
     if (isMouseEvent(event)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_mouseevent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an MouseEvent.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must be an MouseEvent.");
+    }
+  };
+  /*END_DEBUG*/
+
+}());//end class closure
+/*globals doodle*/
+
+/* TouchEvent support is expermental.
+ * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
+ */
+(function () {
+  var touchevent_static_properties,
+      isTouchEvent,
+      /*DEBUG*/
+      check_touchevent_type,
+      check_boolean_type = doodle.utils.types.check_boolean_type,
+      check_number_type = doodle.utils.types.check_number_type,
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      isEvent = doodle.Event.isEvent;
+  
+  /**
+   * @class TouchEvent
+   * @extends UIEvent
+   * @param {String} type
+   * @param {Boolean} bubbles
+   * @param {Boolean} cancelable
+   * @param {HTMLElement} view
+   * @param {Number} detail
+   * @param {Number} screenX
+   * @param {Number} screenY
+   * @param {Number} clientX
+   * @param {Number} clientY
+   * @param {Boolean} ctrlKey
+   * @param {Boolean} altKey
+   * @param {Boolean} shiftKey
+   * @param {Boolean} metaKey
+   * @param {Array} touches ?
+   * @param {Array} targetTouches ?
+   * @param {Array} changedTouches ?
+   * @param {Number} scale
+   * @param {Number} rotation
+   * @return {TouchEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
+   */
+  doodle.TouchEvent = function (type, bubbles, cancelable, view, detail,
+                                screenX, screenY, clientX, clientY,
+                                ctrlKey, altKey, shiftKey, metaKey,
+                                touches, targetTouches, changedTouches,
+                                scale, rotation) {
+    var touchevent,
+        arg_len = arguments.length,
+        init_obj, //function, event
+        copy_touchevent_properties; //fn declared per event for private vars
+    
+    /*DEBUG*/
+    if (arg_len === 0 || arg_len > 18) {
+      throw new SyntaxError("[object TouchEvent](type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation");
+    }
+    /*END_DEBUG*/
+
+    //initialize uievent prototype with another event, function, or args
+    if (isEvent(arguments[0])) {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object TouchEvent](event): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      touchevent = Object.create(doodle.UIEvent(init_obj));
+    } else if (typeof arguments[0] === 'function') {
+      /*DEBUG*/
+      if (arg_len > 1) {
+        throw new SyntaxError("[object TouchEvent](function): Invalid number of parameters.");
+      }
+      /*END_DEBUG*/
+      init_obj = arguments[0];
+      type = undefined;
+      //use empty event type for now, will check after we call the init function.
+      touchevent = Object.create(doodle.UIEvent(''));
+    } else {
+      //parameter defaults
+      bubbles = (bubbles === undefined) ? false : bubbles;
+      cancelable = (cancelable === undefined) ? false : cancelable;
+      view = (view === undefined) ? null : view;
+      detail = (detail === undefined) ? 0 : detail;
+      /*DEBUG*/
+      check_string_type(type, '[object TouchEvent]', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      check_boolean_type(bubbles, '[object TouchEvent]', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      check_boolean_type(cancelable, '[object TouchEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      check_number_type(detail, '[object TouchEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      /*END_DEBUG*/
+      touchevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+    }
+    
+    Object.defineProperties(touchevent, touchevent_static_properties);
+    //properties that require privacy
+    Object.defineProperties(touchevent, (function () {
+      var evt_screenX = 0,
+          evt_screenY = 0,
+          evt_clientX = 0,
+          evt_clientY = 0,
+          evt_ctrlKey = false,
+          evt_altKey = false,
+          evt_shiftKey = false,
+          evt_metaKey = false,
+          evt_touches = null,
+          evt_targetTouches = null,
+          evt_changedTouches = null,
+          evt_scale = 1,
+          evt_rotation = 0;
+
+      /**
+       * @name copy_touchevent_properties
+       * @param {TouchEvent} evt TouchEvent to copy properties from.
+       * @private
+       */
+      copy_touchevent_properties = function (evt) {
+        /*DEBUG*/
+        check_touchevent_type(evt, 'copy_touchevent_properties', '*event*');
+        /*END_DEBUG*/
+        if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
+        if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
+        if (evt.clientX !== undefined) { evt_clientX = evt.clientX; }
+        if (evt.clientY !== undefined) { evt_clientY = evt.clientY; }
+        if (evt.ctrlKey !== undefined) { evt_ctrlKey = evt.ctrlKey; }
+        if (evt.altKey !== undefined) { evt_altKey = evt.altKey; }
+        if (evt.shiftKey !== undefined) { evt_shiftKey = evt.shiftKey; }
+        if (evt.metaKey !== undefined) { evt_metaKey = evt.metaKey; }
+        if (evt.touches !== undefined) { evt_touches = evt.touches; }
+        if (evt.targetTouches !== undefined) { evt_targetTouches = evt.targetTouches; }
+        if (evt.changedTouches !== undefined) { evt_changedTouches = evt.changedTouches; }
+        if (evt.scale !== undefined) { evt_scale = evt.scale; }
+        if (evt.rotation !== undefined) { evt_rotation = evt.rotation; }
+      };
+      
+      return {
+        /**
+         * @name screenX
+         * @return {Number} [read-only]
+         * @property
+         */
+        'screenX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_screenX; }
+        },
+
+        /**
+         * @name screenY
+         * @return {Number} [read-only]
+         * @property
+         */
+        'screenY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_screenY; }
+        },
+
+        /**
+         * @name clientX
+         * @return {Number} [read-only]
+         * @property
+         */
+        'clientX': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_clientX; }
+        },
+
+        /**
+         * @name clientY
+         * @return {Number} [read-only]
+         * @property
+         */
+        'clientY': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_clientY; }
+        },
+
+        /**
+         * @name ctrlKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
+        'ctrlKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_ctrlKey; }
+        },
+
+        /**
+         * @name altKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
+        'altKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_altKey; }
+        },
+
+        /**
+         * @name shiftKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
+        'shiftKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_shiftKey; }
+        },
+
+        /**
+         * @name metaKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
+        'metaKey': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_metaKey; }
+        },
+
+        /**
+         * @name touches
+         * @return {Array} [read-only]
+         * @property
+         */
+        'touches': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_touches; }
+        },
+
+        /**
+         * @name targetTouches
+         * @return {Array} [read-only]
+         * @property
+         */
+        'targetTouches': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_targetTouches; }
+        },
+
+        /**
+         * @name changedTouches
+         * @return {Array} [read-only]
+         * @property
+         */
+        'changedTouches': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_changedTouches; }
+        },
+
+        /**
+         * @name scale
+         * @return {Number} [read-only]
+         * @property
+         */
+        'scale': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_scale; }
+        },
+
+        /**
+         * @name rotation
+         * @return {Number} [read-only]
+         * @property
+         */
+        'rotation': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return evt_rotation; }
+        },
+
+        /**
+         * @name initTouchEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {Number} detailArg
+         * @param {Number} screenXArg
+         * @param {Number} screenYArg
+         * @param {Number} clientXArg
+         * @param {Number} clientYArg
+         * @param {Boolean} ctrlKeyArg
+         * @param {Boolean} altKeyArg
+         * @param {Boolean} shiftKeyArg
+         * @param {Boolean} metaKeyArg
+         * @param {Array} touchesArg
+         * @param {Array} targetTouchesArg
+         * @param {Array} changedTouchesArg
+         * @param {Number} scaleArg
+         * @param {Number} rotationArg
+         * @return {TouchEvent}
+         * @throws {TypeError}
+         */
+        'initTouchEvent': {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
+                           screenXArg, screenYArg, clientXArg, clientYArg,
+                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
+                           touchesArg, targetTouchesArg, changedTouchesArg,
+                           scaleArg, rotationArg) {
+            //parameter defaults
+            canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
+            cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
+            viewArg = (viewArg === undefined) ? null : viewArg;
+            detailArg = (detailArg === undefined) ? 0 : detailArg;
+            screenXArg = (screenXArg === undefined) ? 0 : screenXArg;
+            screenYArg = (screenYArg === undefined) ? 0 : screenYArg;
+            clientXArg = (clientXArg === undefined) ? 0 : clientXArg;
+            clientYArg = (clientYArg === undefined) ? 0 : clientYArg;
+            ctrlKeyArg = (ctrlKeyArg === undefined) ? false : ctrlKeyArg;
+            altKeyArg = (altKeyArg === undefined) ? false : altKeyArg;
+            shiftKeyArg = (shiftKeyArg === undefined) ? false : shiftKeyArg;
+            metaKeyArg = (metaKeyArg === undefined) ? false : metaKeyArg;
+            touchesArg = (touchesArg === undefined) ? null : touchesArg;
+            targetTouchesArg = (targetTouchesArg === undefined) ? null : targetTouchesArg;
+            changedTouchesArg = (changedTouchesArg === undefined) ? null : changedTouchesArg;
+            scaleArg = (scaleArg === undefined) ? 1 : scaleArg;
+            rotationArg = (rotationArg === undefined) ? 0 : rotationArg;
+            /*DEBUG*/
+            check_string_type(typeArg, this+'.initTouchEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(canBubbleArg, this+'.initTouchEvent', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(cancelableArg, this+'.initTouchEvent', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(detailArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(screenXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, *screenX*, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(screenYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, *screenY*, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(clientXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, *clientX*, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(clientYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, *clientY*, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(ctrlKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, *ctrlKey*, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(altKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, *altKey*, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(shiftKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, *shiftKey*, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+            check_boolean_type(metaKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, *metaKey*, touches, targetTouches, changedTouches, scale, rotation');
+            check_number_type(scaleArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, *scale*, rotation');
+            check_number_type(rotationArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, *rotation*');
+            /*END_DEBUG*/
+            evt_screenX = screenXArg;
+            evt_screenY = screenYArg;
+            evt_clientX = clientXArg;
+            evt_clientY = clientYArg;
+            evt_ctrlKey = ctrlKeyArg;
+            evt_altKey = altKeyArg;
+            evt_shiftKey = shiftKeyArg;
+            evt_metaKey = metaKeyArg;
+            evt_touches = touchesArg;
+            evt_targetTouches = targetTouchesArg;
+            evt_changedTouches = changedTouchesArg;
+            evt_scale = scaleArg;
+            evt_rotation = rotationArg;
+
+            this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
+            return this;
+          }
+        },
+
+        /**
+         * Queries the state of a modifier using a key identifier.
+         * @name getModifierState
+         * @param {String} key A modifier key identifier
+         * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
+         * @throws {TypeError}
+         */
+        'getModifierState': {
+          value: function (key) {
+            /*DEBUG*/
+            check_string_type(key, this+'.getModifierState', '*key*');
+            /*END_DEBUG*/
+            switch (key) {
+            case 'Alt':
+              return evt_altKey;
+            case 'Control':
+              return evt_ctrlKey;
+            case 'Meta':
+              return evt_metaKey;
+            case 'Shift':
+              return evt_shiftKey;
+            default:
+              return false;
+            }
+          }
+        },
+
+        /**
+         * Copy the properties from another TouchEvent.
+         * Allows for the reuse of this object for further dispatch.
+         * @name __copyTouchEventProperties
+         * @param {TouchEvent} evt
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {TouchEvent}
+         * @throws {TypeError}
+         * @private
+         */
+        '__copyTouchEventProperties': {
+          enumerable: false,
+          configurable: false,
+          value: function (evt, resetTarget, resetType) {
+            resetTarget = (resetTarget === undefined) ? false : resetTarget;
+            resetType = (resetType === undefined) ? false : resetType;
+            /*DEBUG*/
+            check_touchevent_type(evt, this+'.__copyTouchEventProperties', '*event*, target, type');
+            if (resetTarget !== false && resetTarget !== null) {
+              check_node_type(evt, this+'.__copyTouchEventProperties', 'event, *target*, type');
+            }
+            if (resetType !== false) {
+              check_string_type(resetType, this+'.__copyTouchEventProperties', 'event, target, *type*');
+            }
+            /*END_DEBUG*/
+            copy_touchevent_properties(evt);
+            return this.__copyUIEventProperties(evt, resetTarget, resetType);
+          }
+        }
+      };
+    }()));//end defineProperties
+
+
+    //initialize touchevent
+    if (init_obj) {
+      if (typeof init_obj === 'function') {
+        init_obj.call(touchevent);
+        /*DEBUG*/
+        //make sure we've checked our dummy type string
+        if (touchevent.type === undefined || touchevent.type === '' ||
+            touchevent.bubbles === undefined ||
+            touchevent.cancelable === undefined) {
+          throw new SyntaxError("[object TouchEvent](function): Must call 'this.initTouchEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation)' within the function argument.");
+        }
+        /*END_DEBUG*/
+      } else {
+        //passed a doodle or dom event object
+        copy_touchevent_properties(init_obj);
+      }
+    } else {
+      //standard instantiation
+      touchevent.initTouchEvent(type, bubbles, cancelable, view, detail,
+                                screenX, screenY, clientX, clientY,
+                                ctrlKey, altKey, shiftKey, metaKey,
+                                touches, targetTouches, changedTouches, scale, rotation);
+    }
+    
+    return touchevent;
+  };
+    
+  
+  touchevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () { return "[object TouchEvent]"; }
+    }
+  };
+
+  /*
+   * CLASS METHODS
+   */
+
+  /**
+   * Test if an object is a TouchEvent.
+   * @name isTouchEvent
+   * @param {TouchEvent} event
+   * @return {Boolean}
+   * @static
+   */
+  isTouchEvent = doodle.TouchEvent.isTouchEvent = function (event) {
+    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
+      return false;
+    } else {
+      event = event.toString();
+    }
+    return (event === '[object TouchEvent]');
+  };
+
+  /*DEBUG*/
+  /**
+   * @name check_touchevent_type
+   * @param {TouchEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_touchevent_type = doodle.utils.types.check_touchevent_type = function (event, caller, params) {
+    if (isTouchEvent(event)) {
+      return true;
+    } else {
+      caller = (caller === undefined) ? "check_touchevent_type" : caller;
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must be an TouchEvent.");
     }
   };
   /*END_DEBUG*/
@@ -2644,18 +4662,18 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class TextEvent
+   * @extends UIEvent
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {String} data
    * @param {Number} inputMode
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {TextEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
     var textevent,
@@ -2708,8 +4726,10 @@ Object.defineProperty(doodle, 'LineJoin', {
       var evt_data = '',
           evt_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
 
-      
-      /* @param {TextEvent} evt TextEvent to copy properties from.
+      /**
+       * @name copy_textevent_properties
+       * @param {TextEvent} evt TextEvent to copy properties from.
+       * @private
        */
       copy_textevent_properties = function (evt) {
         /*DEBUG*/
@@ -2720,18 +4740,38 @@ Object.defineProperty(doodle, 'LineJoin', {
       };
       
       return {
+        /**
+         * @name data
+         * @return {String} [read-only]
+         * @property
+         */
         'data': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_data; }
         },
 
+        /**
+         * @name inputMode
+         * @return {Number} [read-only]
+         * @property
+         */
         'inputMode': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_inputMode; }
         },
 
+        /**
+         * @name initTextEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} view
+         * @param {String} dataArg
+         * @param {Number} inputModeArg
+         * @return {TextEvent}
+         */
         'initTextEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, dataArg, inputModeArg) {
             //parameter defaults
@@ -2755,10 +4795,15 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
-        /* Copy the properties from another TextEvent.
+        /**
+         * Copy the properties from another TextEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyTextEventProperties
          * @param {TextEvent} evt
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {TextEvent}
+         * @private
          */
         '__copyTextEventProperties': {
           enumerable: false,
@@ -2808,13 +4853,16 @@ Object.defineProperty(doodle, 'LineJoin', {
   
   
   textevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object TextEvent]";
-      }
+      value: function () { return "[object TextEvent]"; }
     }
   };
 
@@ -2822,6 +4870,13 @@ Object.defineProperty(doodle, 'LineJoin', {
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is a TextEvent.
+   * @name isTextEvent
+   * @param {TextEvent} event
+   * @return {Boolean}
+   * @static
+   */
   isTextEvent = doodle.TextEvent.isTextEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -2832,13 +4887,23 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
 
   /*DEBUG*/
-  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, param) {
+  /**
+   * @name check_textevent_type
+   * @param {TextEvent} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, params) {
     if (isTextEvent(event)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_textevent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an TextEvent.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must be an TextEvent.");
     }
   };
   /*END_DEBUG*/
@@ -2861,20 +4926,20 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       isEvent = doodle.Event.isEvent;
   
-  /* Super constructor
+  /**
+   * @class KeyboardEvent
+   * @extends UIEvent
    * @param {String} type
    * @param {Boolean} bubbles
    * @param {Boolean} cancelable
-   * @param {DOM Object} view
+   * @param {HTMLElement} view
    * @param {String} keyIdentifier
    * @param {Number} keyLocation
    * @param {String} modifiersList White-space separated list of key modifiers.
    * @param {Boolean} repeat
-   *
-   * @alternative instantiation
-   * @param {Event} initializer event to wrap
-   *
    * @return {KeyboardEvent}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle.KeyboardEvent = function (type, bubbles, cancelable, view,
                                    keyIdentifier, keyLocation, modifiersList, repeat) {
@@ -2934,7 +4999,11 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_metaKey = false,
           evt_altGraphKey = false;
 
-      /* @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+      /**
+       * @name copy_keyboardevent_properties
+       * @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+       * @throws {TypeError}
+       * @private
        */
       copy_keyboardevent_properties = function (evt) {
         /*DEBUG*/
@@ -2951,54 +5020,107 @@ Object.defineProperty(doodle, 'LineJoin', {
       };
       
       return {
+        /**
+         * @name keyIdentifier
+         * @return {String} [read-only]
+         * @property
+         */
         'keyIdentifier': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_keyIdentifier; }
         },
 
+        /**
+         * @name keyLocation
+         * @return {Number} [read-only]
+         * @property
+         */
         'keyLocation': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_keyLocation; }
         },
 
+        /**
+         * @name repeat
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'repeat': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_repeat; }
         },
 
+        /**
+         * @name ctrlKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'ctrlKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_ctrlKey; }
         },
-        
+
+        /**
+         * @name altKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'altKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_altKey; }
         },
 
+        /**
+         * @name shiftKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'shiftKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_shiftKey; }
         },
 
+        /**
+         * @name metaKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'metaKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_metaKey; }
         },
 
+        /**
+         * @name altGraphKey
+         * @return {Boolean} [read-only]
+         * @property
+         */
         'altGraphKey': {
           enumerable: true,
           configurable: false,
           get: function () { return evt_altGraphKey; }
         },
-
+        
+        /**
+         * @name initKeyboardEvent
+         * @param {String} typeArg
+         * @param {Boolean} canBubbleArg
+         * @param {Boolean} cancelableArg
+         * @param {HTMLElement} viewArg
+         * @param {String} keyIdentifierArg
+         * @param {Number} keyLocationArg
+         * @param {String} modifiersListArg
+         * @param {Boolean} repeatArg
+         * @return {Event}
+         * @throws {TypeError}
+         */
         'initKeyboardEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg,
                            keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
@@ -3046,10 +5168,12 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
-        /* Queries the state of a modifier using a key identifier.
+        /**
+         * Queries the state of a modifier using a key identifier.
+         * @name getModifierState
          * @param {String} key A modifier key identifier
          * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
-         * This is an incomplete list of modifiers.
+         * @throws {TypeError}
          */
         'getModifierState': {
           value: function (key) {
@@ -3071,10 +5195,16 @@ Object.defineProperty(doodle, 'LineJoin', {
           }
         },
 
-        /* Copy the properties from another KeyboardEvent.
+        /**
+         * Copy the properties from another KeyboardEvent.
          * Allows for the reuse of this object for further dispatch.
-         * @internal
+         * @name __copyKeyboardEventProperties
          * @param {KeyboardEvent} evt
+         * @param {Node} resetTarget
+         * @param {String} resetType
+         * @return {KeyboardEvent}
+         * @throws {TypeError}
+         * @private
          */
         '__copyKeyboardEventProperties': {
           enumerable: false,
@@ -3125,13 +5255,16 @@ Object.defineProperty(doodle, 'LineJoin', {
     
 
   keyboardevent_static_properties = {
+    /**
+     * @name toString
+     * @return {String}
+     * @override
+     */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object KeyboardEvent]";
-      }
+      value: function () { return "[object KeyboardEvent]"; }
     }
   };
 
@@ -3139,6 +5272,13 @@ Object.defineProperty(doodle, 'LineJoin', {
    * CLASS METHODS
    */
 
+  /**
+   * Test if an object is a keyboard event.
+   * @name isKeyboardEvent
+   * @param {Event} event
+   * @return {Boolean}
+   * @static
+   */
   isKeyboardEvent = doodle.KeyboardEvent.isKeyboardEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
@@ -3149,6 +5289,16 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
 
   /*DEBUG*/
+  /**
+   * @name check_keyboardevent_type
+   * @param {Event} event
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_keyboardevent_type = doodle.utils.types.check_keyboardevent_type = function (event, caller, param) {
     if (isKeyboardEvent(event)) {
       return true;
@@ -3162,10 +5312,18 @@ Object.defineProperty(doodle, 'LineJoin', {
 
 }());//end class closure
 
-/* EVENT
+/*
+ * EVENT
  */
 Object.defineProperties(doodle.Event, {
-
+  /**
+   * @name CAPTURING_PHASE
+   * @return {Number} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
+   */
   'CAPTURING_PHASE': {
     enumerable: true,
     writable: false,
@@ -3173,6 +5331,14 @@ Object.defineProperties(doodle.Event, {
     value: 1
   },
 
+  /**
+   * @name AT_TARGET
+   * @return {Number} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
+   */
   'AT_TARGET': {
     enumerable: true,
     writable: false,
@@ -3180,6 +5346,14 @@ Object.defineProperties(doodle.Event, {
     value: 2
   },
 
+  /**
+   * @name BUBBLING_PHASE
+   * @return {Number} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
+   */
   'BUBBLING_PHASE': {
     enumerable: true,
     writable: false,
@@ -3187,7 +5361,14 @@ Object.defineProperties(doodle.Event, {
     value: 3
   },
 
-  /* Dispatched when object is added to display path.
+  /**
+   * Dispatched when object is added to display path.
+   * @name ADDED
+   * @return {String} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
    */
   'ADDED': {
     enumerable: true,
@@ -3196,7 +5377,14 @@ Object.defineProperties(doodle.Event, {
     value: "added"
   },
 
-  /* Dispatched when object is removed from display path.
+  /**
+   * Dispatched when object is removed from display path.
+   * @name REMOVED
+   * @return {String} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
    */
   'REMOVED': {
     enumerable: true,
@@ -3205,6 +5393,14 @@ Object.defineProperties(doodle.Event, {
     value: "removed"
   },
 
+  /**
+   * @name ENTER_FRAME
+   * @return {String} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
+   */
   'ENTER_FRAME': {
     enumerable: true,
     writable: false,
@@ -3212,7 +5408,14 @@ Object.defineProperties(doodle.Event, {
     value: "enterFrame"
   },
 
-  /* Dispatched when element is loaded.
+  /**
+   * Dispatched when element is loaded.
+   * @name LOAD
+   * @return {String} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
    */
   'LOAD': {
     enumerable: true,
@@ -3221,6 +5424,14 @@ Object.defineProperties(doodle.Event, {
     value: "load"
   },
 
+  /**
+   * @name CHANGE
+   * @return {String} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
+   */
   'CHANGE': {
     enumerable: true,
     writable: false,
@@ -3230,9 +5441,18 @@ Object.defineProperties(doodle.Event, {
 });
 
 
-/* UI EVENT
+/*
+ * UI EVENT
  */
 Object.defineProperties(doodle.UIEvent, {
+  /**
+   * @name FOCUS_IN
+   * @return {String} [read-only]
+   * @memberOf UIEvent
+   * @property
+   * @constant
+   * @static
+   */
   'FOCUS_IN': {
     enumerable: true,
     writable: false,
@@ -3242,12 +5462,19 @@ Object.defineProperties(doodle.UIEvent, {
 });
 
 
-/* MOUSE EVENT
+/*
+ * MOUSE EVENT
  * Compatibility tables: http://www.quirksmode.org/dom/events/index.html
  */
 Object.defineProperties(doodle.MouseEvent, {
-
-  /* To test for left/middle/right button check value for event.which (0,1,2)
+  /**
+   * To test for left/middle/right button check value for event.which (0,1,2).
+   * @name CLICK
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
    */
   'CLICK': {
     enumerable: true,
@@ -3256,6 +5483,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "click"
   },
 
+  /**
+   * @name DOUBLE_CLICK
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'DOUBLE_CLICK': {
     enumerable: true,
     writable: false,
@@ -3263,6 +5498,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "dblclick"
   },
 
+  /**
+   * @name CONTEXT_MENU
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'CONTEXT_MENU': {
     enumerable: true,
     writable: false,
@@ -3270,6 +5513,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "contextmenu"
   },
 
+  /**
+   * @name MOUSE_DOWN
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_DOWN': {
     enumerable: true,
     writable: false,
@@ -3277,6 +5528,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "mousedown"
   },
 
+  /**
+   * @name MOUSE_UP
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_UP': {
     enumerable: true,
     writable: false,
@@ -3284,6 +5543,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "mouseup"
   },
 
+  /**
+   * @name MOUSE_WHEEL
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_WHEEL': {
     enumerable: true,
     writable: false,
@@ -3291,6 +5558,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "mousewheel"
   },
 
+  /**
+   * @name MOUSE_MOVE
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_MOVE': {
     enumerable: true,
     writable: false,
@@ -3298,6 +5573,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "mousemove"
   },
 
+  /**
+   * @name MOUSE_OUT
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_OUT': {
     enumerable: true,
     writable: false,
@@ -3305,6 +5588,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "mouseout"
   },
 
+  /**
+   * @name MOUSE_OVER
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_OVER': {
     enumerable: true,
     writable: false,
@@ -3312,6 +5603,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "mouseover"
   },
 
+  /**
+   * @name MOUSE_ENTER
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_ENTER': {
     enumerable: true,
     writable: false,
@@ -3319,6 +5618,14 @@ Object.defineProperties(doodle.MouseEvent, {
     value: "mouseenter"
   },
 
+  /**
+   * @name MOUSE_LEAVE
+   * @return {String} [read-only]
+   * @memberOf MouseEvent
+   * @property
+   * @constant
+   * @static
+   */
   'MOUSE_LEAVE': {
     enumerable: true,
     writable: false,
@@ -3329,11 +5636,19 @@ Object.defineProperties(doodle.MouseEvent, {
 });
 
 
-/* TOUCH EVENT
+/*
+ * TOUCH EVENT
  * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
- *
+ */
 Object.defineProperties(doodle.TouchEvent, {
-  
+  /**
+   * @name TOUCH_START
+   * @return {String} [read-only]
+   * @memberOf TouchEvent
+   * @property
+   * @constant
+   * @static
+   */
   'TOUCH_START': {
     enumerable: true,
     writable: false,
@@ -3341,6 +5656,14 @@ Object.defineProperties(doodle.TouchEvent, {
     value: "touchstart"
   },
 
+  /**
+   * @name TOUCH_MOVE
+   * @return {String} [read-only]
+   * @memberOf TouchEvent
+   * @property
+   * @constant
+   * @static
+   */
   'TOUCH_MOVE': {
     enumerable: true,
     writable: false,
@@ -3348,6 +5671,14 @@ Object.defineProperties(doodle.TouchEvent, {
     value: "touchmove"
   },
 
+  /**
+   * @name TOUCH_END
+   * @return {String} [read-only]
+   * @memberOf TouchEvent
+   * @property
+   * @constant
+   * @static
+   */
   'TOUCH_END': {
     enumerable: true,
     writable: false,
@@ -3355,6 +5686,14 @@ Object.defineProperties(doodle.TouchEvent, {
     value: "touchend"
   },
 
+  /**
+   * @name TOUCH_CANCEL
+   * @return {String} [read-only]
+   * @memberOf TouchEvent
+   * @property
+   * @constant
+   * @static
+   */
   'TOUCH_CANCEL': {
     enumerable: true,
     writable: false,
@@ -3363,12 +5702,19 @@ Object.defineProperties(doodle.TouchEvent, {
   }
   
 });
-***/
 
-/* KEYBOARD EVENT
+/*
+ * KEYBOARD EVENT
  */
 Object.defineProperties(doodle.KeyboardEvent, {
-  
+  /**
+   * @name KEY_PRESS
+   * @return {String} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_PRESS': {
     enumerable: true,
     writable: false,
@@ -3376,6 +5722,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: "keypress"
   },
 
+  /**
+   * @name KEY_UP
+   * @return {String} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_UP': {
     enumerable: true,
     writable: false,
@@ -3383,6 +5737,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: "keyup"
   },
 
+  /**
+   * @name KEY_DOWN
+   * @return {String} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_DOWN': {
     enumerable: true,
     writable: false,
@@ -3390,6 +5752,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: "keydown"
   },
 
+  /**
+   * @name KEY_LOCATION_STANDARD
+   * @return {Number} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_LOCATION_STANDARD': {
     enumerable: true,
     writable: false,
@@ -3397,6 +5767,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: 0x00
   },
 
+  /**
+   * @name KEY_LOCATION_LEFT
+   * @return {Number} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_LOCATION_LEFT': {
     enumerable: true,
     writable: false,
@@ -3404,6 +5782,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: 0x01
   },
 
+  /**
+   * @name KEY_LOCATION_RIGHT
+   * @return {Number} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_LOCATION_RIGHT': {
     enumerable: true,
     writable: false,
@@ -3411,6 +5797,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: 0x02
   },
 
+  /**
+   * @name KEY_LOCATION_NUMPAD
+   * @return {Number} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_LOCATION_NUMPAD': {
     enumerable: true,
     writable: false,
@@ -3418,6 +5812,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: 0x03
   },
 
+  /**
+   * @name KEY_LOCATION_MOBILE
+   * @return {Number} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_LOCATION_MOBILE': {
     enumerable: true,
     writable: false,
@@ -3425,6 +5827,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
     value: 0x04
   },
 
+  /**
+   * @name KEY_LOCATION_JOYSTICK
+   * @return {Number} [read-only]
+   * @memberOf KeyboardEvent
+   * @property
+   * @constant
+   * @static
+   */
   'KEY_LOCATION_JOYSTICK': {
     enumerable: true,
     writable: false,
@@ -3437,7 +5847,14 @@ Object.defineProperties(doodle.KeyboardEvent, {
 /* TEXT EVENT
  */
 Object.defineProperties(doodle.TextEvent, {
-
+  /**
+   * @name TEXT_INPUT
+   * @return {String} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'TEXT_INPUT': {
     enumerable: true,
     writable: false,
@@ -3445,6 +5862,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: "textInput"
   },
 
+  /**
+   * @name INPUT_METHOD_UNKNOWN
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_UNKNOWN': {
     enumerable: true,
     writable: false,
@@ -3452,6 +5877,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x00
   },
 
+  /**
+   * @name INPUT_METHOD_KEYBOARD
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_KEYBOARD': {
     enumerable: true,
     writable: false,
@@ -3459,6 +5892,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x01
   },
 
+  /**
+   * @name INPUT_METHOD_PASTE
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_PASTE': {
     enumerable: true,
     writable: false,
@@ -3466,6 +5907,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x02
   },
 
+  /**
+   * @name INPUT_METHOD_DROP
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_DROP': {
     enumerable: true,
     writable: false,
@@ -3473,6 +5922,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x03
   },
 
+  /**
+   * @name INPUT_METHOD_IME
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_IME': {
     enumerable: true,
     writable: false,
@@ -3480,6 +5937,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x04
   },
 
+  /**
+   * @name INPUT_METHOD_OPTION
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_OPTION': {
     enumerable: true,
     writable: false,
@@ -3487,6 +5952,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x05
   },
 
+  /**
+   * @name INPUT_METHOD_HANDWRITING
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_HANDWRITING': {
     enumerable: true,
     writable: false,
@@ -3494,6 +5967,14 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x06
   },
 
+  /**
+   * @name INPUT_METHOD_VOICE
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_VOICE': {
     enumerable: true,
     writable: false,
@@ -3501,13 +5982,29 @@ Object.defineProperties(doodle.TextEvent, {
     value: 0x07
   },
 
+  /**
+   * @name INPUT_METHOD_MULTIMODAL
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_MULTIMODAL': {
     enumerable: true,
     writable: false,
     configurable: false,
     value: 0x08
   },
-
+  
+  /**
+   * @name INPUT_METHOD_SCRIPT
+   * @return {Number} [read-only]
+   * @memberOf TextEvent
+   * @property
+   * @constant
+   * @static
+   */
   'INPUT_METHOD_SCRIPT': {
     enumerable: true,
     writable: false,
@@ -3533,11 +6030,14 @@ Object.defineProperties(doodle.TextEvent, {
       sin = Math.sin,
       sqrt = Math.sqrt;
   
-  /* Point
-   * @constructor
-   * @param {Number=} x
-   * @param {Number=} y
+  /**
+   * @class Point
+   * @extends Object
+   * @param {Number} x
+   * @param {Number} y
    * @return {Point}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle_Point = doodle.geom.Point = function (x, y) {
     var point = {},
@@ -3552,8 +6052,12 @@ Object.defineProperties(doodle.TextEvent, {
           $temp_array = temp_array;
       
       return {
-        /* The horizontal coordinate of the point.
-         * @param {Number} x
+        /**
+         * The horizontal coordinate of the point.
+         * @name x
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'x': {
           enumerable: true,
@@ -3567,8 +6071,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* The vertical coordinate of the point.
-         * @param {Number} y
+        /**
+         * The vertical coordinate of the point.
+         * @name y
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'y': {
           enumerable: true,
@@ -3582,7 +6090,11 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* Same as toArray, but reuses array object.
+        /**
+         * Same as toArray, but reuses array object.
+         * @name __toArray
+         * @return {Point}
+         * @private
          */
         '__toArray': {
           enumerable: false,
@@ -3595,7 +6107,6 @@ Object.defineProperties(doodle.TextEvent, {
             return pt;
           }
         }
-
       };
     }()));//end defineProperties
 
@@ -3640,8 +6151,11 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   point_static_properties = {
-    /* The length of the line segment from (0,0) to this point.
+    /**
+     * The length of the line segment from (0,0) to this point.
+     * @name length
      * @return {Number}
+     * @property
      */
     'length': {
       enumerable: true,
@@ -3651,11 +6165,9 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /*
-     * METHODS
-     */
-
-    /* Returns an array that contains the values of the x and y coordinates.
+    /**
+     * Returns an array that contains the values of the x and y coordinates.
+     * @name toArray
      * @return {Array}
      */
     'toArray': {
@@ -3667,7 +6179,9 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
     
-    /* Returns a string that contains the values of the x and y coordinates.
+    /**
+     * Returns a string that contains the values of the x and y coordinates.
+     * @name toString
      * @return {String}
      */
     'toString': {
@@ -3679,10 +6193,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Set point coordinates.
+    /**
+     * Set point coordinates.
+     * @name compose
      * @param {Number} x
      * @param {Number} y
      * @return {Point}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: true,
@@ -3699,7 +6216,9 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Creates a copy of this Point object.
+    /**
+     * Creates a copy of this Point object.
+     * @name clone
      * @return {Point}
      */
     'clone': {
@@ -3711,9 +6230,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether two points are equal.
+    /**
+     * Determines whether two points are equal.
+     * @name equals
      * @param {Point} pt The point to be compared.
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'equals': {
       enumerable: true,
@@ -3730,10 +6252,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Adds the coordinates of another point to the coordinates of
+    /**
+     * Adds the coordinates of another point to the coordinates of
      * this point to create a new point.
+     * @name add
      * @param {Point} pt The point to be added.
      * @return {Point} The new point.
+     * @throws {TypeError}
      */
     'add': {
       enumerable: true,
@@ -3747,10 +6272,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Subtracts the coordinates of another point from the
+    /**
+     * Subtracts the coordinates of another point from the
      * coordinates of this point to create a new point.
+     * @name subtract
      * @param {Point} pt The point to be subtracted.
      * @return {Point} The new point.
+     * @throws {TypeError}
      */
     'subtract': {
       enumerable: true,
@@ -3764,6 +6292,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /**
+     * @name offset
+     * @param {Number} dx
+     * @param {Number} dy
+     * @throws {TypeError}
+     */
     'offset': {
       enumerable: true,
       writable: false,
@@ -3779,10 +6313,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Scales the line segment between (0,0) and the
+    /**
+     * Scales the line segment between (0,0) and the
      * current point to a set length.
+     * @name normalize
      * @param {Number} thickness The scaling value.
      * @return {Point}
+     * @throws {TypeError}
      */
     'normalize': {
       enumerable: true,
@@ -3803,12 +6340,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines a point between two specified points.
-     * @static
+    /**
+     * Determines a point between two specified points.
+     * @name interpolate
      * @param {Point} pt1 The first point.
      * @param {Point} pt2 The second point.
      * @param {Number} t The level of interpolation between the two points, between 0 and 1.
      * @return {Point}
+     * @throws {TypeError}
      */
     'interpolate': {
       enumerable: true,
@@ -3835,11 +6374,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Converts a pair of polar coordinates to a Cartesian point coordinate.
-     * @static
+    /**
+     * Converts a pair of polar coordinates to a Cartesian point coordinate.
+     * @name polar
      * @param {Number} len The length coordinate of the polar pair.
      * @param {Number} angle The angle, in radians, of the polar pair.
      * @return {Point}
+     * @throws {TypeError}
      */
     'polar': {
       enumerable: true,
@@ -3860,8 +6401,14 @@ Object.defineProperties(doodle.TextEvent, {
    * CLASS FUNCTIONS
    */
 
-  /* Returns the distance between pt1 and pt2.
+  /**
+   * Returns the distance between pt1 and pt2.
+   * @name distance
+   * @param {Point} pt1
+   * @param {Point} pt2
    * @return {Number}
+   * @throws {TypeError}
+   * @static
    */
   distance = doodle.geom.Point.distance = function (pt1, pt2) {
     /*DEBUG*/
@@ -3873,17 +6420,29 @@ Object.defineProperties(doodle.TextEvent, {
     return sqrt(dx*dx + dy*dy);
   };
 
-  /* Check if a given object contains a numeric x and y property.
+  /**
+   * Check if a given object contains a numeric x and y property.
    * Does not check if a point is actually a doodle.geom.point.
-   * @param {Point} point Object with x and y numeric parameters.
-   * @param {String} fn_name Function name to show in TypeError message.
+   * @name isPoint
+   * @param {Point} pt
    * @return {Boolean}
+   * @static
    */
   isPoint = doodle.geom.Point.isPoint = function (pt) {
     return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
   };
 
   /*DEBUG*/
+  /**
+   * @name check_point_type
+   * @param {Object} pt
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_point_type = doodle.utils.types.check_point_type = function (pt, caller, param) {
     if (!isPoint(pt)) {
       caller = (caller === undefined) ? "check_point_type" : caller;
@@ -3918,15 +6477,18 @@ Object.defineProperties(doodle.TextEvent, {
       atan2 = Math.atan2,
       tan = Math.tan;
   
-  /* Matrix
-   * @constructor
-   * @param {Number=} a
-   * @param {Number=} b
-   * @param {Number=} c
-   * @param {Number=} d
-   * @param {Number=} tx
-   * @param {Number=} ty
+  /**
+   * @class Matrix
+   * @extends Object
+   * @param {Number} a
+   * @param {Number} b
+   * @param {Number} c
+   * @param {Number} d
+   * @param {Number} tx
+   * @param {Number} ty
    * @return {Matrix}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
@@ -3946,9 +6508,13 @@ Object.defineProperties(doodle.TextEvent, {
       
       return {
 
-        /* The value that affects the positioning of pixels along the x axis
+        /**
+         * The value that affects the positioning of pixels along the x axis
          * when scaling or rotating an image.
-         * @param {Number} a
+         * @name a
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'a': {
           enumerable: true,
@@ -3962,9 +6528,13 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* The value that affects the positioning of pixels along the y axis
+        /**
+         * The value that affects the positioning of pixels along the y axis
          * when rotating or skewing an image.
-         * @param {Number} b
+         * @name b
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'b': {
           enumerable: true,
@@ -3978,9 +6548,13 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* The value that affects the positioning of pixels along the x axis
+        /**
+         * The value that affects the positioning of pixels along the x axis
          * when rotating or skewing an image.
-         * @param {Number} c
+         * @name c
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'c': {
           enumerable: true,
@@ -3994,9 +6568,13 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* The value that affects the positioning of pixels along the y axis
+        /**
+         * The value that affects the positioning of pixels along the y axis
          * when scaling or rotating an image.
-         * @param {Number} d
+         * @name d
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'd': {
           enumerable: true,
@@ -4010,8 +6588,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* The distance by which to translate each point along the x axis.
-         * @param {Number} tx
+        /**
+         * The distance by which to translate each point along the x axis.
+         * @name tx
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'tx': {
           enumerable: true,
@@ -4025,8 +6607,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* The distance by which to translate each point along the y axis.
-         * @param {Number} ty
+        /**
+         * The distance by which to translate each point along the y axis.
+         * @name ty
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'ty': {
           enumerable: true,
@@ -4040,7 +6626,10 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* Same as toArray, but reuses array object.
+        /**
+         * Same as toArray, but reuses array object.
+         * @return {Array}
+         * @private
          */
         '__toArray': {
           enumerable: false,
@@ -4103,8 +6692,9 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   matrix_static_properties = {
-    
-    /* Set values of this matrix with the specified parameters.
+    /**
+     * Set values of this matrix with the specified parameters.
+     * @name compose
      * @param {Number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
      * @param {Number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
      * @param {Number} c The value that affects the positioning of pixels along the x axis when rotating or skewing an image.
@@ -4112,6 +6702,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @param {Number} tx The distance by which to translate each point along the x axis.
      * @param {Number} ty The distance by which to translate each point along the y axis.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: true,
@@ -4136,7 +6727,9 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
     
-    /* Returns an array value containing the properties of the Matrix object.
+    /**
+     * Returns an array value containing the properties of the Matrix object.
+     * @name toArray
      * @return {Array}
      */
     'toArray': {
@@ -4148,7 +6741,9 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
     
-    /* Returns a text value listing the properties of the Matrix object.
+    /**
+     * Returns a text value listing the properties of the Matrix object.
+     * @name toString
      * @return {String}
      */
     'toString': {
@@ -4161,9 +6756,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Test if matrix is equal to this one.
+    /**
+     * Test if matrix is equal to this one.
+     * @name equals
      * @param {Matrix} m
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'equals': {
       enumerable: true,
@@ -4184,7 +6782,9 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Sets each matrix property to a value that causes a null transformation.
+    /**
+     * Sets each matrix property to a value that causes a null transformation.
+     * @name identity
      * @return {Matrix}
      */
     'identity': {
@@ -4202,8 +6802,10 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Returns a new Matrix object that is a clone of this matrix,
+    /**
+     * Returns a new Matrix object that is a clone of this matrix,
      * with an exact copy of the contained object.
+     * @name clone
      * @return {Matrix}
      */
     'clone': {
@@ -4215,10 +6817,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Multiplies a matrix with the current matrix,
+    /**
+     * Multiplies a matrix with the current matrix,
      * effectively combining the geometric effects of the two.
+     * @name multiply
      * @param {Matrix} m The matrix to be concatenated to the source matrix.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'multiply': {
       enumerable: true,
@@ -4239,9 +6844,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Applies a rotation transformation to the Matrix object.
+    /**
+     * Applies a rotation transformation to the Matrix object.
+     * @name rotate
      * @param {Number} angle The rotation angle in radians.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'rotate': {
       enumerable: true,
@@ -4265,9 +6873,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Applies a rotation transformation to the Matrix object, ignore translation.
+    /**
+     * Applies a rotation transformation to the Matrix object, ignore translation.
+     * @name deltaRotate
      * @param {Number} angle The rotation angle in radians.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'deltaRotate': {
       enumerable: true,
@@ -4286,8 +6897,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Return the angle of rotation in radians.
+    /**
+     * Return the angle of rotation in radians.
+     * @name rotation
      * @return {Number} radians
+     * @throws {TypeError}
+     * @property
      */
     'rotation': {
       enumerable: true,
@@ -4295,9 +6910,6 @@ Object.defineProperties(doodle.TextEvent, {
       get: function () {
         return atan2(this.b, this.a);
       },
-      /* Set a new rotation for matrix.
-       * @param {Number} angle, in radians
-       */
       set: function (radians) {
         /*DEBUG*/
         check_number_type(radians, this+'.rotation', '*radians*');
@@ -4308,10 +6920,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Applies a scaling transformation to the matrix.
+    /**
+     * Applies a scaling transformation to the matrix.
+     * @name scale
      * @param {Number} sx A multiplier used to scale the object along the x axis.
      * @param {Number} sy A multiplier used to scale the object along the y axis.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'scale': {
       enumerable: true,
@@ -4334,10 +6949,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Applies a scaling transformation to the matrix, ignores translation.
+    /**
+     * Applies a scaling transformation to the matrix, ignores translation.
+     * @name deltaScale
      * @param {Number} sx A multiplier used to scale the object along the x axis.
      * @param {Number} sy A multiplier used to scale the object along the y axis.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'deltaScale': {
       enumerable: true,
@@ -4357,10 +6975,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Translates the matrix along the x and y axes.
+    /**
+     * Translates the matrix along the x and y axes.
+     * @name translate
      * @param {Number} dx The amount of movement along the x axis to the right, in pixels.
      * @param {Number} dy The amount of movement down along the y axis, in pixels.
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'translate': {
       enumerable: true,
@@ -4377,10 +6998,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /*
+    /**
+     * @name skew
      * @param {Number} skewX
      * @param {Number} skewY
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'skew': {
       enumerable: true,
@@ -4405,10 +7028,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Skew matrix and ignore translation.
+    /**
+     * Skew matrix and ignore translation.
+     * @name deltaSkew
      * @param {Number} skewX
      * @param {Number} skewY
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'deltaSkew': {
       enumerable: true,
@@ -4428,9 +7054,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Add a matrix with the current matrix.
+    /**
+     * Add a matrix with the current matrix.
+     * @name add
      * @param {Matrix} m
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'add': {
       enumerable: true,
@@ -4450,7 +7079,9 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Performs the opposite transformation of the original matrix.
+    /**
+     * Performs the opposite transformation of the original matrix.
+     * @name invert
      * @return {Matrix}
      */
     'invert': {
@@ -4469,10 +7100,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Returns the result of applying the geometric transformation
+    /**
+     * Returns the result of applying the geometric transformation
      * represented by the Matrix object to the specified point.
+     * @name transformPoint
      * @param {Point} pt
      * @return {Point}
+     * @throws {TypeError}
      */
     'transformPoint': {
       enumerable: true,
@@ -4487,8 +7121,11 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Same as transformPoint, but modifies the point object argument.
-     * @internal
+    /**
+     * Same as transformPoint, but modifies the point object argument.
+     * @name __transformPoint
+     * @throws {TypeError}
+     * @private
      */
     '__transformPoint': {
       enumerable: false,
@@ -4506,11 +7143,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Given a point in the pretransform coordinate space, returns
+    /**
+     * Given a point in the pretransform coordinate space, returns
      * the coordinates of that point after the transformation occurs.
      * Unlike 'transformPoint', does not consider translation.
+     * @name deltaTransformPoint
      * @param {Point} pt
      * @return {Point}
+     * @throws {TypeError}
      */
     'deltaTransformPoint': {
       enumerable: true,
@@ -4525,8 +7165,11 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Same as deltaTransformPoint, but modifies the point object argument.
-     * @internal
+    /**
+     * Same as deltaTransformPoint, but modifies the point object argument.
+     * @name __deltaTransformPoint
+     * @throws {TypeError}
+     * @private
      */
     '__deltaTransformPoint': {
       enumerable: false,
@@ -4543,7 +7186,11 @@ Object.defineProperties(doodle.TextEvent, {
         return point;
       }
     },
-    
+
+    /**
+     * @name rotateAroundExternalPoint
+     * @throws {TypeError}
+     */
     'rotateAroundExternalPoint': {
       enumerable: true,
       writable: false,
@@ -4576,7 +7223,11 @@ Object.defineProperties(doodle.TextEvent, {
         return this.multiply(m).translate(pt.x, pt.y);
       }
     },
-    
+
+    /**
+     * @name rotateAroundInternalPoint
+     * @throws {TypeError}
+     */
     'rotateAroundInternalPoint': {
       enumerable: true,
       writable: false,
@@ -4593,7 +7244,11 @@ Object.defineProperties(doodle.TextEvent, {
         return this.rotateAroundExternalPoint(pt, radians);
       }
     },
-    
+
+    /**
+     * @name matchInternalPointWithExternal
+     * @throws {TypeError}
+     */
     'matchInternalPointWithExternal': {
       enumerable: true,
       writable: false,
@@ -4612,9 +7267,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Update matrix 'in-between' this and another matrix
+    /**
+     * Update matrix 'in-between' this and another matrix
      * given a value of t bewteen 0 and 1.
+     * @name interpolate
      * @return {Matrix}
+     * @throws {TypeError}
      */
     'interpolate': {
       enumerable: true,
@@ -4641,10 +7299,13 @@ Object.defineProperties(doodle.TextEvent, {
    * CLASS FUNCTIONS
    */
   
-  /* Check if a given object contains a numeric matrix properties.
+  /**
+   * Check if a given object contains a numeric matrix properties.
    * Does not check if a matrix is actually a doodle.geom.matrix.
-   * @param {Matrix} m Object with numeric matrix parameters.
+   * @name isMatrix
+   * @param {Object} m
    * @return {Boolean}
+   * @static
    */
   isMatrix = doodle.geom.Matrix.isMatrix = function (m) {
     return (m !== undefined && m !== null &&
@@ -4654,12 +7315,23 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   /*DEBUG*/
-  check_matrix_type = doodle.utils.types.check_matrix_type = function (m, caller_name) {
-    if (!isMatrix(m)) {
-      caller_name = (caller_name === undefined) ? "check_matrix_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a matrix.");
-    } else {
+  /**
+   * @name check_matrix_type
+   * @param {Object} obj
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_matrix_type = doodle.utils.types.check_matrix_type = function (obj, caller, param) {
+    if (isMatrix(obj)) {
       return true;
+    } else {
+      caller = (caller === undefined) ? "check_matrix_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Matrix.");
     }
   };
   /*END_DEBUG*/
@@ -4681,13 +7353,16 @@ Object.defineProperties(doodle.TextEvent, {
       max = Math.max,
       min = Math.min;
   
-  /* Rectangle
-   * @constructor
-   * @param {Number=} x
-   * @param {Number=} y
-   * @param {Number=} width
-   * @param {Number=} height
+  /**
+   * @class Rectangle
+   * @extends Object
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Number} width
+   * @param {Number} height
    * @return {Rectangle}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
    */
   doodle_Rectangle = doodle.geom.Rectangle = function (x, y, width, height) {
     var rect = {},
@@ -4704,7 +7379,12 @@ Object.defineProperties(doodle.TextEvent, {
           $temp_array = temp_array;
       
       return {
-        
+        /**
+         * @name x
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'x': {
           enumerable: true,
           configurable: false,
@@ -4717,6 +7397,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * @name y
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'y': {
           enumerable: true,
           configurable: false,
@@ -4729,6 +7415,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'width': {
           enumerable: true,
           configurable: false,
@@ -4741,6 +7433,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         */
         'height': {
           enumerable: true,
           configurable: false,
@@ -4753,7 +7451,11 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /* Same as toArray, but reuses array object.
+        /**
+         * Same as toArray, but reuses array object.
+         * @name __toArray
+         * @return {Array}
+         * @private
          */
         '__toArray': {
           enumerable: false,
@@ -4813,6 +7515,12 @@ Object.defineProperties(doodle.TextEvent, {
 
 
   rect_static_properties = {
+    /**
+     * @name top
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'top': {
       enumerable: true,
       configurable: false,
@@ -4827,7 +7535,13 @@ Object.defineProperties(doodle.TextEvent, {
         this.height -= n;
       }
     },
-    
+
+    /**
+     * @name right
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'right': {
       enumerable: true,
       configurable: false,
@@ -4841,7 +7555,13 @@ Object.defineProperties(doodle.TextEvent, {
         this.width = n - this.x;
       }
     },
-    
+
+    /**
+     * @name bottom
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'bottom': {
       enumerable: true,
       configurable: false,
@@ -4855,7 +7575,13 @@ Object.defineProperties(doodle.TextEvent, {
         this.height = n - this.y;
       }
     },
-    
+
+    /**
+     * @name left
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'left': {
       enumerable: true,
       configurable: false,
@@ -4870,11 +7596,11 @@ Object.defineProperties(doodle.TextEvent, {
         this.width -= n;
       }
     },
-    
-    /*
-     * METHODS
+
+    /**
+     * @name toString
+     * @return {String}
      */
-    
     'toString': {
       enumerable: true,
       writable: false,
@@ -4883,7 +7609,11 @@ Object.defineProperties(doodle.TextEvent, {
         return "(x="+ this.x +", y="+ this.y +", w="+ this.width +", h="+ this.height +")";
       }
     },
-    
+
+    /**
+     * @name toArray
+     * @return {Array}
+     */
     'toArray': {
       enumerable: true,
       writable: false,
@@ -4893,12 +7623,15 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
     
-    /* Sets this rectangle's parameters.
+    /**
+     * Sets this rectangle's parameters.
+     * @name compose
      * @param {Number} x
      * @param {Number} y
      * @param {Number} width
      * @param {Number} height
      * @return {Rectangle}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: true,
@@ -4919,7 +7652,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Same as compose, but takes a rectangle parameter.
+    /**
+     * Same as compose, but takes a rectangle parameter.
+     * @name __compose
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     * @throws {TypeError}
+     * @private
      */
     '__compose': {
       enumerable: false,
@@ -4934,6 +7673,10 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /**
+     * @name clone
+     * @return {Rectangle}
+     */
     'clone': {
       enumerable: true,
       writable: false,
@@ -4943,10 +7686,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Adjusts the location of the rectangle, as determined by
+    /**
+     * Adjusts the location of the rectangle, as determined by
      * its top-left corner, by the specified amounts.
+     * @name offset
      * @param {Number} dx
      * @param {Number} dy
+     * @return {Rectangle}
+     * @throws {TypeError}
      */
     'offset': {
       enumerable: true,
@@ -4963,12 +7710,16 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Increases the size of the rectangle by the specified amounts, in pixels.
+    /**
+     * Increases the size of the rectangle by the specified amounts, in pixels.
      * The center point of the Rectangle object stays the same, and its size
      * increases to the left and right by the dx value, and to the top and the
      * bottom by the dy value.
+     * @name inflate
      * @param {Number} dx
      * @param {Number} dy
+     * @return {Rectangle}
+     * @throws {TypeError}
      */
     'inflate': {
       enumerable: true,
@@ -4987,9 +7738,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether the rectangle argument is equal to this rectangle.
+    /**
+     * Determines whether the rectangle argument is equal to this rectangle.
+     * @name equals
      * @param {Rectangle} rect
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'equals': {
       enumerable: true,
@@ -5004,7 +7758,10 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether or not this Rectangle object is empty.
+    /**
+     * Determines whether or not this Rectangle object is empty.
+     * @name isEmpty
+     * @return {Boolean}
      */
     'isEmpty': {
       enumerable: true,
@@ -5015,8 +7772,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether the specified point is contained within the
+    /**
+     * Determines whether the specified point is contained within the
      * rectangular region defined by this Rectangle object.
+     * @name contains
+     * @param {Number} x
+     * @param {Number} y
+     * @return {Boolean}
+     * @throws {TypeError}
      */
     'contains': {
       enumerable: false,
@@ -5032,9 +7795,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether the specified point is contained within this rectangle object.
+    /**
+     * Determines whether the specified point is contained within
+     * this rectangle object.
+     * @name containsPoint
      * @param {Point} pt
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'containsPoint': {
       enumerable: true,
@@ -5048,9 +7815,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether the rectangle argument is contained within this rectangle.
+    /**
+     * Determines whether the rectangle argument is contained within this rectangle.
+     * @name containsRect
      * @param {Rectangle} rect
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'containsRect': {
       enumerable: true,
@@ -5068,9 +7838,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Determines whether the rectangle argument intersects with this rectangle.
+    /**
+     * Determines whether the rectangle argument intersects with this rectangle.
+     * @name intersects
      * @param {Rectangle} rect
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'intersects': {
       enumerable: true,
@@ -5088,12 +7861,15 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* If the rectangle argument intersects with this rectangle, returns
+    /**
+     * If the rectangle argument intersects with this rectangle, returns
      * the area of intersection as a Rectangle object.
      * If the rectangles do not intersect, this method returns an empty
      * Rectangle object with its properties set to 0.
+     * @name intersection
      * @param {Rectangle} rect
      * @return {Rectangle}
+     * @throws {TypeError}
      */
     'intersection': {
       enumerable: true,
@@ -5114,7 +7890,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Same as intersection, but modifies this rectangle in place.
+    /**
+     * Same as intersection, but modifies this rectangle in place.
+     * @name __intersection
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     * @throws {TypeError}
+     * @private
      */
     '__intersection': {
       enumerable: false,
@@ -5134,10 +7916,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Adds two rectangles together to create a new Rectangle object,
+    /**
+     * Adds two rectangles together to create a new Rectangle object,
      * by filling in the horizontal and vertical space between the two.
+     * @name union
      * @param {Rectangle} rect
      * @return {Rectangle}
+     * @throws {TypeError}
      */
     'union': {
       enumerable: true,
@@ -5156,7 +7941,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Same as union, but modifies this rectangle in place.
+    /**
+     * Same as union, but modifies this rectangle in place.
+     * @name __union
+     * @param {Rectangle} rect
+     * @return {Rectangle}
+     * @throws {TypeError}
+     * @private
      */
     '__union': {
       enumerable: false,
@@ -5186,11 +7977,14 @@ Object.defineProperties(doodle.TextEvent, {
    * CLASS FUNCTIONS
    */
 
-  /* Check if a given object contains a numeric rectangle properties including
+  /**
+   * Check if a given object contains a numeric rectangle properties including
    * x, y, width, height, top, bottom, right, left.
    * Does not check if a rectangle is actually a doodle.geom.rectangle.
+   * @name isRect
    * @param {Rectangle} rect Object with numeric rectangle parameters.
    * @return {Boolean}
+   * @static
    */
   isRect = doodle.geom.Rectangle.isRect = function (rect) {
     return (typeof rect.x     === "number" && typeof rect.y      === "number" &&
@@ -5200,12 +7994,23 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   /*DEBUG*/
-  check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller_name) {
-    if (!isRect(rect)) {
-      caller_name = (caller_name === undefined) ? "check_rect_type" : caller_name;
-      throw new TypeError(caller_name + ": Parameter must be a rectangle.");
-    } else {
+  /**
+   * @name check_rect_type
+   * @param {Rectangle} rect
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller, param) {
+    if (isRect(rect)) {
       return true;
+    } else {
+      caller = (caller === undefined) ? "check_rect_type" : caller;
+      param = (param === undefined) ? "" : '('+param+')';
+      throw new TypeError(caller + param +": Parameter must be a Rectangle.");
     }
   };
   /*END_DEBUG*/
@@ -5232,9 +8037,10 @@ Object.defineProperties(doodle.TextEvent, {
       Array_indexOf = Array.prototype.indexOf,
       Array_splice = Array.prototype.splice;
   
-  /* Super constructor
+  /**
+   * @class {EventDispatcher}
    * @param {Function} initializer
-   * @return {Object}
+   * @return {EventDispatcher}
    */
   doodle.EventDispatcher = function () {
     var evt_disp = {};
@@ -5270,7 +8076,9 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   evtDisp_static_properties = {
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
      */
     'toString': {
@@ -5282,9 +8090,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Call function passing object as 'this'.
+    /**
+     * Call function passing object as 'this'.
+     * @name modify
      * @param {Function} fn
      * @return {Object}
+     * @throws {TypeError}
      */
     'modify': {
       enumerable: true,
@@ -5299,11 +8110,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Registers an event listener object with an EventDispatcher object
+    /**
+     * Registers an event listener object with an EventDispatcher object
      * so that the listener receives notification of an event.
+     * @name addEventListener
      * @param {String} type
      * @param {Function} listener
      * @param {Boolean} useCapture
+     * @throws {TypeError}
      */
     'addEventListener': {
       enumerable: true,
@@ -5331,10 +8145,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Removes a listener from the EventDispatcher object.
+    /**
+     * Removes a listener from the EventDispatcher object.
+     * @name removeEventListener
      * @param {String} type
      * @param {Function} listener
      * @param {Boolean} useCapture
+     * @throws {TypeError}
      */
     'removeEventListener': {
       enumerable: true,
@@ -5373,9 +8190,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Lookup and call listener if registered for specific event type.
+    /**
+     * Lookup and call listener if registered for specific event type.
+     * @name handleEvent
      * @param {Event} event
      * @return {Boolean} true if node has listeners of event type.
+     * @throws {TypeError}
      */
     'handleEvent': {
       enumerable: true,
@@ -5430,10 +8250,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
     
-    /* Dispatches an event into the event flow. The event target is the
+    /**
+     * Dispatches an event into the event flow. The event target is the
      * EventDispatcher object upon which the dispatchEvent() method is called.
+     * @name dispatchEvent
      * @param {Event} event
      * @return {Boolean} true if the event was successfully dispatched.
+     * @throws {TypeError}
      */
     'dispatchEvent': {
       enumerable: true,
@@ -5524,10 +8347,14 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Dispatches an event to every object with an active listener.
-     * Ignores propagation path, objects come from 
+    /**
+     * Dispatches an event to every object with an active listener.
+     * Ignores propagation path, objects come from
+     * @name broadcastEvent
      * @param {Event} event
      * @return {Boolean} True if the event was successfully dispatched.
+     * @throws {TypeError}
+     * @throws {Error}
      */
     'broadcastEvent': {
       enumerable: true,
@@ -5568,10 +8395,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Checks whether the EventDispatcher object has any listeners
+    /**
+     * Checks whether the EventDispatcher object has any listeners
      * registered for a specific type of event.
+     * @name hasEventListener
      * @param {String} type
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'hasEventListener': {
       enumerable: true,
@@ -5585,14 +8415,17 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Checks whether an event listener is registered with this EventDispatcher object
+    /**
+     * Checks whether an event listener is registered with this EventDispatcher object
      * or any of its ancestors for the specified event type.
      * The difference between the hasEventListener() and the willTrigger() methods is
      * that hasEventListener() examines only the object to which it belongs,
      * whereas the willTrigger() method examines the entire event flow for the
      * event specified by the type parameter.
+     * @name willTrigger
      * @param {String} type The type of event.
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'willTrigger': {
       enumerable: true,
@@ -5628,10 +8461,12 @@ Object.defineProperties(doodle.TextEvent, {
   //holds all objects with event listeners
   dispatcher_queue = doodle.EventDispatcher.dispatcher_queue = [];
 
-  /* Test if an object is an event dispatcher.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is an event dispatcher.
+   * @name isEventDispatcher
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isEventDispatcher = doodle.EventDispatcher.isEventDispatcher = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -5640,9 +8475,12 @@ Object.defineProperties(doodle.TextEvent, {
     return (obj.toString() === '[object EventDispatcher]');
   };
 
-  /* Check if object inherits from event dispatcher.
+  /**
+   * Check if object inherits from event dispatcher.
+   * @name inheritsEventDispatcher
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsEventDispatcher = doodle.EventDispatcher.inheritsEventDispatcher = function (obj) {
     while (obj) {
@@ -5659,6 +8497,16 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   /*DEBUG*/
+  /**
+   * @name check_eventdispatcher_type
+   * @param {EventDispatcher} obj
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
     if (inheritsEventDispatcher(obj)) {
       return true;
@@ -5698,7 +8546,9 @@ Object.defineProperties(doodle.TextEvent, {
       create_scene_path = doodle.utils.create_scene_path,
       PI = Math.PI;
   
-  /* Super constructor
+  /**
+   * @class Node
+   * @extends EventDispatcher
    * @param {String|Function} id|initializer
    * @return {Node}
    */
@@ -5721,6 +8571,11 @@ Object.defineProperties(doodle.TextEvent, {
         enumerable: true,
         configurable: false,
         value: Object.create(null, {
+          /**
+           * @name debug.boundingBox
+           * @return {Boolean}
+           * @property
+           */
           'boundingBox': (function () {
             var show_bounds = false;
             return {
@@ -5737,7 +8592,12 @@ Object.defineProperties(doodle.TextEvent, {
         })
       },
       /*END_DEBUG*/
-      
+
+      /**
+       * @name id
+       * @return {String}
+       * @property
+       */
       'id': (function () {
         var node_id = (typeof id === 'string') ? id : "node"+ String('000'+node_count).slice(-3);
         node_count += 1;
@@ -5753,7 +8613,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         };
       }()),
-      
+
+      /**
+       * @name root
+       * @return {Display}
+       * @property
+       */
       'root': (function () {
         var root = null;
         return {
@@ -5771,7 +8636,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         };
       }()),
-      
+
+      /**
+       * @name parent
+       * @return {Node}
+       * @property
+       */
       'parent': (function () {
         var parent = null;
         return {
@@ -5788,7 +8658,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         };
       }()),
-      
+
+      /**
+       * @name children
+       * @return {Array}
+       * @property
+       */
       'children': (function () {
         var children = [];
         return {
@@ -5799,7 +8674,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         };
       }()),
-      
+
+      /**
+       * @name transform
+       * @return {Matrix}
+       * @property
+       */
       'transform': (function () {
         var transform = doodle_Matrix();
         return {
@@ -5815,6 +8695,11 @@ Object.defineProperties(doodle.TextEvent, {
         };
       }()),
 
+      /**
+       * @name visible
+       * @return {Boolean}
+       * @property
+       */
       'visible': (function () {
         var visible = true;
         return {
@@ -5830,6 +8715,11 @@ Object.defineProperties(doodle.TextEvent, {
         };
       }()),
 
+      /**
+       * @name alpha
+       * @return {Number}
+       * @property
+       */
       'alpha': (function () {
         var alpha = 1; //alpha is between 0 and 1
         return {
@@ -5845,7 +8735,9 @@ Object.defineProperties(doodle.TextEvent, {
         };
       }()),
 
-      /* The bounding box of a Node is a union of all it's child Sprite's bounds.
+      /**
+       * The bounding box of a Node is a union of all it's child Sprite's bounds.
+       * @name getBounds
        * @param {Node} targetCoordSpace
        * @return {Rectangle|Null}
        */
@@ -5864,6 +8756,8 @@ Object.defineProperties(doodle.TextEvent, {
       /* Same as getBounds, but reuses an internal rectangle.
        * Since it's passed by reference, you don't want to modify it, but
        * it's more efficient for checking bounds.
+       * @name __getBounds
+       * @private
        */
       '__getBounds': {
         enumerable: false,
@@ -5910,7 +8804,12 @@ Object.defineProperties(doodle.TextEvent, {
 
 
   node_static_properties = {
-    
+
+    /**
+     * @name x
+     * @return {Number}
+     * @property
+     */
     'x': {
       enumerable: true,
       configurable: false,
@@ -5924,7 +8823,12 @@ Object.defineProperties(doodle.TextEvent, {
         this.transform.tx = n;
       }
     },
-    
+
+    /**
+     * @name y
+     * @return {Number}
+     * @property
+     */
     'y': {
       enumerable: true,
       configurable: false,
@@ -5939,7 +8843,7 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /**
+    /*
     //registration point
     'axis': {
       value: {x: this.x, y: this.y}
@@ -5957,8 +8861,13 @@ Object.defineProperties(doodle.TextEvent, {
         }
       }
     },
-    **/
+    */
 
+    /**
+     * @name rotate
+     * @param {Number} deg
+     * @return {Number}
+     */
     'rotate': {
       enumerable: true,
       configurable: false,
@@ -5969,7 +8878,12 @@ Object.defineProperties(doodle.TextEvent, {
         this.transform.rotate(deg * PI / 180);
       }
     },
-    
+
+    /**
+     * @name rotation
+     * @return {Number}
+     * @property
+     */
     'rotation': {
       enumerable: true,
       configurable: true,
@@ -5984,6 +8898,11 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /**
+     * @name scaleX
+     * @param {Number} sx
+     * @return {Number}
+     */
     'scaleX': {
       enumerable: true,
       configurable: false,
@@ -5997,7 +8916,12 @@ Object.defineProperties(doodle.TextEvent, {
         this.transform.a = sx;
       }
     },
-    
+
+    /**
+     * @name scaleY
+     * @param {Number} sy
+     * @return {Number}
+     */
     'scaleY': {
       enumerable: true,
       configurable: false,
@@ -6012,7 +8936,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    //drawing context to use
+    /**
+     * drawing context to use
+     * @name context
+     * @return {CanvasRenderingContext2D}
+     * @property
+     */
     'context': {
       enumerable: true,
       configurable: true,
@@ -6032,6 +8961,10 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /*
+     * @name __allTransforms
+     * @private
+     */
     '__allTransforms': {
       enumerable: false,
       configurable: false,
@@ -6050,23 +8983,27 @@ Object.defineProperties(doodle.TextEvent, {
         };
       }())
     },
-    
-    /*
-     * METHODS
-     */
 
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
+     * @override
      */
     'toString': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Node]";
-      }
+      value: function () { return "[object Node]"; }
     },
 
+    /**
+     * @name addChildAt
+     * @param {Node} node
+     * @param {Number} index
+     * @return {Node}
+     * @throws {TypeError}
+     */
     'addChildAt': {
       enumerable: true,
       writable: false,
@@ -6112,7 +9049,13 @@ Object.defineProperties(doodle.TextEvent, {
         return node;
       }
     },
-    
+
+    /**
+     * @name addChild
+     * @param {Node} node
+     * @return {Node}
+     * @throws {TypeError}
+     */
     'addChild': {
       enumerable: true,
       writable: false,
@@ -6124,7 +9067,12 @@ Object.defineProperties(doodle.TextEvent, {
         return this.addChildAt(node, this.children.length);
       }
     },
-    
+
+    /**
+     * @name removeChildAt
+     * @param {Number} index
+     * @throws {TypeError}
+     */
     'removeChildAt': {
       enumerable: true,
       writable: false,
@@ -6160,7 +9108,12 @@ Object.defineProperties(doodle.TextEvent, {
         }
       }
     },
-    
+
+    /**
+     * @name removeChild
+     * @param {Node} node
+     * @throws {TypeError}
+     */
     'removeChild': {
       enumerable: false,
       writable: false,
@@ -6172,7 +9125,12 @@ Object.defineProperties(doodle.TextEvent, {
         this.removeChildAt(this.children.indexOf(node));
       }
     },
-    
+
+    /**
+     * @name removeChildById
+     * @param {String} id
+     * @throws {TypeError}
+     */
     'removeChildById': {
       enumerable: true,
       writable: false,
@@ -6184,7 +9142,11 @@ Object.defineProperties(doodle.TextEvent, {
         this.removeChild(this.getChildById(id));
       }
     },
-    
+
+    /**
+     * @name removeAllChildren
+     * @throws {TypeError}
+     */
     'removeAllChildren': {
       enumerable: true,
       writable: false,
@@ -6196,7 +9158,13 @@ Object.defineProperties(doodle.TextEvent, {
         }
       }
     },
-    
+
+    /**
+     * @name getChildById
+     * @param {String} id
+     * @return {Node|null}
+     * @throws {TypeError}
+     */
     'getChildById': {
       enumerable: true,
       writable: false,
@@ -6217,10 +9185,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Changes the position of an existing child in the node's children array.
+    /**
+     * Changes the position of an existing child in the node's children array.
      * This affects the layering of child objects.
+     * @name setChildIndex
      * @param {Node} child
      * @param {Number} index
+     * @throws {TypeError}
      */
     'setChildIndex': {
       enumerable: true,
@@ -6247,7 +9218,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Swaps the child nodes at the two specified index positions in the child list.
+    /**
+     * Swaps the child nodes at the two specified index positions in the child list.
+     * @name swapChildrenAt
+     * @param {Number} index1
+     * @param {Number} index2
+     * @throws {TypeError}
      */
     'swapChildrenAt': {
       enumerable: true,
@@ -6262,7 +9238,13 @@ Object.defineProperties(doodle.TextEvent, {
         children[index1] = children.splice(index2, 1, children[index1])[0];
       }
     },
-    
+
+    /**
+     * @name swapChildren
+     * @param {Node} node1
+     * @param {Node} node2
+     * @throws {TypeError}
+     */
     'swapChildren': {
       enumerable: true,
       writable: false,
@@ -6277,8 +9259,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Swap positions with another node in the parents child list.
+    /**
+     * Swap positions with another node in the parents child list.
+     * @name swapDepths
      * @param {Node} node
+     * @throws {TypeError}
+     * @throws {ReferenceError}
      */
     'swapDepths': {
       enumerable: true,
@@ -6299,8 +9285,11 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Swap positions with another node at a given index in the parents child list.
+    /**
+     * Swap positions with another node at a given index in the parents child list.
+     * @name swapDepthAt
      * @param {Number} index
+     * @throws {TypeError}
      */
     'swapDepthAt': {
       enumerable: true,
@@ -6316,9 +9305,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
     
-    /* Determine if node is among it's children, grandchildren, etc.
+    /**
+     * Determine if node is among it's children, grandchildren, etc.
+     * @name contains
      * @param {Node} node
      * @return {Boolean}
+     * @throws {TypeError}
      */
     'contains': {
       enumerable: true,
@@ -6332,6 +9324,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /**
+     * @name localToGlobal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     */
     'localToGlobal': {
       enumerable: true,
       writable: false,
@@ -6351,7 +9349,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Same as localToGlobal, but modifies a point in place.
+    /**
+		 * Same as localToGlobal, but modifies a point in place.
+     * @name __localToGlobal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     * @private
      */
     '__localToGlobal': {
       enumerable: false,
@@ -6371,6 +9375,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
+    /**
+     * @name globalToLocal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     */
     'globalToLocal': {
       enumerable: true,
       writable: false,
@@ -6385,7 +9395,13 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Same as globalToLocal, but modifies a point in place.
+    /**
+		 * Same as globalToLocal, but modifies a point in place.
+     * @name __globalToLocal
+     * @param {Point} point
+     * @return {Point}
+     * @throws {TypeError}
+     * @private
      */
     '__globalToLocal': {
       enumerable: false,
@@ -6409,10 +9425,12 @@ Object.defineProperties(doodle.TextEvent, {
    * CLASS METHODS
    */
 
-  /* Test if an object is an node.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is an node.
+   * @name isNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isNode = doodle.Node.isNode = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -6421,9 +9439,12 @@ Object.defineProperties(doodle.TextEvent, {
     return (obj.toString() === '[object Node]');
   };
 
-  /* Check if object inherits from node.
+  /**
+   * Check if object inherits from node.
+   * @name inheritsNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsNode = doodle.Node.inheritsNode = function (obj) {
     while (obj) {
@@ -6440,6 +9461,16 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   /*DEBUG*/
+  /**
+   * @name check_node_type
+   * @param {Node} node
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   check_node_type = doodle.utils.types.check_node_type = function (node, caller, param) {
     if (inheritsNode(node)) {
       return true;
@@ -7205,9 +10236,13 @@ Object.defineProperties(doodle.TextEvent, {
       //lookup help
       doodle_Rectangle = doodle.geom.Rectangle;
 
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /**
+	 * An node to display.
+   * @class Sprite
+	 * @extends Node
+   * @param {String|Function} id|initializer Name or initialization function.
+   * @return {Sprite} A sprite object.
+	 * @throws {SyntaxError} Invalid parameters.
    */
   doodle.Sprite = function (id) {
     //only pass id if string, an init function will be called later
@@ -7226,21 +10261,25 @@ Object.defineProperties(doodle.TextEvent, {
           extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
       
       return {
-        /* The graphics object contains drawing operations to be stored in draw_commands.
+        /**
+         * The graphics object contains drawing operations to be stored in draw_commands.
          * Objects and Arrays are passed by reference, so these will be modified
+         * @name graphics
+         * @return {Graphics}
+         * @property
          */
         'graphics': {
           enumerable: false,
           configurable: false,
           value:  Object.create(doodle.Graphics.call(sprite, draw_commands, extrema))
         },
-        
-        /*
-         * PROPERTIES
-         */
 
-        /* Indicates the width of the sprite, in pixels.
-         * @param {Number}
+        /**
+         * Indicates the width of the sprite, in pixels.
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'width': (function () {
           var width = 0;
@@ -7259,8 +10298,12 @@ Object.defineProperties(doodle.TextEvent, {
           };
         }()),
 
-        /* Indicates the height of the sprite, in pixels.
-         * @param {Number}
+        /**
+         * Indicates the height of the sprite, in pixels.
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
          */
         'height': (function () {
           var height = 0;
@@ -7279,9 +10322,12 @@ Object.defineProperties(doodle.TextEvent, {
           };
         }()),
 
-        /*
+        /**
+         * @name getBounds
          * @param {Node} targetCoordSpace
          * @return {Rectangle}
+         * @throws {TypeError}
+				 * @override
          */
         'getBounds': {
           enumerable: true,
@@ -7298,6 +10344,8 @@ Object.defineProperties(doodle.TextEvent, {
         /* Same as getBounds, but reuses an internal rectangle.
          * Since it's passed by reference, you don't want to modify it, but
          * it's more efficient for checking bounds.
+         * @name __getBounds
+         * @private
          */
         '__getBounds': {
           enumerable: false,
@@ -7378,18 +10426,30 @@ Object.defineProperties(doodle.TextEvent, {
         }()),
         **/
 
+        /**
+         * @name hitTestObject
+				 * @param {Node} node
+         * @return {Boolean}
+         * @throws {TypeError}
+         */
         'hitTestObject': {
           enumerable: true,
           writable: true,
           configurable: false,
-          value: function (obj) {
+          value: function (node) {
             /*DEBUG*/
-            check_sprite_type(obj, this+'.hitTestObject', '*sprite*');
+            check_node_type(node, this+'.hitTestObject', '*sprite*');
             /*END_DEBUG*/
-            return this.getBounds(this).intersects(obj.getBounds(this));
+            return this.getBounds(this).intersects(node.getBounds(this));
           }
         },
 
+        /**
+         * @name hitTestPoint
+				 * @param {Point} pt
+         * @return {Boolean}
+         * @throws {TypeError}
+         */
         'hitTestPoint': {
           enumerable: true,
           writable: true,
@@ -7402,15 +10462,12 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
-        /*
-         * METHODS
-         */
-
         /* When called execute all the draw commands in the stack.
          * This draws from screen 0,0 - transforms are applied when the
          * entire scene graph is drawn.
-         * @private
+         * @name __draw
          * @param {Context} ctx 2d canvas context to draw on.
+         * @private
          */
         '__draw': {
           enumerable: false,
@@ -7441,6 +10498,12 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   sprite_static_properties = {
+    /**
+     * @name rotation
+     * @return {Number}
+     * @throws {TypeError}
+     * @property
+     */
     'rotation': (function () {
       var to_degrees = 180 / Math.PI,
           to_radians = Math.PI / 180;
@@ -7459,12 +10522,11 @@ Object.defineProperties(doodle.TextEvent, {
       };
     }()),
 
-    /*
-     * METHODS
-     */
-
-    /* Returns the string representation of the specified object.
-     * @param {String}
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
+     * @return {String}
+     * @override
      */
     'toString': {
       enumerable: false,
@@ -7475,12 +10537,15 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* Updates the position and size of this sprite.
+    /**
+     * Updates the position and size of this sprite.
+     * @name compose
      * @param {Number} x
      * @param {Number} y
      * @param {Number} width
      * @param {Number} height
      * @return {Sprite}
+     * @throws {TypeError}
      */
     'compose': {
       enumerable: false,
@@ -7506,7 +10571,13 @@ Object.defineProperties(doodle.TextEvent, {
   /*
    * CLASS METHODS
    */
-  
+
+  /**
+   * @name isSprite
+   * @param {Object} obj
+   * @return {Boolean}
+   * @static
+   */
   isSprite = doodle.Sprite.isSprite = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
       return false;
@@ -7514,9 +10585,13 @@ Object.defineProperties(doodle.TextEvent, {
     return (obj.toString() === '[object Sprite]');
   };
 
-  /* Check if object inherits from Sprite.
+  /**
+   * Check if object inherits from Sprite.
+   * If it doesn't return false.
+   * @name inheritsSprite
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsSprite = doodle.Sprite.inheritsSprite = function (obj) {
     while (obj) {
@@ -7533,13 +10608,23 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   /*DEBUG*/
-  check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, param) {
+  /**
+   * @name check_sprite_type
+   * @param {Sprite} sprite
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
+  check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, params) {
     if (inheritsSprite(sprite)) {
       return true;
     } else {
       caller = (caller === undefined) ? "check_sprite_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must inherit from Sprite.");
+      params = (params === undefined) ? "" : '('+params+')';
+      throw new TypeError(caller + params +": Parameter must inherit from Sprite.");
     }
   };
   /*END_DEBUG*/
@@ -7566,9 +10651,12 @@ Object.defineProperties(doodle.TextEvent, {
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property;
   
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /**
+   * @class ElementNode
+   * @param {HTMLElement|Function} element
+	 * @param {String} id
+   * @return {ElementNode}
+   * @throws {SyntaxError}
    */
   doodle.ElementNode = function (element, id/*optional*/) {
     var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
@@ -7588,6 +10676,11 @@ Object.defineProperties(doodle.TextEvent, {
           bg_repeat = 'repeat';
       
       return {
+        /**
+         * @name element
+         * @return {HTMLElement}
+         * @property
+         */
         'element': {
           enumerable: true,
           configurable: true,
@@ -7656,7 +10749,14 @@ Object.defineProperties(doodle.TextEvent, {
         /* Evidently it's not very efficent to query the dom for property values,
          * as it might initiate a re-flow. Cache values instead.
          */
-        
+
+        /**
+         * @name id
+         * @return {String}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'id': {
           enumerable: true,
           configurable: true,
@@ -7668,7 +10768,14 @@ Object.defineProperties(doodle.TextEvent, {
             node_id = set_element_property(this.element, 'id', name, 'html');
           }
         },
-        
+
+        /**
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'width': {
           enumerable: true,
           configurable: true,
@@ -7681,7 +10788,14 @@ Object.defineProperties(doodle.TextEvent, {
             width = n;
           }
         },
-        
+
+        /**
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'height': {
           enumerable: true,
           configurable: true,
@@ -7694,7 +10808,12 @@ Object.defineProperties(doodle.TextEvent, {
             height = n;
           }
         },
-        
+
+        /**
+         * @name backgroundColor
+         * @return {Color}
+         * @property
+         */
         'backgroundColor': {
           enumerable: true,
           configurable: true,
@@ -7708,7 +10827,13 @@ Object.defineProperties(doodle.TextEvent, {
             bg_color = rgb_str_to_hex(get_element_property(this.element, 'backgroundColor'));
           }
         },
-        
+
+        /**
+         * @name backgroundImage
+         * @return {HTMLImage}
+         * @throws {TypeError}
+         * @property
+         */
         'backgroundImage': {
           enumerable: true,
           configurable: true,
@@ -7738,6 +10863,13 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * @name backgroundRepeat
+         * @return {String}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
+         * @property
+         */
         'backgroundRepeat': {
           enumerable: true,
           configurable: true,
@@ -7760,6 +10892,13 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * @name alpha
+         * @return {Number}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'alpha': {
           enumerable: true,
           configurable: true,
@@ -7773,6 +10912,13 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * @name visible
+         * @return {Boolean}
+         * @throws {TypeError}
+         * @override
+         * @property
+         */
         'visible': {
           enumerable: true,
           configurable: true,
@@ -7790,6 +10936,13 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * Called when a dom element is added. This function will be overridden
+         * for sub-class specific behavior.
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @private
+         */
         '__addDomElement': {
           enumerable: false,
           configurable: true,
@@ -7802,12 +10955,19 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @return {Rectangle} Rectangle object is reused for each call.
+         * @throws {TypeError} targetCoordSpace must inherit from Node.
+				 * @override
+         * @private
+         */
         '__getBounds': {
           enumerable: true,
           configurable: true,
           value: (function () {
             var rect = doodle_Rectangle(); //recycle
-            
             return function (targetCoordSpace) {
               /*DEBUG*/
               check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
@@ -7887,8 +11047,11 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   node_static_properties = {
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
+     * @override
      */
     'toString': {
       enumerable: true,
@@ -7904,10 +11067,12 @@ Object.defineProperties(doodle.TextEvent, {
    * CLASS METHODS
    */
 
-  /* Test if an object is an node.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is an ElementNode.
+   * @name isElementNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isElementNode = doodle.ElementNode.isElementNode = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -7916,9 +11081,12 @@ Object.defineProperties(doodle.TextEvent, {
     return (obj.toString() === '[object ElementNode]');
   };
 
-  /* Check if object inherits from node.
+  /**
+   * Check if object inherits from ElementNode.
+   * @name inheritsNode
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsElementNode = doodle.ElementNode.inheritsElementNode = function (obj) {
     while (obj) {
@@ -7935,6 +11103,16 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   /*DEBUG*/
+  /**
+   * @name check_elementnode_type
+   * @param {Node} node
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   doodle.utils.types.check_elementnode_type = function (node, caller, param) {
     if (inheritsElementNode(node)) {
       return true;
@@ -7960,9 +11138,13 @@ Object.defineProperties(doodle.TextEvent, {
       /*END_DEBUG*/
       set_element_property = doodle.utils.set_element_property;
   
-  /* Super constructor
-   * @param {String|Function} id|initializer
-   * @return {Object}
+  /**
+   * @class Layer
+   * @extends ElementNode
+   * @param {String} id
+   * @param {HTMLCanvasElement} element
+   * @return {Layer}
+   * @throws {SyntaxError}
    */
   doodle.Layer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
@@ -7977,7 +11159,13 @@ Object.defineProperties(doodle.TextEvent, {
           context = null;
       
       return {
-        /* Canvas dimensions need to apply to HTML attributes.
+        /**
+         * Canvas dimensions need to apply to HTML attributes.
+         * @name width
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         * @override
          */
         'width': {
           enumerable: true,
@@ -7990,7 +11178,15 @@ Object.defineProperties(doodle.TextEvent, {
             width = set_element_property(this.element, 'width', n, 'html');
           }
         },
-        
+
+        /**
+         * 
+         * @name height
+         * @return {Number}
+         * @throws {TypeError}
+         * @property
+         * @override
+         */
         'height': {
           enumerable: true,
           configurable: true,
@@ -8003,14 +11199,27 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * 
+         * @name context
+         * @return {CanvasRenderingContext2D}
+         * @property
+         * @override
+         */
         'context': {
           enumerable: true,
           configurable: true,
           get: function () { return context; }
         },
 
-        /* Layer specific things to setup when adding a dom element.
+        /**
+         * Layer specific things to setup when adding a dom element.
          * Called in ElementNode.element
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @throws {TypeError}
+         * @override
+         * @private
          */
         '__addDomElement': {
           enumerable: false,
@@ -8031,6 +11240,14 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
 
+        /**
+         * Layer specific things to setup when removing a dom element.
+         * Called in ElementNode.element
+         * @name __removeDomElement
+         * @param {HTMLElement} elementArg
+         * @override
+         * @private
+         */
         '__removeDomElement': {
           enumerable: false,
           writable: false,
@@ -8073,8 +11290,11 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   layer_static_properties = {
-    /* Returns the string representation of the specified object.
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
      * @return {String}
+     * @override
      */
     'toString': {
       enumerable: true,
@@ -8085,7 +11305,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* This is always the same, so we'll save some computation.
+    /**
+     * This is always the same size, so we'll save some computation.
+     * @name __getBounds
+     * @return {Rectangle}
+     * @override
+     * @private
      */
     '__getBounds': {
       enumerable: true,
@@ -8103,10 +11328,12 @@ Object.defineProperties(doodle.TextEvent, {
    * CLASS METHODS
    */
 
-  /* Test if an object is an node.
-   * Not the best way to test object, but it'll do for now.
+  /**
+   * Test if an object is a Layer.
+   * @name isLayer
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   isLayer = doodle.Layer.isLayer = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -8115,9 +11342,12 @@ Object.defineProperties(doodle.TextEvent, {
     return (obj.toString() === '[object Layer]');
   };
 
-  /* Check if object inherits from node.
+  /**
+   * Check if object inherits from layer.
+   * @name inheritsLayer
    * @param {Object} obj
    * @return {Boolean}
+   * @static
    */
   inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
     while (obj) {
@@ -8134,6 +11364,16 @@ Object.defineProperties(doodle.TextEvent, {
   };
 
   /*DEBUG*/
+  /**
+   * @name check_layer_type
+   * @param {Layer} layer
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
+   */
   doodle.utils.types.check_layer_type = function (layer, caller, param) {
     if (inheritsLayer(layer)) {
       return true;
@@ -8183,14 +11423,13 @@ Object.defineProperties(doodle.TextEvent, {
       evt_keyboardEvent = doodle.KeyboardEvent('');
   
   /**
-   * @name Display
-   * @description
+   * Doodle Display object.
+   * @class Display
+   * @extends ElementNode
    * @param {HTMLElement} element
    * @return {Display}
-   *
-   * @constructor
-   * @namespace doodle
-   * @extends doodle.ElementNode
+   * @throws {TypeError} Must be a block style element.
+   * @throws {SyntaxError}
    */
   doodle.Display = function (element) {
     var display,
@@ -8215,14 +11454,14 @@ Object.defineProperties(doodle.TextEvent, {
     Object.defineProperties(display, (function () {
       var width = 0,
           height = 0,
-					dom_element = null, //just a reference
+          dom_element = null, //just a reference
           layers = display.children,
           dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
           display_scene_path = [], //all descendants
           mouseX = 0,
           mouseY = 0,
-					//chrome mouseevent has offset info, otherwise need to calculate
-					evt_offset_p = document.createEvent('MouseEvent').offsetX !== undefined,
+          //chrome mouseevent has offset info, otherwise need to calculate
+          evt_offset_p = document.createEvent('MouseEvent').offsetX !== undefined,
           //move to closer scope since they're called frequently
           $display = display,
           $dispatch_mouse_event = dispatch_mouse_event,
@@ -8239,20 +11478,20 @@ Object.defineProperties(doodle.TextEvent, {
        */
       function on_mouse_event (evt) {
         $dispatch_mouse_event(evt, $evt_mouseEvent,
-															display_scene_path, display_scene_path.length,
-															mouseX, mouseY, $display);
+                              display_scene_path, display_scene_path.length,
+                              mouseX, mouseY, $display);
       }
 
       /* @param {MouseEvent} evt
        */
       function on_mouse_move (evt) {
         var x, y;
-				mouseX = x = evt_offset_p ? evt.offsetX : evt.clientX - dom_element.offsetLeft;
-				mouseY = y = evt_offset_p ? evt.offsetY : evt.clientY - dom_element.offsetTop;
-				
+        mouseX = x = evt_offset_p ? evt.offsetX : evt.clientX - dom_element.offsetLeft;
+        mouseY = y = evt_offset_p ? evt.offsetY : evt.clientY - dom_element.offsetTop;
+        
         $dispatch_mousemove_event(evt, $evt_mouseEvent,
-																	display_scene_path, display_scene_path.length,
-																	x, y, $display);
+                                  display_scene_path, display_scene_path.length,
+                                  x, y, $display);
       }
 
       /* @param {MouseEvent} evt
@@ -8261,6 +11500,8 @@ Object.defineProperties(doodle.TextEvent, {
         $dispatch_mouseleave_event(evt, $evt_mouseEvent, display_scene_path, layers, layers.length, $display);
       }
 
+      /* @param {KeyboardEvent} evt
+       */
       function on_keyboard_event (evt) {
         $dispatch_keyboard_event(evt, $evt_keyboardEvent, $display);
       }
@@ -8284,7 +11525,11 @@ Object.defineProperties(doodle.TextEvent, {
       document.addEventListener(doodle.KeyboardEvent.KEY_UP, on_keyboard_event, false);
       
       return {
-        /* Display always returns itself as root.
+        /**
+         * Display always returns itself as root.
+         * @name root
+         * @return {Display}
+         * @property
          * @override
          */
         'root': {
@@ -8296,6 +11541,9 @@ Object.defineProperties(doodle.TextEvent, {
         
         /**
          * Mouse x position on display.
+         * @name mouseX
+         * @return {Number} [read-only]
+         * @property
          */
         'mouseX': {
           enumerable: true,
@@ -8305,6 +11553,9 @@ Object.defineProperties(doodle.TextEvent, {
 
         /**
          * Mouse y position on display.
+         * @name mouseY
+         * @return {Number} [read-only]
+         * @property
          */
         'mouseY': {
           enumerable: true,
@@ -8314,8 +11565,10 @@ Object.defineProperties(doodle.TextEvent, {
         
         /**
          * Display width. Setting this affects all it's children layers.
-         * @param {Number} n
+         * @name width
          * @return {Number}
+         * @throws {TypeError}
+         * @property
          * @override
          */
         'width': {
@@ -8337,8 +11590,10 @@ Object.defineProperties(doodle.TextEvent, {
 
         /**
          * Display height. Setting this affects all it's children layers.
-         * @param {Number} n
+         * @name height
          * @return {Number}
+         * @throws {TypeError}
+         * @property
          * @override
          */
         'height': {
@@ -8358,10 +11613,14 @@ Object.defineProperties(doodle.TextEvent, {
           }
         },
         
-        /* Gets size of display element and adds event handlers.
+        /**
+         * Gets size of display element and adds event handlers.
          * Called in ElementNode.element
-         * @param {HTMLElement}
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @throws {TypeError}
          * @override
+         * @private
          */
         '__addDomElement': {
           enumerable: false,
@@ -8398,12 +11657,16 @@ Object.defineProperties(doodle.TextEvent, {
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
             */
-						dom_element = elementArg;
+            dom_element = elementArg;
           }
         },
 
-        /* Removes event handlers from display element.
-         * @param {HTMLElement}
+        /**
+         * Removes event handlers from display element.
+         * @name __removeDomElement
+         * @param {HTMLElement} elementArg
+         * @override
+         * @private
          */
         '__removeDomElement': {
           enumerable: false,
@@ -8427,12 +11690,15 @@ Object.defineProperties(doodle.TextEvent, {
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_END, on_touch_event, false);
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_CANCEL, on_touch_event, false);
             */
-						dom_element = null;
+            dom_element = null;
           }
         },
 
         /**
          * All descendants of the display, in scene graph order.
+         * @name allChildren
+         * @return {Array} [read-only]
+         * @property
          */
         'allChildren': {
           enumerable: true,
@@ -8440,8 +11706,12 @@ Object.defineProperties(doodle.TextEvent, {
           get: function () { return display_scene_path; }
         },
 
-        /* Re-creates the display's scene path.
-         * Called when adding child nodes.
+        /**
+         * Re-creates the display's scene path. Called when adding child nodes.
+         * @name __sortAllChildren
+         * @throws {RangeError}
+         * @throws {ReferenceError}
+         * @private
          */
         '__sortAllChildren': {
           enumerable: false,
@@ -8453,12 +11723,33 @@ Object.defineProperties(doodle.TextEvent, {
               throw new RangeError(this+'.__sortAllChildren: display_scene_path array should never be zero.');
             }
             /*END_DEBUG*/
+            /*** not-implemented-yet
+            //move layers toward the bottom of the stack
+            display_scene_path.sort(function (a, b) {
+              if ((isDisplay(a) || isDisplay(b)) ||
+                  (isLayer(a) && isLayer(b)) ||
+                  (!isLayer(a) && !isLayer(b))) {
+                return 0;
+              } else if (isLayer(a) && !isLayer(b)) {
+                return -1;
+              } else if (!isLayer(a) && isLayer(b)) {
+                return 1;
+              }
+            });
+            ***/
+            /*DEBUG*/
+            if (!isDisplay(display_scene_path[0])) {
+              throw new ReferenceError(this+'.__sortAllChildren: Error sorting display_scene_path.');
+            }
+            /*END_DEBUG*/
           }
         },
 
         /**
          * Returns a list of nodes under a given display position.
+         * @name getNodesUnderPoint
          * @param {Point} point
+         * @throws {TypeError}
          * @return {Array}
          */
         'getNodesUnderPoint': {
@@ -8487,9 +11778,11 @@ Object.defineProperties(doodle.TextEvent, {
         /**
          * Add a layer to the display's children at the given array position.
          * Layer inherits the dimensions of the display.
+         * @name addChildAt
          * @param {Layer} layer
          * @param {Number} index
          * @return {Layer}
+         * @throws {TypeError}
          * @override
          */
         'addChildAt': {
@@ -8514,7 +11807,9 @@ Object.defineProperties(doodle.TextEvent, {
 
         /**
          * Remove a layer from the display's children at the given array position.
+         * @name removeChildAt
          * @param {Number} index
+         * @throws {TypeError}
          * @override
          */
         'removeChildAt': {
@@ -8535,7 +11830,11 @@ Object.defineProperties(doodle.TextEvent, {
         },
 
         /**
-         * Change the display order of two child layers at the given index. 
+         * Change the display order of two child layers at the given index.
+         * @name swapChildrenAt
+         * @param {Number} idx1
+         * @param {Number} idx2
+         * @throws {TypeError}
          * @override
          */
         'swapChildrenAt': {
@@ -8569,8 +11868,11 @@ Object.defineProperties(doodle.TextEvent, {
             /**
              * Color of the bounding box outline for nodes on the display.
              * Display a particular node's bounds with node.debug.boundingBox = true
+             * @name debug.boundingBox
              * @param {String} color
              * @return {String}
+             * @override
+             * @property
              */
             'boundingBox': (function () {
               var bounds_color = "#ff0000";
@@ -8589,8 +11891,11 @@ Object.defineProperties(doodle.TextEvent, {
              * Overlay a stats meter on the display.
              * See http://github.com/mrdoob/stats.js for more info.
              * To include in a compiled build, use ./build/make-doodle -S
+             * @name debug.stats
              * @param {Boolean}
              * @return {Stats|Boolean}
+             * @throws {TypeError}
+             * @property
              */
             'stats': (function () {
               var debug_stats = false; //stats object
@@ -8621,8 +11926,11 @@ Object.defineProperties(doodle.TextEvent, {
          * This event is dispatched simultaneously to all display objects listenting
          * for this event. It does not go through a "capture phase" and is dispatched
          * directly to the target, whether the target is on the display list or not.
-         * @param {Number|false} fps
+         * @name frameRate
          * @return {Number|false}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
          */
         'frameRate': (function () {
           var frame_rate = false, //fps
@@ -8700,8 +12008,12 @@ Object.defineProperties(doodle.TextEvent, {
 
   
   display_static_properties = {
-    /* A Display has no parent.
+    /**
+     * A Display has no parent.
+     * @name parent
+     * @return {null}
      * @override
+     * @property
      */
     'parent': {
       enumerable: true,
@@ -8712,7 +12024,10 @@ Object.defineProperties(doodle.TextEvent, {
     
     /**
      * Returns the string representation of the specified object.
+     * @name toString
+     * @return {String}
      * @override
+     * @property
      */
     'toString': {
       enumerable: false,
@@ -8723,8 +12038,10 @@ Object.defineProperties(doodle.TextEvent, {
 
     /**
      * Add a new layer to the display's children.
+     * @name addLayer
      * @param {String} id
      * @return {Layer}
+     * @throws {TypeError}
      */
     'addLayer': {
       value: function (id) {
@@ -8739,7 +12056,9 @@ Object.defineProperties(doodle.TextEvent, {
 
     /**
      * Remove a layer with a given name from the display's children.
+     * @name removeLayer
      * @param {String} id
+     * @throws {TypeError}
      */
     'removeLayer': {
       value: function (id) {
@@ -8750,9 +12069,12 @@ Object.defineProperties(doodle.TextEvent, {
       }
     },
 
-    /* The bounds of a display is always it's dimensions.
+    /**
+     * The bounds of a display is always it's dimensions.
+     * @name __getBounds
      * @return {Rectangle} This object is reused with each call.
      * @override
+     * @private
      */
     '__getBounds': {
       enumerable: false,
@@ -8962,6 +12284,40 @@ Object.defineProperties(doodle.TextEvent, {
     return false;
   };
 
+  
+  (function () {
+  /* ignores layers until later - not implemented - not sure I want to
+   */
+  var dispatch_mouse_event_IGNORELAYER = function (evt, mouseEvent, evt_type, path, count, x, y,
+                                                   display, layers, layer_count) {
+    //check nodes, dispatch if in boundry
+    while (count--) {
+      if (count <= layer_count) {
+        break;
+      }
+      if (path[count].__getBounds(display).contains(x, y)) {
+        path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+    //if no layers, dispatch from display
+    if (layer_count === 0) {
+      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    //check layers, must have handler to dispatch
+    while (layer_count--) {
+      if (layers[layer_count].eventListeners.hasOwnProperty(evt_type)) {
+        layers[layer_count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+    //if nothing else, top layer dispatch to display
+    layers[--count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+    return true;
+  };
+  }());
+
   /* Called on every mousemove event from the dom.
    * Dispatches the following events to doodle nodes on the display path:
    * 'mousemove', 'mouseover', 'mouseenter', 'mouseout', 'mouseleave'
@@ -9009,6 +12365,108 @@ Object.defineProperties(doodle.TextEvent, {
       }
     }
   };
+
+  (function () {
+  /* not implemented
+   */
+  var dispatch_mousemove_event_IGNORELAYER = function (evt, mouseEvent, path, count, x, y,
+                                       display, layers, layer_count) {
+    var node,
+        evt_disp_p = false;
+    
+    while (count--) {
+      if (count <= layer_count) {
+        break;
+      }
+      node = path[count];
+
+      if (node.__getBounds(display).contains(x, y)) {
+        //point in bounds
+        if (!node.__pointInBounds) {
+          /* @type {Boolean} */
+          node.__pointInBounds = true;
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          return true;
+        }
+        //while in-bounds, dispatch mousemove
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      } else {
+        //point not on sprite
+        if (node.__pointInBounds) {
+          /* @type {Boolean} */
+          node.__pointInBounds = false;
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+          return true;
+        }
+      }
+    }
+    
+    //no layers
+    if (layer_count === 0) {
+      if (!display.__pointInBounds) {
+        display.__pointInBounds = true;
+        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+        return true;
+      }
+      //while in-bounds, dispatch mousemove
+      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    
+    //check layers, always in bounds
+    while (layer_count--) {
+      node = layers[layer_count];
+      
+      if (!node.__pointInBounds) {
+        /* @type {Boolean} */
+        node.__pointInBounds = true;
+        if (node.eventListeners.hasOwnProperty('mouseover')) {
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          evt_disp_p = true;
+        }
+        if (node.eventListeners.hasOwnProperty('mouseenter')) {
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          evt_disp_p = true;
+        }
+        if (evt_disp_p) {
+          return true;
+        }
+      }
+      if (node.eventListeners.hasOwnProperty('mousemove')) {
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+
+    //nuthin doin, dispatch from top layer to display
+    node = layers[--count];
+    if (!display.__pointInBounds) {
+      display.__pointInBounds = true;
+      if (display.eventListeners.hasOwnProperty('mouseover')) {
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+        evt_disp_p = true;
+      }
+      if (display.eventListeners.hasOwnProperty('mouseenter')) {
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+        evt_disp_p = true;
+      }
+      if (evt_disp_p) {
+        return true;
+      }
+    }
+    //finally check mousemove
+    if (display.eventListeners.hasOwnProperty('mousemove')) {
+      node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+
+    return false;
+  };
+  }());
 
   /* Called when the mouse leaves the display element.
    * Dispatches 'mouseout' and 'mouseleave' to the display and resets
@@ -9064,9 +12522,11 @@ Object.defineProperties(doodle.TextEvent, {
    */
 
   /**
-   * Test if an object is of the display type.
-   * @param {Object} obj Object to test.
+   * Test if an object is a Display.
+   * @name isDisplay
+   * @param {Object} obj
    * @return {Boolean} True if object is a Doodle Display.
+   * @static
    */
   isDisplay = doodle.Display.isDisplay = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -9077,11 +12537,14 @@ Object.defineProperties(doodle.TextEvent, {
 
   /*DEBUG*/
   /**
-   * Type-checking for a Doodle Display object. Throws a TypeError if the test fails.
-   * @param {Object} display Object to test.
-   * @param {String=} caller Function name to print in error message.
-   * @param {String=} param Parameters to print in error message.
-   * @return {Boolean} True if object is a Doodle Display.
+   * @name check_display_type
+   * @param {Display} display
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
    */
   doodle.utils.types.check_display_type = function (display, caller, params) {
     if (isDisplay(display)) {

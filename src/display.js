@@ -35,14 +35,13 @@
       evt_keyboardEvent = doodle.KeyboardEvent('');
   
   /**
-   * @name Display
-   * @description
+   * Doodle Display object.
+   * @class Display
+   * @extends ElementNode
    * @param {HTMLElement} element
    * @return {Display}
-   *
-   * @constructor
-   * @namespace doodle
-   * @extends doodle.ElementNode
+   * @throws {TypeError} Must be a block style element.
+   * @throws {SyntaxError}
    */
   doodle.Display = function (element) {
     var display,
@@ -113,6 +112,8 @@
         $dispatch_mouseleave_event(evt, $evt_mouseEvent, display_scene_path, layers, layers.length, $display);
       }
 
+      /* @param {KeyboardEvent} evt
+       */
       function on_keyboard_event (evt) {
         $dispatch_keyboard_event(evt, $evt_keyboardEvent, $display);
       }
@@ -136,7 +137,11 @@
       document.addEventListener(doodle.KeyboardEvent.KEY_UP, on_keyboard_event, false);
       
       return {
-        /* Display always returns itself as root.
+        /**
+         * Display always returns itself as root.
+         * @name root
+         * @return {Display}
+         * @property
          * @override
          */
         'root': {
@@ -148,6 +153,9 @@
         
         /**
          * Mouse x position on display.
+         * @name mouseX
+         * @return {Number} [read-only]
+         * @property
          */
         'mouseX': {
           enumerable: true,
@@ -157,6 +165,9 @@
 
         /**
          * Mouse y position on display.
+         * @name mouseY
+         * @return {Number} [read-only]
+         * @property
          */
         'mouseY': {
           enumerable: true,
@@ -166,8 +177,10 @@
         
         /**
          * Display width. Setting this affects all it's children layers.
-         * @param {Number} n
+         * @name width
          * @return {Number}
+         * @throws {TypeError}
+         * @property
          * @override
          */
         'width': {
@@ -189,8 +202,10 @@
 
         /**
          * Display height. Setting this affects all it's children layers.
-         * @param {Number} n
+         * @name height
          * @return {Number}
+         * @throws {TypeError}
+         * @property
          * @override
          */
         'height': {
@@ -210,10 +225,14 @@
           }
         },
         
-        /* Gets size of display element and adds event handlers.
+        /**
+         * Gets size of display element and adds event handlers.
          * Called in ElementNode.element
-         * @param {HTMLElement}
+         * @name __addDomElement
+         * @param {HTMLElement} elementArg
+         * @throws {TypeError}
          * @override
+         * @private
          */
         '__addDomElement': {
           enumerable: false,
@@ -254,8 +273,12 @@
           }
         },
 
-        /* Removes event handlers from display element.
-         * @param {HTMLElement}
+        /**
+         * Removes event handlers from display element.
+         * @name __removeDomElement
+         * @param {HTMLElement} elementArg
+         * @override
+         * @private
          */
         '__removeDomElement': {
           enumerable: false,
@@ -285,6 +308,9 @@
 
         /**
          * All descendants of the display, in scene graph order.
+         * @name allChildren
+         * @return {Array} [read-only]
+         * @property
          */
         'allChildren': {
           enumerable: true,
@@ -292,8 +318,12 @@
           get: function () { return display_scene_path; }
         },
 
-        /* Re-creates the display's scene path.
-         * Called when adding child nodes.
+        /**
+         * Re-creates the display's scene path. Called when adding child nodes.
+         * @name __sortAllChildren
+         * @throws {RangeError}
+         * @throws {ReferenceError}
+         * @private
          */
         '__sortAllChildren': {
           enumerable: false,
@@ -305,12 +335,33 @@
               throw new RangeError(this+'.__sortAllChildren: display_scene_path array should never be zero.');
             }
             /*END_DEBUG*/
+            /*** not-implemented-yet
+            //move layers toward the bottom of the stack
+            display_scene_path.sort(function (a, b) {
+              if ((isDisplay(a) || isDisplay(b)) ||
+                  (isLayer(a) && isLayer(b)) ||
+                  (!isLayer(a) && !isLayer(b))) {
+                return 0;
+              } else if (isLayer(a) && !isLayer(b)) {
+                return -1;
+              } else if (!isLayer(a) && isLayer(b)) {
+                return 1;
+              }
+            });
+            ***/
+            /*DEBUG*/
+            if (!isDisplay(display_scene_path[0])) {
+              throw new ReferenceError(this+'.__sortAllChildren: Error sorting display_scene_path.');
+            }
+            /*END_DEBUG*/
           }
         },
 
         /**
          * Returns a list of nodes under a given display position.
+         * @name getNodesUnderPoint
          * @param {Point} point
+         * @throws {TypeError}
          * @return {Array}
          */
         'getNodesUnderPoint': {
@@ -339,9 +390,11 @@
         /**
          * Add a layer to the display's children at the given array position.
          * Layer inherits the dimensions of the display.
+         * @name addChildAt
          * @param {Layer} layer
          * @param {Number} index
          * @return {Layer}
+         * @throws {TypeError}
          * @override
          */
         'addChildAt': {
@@ -366,7 +419,9 @@
 
         /**
          * Remove a layer from the display's children at the given array position.
+         * @name removeChildAt
          * @param {Number} index
+         * @throws {TypeError}
          * @override
          */
         'removeChildAt': {
@@ -387,7 +442,11 @@
         },
 
         /**
-         * Change the display order of two child layers at the given index. 
+         * Change the display order of two child layers at the given index.
+         * @name swapChildrenAt
+         * @param {Number} idx1
+         * @param {Number} idx2
+         * @throws {TypeError}
          * @override
          */
         'swapChildrenAt': {
@@ -421,8 +480,11 @@
             /**
              * Color of the bounding box outline for nodes on the display.
              * Display a particular node's bounds with node.debug.boundingBox = true
+             * @name debug.boundingBox
              * @param {String} color
              * @return {String}
+             * @override
+             * @property
              */
             'boundingBox': (function () {
               var bounds_color = "#ff0000";
@@ -441,8 +503,11 @@
              * Overlay a stats meter on the display.
              * See http://github.com/mrdoob/stats.js for more info.
              * To include in a compiled build, use ./build/make-doodle -S
+             * @name debug.stats
              * @param {Boolean}
              * @return {Stats|Boolean}
+             * @throws {TypeError}
+             * @property
              */
             'stats': (function () {
               var debug_stats = false; //stats object
@@ -473,8 +538,11 @@
          * This event is dispatched simultaneously to all display objects listenting
          * for this event. It does not go through a "capture phase" and is dispatched
          * directly to the target, whether the target is on the display list or not.
-         * @param {Number|false} fps
+         * @name frameRate
          * @return {Number|false}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
          */
         'frameRate': (function () {
           var frame_rate = false, //fps
@@ -552,8 +620,12 @@
 
   
   display_static_properties = {
-    /* A Display has no parent.
+    /**
+     * A Display has no parent.
+     * @name parent
+     * @return {null}
      * @override
+     * @property
      */
     'parent': {
       enumerable: true,
@@ -564,7 +636,10 @@
     
     /**
      * Returns the string representation of the specified object.
+     * @name toString
+     * @return {String}
      * @override
+     * @property
      */
     'toString': {
       enumerable: false,
@@ -575,8 +650,10 @@
 
     /**
      * Add a new layer to the display's children.
+     * @name addLayer
      * @param {String} id
      * @return {Layer}
+     * @throws {TypeError}
      */
     'addLayer': {
       value: function (id) {
@@ -591,7 +668,9 @@
 
     /**
      * Remove a layer with a given name from the display's children.
+     * @name removeLayer
      * @param {String} id
+     * @throws {TypeError}
      */
     'removeLayer': {
       value: function (id) {
@@ -602,9 +681,12 @@
       }
     },
 
-    /* The bounds of a display is always it's dimensions.
+    /**
+     * The bounds of a display is always it's dimensions.
+     * @name __getBounds
      * @return {Rectangle} This object is reused with each call.
      * @override
+     * @private
      */
     '__getBounds': {
       enumerable: false,
@@ -814,6 +896,40 @@
     return false;
   };
 
+  
+  (function () {
+  /* ignores layers until later - not implemented - not sure I want to
+   */
+  var dispatch_mouse_event_IGNORELAYER = function (evt, mouseEvent, evt_type, path, count, x, y,
+                                                   display, layers, layer_count) {
+    //check nodes, dispatch if in boundry
+    while (count--) {
+      if (count <= layer_count) {
+        break;
+      }
+      if (path[count].__getBounds(display).contains(x, y)) {
+        path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+    //if no layers, dispatch from display
+    if (layer_count === 0) {
+      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    //check layers, must have handler to dispatch
+    while (layer_count--) {
+      if (layers[layer_count].eventListeners.hasOwnProperty(evt_type)) {
+        layers[layer_count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+    //if nothing else, top layer dispatch to display
+    layers[--count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+    return true;
+  };
+  }());
+
   /* Called on every mousemove event from the dom.
    * Dispatches the following events to doodle nodes on the display path:
    * 'mousemove', 'mouseover', 'mouseenter', 'mouseout', 'mouseleave'
@@ -861,6 +977,108 @@
       }
     }
   };
+
+  (function () {
+  /* not implemented
+   */
+  var dispatch_mousemove_event_IGNORELAYER = function (evt, mouseEvent, path, count, x, y,
+                                       display, layers, layer_count) {
+    var node,
+        evt_disp_p = false;
+    
+    while (count--) {
+      if (count <= layer_count) {
+        break;
+      }
+      node = path[count];
+
+      if (node.__getBounds(display).contains(x, y)) {
+        //point in bounds
+        if (!node.__pointInBounds) {
+          /* @type {Boolean} */
+          node.__pointInBounds = true;
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          return true;
+        }
+        //while in-bounds, dispatch mousemove
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      } else {
+        //point not on sprite
+        if (node.__pointInBounds) {
+          /* @type {Boolean} */
+          node.__pointInBounds = false;
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+          return true;
+        }
+      }
+    }
+    
+    //no layers
+    if (layer_count === 0) {
+      if (!display.__pointInBounds) {
+        display.__pointInBounds = true;
+        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+        return true;
+      }
+      //while in-bounds, dispatch mousemove
+      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+    
+    //check layers, always in bounds
+    while (layer_count--) {
+      node = layers[layer_count];
+      
+      if (!node.__pointInBounds) {
+        /* @type {Boolean} */
+        node.__pointInBounds = true;
+        if (node.eventListeners.hasOwnProperty('mouseover')) {
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          evt_disp_p = true;
+        }
+        if (node.eventListeners.hasOwnProperty('mouseenter')) {
+          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          evt_disp_p = true;
+        }
+        if (evt_disp_p) {
+          return true;
+        }
+      }
+      if (node.eventListeners.hasOwnProperty('mousemove')) {
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        return true;
+      }
+    }
+
+    //nuthin doin, dispatch from top layer to display
+    node = layers[--count];
+    if (!display.__pointInBounds) {
+      display.__pointInBounds = true;
+      if (display.eventListeners.hasOwnProperty('mouseover')) {
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+        evt_disp_p = true;
+      }
+      if (display.eventListeners.hasOwnProperty('mouseenter')) {
+        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+        evt_disp_p = true;
+      }
+      if (evt_disp_p) {
+        return true;
+      }
+    }
+    //finally check mousemove
+    if (display.eventListeners.hasOwnProperty('mousemove')) {
+      node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      return true;
+    }
+
+    return false;
+  };
+  }());
 
   /* Called when the mouse leaves the display element.
    * Dispatches 'mouseout' and 'mouseleave' to the display and resets
@@ -916,9 +1134,11 @@
    */
 
   /**
-   * Test if an object is of the display type.
-   * @param {Object} obj Object to test.
+   * Test if an object is a Display.
+   * @name isDisplay
+   * @param {Object} obj
    * @return {Boolean} True if object is a Doodle Display.
+   * @static
    */
   isDisplay = doodle.Display.isDisplay = function (obj) {
     if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
@@ -929,11 +1149,14 @@
 
   /*DEBUG*/
   /**
-   * Type-checking for a Doodle Display object. Throws a TypeError if the test fails.
-   * @param {Object} display Object to test.
-   * @param {String=} caller Function name to print in error message.
-   * @param {String=} param Parameters to print in error message.
-   * @return {Boolean} True if object is a Doodle Display.
+   * @name check_display_type
+   * @param {Display} display
+   * @param {String} caller
+   * @param {String} params
+   * @return {Boolean}
+   * @throws {TypeError}
+   * @memberOf utils.types
+   * @static
    */
   doodle.utils.types.check_display_type = function (display, caller, params) {
     if (isDisplay(display)) {
