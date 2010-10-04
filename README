@@ -20,4 +20,6 @@ Debugging version (some useful error messages):
 
 For more options: ./build/make-doodle -h
 
-Take a look at some demos: http://biilly.github.com/doodle-js/doc/demos/making_things_move/
+Reference docs: http://biilly.github.com/doodle-js/doc/api/
+
+Some examples: http://biilly.github.com/doodle-js/doc/demos/
