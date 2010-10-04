@@ -1,8 +1,24 @@
 body {
   margin: 0 auto;
   width: 100%;
-  font: 14px/22px Helvetica, Arial, sans-serif;
   background: #ffffff;
+  color: #000000;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 1em;
+  line-height: 1.4em;
+}
+
+a {
+  color: #000000;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #666666;
+}
+
+h1, h2, h3 {
+  font-weight: normal;
 }
 
 /* Sidebar
@@ -10,14 +26,7 @@ body {
 nav {
   float: left;
   padding: 15px;
-  width: 125px;
-}
-nav a {
-  color: #000000;
-  text-decoration: none;
-}
-nav a:hover {
-  color: #666666;
+  width: 140px;
 }
 
 /* Content div
@@ -31,22 +40,20 @@ nav a:hover {
 /* Title
  */
 .main h1 {
-  font: 2em Helvetica, Arial, sans-serif;
+  font-size: 2em;
   padding: 0 2px 10px 0;
 }
 
 /* Main section headers: description, properties, methods, etc.
  */
 .main h2 {
-  font: 18px Helvetica, Arial, sans-serif;
+  font-size: 1.2em;
   padding: 2px;
   color: #ffffff;
   background-color: #000000;
 }
 
 .main a {
-  color: #000000;
-  text-decoration: none;
   border-bottom: 1px #000000 dotted;
 }
 
@@ -61,7 +68,9 @@ nav a:hover {
 
 /* property details */
 .main details h3 {
+  font-size: 0.9em;
   font-weight: normal;
+  margin-top: 0.5em;
   color: #666666;
 }
 
@@ -72,7 +81,7 @@ nav a:hover {
 /* property name and type sig - block
  */
 .main dt {
-  font: 16px Helvetica, Arial, sans-serif;
+  font-size: 1em;
   margin: 20px 0 5px;
   padding: 2px 2px 2px 2em;
   background-color: #e0e0e0;
@@ -85,13 +94,21 @@ nav a:hover {
   font-weight: bold;
 }
 
+/* code examples
+ */
+.main dl details samp {
+  font-family: 'Droid Sans Mono', monospace;
+  font-size: 0.8em;
+}
+
 /* Buttons to collapse sub-sections
  */
 .main .expandButton {
   cursor: pointer;
   float: right;
-  font: 16px monospace;
   text-indent: 0px;
+  font-family: monospace;
+  font-size: 16px;
 }
 .main h2 .expandButton {
   color: #ffffff;

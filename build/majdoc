@@ -78,7 +78,7 @@ CLASS_SRC['LineJoin']="$SRC_HOME/constants/linejoin.js"
 CLASS_SRC['Pattern']="$SRC_HOME/constants/pattern.js"
 
 #parse multi-line doc comments from source file,
-#separate fields with ';' and concat to single line
+#separate fields with '~' and concat to single line
 function get_doc_records {
     #grab entire comment between '/**(EOL)' and '*/(EOL)'
     local doc_records=$(cat "$1" | sed -n -e '\|/\*\*$|,\|\*/$|p' | \
@@ -87,10 +87,10 @@ function get_doc_records {
         sed -e 's/\/\*\*/@description /g' -e 's/\*\//@EOL/g' | \
         #replace tab with space, squeeze empties, remove opening '*'
         tr '\t' ' ' | tr -s [:blank:] | sed -e 's/ \* / /g' | \
-        #mark fields at '@' using ';', delete newlines
-        sed -e 's/ @/;@/g' | tr -d '\n' | \
-        #replace EOL with newline, remove opening ';', squeeze spaces
-        sed -e 's/;@EOL/\n/g' | sed -e 's/^;//g' | tr -s ' ')
+        #mark fields at '@' using '~', delete newlines
+        sed -e 's/ @/~@/g' | tr -d '\n' | \
+        #replace EOL with newline, remove opening '~', squeeze spaces
+        sed -e 's/~@EOL/\n/g' | sed -e 's/^~//g' | tr -s ' ')
     echo "$doc_records"
 }
 
@@ -102,14 +102,14 @@ function get_field_number {
 
 function get_tag_value {
     # $1=tag_pattern, $2=line
-    local n=$(echo "$2" | grep -o "^.*$1" | sed 's/[^;]//g' | wc -m)
+    local n=$(echo "$2" | grep -o "^.*$1" | sed 's/[^~]//g' | wc -m)
     if [ "$n" -ne 0 ]; then
-        local field=$(echo "$2" | cut -d ';' -f "$n")
+        local field=$(echo "$2" | cut -d '~' -f "$n")
         echo $(echo "$field" | sed "s/$1 \(.*\)/\1/")
     fi
 }
 
-## Populates class doc has with doc string lines, using ';' as delinator.
+## Populates class doc has with doc string lines, using '~' as delinator.
 ##
 function populate_docs {
     local class_name class_docs tmp_name tmp_docs prop
@@ -210,6 +210,7 @@ function print_header {
 <title>Doodle.js - API: $class_name</title>
 <link href=\"./style/reset.css\" rel=\"stylesheet\" type=\"text/css\">
 <link href=\"./style/main.css\" rel=\"stylesheet\" type=\"text/css\">
+<link href=\"http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin\" rel=\"stylesheet\" type=\"text/css\">
 <script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js\"></script>
 <script type=\"text/javascript\" src=\"./style/main.js\"></script>
 </head>\n<body>\n"
@@ -261,7 +262,7 @@ function print_params_list {
         #if no params, then don't create list
         if echo "$1" | grep -q "@param"; then
             params_list="<h3>Parameters</h3>\n<ol>"
-            IFS=";"
+            IFS="~"
             #iterate over fields to grab all params
             for prop in $(echo "$1"); do
                 if echo "$prop" | grep -q "@param"; then
@@ -289,7 +290,7 @@ function print_returns_list {
         local prop type desc _ifs="$IFS" returns_list="<h3>Returns</h3>\n<ul>"
         local match_type='s/^.*{\(.*\)}.*$/\1/'
         local match_desc='s/^.*{.*}[[:blank:]]\(.*\)$/\1/'
-        IFS=";"
+        IFS="~"
         for prop in $(echo "$1"); do
             if echo "$prop" | grep -q "@return"; then
                 type=$(echo "$prop" | sed -e "$match_type")
@@ -314,7 +315,7 @@ function print_throws_list {
         local prop type desc _ifs="$IFS" throws_list="<h3>Throws</h3>\n<ul>"
         local match_type='s/^.*{\(.*\)}.*$/\1/'
         local match_desc='s/^.*{.*}[[:blank:]]\(.*\)$/\1/'
-        IFS=";"
+        IFS="~"
         for prop in $(echo "$1"); do
             if echo "$prop" | grep -q "@throws"; then
                 type=$(echo "$prop" | sed -e "$match_type")
@@ -338,13 +339,13 @@ function print_examples_list {
     if echo "$1" | grep -q "@example"; then
         local prop example _ifs="$IFS" examples_list="<h3>Examples</h3>\n<ul>"
         local match_example='s/^@example[[:blank:]]\(.*\)$/\1/'
-        IFS=";"
+        IFS="~"
         for prop in $(echo "$1"); do
             if echo "$prop" | grep -q "@example"; then
                 example=$(echo "$prop" | sed -e "$match_example")
                 #if they're the same, no match - set empty
                 if [ "$example" = "$prop" ]; then desc=''; fi
-                examples_list="$examples_list\n<li>\n<code>\n$example\n</code>\n</li>"
+                examples_list="$examples_list\n<li>\n<samp>\n$example\n</samp>\n</li>"
             fi
         done
         IFS="$_ifs"
@@ -363,7 +364,7 @@ function print_type_sig {
     if echo "$1" | grep -q "@property"; then
         propertyp="1"
     fi
-    IFS=";"
+    IFS="~"
     for prop in $(echo "$1"); do
         if echo "$prop" | grep -q "@param"; then
             var=$(echo "$prop" | sed -e "$match_var")
@@ -405,7 +406,7 @@ function print_class_description {
     local cls_params=$(print_params_list "$cls_docs")
     local cls_returns=$(print_returns_list "$cls_docs")
     local cls_throws=$(print_throws_list "$cls_docs")
-    local cls_examples=""
+    local cls_examples=$(print_examples_list "$cls_docs")
     local desc="<h1>doodle.$class_name</h1>
 \n<section>
 <h2>Description:</h2>

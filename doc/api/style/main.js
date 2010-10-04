@@ -105,10 +105,23 @@ $(document).ready(function () {
       item.html("&#8680; " + item.html());
     }
   });
-  
-  /* Property items - returns, throws
+
+  /* Example list items
    */
-  $('.main ul li').each(function () {
+  $("h3:contains('Examples') + ul li").each(function () {
+    $(this).css({
+      'background-color': '#ededed',
+      'margin': '0.6em 0',
+      'padding': '0.4em 0.4em',
+      'line-height': '1.1em'
+    });
+  });
+  
+  /* Property details - returns, throws list items
+   */
+  var list_returns = ".main details h3:contains('Returns')",
+      list_throws = ".main details h3:contains('Throws')";
+  $(list_returns +','+ list_throws +' + ul li').each(function () {
     var item = $(this),
         txt = item.text(),
         regexp;
@@ -124,10 +137,16 @@ $(document).ready(function () {
   });
 
 
-  /* Add collapse button
+  /* Add menu collapse button
    */
   $('.main h1, .main section h2, .main section dt').each(function () {
     $(this).html($(this).html() + '<span class="expandButton">[-]</span>');
+  });
+  //example buttons are closed by default
+  $('h3:contains("Examples")').each(function () {
+    var example = $(this);
+    example.html(example.html() + '<span class="expandButton">[+]</span>');
+    example.next('ul').hide();
   });
 
   /* @return {Boolean} collapse_all
@@ -181,10 +200,23 @@ $(document).ready(function () {
 
   /* Property item collapse button
    */
-  $('.main section dt .expandButton').each(function () {
+  $('.main dt .expandButton').each(function () {
     var button = $(this);
     button.click(function () {
       button.parent().next('dd').animate({
+        'height': "toggle",
+        'opacity': "toggle"
+      }, { duration: "fast" });
+      toggle_expand_button(button);
+    });
+  });
+
+  /* Examples collapse button
+   */
+  $('.main h3:contains("Examples") .expandButton').each(function () {
+    var button = $(this);
+    button.click(function () {
+      button.parent().next('ul').animate({
         'height': "toggle",
         'opacity': "toggle"
       }, { duration: "fast" });
