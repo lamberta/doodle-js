@@ -42,6 +42,13 @@
    * @return {Display}
    * @throws {TypeError} Must be a block style element.
    * @throws {SyntaxError}
+   * @example
+   *   var display = doodle.Display;<br/>
+   *   display.width = 400;
+   * @example
+   *   var display = doodle.Display(function () {<br/>
+   *   &nbsp; this.width = 400;<br/>
+   *   });
    */
   doodle.Display = function (element) {
     var display,

@@ -5,6 +5,7 @@
 <title>Doodle.js - API: Display</title>
 <link href="./style/reset.css" rel="stylesheet" type="text/css">
 <link href="./style/main.css" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script type="text/javascript" src="./style/main.js"></script>
 </head>
@@ -70,7 +71,18 @@
 <li>SyntaxError &#8211; </li>
 </ul>
 
-
+<h3>Examples</h3>
+<ul>
+<li>
+<samp>
+var display = doodle.Display;<br/> display.width = 400;
+</samp>
+</li>
+<li>
+<samp>
+var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> });
+</samp>
+</li>
 </details>
 </dd>
 </dl>
@@ -295,7 +307,7 @@
 
 </details>
 </dd>
-<dt><dfn>backgroundImage</dfn> :HTMLImage</dt>
+<dt><dfn>backgroundImage</dfn> :HTMLImageElement</dt>
 <dd>
 <p></p>
 <details>
@@ -304,7 +316,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>HTMLImage &#8211; </li>
+<li>HTMLImageElement &#8211; </li>
 </ul>
 
 <h3>Throws</h3>

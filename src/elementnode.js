@@ -22,7 +22,7 @@
   /**
    * @class ElementNode
    * @param {HTMLElement|Function} element
-	 * @param {String} id
+   * @param {String} id
    * @return {ElementNode}
    * @throws {SyntaxError}
    */
@@ -198,7 +198,7 @@
 
         /**
          * @name backgroundImage
-         * @return {HTMLImage}
+         * @return {HTMLImageElement}
          * @throws {TypeError}
          * @property
          */
@@ -328,7 +328,7 @@
          * @param {HTMLElement} elementArg
          * @return {Rectangle} Rectangle object is reused for each call.
          * @throws {TypeError} targetCoordSpace must inherit from Node.
-				 * @override
+         * @override
          * @private
          */
         '__getBounds': {
