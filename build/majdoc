@@ -218,7 +218,7 @@ function print_header {
 }
 
 function print_footer {
-    local license="<a href=\"../../BSD-LICENSE.txt\">Copyright</a>"
+    local license="<a href=\"http://github.com/biilly/doodle-js/blob/master/BSD-LICENSE.txt\">Copyright</a>"
     local name="<a href=\"http://www.lamberta.org\">Billy Lamberta</a>"
     local footer="</div>\n<footer>\n$license $name\n</footer>\n</body>\n</html>"
     echo -e "$footer"
