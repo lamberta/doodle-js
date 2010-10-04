@@ -21,6 +21,12 @@ h1, h2, h3 {
   font-weight: normal;
 }
 
+footer {
+  font-size: 0.8em;
+  clear: both;
+  text-align: center;
+}
+
 /* Sidebar
  */
 nav {

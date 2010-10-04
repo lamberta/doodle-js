@@ -218,7 +218,9 @@ function print_header {
 }
 
 function print_footer {
-    local footer="</div>\n</body>\n</html>"
+    local license="<a href=\"../../BSD-LICENSE.txt\">Copyright</a>"
+    local name="<a href=\"http://www.lamberta.org\">Billy Lamberta</a>"
+    local footer="</div>\n<footer>\n$license $name\n</footer>\n</body>\n</html>"
     echo -e "$footer"
 }
 
