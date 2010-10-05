@@ -36,10 +36,11 @@
   
   /**
    * Doodle Display object.
-   * @class Display
-   * @extends ElementNode
-   * @param {HTMLElement} element
-   * @return {Display}
+   * @class doodle.Display
+   * @extends doodle.ElementNode
+   * @constructor
+   * @param {HTMLElement=} element
+   * @return {doodle.Display}
    * @throws {TypeError} Must be a block style element.
    * @throws {SyntaxError}
    * @example
@@ -161,7 +162,7 @@
         /**
          * Mouse x position on display.
          * @name mouseX
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'mouseX': {
@@ -173,7 +174,7 @@
         /**
          * Mouse y position on display.
          * @name mouseY
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'mouseY': {
@@ -185,7 +186,7 @@
         /**
          * Display width. Setting this affects all it's children layers.
          * @name width
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          * @override
@@ -210,7 +211,7 @@
         /**
          * Display height. Setting this affects all it's children layers.
          * @name height
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          * @override
@@ -399,7 +400,7 @@
          * Layer inherits the dimensions of the display.
          * @name addChildAt
          * @param {Layer} layer
-         * @param {Number} index
+         * @param {number} index
          * @return {Layer}
          * @throws {TypeError}
          * @override
@@ -427,7 +428,7 @@
         /**
          * Remove a layer from the display's children at the given array position.
          * @name removeChildAt
-         * @param {Number} index
+         * @param {number} index
          * @throws {TypeError}
          * @override
          */
@@ -451,8 +452,8 @@
         /**
          * Change the display order of two child layers at the given index.
          * @name swapChildrenAt
-         * @param {Number} idx1
-         * @param {Number} idx2
+         * @param {number} idx1
+         * @param {number} idx2
          * @throws {TypeError}
          * @override
          */
@@ -488,13 +489,13 @@
              * Color of the bounding box outline for nodes on the display.
              * Display a particular node's bounds with node.debug.boundingBox = true
              * @name debug.boundingBox
-             * @param {String} color
-             * @return {String}
+             * @param {string} color
+             * @return {string}
              * @override
              * @property
              */
             'boundingBox': (function () {
-              var bounds_color = "#ff0000";
+              var bounds_color = "#0000cc";
               return {
                 enumerable: true,
                 configurable: false,
@@ -511,8 +512,8 @@
              * See http://github.com/mrdoob/stats.js for more info.
              * To include in a compiled build, use ./build/make-doodle -S
              * @name debug.stats
-             * @param {Boolean}
-             * @return {Stats|Boolean}
+             * @param {boolean}
+             * @return {Stats|boolean}
              * @throws {TypeError}
              * @property
              */
@@ -546,7 +547,7 @@
          * for this event. It does not go through a "capture phase" and is dispatched
          * directly to the target, whether the target is on the display list or not.
          * @name frameRate
-         * @return {Number|false}
+         * @return {number|false}
          * @throws {TypeError}
          * @throws {RangeError}
          * @property
@@ -644,7 +645,7 @@
     /**
      * Returns the string representation of the specified object.
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      * @property
      */
@@ -658,7 +659,7 @@
     /**
      * Add a new layer to the display's children.
      * @name addLayer
-     * @param {String} id
+     * @param {string} id
      * @return {Layer}
      * @throws {TypeError}
      */
@@ -676,7 +677,7 @@
     /**
      * Remove a layer with a given name from the display's children.
      * @name removeLayer
-     * @param {String} id
+     * @param {string} id
      * @throws {TypeError}
      */
     'removeLayer': {
@@ -699,7 +700,7 @@
       enumerable: false,
       configurable: true,
       value: (function () {
-        var rect = doodle.geom.Rectangle(); //recycle
+        var rect = doodle.geom.Rectangle(0, 0, 0, 0); //recycle
         return function () {
           return rect.compose(0, 0, this.width, this.height);
         };
@@ -854,7 +855,6 @@
         
         /*DEBUG*/
         if (node.debug.boundingBox) {
-          draw_bounding_box(node, ctx, node.root);
           bounds = node.__getBounds(display);
           if (bounds) {
             ctx.save();
@@ -886,11 +886,11 @@
    * @param {MouseEvent} evt DOM mouse event to copy properties from.
    * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
-   * @param {Number} count Number of nodes in the scene path array.
-   * @param {Number} x Position of the mouse x coordiante.
-   * @param {Number} y Position of the mouse y coorindate.
+   * @param {number} count number of nodes in the scene path array.
+   * @param {number} x Position of the mouse x coordiante.
+   * @param {number} y Position of the mouse y coorindate.
    * @param {Display} display Reference to the display object.
-   * @return {Boolean} True if event gets dispatched.
+   * @return {boolean} True if event gets dispatched.
    * @private
    */
   dispatch_mouse_event = function (evt, mouseEvent, path, count, x, y, display) {
@@ -947,11 +947,11 @@
    * @param {MouseEvent} evt DOM mouse event to copy properties from.
    * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
-   * @param {Number} count Number of nodes in the scene path array.
-   * @param {Number} x Position of the mouse x coordiante.
-   * @param {Number} y Position of the mouse y coorindate.
+   * @param {number} count number of nodes in the scene path array.
+   * @param {number} x Position of the mouse x coordiante.
+   * @param {number} y Position of the mouse y coorindate.
    * @param {Display} display Reference to the display object.
-   * @return {Boolean} True on dispatch. (Always true because display will trigger it.)
+   * @return {boolean} True on dispatch. (Always true because display will trigger it.)
    * @private
    */
   dispatch_mousemove_event = function (evt, mouseEvent, path, count, x, y, display) {
@@ -961,7 +961,7 @@
       if(node.__getBounds(display).contains(x, y)) {
         //point in bounds
         if (!node.__pointInBounds) {
-          /* @type {Boolean} */
+          /* @type {boolean} */
           node.__pointInBounds = true;
           //dispatch events to node and up parent chain
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
@@ -974,7 +974,7 @@
       } else {
         //point not on sprite
         if (node.__pointInBounds) {
-          /* @type {Boolean} */
+          /* @type {boolean} */
           node.__pointInBounds = false;
           //dispatch events to node and up parent chain
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
@@ -1002,7 +1002,7 @@
       if (node.__getBounds(display).contains(x, y)) {
         //point in bounds
         if (!node.__pointInBounds) {
-          /* @type {Boolean} */
+          /* @type {boolean} */
           node.__pointInBounds = true;
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
@@ -1014,7 +1014,7 @@
       } else {
         //point not on sprite
         if (node.__pointInBounds) {
-          /* @type {Boolean} */
+          /* @type {boolean} */
           node.__pointInBounds = false;
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
@@ -1041,7 +1041,7 @@
       node = layers[layer_count];
       
       if (!node.__pointInBounds) {
-        /* @type {Boolean} */
+        /* @type {boolean} */
         node.__pointInBounds = true;
         if (node.eventListeners.hasOwnProperty('mouseover')) {
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
@@ -1095,15 +1095,15 @@
    * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
    * @param {Array} layers Reference to display's children array.
-   * @param {Number} layer_count Number of nodes in the layers array. Later reused to be node scene path count.
+   * @param {number} layer_count number of nodes in the layers array. Later reused to be node scene path count.
    * @param {Node} top_node Reference to the display object. Later reused to be the top layer.
-   * @return {Boolean} True on dispatch. (Always true because display will trigger it.)
+   * @return {boolean} True on dispatch. (Always true because display will trigger it.)
    * @private
    */
   dispatch_mouseleave_event = function (evt, mouseEvent, path, layers, layer_count, top_node) {
     if (layer_count === 0) {
       //no layers so no scene path, display will dispatch
-      /* @type {Boolean} */
+      /* @type {boolean} */
       top_node.__pointInBounds = false;
       top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
       top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
@@ -1115,7 +1115,7 @@
       layer_count = path.length;
       while (layer_count--) {
         //all nodes out-of-bounds
-        /* @type {Boolean} */
+        /* @type {boolean} */
         path[layer_count].__pointInBounds = false;
       }
       //top layer dispatch
@@ -1128,7 +1128,7 @@
   /* Called when the dom detects a keypress.
    * Doodle KeyboardEvent is reused by copying the dom event properties.
    * @param {Event} evt DOM keyboard event to copy properties from.
-   * @return {Boolean}
+   * @return {boolean}
    * @private
    */
   dispatch_keyboard_event = function (evt, keyboardEvent, display) {
@@ -1144,7 +1144,7 @@
    * Test if an object is a Display.
    * @name isDisplay
    * @param {Object} obj
-   * @return {Boolean} True if object is a Doodle Display.
+   * @return {boolean} True if object is a Doodle Display.
    * @static
    */
   isDisplay = doodle.Display.isDisplay = function (obj) {
@@ -1158,9 +1158,9 @@
   /**
    * @name check_display_type
    * @param {Display} display
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

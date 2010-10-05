@@ -20,13 +20,15 @@
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @class ElementNode
-   * @param {HTMLElement|Function} element
-   * @param {String} id
-   * @return {ElementNode}
+   * @class doodle.ElementNode
+   * @extends doodle.Node
+   * @constructor
+   * @param {HTMLElement=} element
+   * @param {string=} id
+   * @return {doodle.ElementNode}
    * @throws {SyntaxError}
    */
-  doodle.ElementNode = function (element, id/*optional*/) {
+  doodle.ElementNode = function (element, id) {
     var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
 
     Object.defineProperties(element_node, node_static_properties);
@@ -120,7 +122,7 @@
 
         /**
          * @name id
-         * @return {String}
+         * @return {string}
          * @throws {TypeError}
          * @override
          * @property
@@ -139,7 +141,7 @@
 
         /**
          * @name width
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @override
          * @property
@@ -159,7 +161,7 @@
 
         /**
          * @name height
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @override
          * @property
@@ -233,7 +235,7 @@
 
         /**
          * @name backgroundRepeat
-         * @return {String}
+         * @return {string}
          * @throws {TypeError}
          * @throws {SyntaxError}
          * @property
@@ -262,7 +264,7 @@
 
         /**
          * @name alpha
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @override
          * @property
@@ -282,7 +284,7 @@
 
         /**
          * @name visible
-         * @return {Boolean}
+         * @return {boolean}
          * @throws {TypeError}
          * @override
          * @property
@@ -335,7 +337,7 @@
           enumerable: true,
           configurable: true,
           value: (function () {
-            var rect = doodle_Rectangle(); //recycle
+            var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
             return function (targetCoordSpace) {
               /*DEBUG*/
               check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
@@ -418,7 +420,7 @@
     /**
      * Returns the string representation of the specified object.
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -439,7 +441,7 @@
    * Test if an object is an ElementNode.
    * @name isElementNode
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isElementNode = doodle.ElementNode.isElementNode = function (obj) {
@@ -453,7 +455,7 @@
    * Check if object inherits from ElementNode.
    * @name inheritsNode
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   inheritsElementNode = doodle.ElementNode.inheritsElementNode = function (obj) {
@@ -474,9 +476,9 @@
   /**
    * @name check_elementnode_type
    * @param {Node} node
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

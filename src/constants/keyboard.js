@@ -1,5 +1,5 @@
 /**
- * @class Keyboard
+ * @class doodle.Keyboard
  * @static
  */
 Object.defineProperty(doodle, 'Keyboard', {
@@ -9,7 +9,7 @@ Object.defineProperty(doodle, 'Keyboard', {
   value: Object.create(null, {
     /**
      * @name BACKSPACE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -23,7 +23,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name TAB
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -37,7 +37,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name ENTER
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -51,7 +51,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name COMMAND
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -65,7 +65,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name SHIFT
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -79,7 +79,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name CONTROL
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -93,7 +93,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name ALTERNATE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -107,7 +107,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name PAUSE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -121,7 +121,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name CAPS_LOCK
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -135,7 +135,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -149,7 +149,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name ESCAPE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -163,7 +163,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name SPACE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -177,7 +177,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name PAGE_UP
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -191,7 +191,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name PAGE_DOWN
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -205,7 +205,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name END
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -219,7 +219,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name HOME
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -236,7 +236,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name LEFT
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -250,7 +250,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name UP
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -264,7 +264,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name RIGHT
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -278,7 +278,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name DOWN
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -292,7 +292,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name INSERT
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -306,7 +306,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name DELETE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -323,7 +323,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -337,7 +337,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_1
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -351,7 +351,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_2
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -365,7 +365,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_3
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -379,7 +379,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_4
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -393,7 +393,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_5
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -407,7 +407,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_6
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -421,7 +421,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_7
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -435,7 +435,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_8
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -449,7 +449,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMBER_9
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -466,7 +466,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name A
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -480,7 +480,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name B
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -494,7 +494,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name C
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -508,7 +508,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name D
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -522,7 +522,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name E
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -536,7 +536,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -550,7 +550,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name G
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -564,7 +564,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name H
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -578,7 +578,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name I
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -592,7 +592,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name J
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -606,7 +606,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name K
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -620,7 +620,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name L
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -634,7 +634,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name M
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -648,7 +648,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name N
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -662,7 +662,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name O
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -676,7 +676,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name P
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -690,7 +690,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name Q
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -704,7 +704,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name R
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -718,7 +718,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name S
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -732,7 +732,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name T
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -746,7 +746,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name U
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -760,7 +760,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name V
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -774,7 +774,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name W
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -788,7 +788,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name X
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -802,7 +802,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name Y
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -816,7 +816,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name Z
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -830,7 +830,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name WINDOWS_KEY
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -847,7 +847,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_0
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -861,7 +861,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_1
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -875,7 +875,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_2
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -889,7 +889,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_3
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -903,7 +903,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_4
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -917,7 +917,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_5
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -931,7 +931,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_6
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -945,7 +945,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_7
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -959,7 +959,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_8
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -973,7 +973,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_9
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -987,7 +987,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_MULTIPLY
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1001,7 +1001,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_ADD
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1015,7 +1015,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_ENTER
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1029,7 +1029,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_SUBTRACT
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1043,7 +1043,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_DECIMAL
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1057,7 +1057,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name NUMPAD_DIVIDE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1074,7 +1074,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F1
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1088,7 +1088,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F2
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1102,7 +1102,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F3
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1116,7 +1116,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F4
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1130,7 +1130,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F5
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1144,7 +1144,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F6
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1158,7 +1158,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F7
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1172,7 +1172,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F8
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1186,7 +1186,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F9
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1200,7 +1200,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F10
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1214,7 +1214,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F11
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1228,7 +1228,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F12
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1242,7 +1242,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F13
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1256,7 +1256,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F14
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1270,7 +1270,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name F15
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1284,7 +1284,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name SCROLL
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1301,7 +1301,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name SEMICOLON
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1315,7 +1315,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name EQUAL
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1329,7 +1329,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name COMMA
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1343,7 +1343,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name MINUS
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1357,7 +1357,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name PERIOD
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1371,7 +1371,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name SLASH
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1385,7 +1385,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name BACKQUOTE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1399,7 +1399,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name LEFTBRACKET
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1413,7 +1413,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name BACKSLASH
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1427,7 +1427,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name RIGHTBRACKET
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static
@@ -1441,7 +1441,7 @@ Object.defineProperty(doodle, 'Keyboard', {
 
     /**
      * @name QUOTE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      * @static

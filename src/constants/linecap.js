@@ -1,5 +1,5 @@
 /**
- * @class LineCap
+ * @class doodle.LineCap
  * @static
  */
 Object.defineProperty(doodle, 'LineCap', {
@@ -9,7 +9,7 @@ Object.defineProperty(doodle, 'LineCap', {
   value: Object.create(null, {
     /**
      * @name BUTT
-     * @return {String} [read-only] Default
+     * @return {string} [read-only] Default
      * @property
      * @constant
      * @static
@@ -23,7 +23,7 @@ Object.defineProperty(doodle, 'LineCap', {
 
     /**
      * @name ROUND
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static
@@ -37,7 +37,7 @@ Object.defineProperty(doodle, 'LineCap', {
 
     /**
      * @name SQUARE
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static

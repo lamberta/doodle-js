@@ -2,7 +2,7 @@
 
 /**
  * Doodle utilty functions.
- * @class utils
+ * @class doodle.utils
  * @static
  */
 doodle.utils = Object.create({}, {
@@ -38,8 +38,8 @@ doodle.utils = Object.create({}, {
   /**
    * @name hex_to_rgb_str
    * @param {Color} color
-   * @param {Number} alpha
-   * @return {String}
+   * @param {number} alpha
+   * @return {string}
    * @throws {TypeError}
    * @static
    */
@@ -60,8 +60,8 @@ doodle.utils = Object.create({}, {
   
   /**
    * @name rgb_str_to_hex
-   * @param {String} rgb_str
-   * @return {String}
+   * @param {string} rgb_str
+   * @return {string}
    * @throws {TypeError}
    * @static
    */
@@ -121,10 +121,10 @@ doodle.utils = Object.create({}, {
   
   /**
    * @name rgb_to_hex
-   * @param {Number} r
-   * @param {Number} g
-   * @param {Number} b
-   * @return {String}
+   * @param {number} r
+   * @param {number} g
+   * @param {number} b
+   * @return {string}
    * @throws {TypeError}
    * @static
    */
@@ -146,11 +146,11 @@ doodle.utils = Object.create({}, {
 
   /**
    * @name rgb_to_rgb_str
-   * @param {Number} r
-   * @param {Number} g
-   * @param {Number} b
-   * @param {Number} a
-   * @return {String}
+   * @param {number} r
+   * @param {number} g
+   * @param {number} b
+   * @param {number} a
+   * @return {string}
    * @throws {TypeError}
    * @static
    */
@@ -183,7 +183,7 @@ doodle.utils = Object.create({}, {
   /**
    * Returns HTML element from id name or element itself.
    * @name get_element
-   * @param {HTMLElement|String} element
+   * @param {HTMLElement|string} element
    * @return {HTMLElement}
    * @static
    */
@@ -207,8 +207,8 @@ doodle.utils = Object.create({}, {
    * Returns css property of element, it's own or inherited.
    * @name get_style_property
    * @param {HTMLElement} element
-   * @param {String} property
-   * @param {Boolean} useComputedStyle
+   * @param {string} property
+   * @param {boolean} useComputedStyle
    * @return {*}
    * @throws {TypeError}
    * @throws {ReferenceError}
@@ -244,9 +244,9 @@ doodle.utils = Object.create({}, {
    * Returns property of an element. CSS properties take precedence over HTML attributes.
    * @name get_element_property
    * @param {HTMLElement} element
-   * @param {String} property
-   * @param {String} returnType 'int'|'float' Return type.
-   * @param {Boolean} useComputedStyle
+   * @param {string} property
+   * @param {string} returnType 'int'|'float' Return type.
+   * @param {boolean} useComputedStyle
    * @return {*}
    * @throws {ReferenceError}
    * @static
@@ -301,9 +301,9 @@ doodle.utils = Object.create({}, {
   /**
    * @name set_element_property
    * @param {HTMLElement} element
-   * @param {String} property
+   * @param {string} property
    * @param {*} value
-   * @param {String} type 'css'|'html' Set CSS property or HTML attribute.
+   * @param {string} type 'css'|'html' Set CSS property or HTML attribute.
    * @return {*}
    * @throws {TypeError}
    * @throws {SyntaxError}
@@ -343,7 +343,7 @@ doodle.utils = Object.create({}, {
    * @name create_scene_path
    * @param {Node} node
    * @param {Array} array Array to store the path nodes in.
-   * @param {Boolean} clearArray Empty array passed as parameter before storing nodes in it.
+   * @param {boolean} clearArray Empty array passed as parameter before storing nodes in it.
    * @return {Array} The array passed to the function (modified in place).
    * @throws {TypeError}
    * @static

@@ -42,12 +42,12 @@
 <section>
 <h2>Description:</h2>
 <dl>
-<dt><dfn>Node</dfn> (id|initializer:String|Function) :Node</dt>
+<dt><dfn>Node</dfn> (id|initializer:string) :Node</dt>
 <dd>
 <p></p>
 <details>
 
-<h3>Inheritance</h3>
+<h3>Inherits</h3>
 <ol>
 <li>EventDispatcher</li>
 <li>Object</li>
@@ -55,7 +55,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>id|initializer:String|Function &#8211; </li>
+<li>id|initializer:string &#8211; <span class='param_annotation'>[optional]</span> </li>
 </ol>
 
 <h3>Returns</h3>
@@ -90,7 +90,7 @@
 
 </details>
 </dd>
-<dt><dfn>alpha</dfn> :Number</dt>
+<dt><dfn>alpha</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -99,7 +99,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -124,7 +124,7 @@
 
 </details>
 </dd>
-<dt><dfn>debug.boundingBox</dfn> :Boolean</dt>
+<dt><dfn>debug.boundingBox</dfn> :boolean</dt>
 <dd>
 <p></p>
 <details>
@@ -133,7 +133,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 
@@ -141,7 +141,7 @@
 
 </details>
 </dd>
-<dt><dfn>id</dfn> :String</dt>
+<dt><dfn>id</dfn> :string</dt>
 <dd>
 <p></p>
 <details>
@@ -150,7 +150,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 
@@ -192,7 +192,7 @@
 
 </details>
 </dd>
-<dt><dfn>rotation</dfn> :Number</dt>
+<dt><dfn>rotation</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -201,7 +201,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -226,7 +226,7 @@
 
 </details>
 </dd>
-<dt><dfn>visible</dfn> :Boolean</dt>
+<dt><dfn>visible</dfn> :boolean</dt>
 <dd>
 <p></p>
 <details>
@@ -235,7 +235,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 
@@ -243,7 +243,7 @@
 
 </details>
 </dd>
-<dt><dfn>x</dfn> :Number</dt>
+<dt><dfn>x</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -252,7 +252,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -260,7 +260,7 @@
 
 </details>
 </dd>
-<dt><dfn>y</dfn> :Number</dt>
+<dt><dfn>y</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -269,7 +269,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -288,7 +288,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>fn:Function &#8211; </li>
+<li>fn:Function &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -304,15 +304,15 @@
 
 </details>
 </dd>
-<dt><dfn>setChildIndex</dfn> (child:Node, index:Number) :void</dt>
+<dt><dfn>setChildIndex</dfn> (child:Node, index:number) :void</dt>
 <dd>
 <p>Changes the position of an existing child in the node's children array. This affects the layering of child objects.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>child:Node &#8211; </li>
-<li>index:Number &#8211; </li>
+<li>child:Node &#8211;  </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 
@@ -325,19 +325,19 @@
 
 </details>
 </dd>
-<dt><dfn>willTrigger</dfn> (type:String) :Boolean</dt>
+<dt><dfn>willTrigger</dfn> (type:string) :boolean</dt>
 <dd>
 <p>Checks whether an event listener is registered with this EventDispatcher object or any of its ancestors for the specified event type. The difference between the hasEventListener() and the willTrigger() methods is that hasEventListener() examines only the object to which it belongs, whereas the willTrigger() method examines the entire event flow for the event specified by the type parameter.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; The type of event.</li>
+<li>type:string &#8211;  The type of event.</li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -348,19 +348,19 @@
 
 </details>
 </dd>
-<dt><dfn>hasEventListener</dfn> (type:String) :Boolean</dt>
+<dt><dfn>hasEventListener</dfn> (type:string) :boolean</dt>
 <dd>
 <p>Checks whether the EventDispatcher object has any listeners registered for a specific type of event.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; </li>
+<li>type:string &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -371,19 +371,19 @@
 
 </details>
 </dd>
-<dt><dfn>contains</dfn> (node:Node) :Boolean</dt>
+<dt><dfn>contains</dfn> (node:Node) :boolean</dt>
 <dd>
 <p>Determine if node is among it's children, grandchildren, etc.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -394,19 +394,19 @@
 
 </details>
 </dd>
-<dt><dfn>dispatchEvent</dfn> (event:Event) :Boolean</dt>
+<dt><dfn>dispatchEvent</dfn> (event:Event) :boolean</dt>
 <dd>
 <p>Dispatches an event into the event flow. The event target is the EventDispatcher object upon which the dispatchEvent() method is called.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211; </li>
+<li>event:Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; true if the event was successfully dispatched.</li>
+<li>boolean &#8211; true if the event was successfully dispatched.</li>
 </ul>
 
 <h3>Throws</h3>
@@ -417,19 +417,19 @@
 
 </details>
 </dd>
-<dt><dfn>broadcastEvent</dfn> (event:Event) :Boolean</dt>
+<dt><dfn>broadcastEvent</dfn> (event:Event) :boolean</dt>
 <dd>
 <p>Dispatches an event to every object with an active listener. Ignores propagation path, objects come from</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211; </li>
+<li>event:Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; True if the event was successfully dispatched.</li>
+<li>boolean &#8211; True if the event was successfully dispatched.</li>
 </ul>
 
 <h3>Throws</h3>
@@ -441,19 +441,19 @@
 
 </details>
 </dd>
-<dt><dfn>handleEvent</dfn> (event:Event) :Boolean</dt>
+<dt><dfn>handleEvent</dfn> (event:Event) :boolean</dt>
 <dd>
 <p>Lookup and call listener if registered for specific event type.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211; </li>
+<li>event:Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; true if node has listeners of event type.</li>
+<li>boolean &#8211; true if node has listeners of event type.</li>
 </ul>
 
 <h3>Throws</h3>
@@ -464,15 +464,15 @@
 
 </details>
 </dd>
-<dt><dfn>addChildAt</dfn> (node:Node, index:Number) :Node</dt>
+<dt><dfn>addChildAt</dfn> (node:Node, index:number) :Node</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
-<li>index:Number &#8211; </li>
+<li>node:Node &#8211;  </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -495,7 +495,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -511,14 +511,14 @@
 
 </details>
 </dd>
-<dt><dfn>getChildById</dfn> (id:String) :Node|null</dt>
+<dt><dfn>getChildById</dfn> (id:string) :Node|null</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>id:String &#8211; </li>
+<li>id:string &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -541,7 +541,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>point:Point &#8211; </li>
+<li>point:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -564,7 +564,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>point:Point &#8211; </li>
+<li>point:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -597,14 +597,14 @@
 
 </details>
 </dd>
-<dt><dfn>removeChildAt</dfn> (index:Number) :void</dt>
+<dt><dfn>removeChildAt</dfn> (index:number) :void</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>index:Number &#8211; </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 
@@ -617,14 +617,14 @@
 
 </details>
 </dd>
-<dt><dfn>removeChildById</dfn> (id:String) :void</dt>
+<dt><dfn>removeChildById</dfn> (id:string) :void</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>id:String &#8211; </li>
+<li>id:string &#8211;  </li>
 </ol>
 
 
@@ -644,7 +644,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 
@@ -657,19 +657,19 @@
 
 </details>
 </dd>
-<dt><dfn>rotate</dfn> (deg:Number) :Number</dt>
+<dt><dfn>rotate</dfn> (deg:number) :number</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>deg:Number &#8211; </li>
+<li>deg:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -677,19 +677,19 @@
 
 </details>
 </dd>
-<dt><dfn>scaleX</dfn> (sx:Number) :Number</dt>
+<dt><dfn>scaleX</dfn> (sx:number) :number</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>sx:Number &#8211; </li>
+<li>sx:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -697,19 +697,19 @@
 
 </details>
 </dd>
-<dt><dfn>scaleY</dfn> (sy:Number) :Number</dt>
+<dt><dfn>scaleY</dfn> (sy:number) :number</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>sy:Number &#8211; </li>
+<li>sy:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -724,8 +724,8 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>node1:Node &#8211; </li>
-<li>node2:Node &#8211; </li>
+<li>node1:Node &#8211;  </li>
+<li>node2:Node &#8211;  </li>
 </ol>
 
 
@@ -738,16 +738,16 @@
 
 </details>
 </dd>
-<dt><dfn>addEventListener</dfn> (type:String, listener:Function, useCapture:Boolean) :void</dt>
+<dt><dfn>addEventListener</dfn> (type:string, listener:Function, useCapture:boolean) :void</dt>
 <dd>
 <p>Registers an event listener object with an EventDispatcher object so that the listener receives notification of an event.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; </li>
-<li>listener:Function &#8211; </li>
-<li>useCapture:Boolean &#8211; </li>
+<li>type:string &#8211;  </li>
+<li>listener:Function &#8211;  </li>
+<li>useCapture:boolean &#8211;  </li>
 </ol>
 
 
@@ -760,16 +760,16 @@
 
 </details>
 </dd>
-<dt><dfn>removeEventListener</dfn> (type:String, listener:Function, useCapture:Boolean) :void</dt>
+<dt><dfn>removeEventListener</dfn> (type:string, listener:Function, useCapture:boolean) :void</dt>
 <dd>
 <p>Removes a listener from the EventDispatcher object.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; </li>
-<li>listener:Function &#8211; </li>
-<li>useCapture:Boolean &#8211; </li>
+<li>type:string &#8211;  </li>
+<li>listener:Function &#8211;  </li>
+<li>useCapture:boolean &#8211;  </li>
 </ol>
 
 
@@ -782,7 +782,7 @@
 
 </details>
 </dd>
-<dt><dfn>toString</dfn> () :String</dt>
+<dt><dfn>toString</dfn> () :string</dt>
 <dd>
 <p>Returns the string representation of the specified object.</p>
 <details>
@@ -791,7 +791,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 
@@ -799,14 +799,14 @@
 
 </details>
 </dd>
-<dt><dfn>swapDepthAt</dfn> (index:Number) :void</dt>
+<dt><dfn>swapDepthAt</dfn> (index:number) :void</dt>
 <dd>
 <p>Swap positions with another node at a given index in the parents child list.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>index:Number &#8211; </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 
@@ -826,7 +826,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 
@@ -840,15 +840,15 @@
 
 </details>
 </dd>
-<dt><dfn>swapChildrenAt</dfn> (index1:Number, index2:Number) :void</dt>
+<dt><dfn>swapChildrenAt</dfn> (index1:number, index2:number) :void</dt>
 <dd>
 <p>Swaps the child nodes at the two specified index positions in the child list.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>index1:Number &#8211; </li>
-<li>index2:Number &#8211; </li>
+<li>index1:number &#8211;  </li>
+<li>index2:number &#8211;  </li>
 </ol>
 
 
@@ -861,19 +861,19 @@
 
 </details>
 </dd>
-<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle|Null</dt>
+<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle|null</dt>
 <dd>
 <p>The bounding box of a Node is a union of all it's child Sprite's bounds.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>targetCoordSpace:Node &#8211; </li>
+<li>targetCoordSpace:Node &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Rectangle|Null &#8211; </li>
+<li>Rectangle|null &#8211; </li>
 </ul>
 
 
@@ -885,19 +885,19 @@
 <section>
 <h2>Class Functions</h2>
 <dl>
-<dt><dfn>inheritsNode</dfn> (obj:Object) :Boolean</dt>
+<dt><dfn>inheritsNode</dfn> (obj:Object) :boolean</dt>
 <dd>
 <p>Check if object inherits from node.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>obj:Object &#8211; </li>
+<li>obj:Object &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 
@@ -905,19 +905,19 @@
 
 </details>
 </dd>
-<dt><dfn>isNode</dfn> (obj:Object) :Boolean</dt>
+<dt><dfn>isNode</dfn> (obj:Object) :boolean</dt>
 <dd>
 <p>Test if an object is an node.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>obj:Object &#8211; </li>
+<li>obj:Object &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 

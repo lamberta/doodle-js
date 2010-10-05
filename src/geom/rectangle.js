@@ -15,13 +15,14 @@
       min = Math.min;
   
   /**
-   * @class Rectangle
+   * @class doodle.geom.Rectangle
    * @extends Object
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Number} width
-   * @param {Number} height
-   * @return {Rectangle}
+   * @constructor
+   * @param {number=} x
+   * @param {number=} y
+   * @param {number=} width
+   * @param {number=} height
+   * @return {doodle.geom.Rectangle}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -42,7 +43,7 @@
       return {
         /**
          * @name x
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -60,7 +61,7 @@
 
         /**
          * @name y
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -78,7 +79,7 @@
 
         /**
          * @name width
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -96,7 +97,7 @@
 
         /**
          * @name height
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -178,7 +179,7 @@
   rect_static_properties = {
     /**
      * @name top
-     * @return {Number}
+     * @return {number}
      * @throws {TypeError}
      * @property
      */
@@ -199,7 +200,7 @@
 
     /**
      * @name right
-     * @return {Number}
+     * @return {number}
      * @throws {TypeError}
      * @property
      */
@@ -219,7 +220,7 @@
 
     /**
      * @name bottom
-     * @return {Number}
+     * @return {number}
      * @throws {TypeError}
      * @property
      */
@@ -239,7 +240,7 @@
 
     /**
      * @name left
-     * @return {Number}
+     * @return {number}
      * @throws {TypeError}
      * @property
      */
@@ -260,7 +261,7 @@
 
     /**
      * @name toString
-     * @return {String}
+     * @return {string}
      */
     'toString': {
       enumerable: true,
@@ -287,10 +288,10 @@
     /**
      * Sets this rectangle's parameters.
      * @name compose
-     * @param {Number} x
-     * @param {Number} y
-     * @param {Number} width
-     * @param {Number} height
+     * @param {number} x
+     * @param {number} y
+     * @param {number} width
+     * @param {number} height
      * @return {Rectangle}
      * @throws {TypeError}
      */
@@ -351,8 +352,8 @@
      * Adjusts the location of the rectangle, as determined by
      * its top-left corner, by the specified amounts.
      * @name offset
-     * @param {Number} dx
-     * @param {Number} dy
+     * @param {number} dx
+     * @param {number} dy
      * @return {Rectangle}
      * @throws {TypeError}
      */
@@ -377,8 +378,8 @@
      * increases to the left and right by the dx value, and to the top and the
      * bottom by the dy value.
      * @name inflate
-     * @param {Number} dx
-     * @param {Number} dy
+     * @param {number} dx
+     * @param {number} dy
      * @return {Rectangle}
      * @throws {TypeError}
      */
@@ -403,7 +404,7 @@
      * Determines whether the rectangle argument is equal to this rectangle.
      * @name equals
      * @param {Rectangle} rect
-     * @return {Boolean}
+     * @return {boolean}
      * @throws {TypeError}
      */
     'equals': {
@@ -422,7 +423,7 @@
     /**
      * Determines whether or not this Rectangle object is empty.
      * @name isEmpty
-     * @return {Boolean}
+     * @return {boolean}
      */
     'isEmpty': {
       enumerable: true,
@@ -437,9 +438,9 @@
      * Determines whether the specified point is contained within the
      * rectangular region defined by this Rectangle object.
      * @name contains
-     * @param {Number} x
-     * @param {Number} y
-     * @return {Boolean}
+     * @param {number} x
+     * @param {number} y
+     * @return {boolean}
      * @throws {TypeError}
      */
     'contains': {
@@ -461,7 +462,7 @@
      * this rectangle object.
      * @name containsPoint
      * @param {Point} pt
-     * @return {Boolean}
+     * @return {boolean}
      * @throws {TypeError}
      */
     'containsPoint': {
@@ -480,7 +481,7 @@
      * Determines whether the rectangle argument is contained within this rectangle.
      * @name containsRect
      * @param {Rectangle} rect
-     * @return {Boolean}
+     * @return {boolean}
      * @throws {TypeError}
      */
     'containsRect': {
@@ -503,7 +504,7 @@
      * Determines whether the rectangle argument intersects with this rectangle.
      * @name intersects
      * @param {Rectangle} rect
-     * @return {Boolean}
+     * @return {boolean}
      * @throws {TypeError}
      */
     'intersects': {
@@ -644,7 +645,7 @@
    * Does not check if a rectangle is actually a doodle.geom.rectangle.
    * @name isRect
    * @param {Rectangle} rect Object with numeric rectangle parameters.
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isRect = doodle.geom.Rectangle.isRect = function (rect) {
@@ -658,9 +659,9 @@
   /**
    * @name check_rect_type
    * @param {Rectangle} rect
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

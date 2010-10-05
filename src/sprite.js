@@ -16,12 +16,13 @@
       doodle_Rectangle = doodle.geom.Rectangle;
 
   /**
-	 * An node to display.
-   * @class Sprite
-	 * @extends Node
-   * @param {String|Function} id|initializer Name or initialization function.
-   * @return {Sprite} A sprite object.
-	 * @throws {SyntaxError} Invalid parameters.
+   * An node to display.
+   * @class doodle.Sprite
+   * @extends doodle.Node
+   * @constructor
+   * @param {string=} id Name or initialization function.
+   * @return {doodle.Sprite} A sprite object.
+   * @throws {SyntaxError} Invalid parameters.
    */
   doodle.Sprite = function (id) {
     //only pass id if string, an init function will be called later
@@ -56,7 +57,7 @@
         /**
          * Indicates the width of the sprite, in pixels.
          * @name width
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -80,7 +81,7 @@
         /**
          * Indicates the height of the sprite, in pixels.
          * @name height
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -106,7 +107,7 @@
          * @param {Node} targetCoordSpace
          * @return {Rectangle}
          * @throws {TypeError}
-				 * @override
+         * @override
          */
         'getBounds': {
           enumerable: true,
@@ -131,7 +132,7 @@
           writable: true,
           configurable: false,
           value: (function () {
-            var rect = doodle_Rectangle(); //recycle
+            var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
             
             return function (targetCoordSpace) {
               /*DEBUG*/
@@ -207,8 +208,8 @@
 
         /**
          * @name hitTestObject
-				 * @param {Node} node
-         * @return {Boolean}
+         * @param {Node} node
+         * @return {boolean}
          * @throws {TypeError}
          */
         'hitTestObject': {
@@ -225,8 +226,8 @@
 
         /**
          * @name hitTestPoint
-				 * @param {Point} pt
-         * @return {Boolean}
+         * @param {Point} pt
+         * @return {boolean}
          * @throws {TypeError}
          */
         'hitTestPoint': {
@@ -279,7 +280,7 @@
   sprite_static_properties = {
     /**
      * @name rotation
-     * @return {Number}
+     * @return {number}
      * @throws {TypeError}
      * @property
      */
@@ -304,7 +305,7 @@
     /**
      * Returns the string representation of the specified object.
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -319,10 +320,10 @@
     /**
      * Updates the position and size of this sprite.
      * @name compose
-     * @param {Number} x
-     * @param {Number} y
-     * @param {Number} width
-     * @param {Number} height
+     * @param {number} x
+     * @param {number} y
+     * @param {number} width
+     * @param {number} height
      * @return {Sprite}
      * @throws {TypeError}
      */
@@ -354,7 +355,7 @@
   /**
    * @name isSprite
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isSprite = doodle.Sprite.isSprite = function (obj) {
@@ -369,7 +370,7 @@
    * If it doesn't return false.
    * @name inheritsSprite
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   inheritsSprite = doodle.Sprite.inheritsSprite = function (obj) {
@@ -390,9 +391,9 @@
   /**
    * @name check_sprite_type
    * @param {Sprite} sprite
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

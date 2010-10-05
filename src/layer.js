@@ -12,11 +12,12 @@
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @class Layer
-   * @extends ElementNode
-   * @param {String} id
-   * @param {HTMLCanvasElement} element
-   * @return {Layer}
+   * @class doodle.Layer
+   * @extends doodle.ElementNode
+   * @constructor
+   * @param {string=} id
+   * @param {HTMLCanvasElement=} element
+   * @return {doodle.Layer}
    * @throws {SyntaxError}
    */
   doodle.Layer = function (id, element) {
@@ -35,7 +36,7 @@
         /**
          * Canvas dimensions need to apply to HTML attributes.
          * @name width
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          * @override
@@ -55,7 +56,7 @@
         /**
          * 
          * @name height
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          * @override
@@ -166,7 +167,7 @@
     /**
      * Returns the string representation of the specified object.
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -189,7 +190,7 @@
       enumerable: true,
       configurable: true,
       value: (function () {
-        var rect = doodle.geom.Rectangle(); //recycle
+        var rect = doodle.geom.Rectangle(0, 0, 0, 0); //recycle
         return function () {
           return rect.compose(0, 0, this.width, this.height);
         };
@@ -205,7 +206,7 @@
    * Test if an object is a Layer.
    * @name isLayer
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isLayer = doodle.Layer.isLayer = function (obj) {
@@ -219,7 +220,7 @@
    * Check if object inherits from layer.
    * @name inheritsLayer
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
@@ -240,9 +241,9 @@
   /**
    * @name check_layer_type
    * @param {Layer} layer
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

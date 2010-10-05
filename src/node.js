@@ -26,10 +26,11 @@
       PI = Math.PI;
   
   /**
-   * @class Node
-   * @extends EventDispatcher
-   * @param {String|Function} id|initializer
-   * @return {Node}
+   * @class doodle.Node
+   * @extends doodle.EventDispatcher
+   * @constructor
+   * @param {string=} id|initializer
+   * @return {doodle.Node}
    */
   doodle.Node = function (id) {
     var node = Object.create(doodle.EventDispatcher());
@@ -52,7 +53,7 @@
         value: Object.create(null, {
           /**
            * @name debug.boundingBox
-           * @return {Boolean}
+           * @return {boolean}
            * @property
            */
           'boundingBox': (function () {
@@ -74,7 +75,7 @@
 
       /**
        * @name id
-       * @return {String}
+       * @return {string}
        * @property
        */
       'id': (function () {
@@ -160,7 +161,7 @@
        * @property
        */
       'transform': (function () {
-        var transform = doodle_Matrix();
+        var transform = doodle_Matrix(1, 0, 0, 1, 0, 0);
         return {
           enumerable: true,
           configurable: false,
@@ -176,7 +177,7 @@
 
       /**
        * @name visible
-       * @return {Boolean}
+       * @return {boolean}
        * @property
        */
       'visible': (function () {
@@ -196,7 +197,7 @@
 
       /**
        * @name alpha
-       * @return {Number}
+       * @return {number}
        * @property
        */
       'alpha': (function () {
@@ -218,7 +219,7 @@
        * The bounding box of a Node is a union of all it's child Sprite's bounds.
        * @name getBounds
        * @param {Node} targetCoordSpace
-       * @return {Rectangle|Null}
+       * @return {Rectangle|null}
        */
       'getBounds': {
         enumerable: true,
@@ -243,7 +244,7 @@
         writable: true,
         configurable: false,
         value: (function () {
-          var rect = doodle_Rectangle(); //recycle
+          var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
           
           return function (targetCoordSpace) {
             /*DEBUG*/
@@ -286,7 +287,7 @@
 
     /**
      * @name x
-     * @return {Number}
+     * @return {number}
      * @property
      */
     'x': {
@@ -305,7 +306,7 @@
 
     /**
      * @name y
-     * @return {Number}
+     * @return {number}
      * @property
      */
     'y': {
@@ -344,8 +345,8 @@
 
     /**
      * @name rotate
-     * @param {Number} deg
-     * @return {Number}
+     * @param {number} deg
+     * @return {number}
      */
     'rotate': {
       enumerable: true,
@@ -360,7 +361,7 @@
 
     /**
      * @name rotation
-     * @return {Number}
+     * @return {number}
      * @property
      */
     'rotation': {
@@ -379,8 +380,8 @@
 
     /**
      * @name scaleX
-     * @param {Number} sx
-     * @return {Number}
+     * @param {number} sx
+     * @return {number}
      */
     'scaleX': {
       enumerable: true,
@@ -398,8 +399,8 @@
 
     /**
      * @name scaleY
-     * @param {Number} sy
-     * @return {Number}
+     * @param {number} sy
+     * @return {number}
      */
     'scaleY': {
       enumerable: true,
@@ -448,7 +449,7 @@
       enumerable: false,
       configurable: false,
       get: (function () {
-        var transform = doodle_Matrix();
+        var transform = doodle_Matrix(1, 0, 0, 1, 0, 0);
         return function () {
           var $transform = transform,
               node = this.parent;
@@ -466,7 +467,7 @@
     /**
      * Returns the string representation of the specified object.
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -479,7 +480,7 @@
     /**
      * @name addChildAt
      * @param {Node} node
-     * @param {Number} index
+     * @param {number} index
      * @return {Node}
      * @throws {TypeError}
      */
@@ -549,7 +550,7 @@
 
     /**
      * @name removeChildAt
-     * @param {Number} index
+     * @param {number} index
      * @throws {TypeError}
      */
     'removeChildAt': {
@@ -607,7 +608,7 @@
 
     /**
      * @name removeChildById
-     * @param {String} id
+     * @param {string} id
      * @throws {TypeError}
      */
     'removeChildById': {
@@ -640,7 +641,7 @@
 
     /**
      * @name getChildById
-     * @param {String} id
+     * @param {string} id
      * @return {Node|null}
      * @throws {TypeError}
      */
@@ -669,7 +670,7 @@
      * This affects the layering of child objects.
      * @name setChildIndex
      * @param {Node} child
-     * @param {Number} index
+     * @param {number} index
      * @throws {TypeError}
      */
     'setChildIndex': {
@@ -700,8 +701,8 @@
     /**
      * Swaps the child nodes at the two specified index positions in the child list.
      * @name swapChildrenAt
-     * @param {Number} index1
-     * @param {Number} index2
+     * @param {number} index1
+     * @param {number} index2
      * @throws {TypeError}
      */
     'swapChildrenAt': {
@@ -767,7 +768,7 @@
     /**
      * Swap positions with another node at a given index in the parents child list.
      * @name swapDepthAt
-     * @param {Number} index
+     * @param {number} index
      * @throws {TypeError}
      */
     'swapDepthAt': {
@@ -788,7 +789,7 @@
      * Determine if node is among it's children, grandchildren, etc.
      * @name contains
      * @param {Node} node
-     * @return {Boolean}
+     * @return {boolean}
      * @throws {TypeError}
      */
     'contains': {
@@ -829,7 +830,7 @@
     },
 
     /**
-		 * Same as localToGlobal, but modifies a point in place.
+     * Same as localToGlobal, but modifies a point in place.
      * @name __localToGlobal
      * @param {Point} point
      * @return {Point}
@@ -875,7 +876,7 @@
     },
 
     /**
-		 * Same as globalToLocal, but modifies a point in place.
+     * Same as globalToLocal, but modifies a point in place.
      * @name __globalToLocal
      * @param {Point} point
      * @return {Point}
@@ -908,7 +909,7 @@
    * Test if an object is an node.
    * @name isNode
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isNode = doodle.Node.isNode = function (obj) {
@@ -922,7 +923,7 @@
    * Check if object inherits from node.
    * @name inheritsNode
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   inheritsNode = doodle.Node.inheritsNode = function (obj) {
@@ -943,9 +944,9 @@
   /**
    * @name check_node_type
    * @param {Node} node
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

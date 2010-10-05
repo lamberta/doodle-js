@@ -37,29 +37,29 @@
 <li>utils.types</li></ul>
 </nav>
 <div class="main">
-<h1>doodle.Matrix</h1>
+<h1>doodle.geom.Matrix</h1>
 
 <section>
 <h2>Description:</h2>
 <dl>
-<dt><dfn>Matrix</dfn> (a:Number, b:Number, c:Number, d:Number, tx:Number, ty:Number) :Matrix</dt>
+<dt><dfn>Matrix</dfn> (a:number, b:number, c:number, d:number, tx:number, ty:number) :Matrix</dt>
 <dd>
 <p></p>
 <details>
 
-<h3>Inheritance</h3>
+<h3>Inherits</h3>
 <ol>
 <li>Object</li>
 </ol>
 
 <h3>Parameters</h3>
 <ol>
-<li>a:Number &#8211; </li>
-<li>b:Number &#8211; </li>
-<li>c:Number &#8211; </li>
-<li>d:Number &#8211; </li>
-<li>tx:Number &#8211; </li>
-<li>ty:Number &#8211; </li>
+<li>a:number &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>b:number &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>c:number &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>d:number &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>tx:number &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>ty:number &#8211; <span class='param_annotation'>[optional]</span> </li>
 </ol>
 
 <h3>Returns</h3>
@@ -81,7 +81,7 @@
 <section>
 <h2>Properties</h2>
 <dl>
-<dt><dfn>rotation</dfn> :Number</dt>
+<dt><dfn>rotation</dfn> :number</dt>
 <dd>
 <p>Return the angle of rotation in radians.</p>
 <details>
@@ -90,7 +90,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; radians</li>
+<li>number &#8211; radians</li>
 </ul>
 
 <h3>Throws</h3>
@@ -101,7 +101,7 @@
 
 </details>
 </dd>
-<dt><dfn>tx</dfn> :Number</dt>
+<dt><dfn>tx</dfn> :number</dt>
 <dd>
 <p>The distance by which to translate each point along the x axis.</p>
 <details>
@@ -110,7 +110,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -121,7 +121,7 @@
 
 </details>
 </dd>
-<dt><dfn>ty</dfn> :Number</dt>
+<dt><dfn>ty</dfn> :number</dt>
 <dd>
 <p>The distance by which to translate each point along the y axis.</p>
 <details>
@@ -130,7 +130,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -141,7 +141,7 @@
 
 </details>
 </dd>
-<dt><dfn>c</dfn> :Number</dt>
+<dt><dfn>c</dfn> :number</dt>
 <dd>
 <p>The value that affects the positioning of pixels along the x axis when rotating or skewing an image.</p>
 <details>
@@ -150,7 +150,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -161,7 +161,7 @@
 
 </details>
 </dd>
-<dt><dfn>a</dfn> :Number</dt>
+<dt><dfn>a</dfn> :number</dt>
 <dd>
 <p>The value that affects the positioning of pixels along the x axis when scaling or rotating an image.</p>
 <details>
@@ -170,7 +170,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -181,7 +181,7 @@
 
 </details>
 </dd>
-<dt><dfn>b</dfn> :Number</dt>
+<dt><dfn>b</dfn> :number</dt>
 <dd>
 <p>The value that affects the positioning of pixels along the y axis when rotating or skewing an image.</p>
 <details>
@@ -190,7 +190,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -201,7 +201,7 @@
 
 </details>
 </dd>
-<dt><dfn>d</dfn> :Number</dt>
+<dt><dfn>d</dfn> :number</dt>
 <dd>
 <p>The value that affects the positioning of pixels along the y axis when scaling or rotating an image.</p>
 <details>
@@ -210,7 +210,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -232,7 +232,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>m:Matrix &#8211; </li>
+<li>m:Matrix &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -248,14 +248,14 @@
 
 </details>
 </dd>
-<dt><dfn>deltaRotate</dfn> (angle:Number) :Matrix</dt>
+<dt><dfn>deltaRotate</dfn> (angle:number) :Matrix</dt>
 <dd>
 <p>Applies a rotation transformation to the Matrix object, ignore translation.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>angle:Number &#8211; The rotation angle in radians.</li>
+<li>angle:number &#8211;  The rotation angle in radians.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -271,14 +271,14 @@
 
 </details>
 </dd>
-<dt><dfn>rotate</dfn> (angle:Number) :Matrix</dt>
+<dt><dfn>rotate</dfn> (angle:number) :Matrix</dt>
 <dd>
 <p>Applies a rotation transformation to the Matrix object.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>angle:Number &#8211; The rotation angle in radians.</li>
+<li>angle:number &#8211;  The rotation angle in radians.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -294,15 +294,15 @@
 
 </details>
 </dd>
-<dt><dfn>deltaScale</dfn> (sx:Number, sy:Number) :Matrix</dt>
+<dt><dfn>deltaScale</dfn> (sx:number, sy:number) :Matrix</dt>
 <dd>
 <p>Applies a scaling transformation to the matrix, ignores translation.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>sx:Number &#8211; A multiplier used to scale the object along the x axis.</li>
-<li>sy:Number &#8211; A multiplier used to scale the object along the y axis.</li>
+<li>sx:number &#8211;  A multiplier used to scale the object along the x axis.</li>
+<li>sy:number &#8211;  A multiplier used to scale the object along the y axis.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -318,15 +318,15 @@
 
 </details>
 </dd>
-<dt><dfn>scale</dfn> (sx:Number, sy:Number) :Matrix</dt>
+<dt><dfn>scale</dfn> (sx:number, sy:number) :Matrix</dt>
 <dd>
 <p>Applies a scaling transformation to the matrix.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>sx:Number &#8211; A multiplier used to scale the object along the x axis.</li>
-<li>sy:Number &#8211; A multiplier used to scale the object along the y axis.</li>
+<li>sx:number &#8211;  A multiplier used to scale the object along the x axis.</li>
+<li>sy:number &#8211;  A multiplier used to scale the object along the y axis.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -349,7 +349,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>pt:Point &#8211; </li>
+<li>pt:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -372,7 +372,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>m:Matrix &#8211; The matrix to be concatenated to the source matrix.</li>
+<li>m:Matrix &#8211;  The matrix to be concatenated to the source matrix.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -439,15 +439,15 @@
 
 </details>
 </dd>
-<dt><dfn>skew</dfn> (skewX:Number, skewY:Number) :Matrix</dt>
+<dt><dfn>skew</dfn> (skewX:number, skewY:number) :Matrix</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>skewX:Number &#8211; </li>
-<li>skewY:Number &#8211; </li>
+<li>skewX:number &#8211;  </li>
+<li>skewY:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -514,7 +514,7 @@
 
 </details>
 </dd>
-<dt><dfn>toString</dfn> () :String</dt>
+<dt><dfn>toString</dfn> () :string</dt>
 <dd>
 <p>Returns a text value listing the properties of the Matrix object.</p>
 <details>
@@ -523,7 +523,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 
@@ -538,7 +538,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>pt:Point &#8211; </li>
+<li>pt:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -571,19 +571,19 @@
 
 </details>
 </dd>
-<dt><dfn>compose</dfn> (a:Number, b:Number, c:Number, d:Number, tx:Number, ty:Number) :Matrix</dt>
+<dt><dfn>compose</dfn> (a:number, b:number, c:number, d:number, tx:number, ty:number) :Matrix</dt>
 <dd>
 <p>Set values of this matrix with the specified parameters.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>a:Number &#8211; The value that affects the positioning of pixels along the x axis when scaling or rotating an image.</li>
-<li>b:Number &#8211; The value that affects the positioning of pixels along the y axis when rotating or skewing an image.</li>
-<li>c:Number &#8211; The value that affects the positioning of pixels along the x axis when rotating or skewing an image.</li>
-<li>d:Number &#8211; The value that affects the positioning of pixels along the y axis when scaling or rotating an image.</li>
-<li>tx:Number &#8211; The distance by which to translate each point along the x axis.</li>
-<li>ty:Number &#8211; The distance by which to translate each point along the y axis.</li>
+<li>a:number &#8211;  The value that affects the positioning of pixels along the x axis when scaling or rotating an image.</li>
+<li>b:number &#8211;  The value that affects the positioning of pixels along the y axis when rotating or skewing an image.</li>
+<li>c:number &#8211;  The value that affects the positioning of pixels along the x axis when rotating or skewing an image.</li>
+<li>d:number &#8211;  The value that affects the positioning of pixels along the y axis when scaling or rotating an image.</li>
+<li>tx:number &#8211;  The distance by which to translate each point along the x axis.</li>
+<li>ty:number &#8211;  The distance by which to translate each point along the y axis.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -599,15 +599,15 @@
 
 </details>
 </dd>
-<dt><dfn>deltaSkew</dfn> (skewX:Number, skewY:Number) :Matrix</dt>
+<dt><dfn>deltaSkew</dfn> (skewX:number, skewY:number) :Matrix</dt>
 <dd>
 <p>Skew matrix and ignore translation.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>skewX:Number &#8211; </li>
-<li>skewY:Number &#8211; </li>
+<li>skewX:number &#8211;  </li>
+<li>skewY:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -623,19 +623,19 @@
 
 </details>
 </dd>
-<dt><dfn>equals</dfn> (m:Matrix) :Boolean</dt>
+<dt><dfn>equals</dfn> (m:Matrix) :boolean</dt>
 <dd>
 <p>Test if matrix is equal to this one.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>m:Matrix &#8211; </li>
+<li>m:Matrix &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -646,15 +646,15 @@
 
 </details>
 </dd>
-<dt><dfn>translate</dfn> (dx:Number, dy:Number) :Matrix</dt>
+<dt><dfn>translate</dfn> (dx:number, dy:number) :Matrix</dt>
 <dd>
 <p>Translates the matrix along the x and y axes.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>dx:Number &#8211; The amount of movement along the x axis to the right, in pixels.</li>
-<li>dy:Number &#8211; The amount of movement down along the y axis, in pixels.</li>
+<li>dx:number &#8211;  The amount of movement along the x axis to the right, in pixels.</li>
+<li>dy:number &#8211;  The amount of movement down along the y axis, in pixels.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -694,19 +694,19 @@
 <section>
 <h2>Class Functions</h2>
 <dl>
-<dt><dfn>isMatrix</dfn> (m:Object) :Boolean</dt>
+<dt><dfn>isMatrix</dfn> (m:Object) :boolean</dt>
 <dd>
 <p>Check if a given object contains a numeric matrix properties. Does not check if a matrix is actually a doodle.geom.matrix.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>m:Object &#8211; </li>
+<li>m:Object &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 

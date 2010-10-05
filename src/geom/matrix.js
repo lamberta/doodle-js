@@ -21,15 +21,16 @@
       tan = Math.tan;
   
   /**
-   * @class Matrix
+   * @class doodle.geom.Matrix
    * @extends Object
-   * @param {Number} a
-   * @param {Number} b
-   * @param {Number} c
-   * @param {Number} d
-   * @param {Number} tx
-   * @param {Number} ty
-   * @return {Matrix}
+   * @constructor
+   * @param {number=} a
+   * @param {number=} b
+   * @param {number=} c
+   * @param {number=} d
+   * @param {number=} tx
+   * @param {number=} ty
+   * @return {doodle.geom.Matrix}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -55,7 +56,7 @@
          * The value that affects the positioning of pixels along the x axis
          * when scaling or rotating an image.
          * @name a
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -75,7 +76,7 @@
          * The value that affects the positioning of pixels along the y axis
          * when rotating or skewing an image.
          * @name b
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -95,7 +96,7 @@
          * The value that affects the positioning of pixels along the x axis
          * when rotating or skewing an image.
          * @name c
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -115,7 +116,7 @@
          * The value that affects the positioning of pixels along the y axis
          * when scaling or rotating an image.
          * @name d
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -134,7 +135,7 @@
         /**
          * The distance by which to translate each point along the x axis.
          * @name tx
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -153,7 +154,7 @@
         /**
          * The distance by which to translate each point along the y axis.
          * @name ty
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -238,12 +239,12 @@
     /**
      * Set values of this matrix with the specified parameters.
      * @name compose
-     * @param {Number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
-     * @param {Number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
-     * @param {Number} c The value that affects the positioning of pixels along the x axis when rotating or skewing an image.
-     * @param {Number} d The value that affects the positioning of pixels along the y axis when scaling or rotating an image.
-     * @param {Number} tx The distance by which to translate each point along the x axis.
-     * @param {Number} ty The distance by which to translate each point along the y axis.
+     * @param {number} a The value that affects the positioning of pixels along the x axis when scaling or rotating an image.
+     * @param {number} b The value that affects the positioning of pixels along the y axis when rotating or skewing an image.
+     * @param {number} c The value that affects the positioning of pixels along the x axis when rotating or skewing an image.
+     * @param {number} d The value that affects the positioning of pixels along the y axis when scaling or rotating an image.
+     * @param {number} tx The distance by which to translate each point along the x axis.
+     * @param {number} ty The distance by which to translate each point along the y axis.
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -287,7 +288,7 @@
     /**
      * Returns a text value listing the properties of the Matrix object.
      * @name toString
-     * @return {String}
+     * @return {string}
      */
     'toString': {
       enumerable: true,
@@ -303,7 +304,7 @@
      * Test if matrix is equal to this one.
      * @name equals
      * @param {Matrix} m
-     * @return {Boolean}
+     * @return {boolean}
      * @throws {TypeError}
      */
     'equals': {
@@ -390,7 +391,7 @@
     /**
      * Applies a rotation transformation to the Matrix object.
      * @name rotate
-     * @param {Number} angle The rotation angle in radians.
+     * @param {number} angle The rotation angle in radians.
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -419,7 +420,7 @@
     /**
      * Applies a rotation transformation to the Matrix object, ignore translation.
      * @name deltaRotate
-     * @param {Number} angle The rotation angle in radians.
+     * @param {number} angle The rotation angle in radians.
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -443,7 +444,7 @@
     /**
      * Return the angle of rotation in radians.
      * @name rotation
-     * @return {Number} radians
+     * @return {number} radians
      * @throws {TypeError}
      * @property
      */
@@ -466,8 +467,8 @@
     /**
      * Applies a scaling transformation to the matrix.
      * @name scale
-     * @param {Number} sx A multiplier used to scale the object along the x axis.
-     * @param {Number} sy A multiplier used to scale the object along the y axis.
+     * @param {number} sx A multiplier used to scale the object along the x axis.
+     * @param {number} sy A multiplier used to scale the object along the y axis.
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -495,8 +496,8 @@
     /**
      * Applies a scaling transformation to the matrix, ignores translation.
      * @name deltaScale
-     * @param {Number} sx A multiplier used to scale the object along the x axis.
-     * @param {Number} sy A multiplier used to scale the object along the y axis.
+     * @param {number} sx A multiplier used to scale the object along the x axis.
+     * @param {number} sy A multiplier used to scale the object along the y axis.
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -521,8 +522,8 @@
     /**
      * Translates the matrix along the x and y axes.
      * @name translate
-     * @param {Number} dx The amount of movement along the x axis to the right, in pixels.
-     * @param {Number} dy The amount of movement down along the y axis, in pixels.
+     * @param {number} dx The amount of movement along the x axis to the right, in pixels.
+     * @param {number} dy The amount of movement down along the y axis, in pixels.
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -543,8 +544,8 @@
 
     /**
      * @name skew
-     * @param {Number} skewX
-     * @param {Number} skewY
+     * @param {number} skewX
+     * @param {number} skewY
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -574,8 +575,8 @@
     /**
      * Skew matrix and ignore translation.
      * @name deltaSkew
-     * @param {Number} skewX
-     * @param {Number} skewY
+     * @param {number} skewX
+     * @param {number} skewY
      * @return {Matrix}
      * @throws {TypeError}
      */
@@ -847,7 +848,7 @@
    * Does not check if a matrix is actually a doodle.geom.matrix.
    * @name isMatrix
    * @param {Object} m
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isMatrix = doodle.geom.Matrix.isMatrix = function (m) {
@@ -861,9 +862,9 @@
   /**
    * @name check_matrix_type
    * @param {Object} obj
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

@@ -15,27 +15,28 @@
       isEvent = doodle.Event.isEvent;
   
   /**
-   * @class TouchEvent
+   * @class doodle.TouchEvent
    * @extends UIEvent
-   * @param {String} type
-   * @param {Boolean} bubbles
-   * @param {Boolean} cancelable
-   * @param {HTMLElement} view
-   * @param {Number} detail
-   * @param {Number} screenX
-   * @param {Number} screenY
-   * @param {Number} clientX
-   * @param {Number} clientY
-   * @param {Boolean} ctrlKey
-   * @param {Boolean} altKey
-   * @param {Boolean} shiftKey
-   * @param {Boolean} metaKey
-   * @param {Array} touches ?
-   * @param {Array} targetTouches ?
-   * @param {Array} changedTouches ?
-   * @param {Number} scale
-   * @param {Number} rotation
-   * @return {TouchEvent}
+   * @constructor
+   * @param {string=} type
+   * @param {boolean=} bubbles
+   * @param {boolean=} cancelable
+   * @param {HTMLElement=} view
+   * @param {number=} detail
+   * @param {number=} screenX
+   * @param {number=} screenY
+   * @param {number=} clientX
+   * @param {number=} clientY
+   * @param {boolean=} ctrlKey
+   * @param {boolean=} altKey
+   * @param {boolean=} shiftKey
+   * @param {boolean=} metaKey
+   * @param {Array=} touches ?
+   * @param {Array=} targetTouches ?
+   * @param {Array=} changedTouches ?
+   * @param {number=} scale
+   * @param {number=} rotation
+   * @return {doodle.TouchEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -134,7 +135,7 @@
       return {
         /**
          * @name screenX
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'screenX': {
@@ -145,7 +146,7 @@
 
         /**
          * @name screenY
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'screenY': {
@@ -156,7 +157,7 @@
 
         /**
          * @name clientX
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'clientX': {
@@ -167,7 +168,7 @@
 
         /**
          * @name clientY
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'clientY': {
@@ -178,7 +179,7 @@
 
         /**
          * @name ctrlKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'ctrlKey': {
@@ -189,7 +190,7 @@
 
         /**
          * @name altKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'altKey': {
@@ -200,7 +201,7 @@
 
         /**
          * @name shiftKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'shiftKey': {
@@ -211,7 +212,7 @@
 
         /**
          * @name metaKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'metaKey': {
@@ -255,7 +256,7 @@
 
         /**
          * @name scale
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'scale': {
@@ -266,7 +267,7 @@
 
         /**
          * @name rotation
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'rotation': {
@@ -277,24 +278,24 @@
 
         /**
          * @name initTouchEvent
-         * @param {String} typeArg
-         * @param {Boolean} canBubbleArg
-         * @param {Boolean} cancelableArg
+         * @param {string} typeArg
+         * @param {boolean} canBubbleArg
+         * @param {boolean} cancelableArg
          * @param {HTMLElement} viewArg
-         * @param {Number} detailArg
-         * @param {Number} screenXArg
-         * @param {Number} screenYArg
-         * @param {Number} clientXArg
-         * @param {Number} clientYArg
-         * @param {Boolean} ctrlKeyArg
-         * @param {Boolean} altKeyArg
-         * @param {Boolean} shiftKeyArg
-         * @param {Boolean} metaKeyArg
+         * @param {number} detailArg
+         * @param {number} screenXArg
+         * @param {number} screenYArg
+         * @param {number} clientXArg
+         * @param {number} clientYArg
+         * @param {boolean} ctrlKeyArg
+         * @param {boolean} altKeyArg
+         * @param {boolean} shiftKeyArg
+         * @param {boolean} metaKeyArg
          * @param {Array} touchesArg
          * @param {Array} targetTouchesArg
          * @param {Array} changedTouchesArg
-         * @param {Number} scaleArg
-         * @param {Number} rotationArg
+         * @param {number} scaleArg
+         * @param {number} rotationArg
          * @return {TouchEvent}
          * @throws {TypeError}
          */
@@ -360,8 +361,8 @@
         /**
          * Queries the state of a modifier using a key identifier.
          * @name getModifierState
-         * @param {String} key A modifier key identifier
-         * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
+         * @param {string} key A modifier key identifier
+         * @return {boolean} True if it is a modifier key and the modifier is activated, false otherwise.
          * @throws {TypeError}
          */
         'getModifierState': {
@@ -390,7 +391,7 @@
          * @name __copyTouchEventProperties
          * @param {TouchEvent} evt
          * @param {Node} resetTarget
-         * @param {String} resetType
+         * @param {string} resetType
          * @return {TouchEvent}
          * @throws {TypeError}
          * @private
@@ -449,7 +450,7 @@
   touchevent_static_properties = {
     /**
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -468,7 +469,7 @@
    * Test if an object is a TouchEvent.
    * @name isTouchEvent
    * @param {TouchEvent} event
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isTouchEvent = doodle.TouchEvent.isTouchEvent = function (event) {
@@ -484,9 +485,9 @@
   /**
    * @name check_touchevent_type
    * @param {TouchEvent} event
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

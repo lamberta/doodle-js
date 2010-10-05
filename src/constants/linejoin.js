@@ -1,5 +1,5 @@
 /**
- * @class LineJoin
+ * @class doodle.LineJoin
  * @static
  */
 Object.defineProperty(doodle, 'LineJoin', {
@@ -9,7 +9,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   value: Object.create(null, {
     /**
      * @name MITER
-     * @return {String} [read-only] Default
+     * @return {string} [read-only] Default
      * @property
      * @constant
      * @static
@@ -23,7 +23,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
     /**
      * @name ROUND
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static
@@ -37,7 +37,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
     /**
      * @name BEVEL
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static

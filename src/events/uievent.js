@@ -15,14 +15,15 @@
       isEvent = doodle.Event.isEvent;
   
   /**
-   * @class UIEvent
+   * @class doodle.UIEvent
    * @extends Event
-   * @param {String} type
-   * @param {Boolean} bubbles
-   * @param {Boolean} cancelable
-   * @param {HTMLElement} view
-   * @param {Number} detail
-   * @return {UIEvent}
+   * @constructor
+   * @param {string=} type
+   * @param {boolean=} bubbles
+   * @param {boolean=} cancelable
+   * @param {HTMLElement=} view
+   * @param {number=} detail
+   * @return {doodle.UIEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -118,7 +119,7 @@
 
         /**
          * @name detail
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'detail': {
@@ -129,7 +130,7 @@
 
         /**
          * @name which
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'which': {
@@ -140,7 +141,7 @@
 
         /**
          * @name charCode
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'charCode': {
@@ -151,7 +152,7 @@
 
         /**
          * @name keyCode
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'keyCode': {
@@ -162,7 +163,7 @@
 
         /**
          * @name layerX
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'layerX': {
@@ -173,7 +174,7 @@
 
         /**
          * @name layerY
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'layerY': {
@@ -184,7 +185,7 @@
 
         /**
          * @name pageX
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'pageX': {
@@ -195,7 +196,7 @@
 
         /**
          * @name pageY
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'pageY': {
@@ -206,11 +207,11 @@
 
         /**
          * @name initUIEvent
-         * @param {String} typeArg
-         * @param {Boolean} canBubbleArg
-         * @param {Boolean} cancelableArg
+         * @param {string} typeArg
+         * @param {boolean} canBubbleArg
+         * @param {boolean} cancelableArg
          * @param {HTMLElement} viewArg
-         * @param {Number} detailArg
+         * @param {number} detailArg
          * @return {UIEvent}
          * @throws {TypeError}
          */
@@ -241,7 +242,7 @@
          * @name __copyUIEventProperties
          * @param {UIEvent} evt
          * @param {Node=} resetTarget
-         * @param {String=} resetType
+         * @param {string=} resetType
          * @return {Event}
          * @throws {TypeError}
          * @private
@@ -297,7 +298,7 @@
   uievent_static_properties = {
     /**
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -317,7 +318,7 @@
    * Returns true on Doodle events as well as DOM events.
    * @name isUIEvent
    * @param {Event} event
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isUIEvent = doodle.UIEvent.isUIEvent = function (event) {
@@ -338,9 +339,9 @@
   /**
    * @name check_uievent_type
    * @param {UIEvent} event
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

@@ -16,17 +16,18 @@
       isEvent = doodle.Event.isEvent;
   
   /**
-   * @class KeyboardEvent
+   * @class doodle.KeyboardEvent
    * @extends UIEvent
-   * @param {String} type
-   * @param {Boolean} bubbles
-   * @param {Boolean} cancelable
-   * @param {HTMLElement} view
-   * @param {String} keyIdentifier
-   * @param {Number} keyLocation
-   * @param {String} modifiersList White-space separated list of key modifiers.
-   * @param {Boolean} repeat
-   * @return {KeyboardEvent}
+   * @constructor
+   * @param {string=} type
+   * @param {boolean=} bubbles
+   * @param {boolean=} cancelable
+   * @param {HTMLElement=} view
+   * @param {string=} keyIdentifier
+   * @param {number=} keyLocation
+   * @param {string=} modifiersList White-space separated list of key modifiers.
+   * @param {boolean=} repeat
+   * @return {doodle.KeyboardEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -111,7 +112,7 @@
       return {
         /**
          * @name keyIdentifier
-         * @return {String} [read-only]
+         * @return {string} [read-only]
          * @property
          */
         'keyIdentifier': {
@@ -122,7 +123,7 @@
 
         /**
          * @name keyLocation
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'keyLocation': {
@@ -133,7 +134,7 @@
 
         /**
          * @name repeat
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'repeat': {
@@ -144,7 +145,7 @@
 
         /**
          * @name ctrlKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'ctrlKey': {
@@ -155,7 +156,7 @@
 
         /**
          * @name altKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'altKey': {
@@ -166,7 +167,7 @@
 
         /**
          * @name shiftKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'shiftKey': {
@@ -177,7 +178,7 @@
 
         /**
          * @name metaKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'metaKey': {
@@ -188,7 +189,7 @@
 
         /**
          * @name altGraphKey
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'altGraphKey': {
@@ -199,14 +200,14 @@
         
         /**
          * @name initKeyboardEvent
-         * @param {String} typeArg
-         * @param {Boolean} canBubbleArg
-         * @param {Boolean} cancelableArg
+         * @param {string} typeArg
+         * @param {boolean} canBubbleArg
+         * @param {boolean} cancelableArg
          * @param {HTMLElement} viewArg
-         * @param {String} keyIdentifierArg
-         * @param {Number} keyLocationArg
-         * @param {String} modifiersListArg
-         * @param {Boolean} repeatArg
+         * @param {string} keyIdentifierArg
+         * @param {number} keyLocationArg
+         * @param {string} modifiersListArg
+         * @param {boolean} repeatArg
          * @return {Event}
          * @throws {TypeError}
          */
@@ -260,8 +261,8 @@
         /**
          * Queries the state of a modifier using a key identifier.
          * @name getModifierState
-         * @param {String} key A modifier key identifier
-         * @return {Boolean} True if it is a modifier key and the modifier is activated, false otherwise.
+         * @param {string} key A modifier key identifier
+         * @return {boolean} True if it is a modifier key and the modifier is activated, false otherwise.
          * @throws {TypeError}
          */
         'getModifierState': {
@@ -290,7 +291,7 @@
          * @name __copyKeyboardEventProperties
          * @param {KeyboardEvent} evt
          * @param {Node} resetTarget
-         * @param {String} resetType
+         * @param {string} resetType
          * @return {KeyboardEvent}
          * @throws {TypeError}
          * @private
@@ -346,7 +347,7 @@
   keyboardevent_static_properties = {
     /**
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -365,7 +366,7 @@
    * Test if an object is a keyboard event.
    * @name isKeyboardEvent
    * @param {Event} event
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isKeyboardEvent = doodle.KeyboardEvent.isKeyboardEvent = function (event) {
@@ -381,9 +382,9 @@
   /**
    * @name check_keyboardevent_type
    * @param {Event} event
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

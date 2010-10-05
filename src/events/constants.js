@@ -5,7 +5,7 @@
 Object.defineProperties(doodle.Event, {
   /**
    * @name CAPTURING_PHASE
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -20,7 +20,7 @@ Object.defineProperties(doodle.Event, {
 
   /**
    * @name AT_TARGET
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -35,7 +35,7 @@ Object.defineProperties(doodle.Event, {
 
   /**
    * @name BUBBLING_PHASE
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -51,7 +51,7 @@ Object.defineProperties(doodle.Event, {
   /**
    * Dispatched when object is added to display path.
    * @name ADDED
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -67,7 +67,7 @@ Object.defineProperties(doodle.Event, {
   /**
    * Dispatched when object is removed from display path.
    * @name REMOVED
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -82,7 +82,7 @@ Object.defineProperties(doodle.Event, {
 
   /**
    * @name ENTER_FRAME
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -98,7 +98,7 @@ Object.defineProperties(doodle.Event, {
   /**
    * Dispatched when element is loaded.
    * @name LOAD
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -113,7 +113,7 @@ Object.defineProperties(doodle.Event, {
 
   /**
    * @name CHANGE
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf Event
    * @property
    * @constant
@@ -134,7 +134,7 @@ Object.defineProperties(doodle.Event, {
 Object.defineProperties(doodle.UIEvent, {
   /**
    * @name FOCUS_IN
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf UIEvent
    * @property
    * @constant
@@ -157,7 +157,7 @@ Object.defineProperties(doodle.MouseEvent, {
   /**
    * To test for left/middle/right button check value for event.which (0,1,2).
    * @name CLICK
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -172,7 +172,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name DOUBLE_CLICK
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -187,7 +187,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name CONTEXT_MENU
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -202,7 +202,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_DOWN
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -217,7 +217,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_UP
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -232,7 +232,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_WHEEL
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -247,7 +247,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_MOVE
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -262,7 +262,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_OUT
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -277,7 +277,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_OVER
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -292,7 +292,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_ENTER
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -307,7 +307,7 @@ Object.defineProperties(doodle.MouseEvent, {
 
   /**
    * @name MOUSE_LEAVE
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf MouseEvent
    * @property
    * @constant
@@ -330,7 +330,7 @@ Object.defineProperties(doodle.MouseEvent, {
 Object.defineProperties(doodle.TouchEvent, {
   /**
    * @name TOUCH_START
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf TouchEvent
    * @property
    * @constant
@@ -345,7 +345,7 @@ Object.defineProperties(doodle.TouchEvent, {
 
   /**
    * @name TOUCH_MOVE
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf TouchEvent
    * @property
    * @constant
@@ -360,7 +360,7 @@ Object.defineProperties(doodle.TouchEvent, {
 
   /**
    * @name TOUCH_END
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf TouchEvent
    * @property
    * @constant
@@ -375,7 +375,7 @@ Object.defineProperties(doodle.TouchEvent, {
 
   /**
    * @name TOUCH_CANCEL
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf TouchEvent
    * @property
    * @constant
@@ -396,7 +396,7 @@ Object.defineProperties(doodle.TouchEvent, {
 Object.defineProperties(doodle.KeyboardEvent, {
   /**
    * @name KEY_PRESS
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -411,7 +411,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_UP
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -426,7 +426,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_DOWN
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -441,7 +441,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_LOCATION_STANDARD
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -456,7 +456,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_LOCATION_LEFT
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -471,7 +471,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_LOCATION_RIGHT
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -486,7 +486,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_LOCATION_NUMPAD
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -501,7 +501,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_LOCATION_MOBILE
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -516,7 +516,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
   /**
    * @name KEY_LOCATION_JOYSTICK
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf KeyboardEvent
    * @property
    * @constant
@@ -536,7 +536,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 Object.defineProperties(doodle.TextEvent, {
   /**
    * @name TEXT_INPUT
-   * @return {String} [read-only]
+   * @return {string} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -551,7 +551,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_UNKNOWN
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -566,7 +566,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_KEYBOARD
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -581,7 +581,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_PASTE
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -596,7 +596,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_DROP
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -611,7 +611,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_IME
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -626,7 +626,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_OPTION
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -641,7 +641,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_HANDWRITING
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -656,7 +656,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_VOICE
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -671,7 +671,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /**
    * @name INPUT_METHOD_MULTIMODAL
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant
@@ -686,7 +686,7 @@ Object.defineProperties(doodle.TextEvent, {
   
   /**
    * @name INPUT_METHOD_SCRIPT
-   * @return {Number} [read-only]
+   * @return {number} [read-only]
    * @memberOf TextEvent
    * @property
    * @constant

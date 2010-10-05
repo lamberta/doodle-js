@@ -37,25 +37,25 @@
 <li>utils.types</li></ul>
 </nav>
 <div class="main">
-<h1>doodle.Point</h1>
+<h1>doodle.geom.Point</h1>
 
 <section>
 <h2>Description:</h2>
 <dl>
-<dt><dfn>Point</dfn> (x:Number, y:Number) :Point</dt>
+<dt><dfn>Point</dfn> (x:number, y:number) :Point</dt>
 <dd>
 <p></p>
 <details>
 
-<h3>Inheritance</h3>
+<h3>Inherits</h3>
 <ol>
 <li>Object</li>
 </ol>
 
 <h3>Parameters</h3>
 <ol>
-<li>x:Number &#8211; </li>
-<li>y:Number &#8211; </li>
+<li>x:number &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>y:number &#8211; <span class='param_annotation'>[optional]</span> </li>
 </ol>
 
 <h3>Returns</h3>
@@ -77,7 +77,7 @@
 <section>
 <h2>Properties</h2>
 <dl>
-<dt><dfn>x</dfn> :Number</dt>
+<dt><dfn>x</dfn> :number</dt>
 <dd>
 <p>The horizontal coordinate of the point.</p>
 <details>
@@ -86,7 +86,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -97,7 +97,7 @@
 
 </details>
 </dd>
-<dt><dfn>length</dfn> :Number</dt>
+<dt><dfn>length</dfn> :number</dt>
 <dd>
 <p>The length of the line segment from (0,0) to this point.</p>
 <details>
@@ -106,7 +106,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -114,7 +114,7 @@
 
 </details>
 </dd>
-<dt><dfn>y</dfn> :Number</dt>
+<dt><dfn>y</dfn> :number</dt>
 <dd>
 <p>The vertical coordinate of the point.</p>
 <details>
@@ -123,7 +123,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -145,7 +145,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>pt:Point &#8211; The point to be added.</li>
+<li>pt:Point &#8211;  The point to be added.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -161,15 +161,15 @@
 
 </details>
 </dd>
-<dt><dfn>polar</dfn> (len:Number, angle:Number) :Point</dt>
+<dt><dfn>polar</dfn> (len:number, angle:number) :Point</dt>
 <dd>
 <p>Converts a pair of polar coordinates to a Cartesian point coordinate.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>len:Number &#8211; The length coordinate of the polar pair.</li>
-<li>angle:Number &#8211; The angle, in radians, of the polar pair.</li>
+<li>len:number &#8211;  The length coordinate of the polar pair.</li>
+<li>angle:number &#8211;  The angle, in radians, of the polar pair.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -202,16 +202,16 @@
 
 </details>
 </dd>
-<dt><dfn>interpolate</dfn> (pt1:Point, pt2:Point, t:Number) :Point</dt>
+<dt><dfn>interpolate</dfn> (pt1:Point, pt2:Point, t:number) :Point</dt>
 <dd>
 <p>Determines a point between two specified points.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>pt1:Point &#8211; The first point.</li>
-<li>pt2:Point &#8211; The second point.</li>
-<li>t:Number &#8211; The level of interpolation between the two points, between 0 and 1.</li>
+<li>pt1:Point &#8211;  The first point.</li>
+<li>pt2:Point &#8211;  The second point.</li>
+<li>t:number &#8211;  The level of interpolation between the two points, between 0 and 1.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -227,19 +227,19 @@
 
 </details>
 </dd>
-<dt><dfn>equals</dfn> (pt:Point) :Boolean</dt>
+<dt><dfn>equals</dfn> (pt:Point) :boolean</dt>
 <dd>
 <p>Determines whether two points are equal.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>pt:Point &#8211; The point to be compared.</li>
+<li>pt:Point &#8211;  The point to be compared.</li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -250,15 +250,15 @@
 
 </details>
 </dd>
-<dt><dfn>offset</dfn> (dx:Number, dy:Number) :void</dt>
+<dt><dfn>offset</dfn> (dx:number, dy:number) :void</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>dx:Number &#8211; </li>
-<li>dy:Number &#8211; </li>
+<li>dx:number &#8211;  </li>
+<li>dy:number &#8211;  </li>
 </ol>
 
 
@@ -288,7 +288,7 @@
 
 </details>
 </dd>
-<dt><dfn>toString</dfn> () :String</dt>
+<dt><dfn>toString</dfn> () :string</dt>
 <dd>
 <p>Returns a string that contains the values of the x and y coordinates.</p>
 <details>
@@ -297,7 +297,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 
@@ -305,14 +305,14 @@
 
 </details>
 </dd>
-<dt><dfn>normalize</dfn> (thickness:Number) :Point</dt>
+<dt><dfn>normalize</dfn> (thickness:number) :Point</dt>
 <dd>
 <p>Scales the line segment between (0,0) and the current point to a set length.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>thickness:Number &#8211; The scaling value.</li>
+<li>thickness:number &#8211;  The scaling value.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -328,15 +328,15 @@
 
 </details>
 </dd>
-<dt><dfn>compose</dfn> (x:Number, y:Number) :Point</dt>
+<dt><dfn>compose</dfn> (x:number, y:number) :Point</dt>
 <dd>
 <p>Set point coordinates.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>x:Number &#8211; </li>
-<li>y:Number &#8211; </li>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -359,7 +359,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>pt:Point &#8211; The point to be subtracted.</li>
+<li>pt:Point &#8211;  The point to be subtracted.</li>
 </ol>
 
 <h3>Returns</h3>
@@ -379,19 +379,19 @@
 <section>
 <h2>Class Functions</h2>
 <dl>
-<dt><dfn>isPoint</dfn> (pt:Point) :Boolean</dt>
+<dt><dfn>isPoint</dfn> (pt:Point) :boolean</dt>
 <dd>
 <p>Check if a given object contains a numeric x and y property. Does not check if a point is actually a doodle.geom.point.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>pt:Point &#8211; </li>
+<li>pt:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 
@@ -399,20 +399,20 @@
 
 </details>
 </dd>
-<dt><dfn>distance</dfn> (pt1:Point, pt2:Point) :Number</dt>
+<dt><dfn>distance</dfn> (pt1:Point, pt2:Point) :number</dt>
 <dd>
 <p>Returns the distance between pt1 and pt2.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>pt1:Point &#8211; </li>
-<li>pt2:Point &#8211; </li>
+<li>pt1:Point &#8211;  </li>
+<li>pt2:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>

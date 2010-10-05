@@ -17,11 +17,12 @@
       sqrt = Math.sqrt;
   
   /**
-   * @class Point
+   * @class doodle.geom.Point
    * @extends Object
-   * @param {Number} x
-   * @param {Number} y
-   * @return {Point}
+   * @constructor
+   * @param {number=} x
+   * @param {number=} y
+   * @return {doodle.geom.Point}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -41,7 +42,7 @@
         /**
          * The horizontal coordinate of the point.
          * @name x
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -60,7 +61,7 @@
         /**
          * The vertical coordinate of the point.
          * @name y
-         * @return {Number}
+         * @return {number}
          * @throws {TypeError}
          * @property
          */
@@ -140,7 +141,7 @@
     /**
      * The length of the line segment from (0,0) to this point.
      * @name length
-     * @return {Number}
+     * @return {number}
      * @property
      */
     'length': {
@@ -168,7 +169,7 @@
     /**
      * Returns a string that contains the values of the x and y coordinates.
      * @name toString
-     * @return {String}
+     * @return {string}
      */
     'toString': {
       enumerable: true,
@@ -182,8 +183,8 @@
     /**
      * Set point coordinates.
      * @name compose
-     * @param {Number} x
-     * @param {Number} y
+     * @param {number} x
+     * @param {number} y
      * @return {Point}
      * @throws {TypeError}
      */
@@ -220,7 +221,7 @@
      * Determines whether two points are equal.
      * @name equals
      * @param {Point} pt The point to be compared.
-     * @return {Boolean}
+     * @return {boolean}
      * @throws {TypeError}
      */
     'equals': {
@@ -280,8 +281,8 @@
 
     /**
      * @name offset
-     * @param {Number} dx
-     * @param {Number} dy
+     * @param {number} dx
+     * @param {number} dy
      * @throws {TypeError}
      */
     'offset': {
@@ -303,7 +304,7 @@
      * Scales the line segment between (0,0) and the
      * current point to a set length.
      * @name normalize
-     * @param {Number} thickness The scaling value.
+     * @param {number} thickness The scaling value.
      * @return {Point}
      * @throws {TypeError}
      */
@@ -319,7 +320,7 @@
         this.y = (this.y / this.length) * thickness;
         return this;
         /*correct version?
-          var angle:Number = Math.atan2(this.y, this.x);
+          var angle:number = Math.atan2(this.y, this.x);
           this.x = Math.cos(angle) * thickness;
           this.y = Math.sin(angle) * thickness;
         */
@@ -331,7 +332,7 @@
      * @name interpolate
      * @param {Point} pt1 The first point.
      * @param {Point} pt2 The second point.
-     * @param {Number} t The level of interpolation between the two points, between 0 and 1.
+     * @param {number} t The level of interpolation between the two points, between 0 and 1.
      * @return {Point}
      * @throws {TypeError}
      */
@@ -363,8 +364,8 @@
     /**
      * Converts a pair of polar coordinates to a Cartesian point coordinate.
      * @name polar
-     * @param {Number} len The length coordinate of the polar pair.
-     * @param {Number} angle The angle, in radians, of the polar pair.
+     * @param {number} len The length coordinate of the polar pair.
+     * @param {number} angle The angle, in radians, of the polar pair.
      * @return {Point}
      * @throws {TypeError}
      */
@@ -392,7 +393,7 @@
    * @name distance
    * @param {Point} pt1
    * @param {Point} pt2
-   * @return {Number}
+   * @return {number}
    * @throws {TypeError}
    * @static
    */
@@ -411,7 +412,7 @@
    * Does not check if a point is actually a doodle.geom.point.
    * @name isPoint
    * @param {Point} pt
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isPoint = doodle.geom.Point.isPoint = function (pt) {
@@ -422,9 +423,9 @@
   /**
    * @name check_point_type
    * @param {Object} pt
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

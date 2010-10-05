@@ -1,5 +1,5 @@
 /**
- * @class Pattern
+ * @class doodle.Pattern
  * @static
  */
 Object.defineProperty(doodle, 'Pattern', {
@@ -9,7 +9,7 @@ Object.defineProperty(doodle, 'Pattern', {
   value: Object.create(null, {
     /**
      * @name REPEAT
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static
@@ -23,7 +23,7 @@ Object.defineProperty(doodle, 'Pattern', {
 
     /**
      * @name REPEAT_X
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static
@@ -37,7 +37,7 @@ Object.defineProperty(doodle, 'Pattern', {
 
     /**
      * @name REPEAT_Y
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static
@@ -51,7 +51,7 @@ Object.defineProperty(doodle, 'Pattern', {
 
     /**
      * @name NO_REPEAT
-     * @return {String} [read-only]
+     * @return {string} [read-only]
      * @property
      * @constant
      * @static

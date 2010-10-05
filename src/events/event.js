@@ -17,12 +17,13 @@
       isEvent;
   
   /**
-   * @class Event
+   * @class doodle.Event
    * @extends Object
-   * @param {String} type
-   * @param {Boolean} bubbles = false
-   * @param {Boolean} cancelable = false
-   * @return {Event}
+   * @constructor
+   * @param {string=} type
+   * @param {boolean=} bubbles = false
+   * @param {boolean=} cancelable = false
+   * @return {doodle.Event}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -59,23 +60,33 @@
 
       /**
        * @name copy_event_properties
-       * @param {Event} evt Event to copy properties from.
-       * @param {?Node|Boolean} resetTarget Set new event target or null.
-       * @param {String|Boolean} resetType Set new event type.
+       * @param {doodle.Event} evt Event to copy properties from.
+       * @param {Node|boolean|null=} resetTarget Set new event target or null.
+       * @param {string|boolean=} resetType Set new event type.
        * @throws {TypeError}
        * @private
        */
       copy_event_properties = function (evt, resetTarget, resetType) {
         /*DEBUG*/
         check_event_type(evt, 'copy_event_properties', '*event*, target, type');
-        if (resetTarget !== false && resetTarget !== null) {
-          check_node_type(evt, 'copy_event_properties', 'event, *target*, type');
-        }
-        if (resetType !== false) {
-          check_string_type(resetType, 'copy_event_properties', 'event, target, *type*');
-        }
         /*END_DEBUG*/
+        resetTarget = (resetTarget === undefined) ? false : resetTarget;
+        if (resetTarget !== false) {
+          /*DEBUG*/
+          if (resetTarget !== null) {
+            check_node_type(evt, 'copy_event_properties', 'event, *target*, type');
+          }
+          /*END_DEBUG*/
+          evt_currentTarget = resetTarget;
+          evt_target = resetTarget;
+        } else {
+          evt_currentTarget = evt.currentTarget;
+          evt_target = evt.target;
+        }
         if (resetType) {
+          /*DEBUG*/
+          check_string_type(resetType, 'copy_event_properties', 'event, target, *type*');
+          /*END_DEBUG*/
           evt_type = resetType;
         } else {
           evt_type = evt.type;
@@ -85,13 +96,6 @@
         evt_cancelBubble = evt.cancelBubble;
         evt_defaultPrevented = evt.defaultPrevented;
         evt_eventPhase = evt.eventPhase;
-        if (resetTarget === false) {
-          evt_currentTarget = evt.currentTarget;
-          evt_target = evt.target;
-        } else {
-          evt_currentTarget = resetTarget;
-          evt_target = resetTarget;
-        }
         evt_srcElement = evt.srcElement;
         evt_timeStamp = evt.timeStamp;
         evt_returnValue = evt.returnValue;
@@ -108,7 +112,7 @@
       return {
         /**
          * @name type
-         * @return {String} [read-only]
+         * @return {string} [read-only]
          * @property
          */
         'type': {
@@ -119,7 +123,7 @@
 
         /**
          * @name __setType
-         * @param {String} typeArg
+         * @param {string} typeArg
          * @throws {TypeError}
          * @private
          */
@@ -135,7 +139,7 @@
 
         /**
          * @name bubbles
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'bubbles': {
@@ -146,7 +150,7 @@
 
         /**
          * @name cancelable
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          */
         'cancelable': {
@@ -157,7 +161,7 @@
 
         /**
          * @name cancelBubble
-         * @param {Boolean} cancelArg
+         * @param {boolean} cancelArg
          * @throws {TypeError}
          */
         'cancelBubble': {
@@ -175,7 +179,7 @@
         /**
          * Test if event propagation should stop after this node.
          * @name __cancel
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          * @private
          */
@@ -189,7 +193,7 @@
          * Test if event propagation should stop immediately,
          * ignore other handlers on this node.
          * @name __cancelNow
-         * @return {Boolean} [read-only]
+         * @return {boolean} [read-only]
          * @property
          * @private
          */
@@ -249,7 +253,7 @@
 
         /**
          * @name eventPhase
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'eventPhase': {
@@ -260,7 +264,7 @@
 
         /**
          * @name __setEventPhase
-         * @param {Number} phaseArg
+         * @param {number} phaseArg
          * @throws {TypeError}
          * @private
          */
@@ -310,10 +314,10 @@
         
         /**
          * @name initEvent
-         * @param {String} typeArg
-         * @param {Boolean} canBubbleArg
-         * @param {Boolean} cancelableArg
-         * @return {Event}
+         * @param {string=} typeArg
+         * @param {boolean=} canBubbleArg
+         * @param {boolean=} cancelableArg
+         * @return {doodle.Event}
          * @throws {TypeError}
          */
         'initEvent': {
@@ -321,6 +325,7 @@
           configurable: false,
           value: function (typeArg, canBubbleArg, cancelableArg) {
             //parameter defaults
+            typeArg = (typeArg === undefined) ? "undefined" : typeArg;
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             /*DEBUG*/
@@ -386,7 +391,7 @@
          * @name __copyEventProperties
          * @param {Event} evt
          * @param {Node} resetTarget
-         * @param {String} resetType
+         * @param {string} resetType
          * @throws {TypeError}
          * @private
          */
@@ -446,6 +451,7 @@
   event_static_properties = {
     /**
      * @name toString
+     * @return {string}
      */
     'toString': {
       enumerable: true,
@@ -460,7 +466,7 @@
   event_prototype = Object.create({}, {
     /**
      * @name CAPTURING_PHASE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -473,7 +479,7 @@
 
     /**
      * @name AT_TARGET
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -486,7 +492,7 @@
 
     /**
      * @name BUBBLING_PHASE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -499,7 +505,7 @@
 
     /**
      * @name MOUSEDOWN
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -512,7 +518,7 @@
 
     /**
      * @name MOUSEUP
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -525,7 +531,7 @@
 
     /**
      * @name MOUSEOVER
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -538,7 +544,7 @@
 
     /**
      * @name MOUSEOUT
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -551,7 +557,7 @@
 
     /**
      * @name MOUSEMOVE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -564,7 +570,7 @@
 
     /**
      * @name MOUSEDRAG
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -577,7 +583,7 @@
 
     /**
      * @name CLICK
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -590,7 +596,7 @@
 
     /**
      * @name DBLCLICK
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -603,7 +609,7 @@
 
     /**
      * @name KEYDOWN
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -616,7 +622,7 @@
 
     /**
      * @name KEYUP
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -629,7 +635,7 @@
 
     /**
      * @name KEYPRESS
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -642,7 +648,7 @@
 
     /**
      * @name DRAGDROP
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -655,7 +661,7 @@
 
     /**
      * @name FOCUS
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -668,7 +674,7 @@
 
     /**
      * @name BLUR
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -681,7 +687,7 @@
 
     /**
      * @name SELECT
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -694,7 +700,7 @@
 
     /**
      * @name CHANGE
-     * @return {Number} [read-only]
+     * @return {number} [read-only]
      * @property
      * @constant
      */
@@ -715,7 +721,7 @@
    * Returns true on Doodle events as well as DOM events.
    * @name isEvent
    * @param {Event} event
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isEvent = doodle.Event.isEvent = function (event) {
@@ -737,9 +743,9 @@
   /**
    * @name check_event_type
    * @param {Event} event
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

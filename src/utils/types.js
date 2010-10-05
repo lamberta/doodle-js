@@ -1,15 +1,15 @@
 /**
  * Doodle type-checking functions.
- * @class utils.types
+ * @class doodle.utils.types
  * @static
  */
 doodle.utils.types = Object.create({}, (function () {
 
   /**
    * @name throw_type_error
-   * @param {String} type Name of type.
-   * @param {String=} caller Name of calling function.
-   * @param {String=} params Parameter names for function.
+   * @param {string} type Name of type.
+   * @param {string=} caller Name of calling function.
+   * @param {string=} params Parameter names for function.
    * @throws {TypeError}
    * @static
    * @private
@@ -28,9 +28,9 @@ doodle.utils.types = Object.create({}, (function () {
      * Type-checking for a number. Throws a TypeError if the test fails.
      * @name check_number_type
      * @param {Object} obj Object to test.
-     * @param {String} caller Function name to print in error message.
-     * @param {String} param Parameters to print in error message.
-     * @return {Boolean}
+     * @param {string} caller Function name to print in error message.
+     * @param {string} param Parameters to print in error message.
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */
@@ -46,10 +46,10 @@ doodle.utils.types = Object.create({}, (function () {
 
     /**
      * @name check_boolean_type
-     * @param {Boolean} bool
-     * @param {String} caller Function name to print in error message.
-     * @param {String} param Parameters to print in error message.
-     * @return {Boolean}
+     * @param {boolean} bool
+     * @param {string} caller Function name to print in error message.
+     * @param {string} param Parameters to print in error message.
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */
@@ -65,10 +65,10 @@ doodle.utils.types = Object.create({}, (function () {
 
     /**
      * @name check_string_type
-     * @param {String}
-     * @param {String} caller
-     * @param {String} params
-     * @return {Boolean}
+     * @param {string}
+     * @param {string} caller
+     * @param {string} params
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */
@@ -85,9 +85,9 @@ doodle.utils.types = Object.create({}, (function () {
     /**
      * @name check_function_type
      * @param {Function} fn
-     * @param {String} caller
-     * @param {String} params
-     * @return {Boolean}
+     * @param {string} caller
+     * @param {string} params
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */
@@ -104,9 +104,9 @@ doodle.utils.types = Object.create({}, (function () {
     /**
      * @name check_array_type
      * @param {Array} array
-     * @param {String} caller
-     * @param {String} params
-     * @return {Boolean}
+     * @param {string} caller
+     * @param {string} params
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */
@@ -123,9 +123,9 @@ doodle.utils.types = Object.create({}, (function () {
     /**
      * @name check_canvas_type
      * @param {HTMLCanvasElement} canvas
-     * @param {String} caller
-     * @param {String} params
-     * @return {Boolean}
+     * @param {string} caller
+     * @param {string} params
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */
@@ -143,9 +143,9 @@ doodle.utils.types = Object.create({}, (function () {
     /**
      * @name check_context_type
      * @param {CanvasRenderingContext2D} ctx
-     * @param {String} caller
-     * @param {String} params
-     * @return {Boolean}
+     * @param {string} caller
+     * @param {string} params
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */
@@ -163,9 +163,9 @@ doodle.utils.types = Object.create({}, (function () {
     /**
      * @name check_block_element
      * @param {HTMLElement} element
-     * @param {String} caller
-     * @param {String} params
-     * @return {Boolean}
+     * @param {string} caller
+     * @param {string} params
+     * @return {boolean}
      * @throws {TypeError}
      * @static
      */

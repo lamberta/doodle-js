@@ -42,21 +42,21 @@
 <section>
 <h2>Description:</h2>
 <dl>
-<dt><dfn>Event</dfn> (type:String, bubbles:Boolean, cancelable:Boolean) :Event</dt>
+<dt><dfn>Event</dfn> (type:string, bubbles:boolean, cancelable:boolean) :Event</dt>
 <dd>
 <p></p>
 <details>
 
-<h3>Inheritance</h3>
+<h3>Inherits</h3>
 <ol>
 <li>Object</li>
 </ol>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; </li>
-<li>bubbles:Boolean &#8211; = false</li>
-<li>cancelable:Boolean &#8211; = false</li>
+<li>type:string &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>bubbles:boolean &#8211; <span class='param_annotation'>[optional]</span> = false</li>
+<li>cancelable:boolean &#8211; <span class='param_annotation'>[optional]</span> = false</li>
 </ol>
 
 <h3>Returns</h3>
@@ -78,7 +78,7 @@
 <section>
 <h2>Properties</h2>
 <dl>
-<dt><dfn>bubbles</dfn> :Boolean</dt>
+<dt><dfn>bubbles</dfn> :boolean</dt>
 <dd>
 <p></p>
 <details>
@@ -87,7 +87,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; [read-only]</li>
+<li>boolean &#8211; [read-only]</li>
 </ul>
 
 
@@ -95,7 +95,7 @@
 
 </details>
 </dd>
-<dt><dfn>cancelable</dfn> :Boolean</dt>
+<dt><dfn>cancelable</dfn> :boolean</dt>
 <dd>
 <p></p>
 <details>
@@ -104,7 +104,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; [read-only]</li>
+<li>boolean &#8211; [read-only]</li>
 </ul>
 
 
@@ -129,7 +129,7 @@
 
 </details>
 </dd>
-<dt><dfn>eventPhase</dfn> :Number</dt>
+<dt><dfn>eventPhase</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -138,7 +138,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -214,7 +214,7 @@
 
 </details>
 </dd>
-<dt><dfn>type</dfn> :String</dt>
+<dt><dfn>type</dfn> :string</dt>
 <dd>
 <p></p>
 <details>
@@ -223,7 +223,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; [read-only]</li>
+<li>string &#8211; [read-only]</li>
 </ul>
 
 
@@ -235,14 +235,14 @@
 <section>
 <h2>Methods</h2>
 <dl>
-<dt><dfn>cancelBubble</dfn> (cancelArg:Boolean) :void</dt>
+<dt><dfn>cancelBubble</dfn> (cancelArg:boolean) :void</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>cancelArg:Boolean &#8211; </li>
+<li>cancelArg:boolean &#8211;  </li>
 </ol>
 
 
@@ -255,16 +255,16 @@
 
 </details>
 </dd>
-<dt><dfn>initEvent</dfn> (typeArg:String, canBubbleArg:Boolean, cancelableArg:Boolean) :Event</dt>
+<dt><dfn>initEvent</dfn> (typeArg:string, canBubbleArg:boolean, cancelableArg:boolean) :Event</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>typeArg:String &#8211; </li>
-<li>canBubbleArg:Boolean &#8211; </li>
-<li>cancelableArg:Boolean &#8211; </li>
+<li>typeArg:string &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>canBubbleArg:boolean &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>cancelableArg:boolean &#8211; <span class='param_annotation'>[optional]</span> </li>
 </ol>
 
 <h3>Returns</h3>
@@ -328,14 +328,17 @@
 
 </details>
 </dd>
-<dt><dfn>toString</dfn> () :void</dt>
+<dt><dfn>toString</dfn> () :string</dt>
 <dd>
 <p></p>
 <details>
 
 
 
-
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; </li>
+</ul>
 
 
 
@@ -346,7 +349,7 @@
 <section>
 <h2>Constants</h2>
 <dl>
-<dt><dfn>LOAD</dfn> :String</dt>
+<dt><dfn>LOAD</dfn> :string</dt>
 <dd>
 <p>Dispatched when element is loaded.</p>
 <details>
@@ -355,7 +358,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; [read-only]</li>
+<li>string &#8211; [read-only]</li>
 </ul>
 
 
@@ -363,7 +366,7 @@
 
 </details>
 </dd>
-<dt><dfn>ADDED</dfn> :String</dt>
+<dt><dfn>ADDED</dfn> :string</dt>
 <dd>
 <p>Dispatched when object is added to display path.</p>
 <details>
@@ -372,7 +375,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; [read-only]</li>
+<li>string &#8211; [read-only]</li>
 </ul>
 
 
@@ -380,7 +383,7 @@
 
 </details>
 </dd>
-<dt><dfn>REMOVED</dfn> :String</dt>
+<dt><dfn>REMOVED</dfn> :string</dt>
 <dd>
 <p>Dispatched when object is removed from display path.</p>
 <details>
@@ -389,7 +392,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; [read-only]</li>
+<li>string &#8211; [read-only]</li>
 </ul>
 
 
@@ -397,7 +400,7 @@
 
 </details>
 </dd>
-<dt><dfn>AT_TARGET</dfn> :Number</dt>
+<dt><dfn>AT_TARGET</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -406,7 +409,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -414,7 +417,7 @@
 
 </details>
 </dd>
-<dt><dfn>AT_TARGET</dfn> :Number</dt>
+<dt><dfn>AT_TARGET</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -423,7 +426,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -431,7 +434,7 @@
 
 </details>
 </dd>
-<dt><dfn>BLUR</dfn> :Number</dt>
+<dt><dfn>BLUR</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -440,7 +443,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -448,7 +451,7 @@
 
 </details>
 </dd>
-<dt><dfn>BUBBLING_PHASE</dfn> :Number</dt>
+<dt><dfn>BUBBLING_PHASE</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -457,7 +460,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -465,7 +468,7 @@
 
 </details>
 </dd>
-<dt><dfn>BUBBLING_PHASE</dfn> :Number</dt>
+<dt><dfn>BUBBLING_PHASE</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -474,7 +477,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -482,7 +485,7 @@
 
 </details>
 </dd>
-<dt><dfn>CAPTURING_PHASE</dfn> :Number</dt>
+<dt><dfn>CAPTURING_PHASE</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -491,7 +494,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -499,7 +502,7 @@
 
 </details>
 </dd>
-<dt><dfn>CAPTURING_PHASE</dfn> :Number</dt>
+<dt><dfn>CAPTURING_PHASE</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -508,7 +511,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -516,7 +519,7 @@
 
 </details>
 </dd>
-<dt><dfn>CHANGE</dfn> :Number</dt>
+<dt><dfn>CHANGE</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -525,7 +528,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -533,7 +536,7 @@
 
 </details>
 </dd>
-<dt><dfn>CHANGE</dfn> :String</dt>
+<dt><dfn>CHANGE</dfn> :string</dt>
 <dd>
 <p></p>
 <details>
@@ -542,7 +545,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; [read-only]</li>
+<li>string &#8211; [read-only]</li>
 </ul>
 
 
@@ -550,7 +553,7 @@
 
 </details>
 </dd>
-<dt><dfn>CLICK</dfn> :Number</dt>
+<dt><dfn>CLICK</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -559,7 +562,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -567,7 +570,7 @@
 
 </details>
 </dd>
-<dt><dfn>DBLCLICK</dfn> :Number</dt>
+<dt><dfn>DBLCLICK</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -576,7 +579,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -584,7 +587,7 @@
 
 </details>
 </dd>
-<dt><dfn>DRAGDROP</dfn> :Number</dt>
+<dt><dfn>DRAGDROP</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -593,7 +596,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -601,7 +604,7 @@
 
 </details>
 </dd>
-<dt><dfn>ENTER_FRAME</dfn> :String</dt>
+<dt><dfn>ENTER_FRAME</dfn> :string</dt>
 <dd>
 <p></p>
 <details>
@@ -610,7 +613,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; [read-only]</li>
+<li>string &#8211; [read-only]</li>
 </ul>
 
 
@@ -618,7 +621,7 @@
 
 </details>
 </dd>
-<dt><dfn>FOCUS</dfn> :Number</dt>
+<dt><dfn>FOCUS</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -627,7 +630,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -635,7 +638,7 @@
 
 </details>
 </dd>
-<dt><dfn>KEYDOWN</dfn> :Number</dt>
+<dt><dfn>KEYDOWN</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -644,7 +647,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -652,7 +655,7 @@
 
 </details>
 </dd>
-<dt><dfn>KEYPRESS</dfn> :Number</dt>
+<dt><dfn>KEYPRESS</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -661,7 +664,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -669,7 +672,7 @@
 
 </details>
 </dd>
-<dt><dfn>KEYUP</dfn> :Number</dt>
+<dt><dfn>KEYUP</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -678,7 +681,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -686,7 +689,7 @@
 
 </details>
 </dd>
-<dt><dfn>MOUSEDOWN</dfn> :Number</dt>
+<dt><dfn>MOUSEDOWN</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -695,7 +698,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -703,7 +706,7 @@
 
 </details>
 </dd>
-<dt><dfn>MOUSEDRAG</dfn> :Number</dt>
+<dt><dfn>MOUSEDRAG</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -712,7 +715,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -720,7 +723,7 @@
 
 </details>
 </dd>
-<dt><dfn>MOUSEMOVE</dfn> :Number</dt>
+<dt><dfn>MOUSEMOVE</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -729,7 +732,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -737,7 +740,7 @@
 
 </details>
 </dd>
-<dt><dfn>MOUSEOUT</dfn> :Number</dt>
+<dt><dfn>MOUSEOUT</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -746,7 +749,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -754,7 +757,7 @@
 
 </details>
 </dd>
-<dt><dfn>MOUSEOVER</dfn> :Number</dt>
+<dt><dfn>MOUSEOVER</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -763,7 +766,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -771,7 +774,7 @@
 
 </details>
 </dd>
-<dt><dfn>MOUSEUP</dfn> :Number</dt>
+<dt><dfn>MOUSEUP</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -780,7 +783,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -788,7 +791,7 @@
 
 </details>
 </dd>
-<dt><dfn>SELECT</dfn> :Number</dt>
+<dt><dfn>SELECT</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -797,7 +800,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -809,19 +812,19 @@
 <section>
 <h2>Class Functions</h2>
 <dl>
-<dt><dfn>isEvent</dfn> (event:Event) :Boolean</dt>
+<dt><dfn>isEvent</dfn> (event:Event) :boolean</dt>
 <dd>
 <p>Test if an object is an event of any kind (Event/MouseEvent/etc). Returns true on Doodle events as well as DOM events.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211; </li>
+<li>event:Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 

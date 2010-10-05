@@ -240,7 +240,7 @@ function print_inherits_list {
     local class_name="$1" cls_docs="$2" parent cls_inherits
     #static classes have no inheritance
     if ! echo "$cls_docs" | grep -q "@static"; then
-        cls_inherits="<h3>Inheritance</h3>\n<ol>"
+        cls_inherits="<h3>Inherits</h3>\n<ol>"
         for parent in $(echo "${CLASS_INHERITS[$class_name]}" | tr ":" "\n"); do
             cls_inherits="$cls_inherits\n<li>$parent</li>"
         done
@@ -252,7 +252,7 @@ function print_inherits_list {
 #function parameters
 #prints list for 1 or more params, blank if none found or sees a 'property' tag
 function print_params_list {
-    local prop var type desc params_list _ifs="$IFS"
+    local prop var type type_opt desc params_list _ifs="$IFS"
     #sed regexps
     local match_var='s/^.*{.*}[[:blank:]]\([[:alnum:]|]*\).*$/\1/'
     local match_type='s/^.*{\(.*\)}.*$/\1/'
@@ -272,9 +272,18 @@ function print_params_list {
                     type=$(echo "$prop" | sed -e "$match_type")
                     desc=$(echo "$prop" | sed -e "$match_desc")
                     #if they're the same, no match - set empty
-                    if [ "$type" = "$prop" ]; then type=''; fi
+                    if [ "$type" = "$prop" ]; then
+                        type='';
+                    else
+                        #check for optional annotation '=' for closure compiler
+                        if echo "$type" | grep ".*=" > /dev/null; then
+                            type="${type%=}"
+                            type_opt="<span class='param_annotation'>[optional]</span>"
+                        fi
+                    fi
                     if [ "$desc" = "$prop" ]; then desc=''; fi
-                    params_list="$params_list\n<li>$var:$type &#8211; $desc</li>"
+                    params_list="$params_list\n<li>$var:$type &#8211; $type_opt $desc</li>"
+                    type_opt=''
                 fi
             done
             IFS="$_ifs"
@@ -298,7 +307,12 @@ function print_returns_list {
                 type=$(echo "$prop" | sed -e "$match_type")
                 desc=$(echo "$prop" | sed -e "$match_desc")
                 #if they're the same, no match - set empty
-                if [ "$type" = "$prop" ]; then type=''; fi
+                if [ "$type" = "$prop" ]; then
+                    type='';
+                else
+                    #strip of package path if there
+                    type="${type##*\.}"
+                fi
                 if [ "$desc" = "$prop" ]; then desc=''; fi
                 returns_list="$returns_list\n<li>$type &#8211; $desc</li>"
             fi
@@ -372,13 +386,25 @@ function print_type_sig {
             var=$(echo "$prop" | sed -e "$match_var")
             type=$(echo "$prop" | sed -e "$match_type")
             #if they're the same, no match - set empty
-            if [ "$type" = "$prop" ]; then type=''; fi
+            if [ "$type" = "$prop" ]; then
+                type='';
+            else
+                #check for optional annotation '=' for closure compiler
+                if echo "$type" | grep ".*=" > /dev/null; then
+                    type="${type%=}"
+                fi
+            fi
             params="$params, $var:$type"
         fi
         if echo "$prop" | grep -q "@return"; then
             type=$(echo "$prop" | sed -e "$match_type")
             #if they're the same, no match - set empty
-            if [ "$type" = "$prop" ]; then type=''; fi
+            if [ "$type" = "$prop" ]; then
+                type='';
+            else
+                #strip of package path if there
+                type="${type##*\.}"
+            fi
             returns="$returns|$type"
         fi
     done
@@ -403,13 +429,14 @@ function print_class_description {
     if ! echo "$cls_docs" | grep -q "@static"; then
         local type_sig=$(print_type_sig "$cls_docs")
     fi
+    local class_name_full=$(get_tag_value "@class" "$cls_docs")
     local description=$(get_tag_value "@description" "$cls_docs")
     local cls_inherits=$(print_inherits_list "$class_name" "$cls_docs")
     local cls_params=$(print_params_list "$cls_docs")
     local cls_returns=$(print_returns_list "$cls_docs")
     local cls_throws=$(print_throws_list "$cls_docs")
     local cls_examples=$(print_examples_list "$cls_docs")
-    local desc="<h1>doodle.$class_name</h1>
+    local desc="<h1>$class_name_full</h1>
 \n<section>
 <h2>Description:</h2>
 <dl>

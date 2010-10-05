@@ -7,11 +7,11 @@ $(document).ready(function () {
       type_docs = {
         //javascript types
         'Array': mdc_base+"Array",
-        'Boolean': mdc_base+"Boolean",
+        'boolean': mdc_base+"Boolean",
+        'number': mdc_base+"Number",
+        'string': mdc_base+"String",
         'Function': mdc_base+"Function",
-        'Number': mdc_base+"Number",
         'Object': mdc_base+"Object",
-        'String': mdc_base+"String",
         'Date': mdc_base+"Date",
         'Error': mdc_base+"Error",
         'RangeError': mdc_base+"RangeError",
@@ -89,7 +89,7 @@ $(document).ready(function () {
   /* Class description, inherititance list
    * list on single line with arrow between
    */
-  $("h3:contains('Inheritance') + ol li").each(function (idx) {
+  $("h3:contains('Inherits') + ol li").each(function (idx) {
     var item = $(this),
         txt = item.text(),
         regexp;
@@ -117,11 +117,29 @@ $(document).ready(function () {
     });
   });
   
-  /* Property details - returns, throws list items
+  /* Property details: returns
    */
-  var list_returns = ".main details h3:contains('Returns')",
-      list_throws = ".main details h3:contains('Throws')";
-  $(list_returns +','+ list_throws +' + ul li').each(function () {
+  $('.main details h3:contains("Returns") + ul li').each(function () {
+    var item = $(this),
+        txt = item.text(),
+        regexp;
+    //swap out type links
+    for (var type in type_docs) {
+      regexp = new RegExp('^'+type);
+      txt = txt.replace(regexp, "<a href='"+ type_docs[type] +"'>"+ type +"</a>");
+      regexp = new RegExp("\\|"+type, 'g');
+      if (regexp.test(txt)) {
+        txt = txt.replace(regexp, "|<a href='"+ type_docs[type] +"'>"+ type +"</a>");
+      }
+    }
+    //mark read-only annotations
+    txt = txt.replace(/\[read-only\]/, "<span class='param_annotation'>[read-only]</span>");
+    item.html(txt);
+  });
+
+  /* Property details: throws
+   */
+  $('.main details h3:contains("Throws") + ul li').each(function () {
     var item = $(this),
         txt = item.text(),
         regexp;

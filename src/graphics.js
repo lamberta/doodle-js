@@ -14,11 +14,11 @@
       LINEAR = doodle.GradientType.LINEAR,
       RADIAL = doodle.GradientType.RADIAL;
   
-  /* Super constructor
-   * @param {Array} Reference to draw commands array.
-   * @param {Object} Reference to object's extrema points.
+  /**
+   * @param {Array} draw_commands Reference to draw commands array.
+   * @param {Object} extrema Reference to object's extrema points.
    * @return {Object}
-   * @this {Sprite}
+   * @this {doodle.Sprite}
    */
   doodle.Graphics = function (draw_commands, extrema) {
     var graphics = {},
@@ -107,10 +107,10 @@
       },
 
       /*
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} w
-       * @param {Number} h
+       * @param {number} x
+       * @param {number} y
+       * @param {number} w
+       * @param {number} h
        */
       'rect': {
         enumerable: false,
@@ -145,9 +145,9 @@
       },
 
       /*
-       * @param {Number} x The x location of the center of the circle relative to the registration point of the parent display object (in pixels).
-       * @param {Number} y The y location of the center of the circle relative to the registration point of the parent display object (in pixels).
-       * @param {Number} radius
+       * @param {number} x The x location of the center of the circle relative to the registration point of the parent display object (in pixels).
+       * @param {number} y The y location of the center of the circle relative to the registration point of the parent display object (in pixels).
+       * @param {number} radius
        */
       'circle': {
         enumerable: false,
@@ -182,10 +182,10 @@
       },
 
       /*
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} width
-       * @param {Number} height
+       * @param {number} x
+       * @param {number} y
+       * @param {number} width
+       * @param {number} height
        */
       'ellipse': {
         enumerable: false,
@@ -230,12 +230,12 @@
       },
 
       /*
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} width
-       * @param {Number} height
-       * @param {Number} rx
-       * @param {Number} ry
+       * @param {number} x
+       * @param {number} y
+       * @param {number} width
+       * @param {number} height
+       * @param {number} rx
+       * @param {number} ry
        */
       'roundRect': {
         enumerable: false,
@@ -290,8 +290,8 @@
       },
 
       /*
-       * @param {Number} x
-       * @param {Number} y
+       * @param {number} x
+       * @param {number} y
        */
       'moveTo': {
         enumerable: false,
@@ -313,8 +313,8 @@
       },
 
       /*
-       * @param {Number} x
-       * @param {Number} y
+       * @param {number} x
+       * @param {number} y
        */
       'lineTo': {
         enumerable: false,
@@ -479,7 +479,7 @@
       /* Specifies a simple one-color fill that subsequent calls to other
        * graphics methods use when drawing.
        * @param {Color} color In hex format.
-       * @param {Number} alpha
+       * @param {number} alpha
        */
       'beginFill': {
         enumerable: false,

@@ -47,7 +47,7 @@
 <p>Doodle Display object.</p>
 <details>
 
-<h3>Inheritance</h3>
+<h3>Inherits</h3>
 <ol>
 <li>ElementNode</li>
 <li>Node</li>
@@ -57,7 +57,7 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>element:HTMLElement &#8211; </li>
+<li>element:HTMLElement &#8211; <span class='param_annotation'>[optional]</span> </li>
 </ol>
 
 <h3>Returns</h3>
@@ -124,7 +124,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>debug.boundingBox</dfn> :String</dt>
+<dt><dfn>debug.boundingBox</dfn> :string</dt>
 <dd>
 <p>Color of the bounding box outline for nodes on the display. Display a particular node's bounds with node.debug.boundingBox = true</p>
 <details>
@@ -133,7 +133,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 
@@ -141,7 +141,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>frameRate</dfn> :Number|false</dt>
+<dt><dfn>frameRate</dfn> :number|false</dt>
 <dd>
 <p>Determines the interval to dispatch the event type Event.ENTER_FRAME. This event is dispatched simultaneously to all display objects listenting for this event. It does not go through a "capture phase" and is dispatched directly to the target, whether the target is on the display list or not.</p>
 <details>
@@ -150,7 +150,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number|false &#8211; </li>
+<li>number|false &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -179,7 +179,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>height</dfn> :Number</dt>
+<dt><dfn>height</dfn> :number</dt>
 <dd>
 <p>Display height. Setting this affects all it's children layers.</p>
 <details>
@@ -188,7 +188,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -199,7 +199,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>width</dfn> :Number</dt>
+<dt><dfn>width</dfn> :number</dt>
 <dd>
 <p>Display width. Setting this affects all it's children layers.</p>
 <details>
@@ -208,7 +208,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -236,7 +236,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>mouseX</dfn> :Number</dt>
+<dt><dfn>mouseX</dfn> :number</dt>
 <dd>
 <p>Mouse x position on display.</p>
 <details>
@@ -245,7 +245,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -253,7 +253,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>mouseY</dfn> :Number</dt>
+<dt><dfn>mouseY</dfn> :number</dt>
 <dd>
 <p>Mouse y position on display.</p>
 <details>
@@ -262,7 +262,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; [read-only]</li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -270,7 +270,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>alpha</dfn> :Number</dt>
+<dt><dfn>alpha</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -279,7 +279,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -327,7 +327,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>backgroundRepeat</dfn> :String</dt>
+<dt><dfn>backgroundRepeat</dfn> :string</dt>
 <dd>
 <p></p>
 <details>
@@ -336,7 +336,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -382,7 +382,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>id</dfn> :String</dt>
+<dt><dfn>id</dfn> :string</dt>
 <dd>
 <p></p>
 <details>
@@ -391,7 +391,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -402,7 +402,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>rotation</dfn> :Number</dt>
+<dt><dfn>rotation</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -411,7 +411,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -436,7 +436,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>visible</dfn> :Boolean</dt>
+<dt><dfn>visible</dfn> :boolean</dt>
 <dd>
 <p></p>
 <details>
@@ -445,7 +445,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -456,7 +456,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>x</dfn> :Number</dt>
+<dt><dfn>x</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -465,7 +465,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -473,7 +473,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>y</dfn> :Number</dt>
+<dt><dfn>y</dfn> :number</dt>
 <dd>
 <p></p>
 <details>
@@ -482,7 +482,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -490,7 +490,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>debug.stats</dfn> :Stats|Boolean</dt>
+<dt><dfn>debug.stats</dfn> :Stats|boolean</dt>
 <dd>
 <p>Overlay a stats meter on the display. See http://github.com/mrdoob/stats.js for more info. To include in a compiled build, use ./build/make-doodle -S</p>
 <details>
@@ -499,7 +499,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>Stats|Boolean &#8211; </li>
+<li>Stats|boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -510,7 +510,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>toString</dfn> :String</dt>
+<dt><dfn>toString</dfn> :string</dt>
 <dd>
 <p>Returns the string representation of the specified object.</p>
 <details>
@@ -519,7 +519,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Returns</h3>
 <ul>
-<li>String &#8211; </li>
+<li>string &#8211; </li>
 </ul>
 
 
@@ -531,15 +531,15 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 <section>
 <h2>Methods</h2>
 <dl>
-<dt><dfn>addChildAt</dfn> (layer:Layer, index:Number) :Layer</dt>
+<dt><dfn>addChildAt</dfn> (layer:Layer, index:number) :Layer</dt>
 <dd>
 <p>Add a layer to the display's children at the given array position. Layer inherits the dimensions of the display.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>layer:Layer &#8211; </li>
-<li>index:Number &#8211; </li>
+<li>layer:Layer &#8211;  </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -555,14 +555,14 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>addLayer</dfn> (id:String) :Layer</dt>
+<dt><dfn>addLayer</dfn> (id:string) :Layer</dt>
 <dd>
 <p>Add a new layer to the display's children.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>id:String &#8211; </li>
+<li>id:string &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -585,7 +585,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>fn:Function &#8211; </li>
+<li>fn:Function &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -601,15 +601,15 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>setChildIndex</dfn> (child:Node, index:Number) :void</dt>
+<dt><dfn>setChildIndex</dfn> (child:Node, index:number) :void</dt>
 <dd>
 <p>Changes the position of an existing child in the node's children array. This affects the layering of child objects.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>child:Node &#8211; </li>
-<li>index:Number &#8211; </li>
+<li>child:Node &#8211;  </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 
@@ -622,15 +622,15 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>swapChildrenAt</dfn> (idx1:Number, idx2:Number) :void</dt>
+<dt><dfn>swapChildrenAt</dfn> (idx1:number, idx2:number) :void</dt>
 <dd>
 <p>Change the display order of two child layers at the given index.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>idx1:Number &#8211; </li>
-<li>idx2:Number &#8211; </li>
+<li>idx1:number &#8211;  </li>
+<li>idx2:number &#8211;  </li>
 </ol>
 
 
@@ -643,19 +643,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>willTrigger</dfn> (type:String) :Boolean</dt>
+<dt><dfn>willTrigger</dfn> (type:string) :boolean</dt>
 <dd>
 <p>Checks whether an event listener is registered with this EventDispatcher object or any of its ancestors for the specified event type. The difference between the hasEventListener() and the willTrigger() methods is that hasEventListener() examines only the object to which it belongs, whereas the willTrigger() method examines the entire event flow for the event specified by the type parameter.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; The type of event.</li>
+<li>type:string &#8211;  The type of event.</li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -666,19 +666,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>hasEventListener</dfn> (type:String) :Boolean</dt>
+<dt><dfn>hasEventListener</dfn> (type:string) :boolean</dt>
 <dd>
 <p>Checks whether the EventDispatcher object has any listeners registered for a specific type of event.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; </li>
+<li>type:string &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -689,19 +689,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>contains</dfn> (node:Node) :Boolean</dt>
+<dt><dfn>contains</dfn> (node:Node) :boolean</dt>
 <dd>
 <p>Determine if node is among it's children, grandchildren, etc.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; </li>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -712,19 +712,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>dispatchEvent</dfn> (event:Event) :Boolean</dt>
+<dt><dfn>dispatchEvent</dfn> (event:Event) :boolean</dt>
 <dd>
 <p>Dispatches an event into the event flow. The event target is the EventDispatcher object upon which the dispatchEvent() method is called.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211; </li>
+<li>event:Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; true if the event was successfully dispatched.</li>
+<li>boolean &#8211; true if the event was successfully dispatched.</li>
 </ul>
 
 <h3>Throws</h3>
@@ -735,19 +735,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>broadcastEvent</dfn> (event:Event) :Boolean</dt>
+<dt><dfn>broadcastEvent</dfn> (event:Event) :boolean</dt>
 <dd>
 <p>Dispatches an event to every object with an active listener. Ignores propagation path, objects come from</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211; </li>
+<li>event:Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; True if the event was successfully dispatched.</li>
+<li>boolean &#8211; True if the event was successfully dispatched.</li>
 </ul>
 
 <h3>Throws</h3>
@@ -759,19 +759,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>handleEvent</dfn> (event:Event) :Boolean</dt>
+<dt><dfn>handleEvent</dfn> (event:Event) :boolean</dt>
 <dd>
 <p>Lookup and call listener if registered for specific event type.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211; </li>
+<li>event:Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; true if node has listeners of event type.</li>
+<li>boolean &#8211; true if node has listeners of event type.</li>
 </ul>
 
 <h3>Throws</h3>
@@ -789,7 +789,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -805,14 +805,14 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>getChildById</dfn> (id:String) :Node|null</dt>
+<dt><dfn>getChildById</dfn> (id:string) :Node|null</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>id:String &#8211; </li>
+<li>id:string &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -835,7 +835,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>point:Point &#8211; </li>
+<li>point:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -858,7 +858,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>point:Point &#8211; </li>
+<li>point:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -891,14 +891,14 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>removeChildById</dfn> (id:String) :void</dt>
+<dt><dfn>removeChildById</dfn> (id:string) :void</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>id:String &#8211; </li>
+<li>id:string &#8211;  </li>
 </ol>
 
 
@@ -918,7 +918,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 
@@ -931,19 +931,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>rotate</dfn> (deg:Number) :Number</dt>
+<dt><dfn>rotate</dfn> (deg:number) :number</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>deg:Number &#8211; </li>
+<li>deg:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -951,19 +951,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>scaleX</dfn> (sx:Number) :Number</dt>
+<dt><dfn>scaleX</dfn> (sx:number) :number</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>sx:Number &#8211; </li>
+<li>sx:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -971,19 +971,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>scaleY</dfn> (sy:Number) :Number</dt>
+<dt><dfn>scaleY</dfn> (sy:number) :number</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>sy:Number &#8211; </li>
+<li>sy:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Number &#8211; </li>
+<li>number &#8211; </li>
 </ul>
 
 
@@ -998,8 +998,8 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>node1:Node &#8211; </li>
-<li>node2:Node &#8211; </li>
+<li>node1:Node &#8211;  </li>
+<li>node2:Node &#8211;  </li>
 </ol>
 
 
@@ -1012,16 +1012,16 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>addEventListener</dfn> (type:String, listener:Function, useCapture:Boolean) :void</dt>
+<dt><dfn>addEventListener</dfn> (type:string, listener:Function, useCapture:boolean) :void</dt>
 <dd>
 <p>Registers an event listener object with an EventDispatcher object so that the listener receives notification of an event.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; </li>
-<li>listener:Function &#8211; </li>
-<li>useCapture:Boolean &#8211; </li>
+<li>type:string &#8211;  </li>
+<li>listener:Function &#8211;  </li>
+<li>useCapture:boolean &#8211;  </li>
 </ol>
 
 
@@ -1034,14 +1034,14 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>removeChildAt</dfn> (index:Number) :void</dt>
+<dt><dfn>removeChildAt</dfn> (index:number) :void</dt>
 <dd>
 <p>Remove a layer from the display's children at the given array position.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>index:Number &#8211; </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 
@@ -1054,14 +1054,14 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>removeLayer</dfn> (id:String) :void</dt>
+<dt><dfn>removeLayer</dfn> (id:string) :void</dt>
 <dd>
 <p>Remove a layer with a given name from the display's children.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>id:String &#8211; </li>
+<li>id:string &#8211;  </li>
 </ol>
 
 
@@ -1074,16 +1074,16 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>removeEventListener</dfn> (type:String, listener:Function, useCapture:Boolean) :void</dt>
+<dt><dfn>removeEventListener</dfn> (type:string, listener:Function, useCapture:boolean) :void</dt>
 <dd>
 <p>Removes a listener from the EventDispatcher object.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>type:String &#8211; </li>
-<li>listener:Function &#8211; </li>
-<li>useCapture:Boolean &#8211; </li>
+<li>type:string &#8211;  </li>
+<li>listener:Function &#8211;  </li>
+<li>useCapture:boolean &#8211;  </li>
 </ol>
 
 
@@ -1103,7 +1103,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>point:Point &#8211; </li>
+<li>point:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -1119,14 +1119,14 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>swapDepthAt</dfn> (index:Number) :void</dt>
+<dt><dfn>swapDepthAt</dfn> (index:number) :void</dt>
 <dd>
 <p>Swap positions with another node at a given index in the parents child list.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>index:Number &#8211; </li>
+<li>index:number &#8211;  </li>
 </ol>
 
 
@@ -1146,7 +1146,7 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 <h3>Parameters</h3>
 <ol>
-<li>node:Node &#8211; </li>
+<li>node:Node &#8211;  </li>
 </ol>
 
 
@@ -1160,19 +1160,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 
 </details>
 </dd>
-<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle|Null</dt>
+<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle|null</dt>
 <dd>
 <p>The bounding box of a Node is a union of all it's child Sprite's bounds.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>targetCoordSpace:Node &#8211; </li>
+<li>targetCoordSpace:Node &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Rectangle|Null &#8211; </li>
+<li>Rectangle|null &#8211; </li>
 </ul>
 
 
@@ -1184,19 +1184,19 @@ var display = doodle.Display(function () {<br/> &nbsp; this.width = 400;<br/> })
 <section>
 <h2>Class Functions</h2>
 <dl>
-<dt><dfn>isDisplay</dfn> (obj:Object) :Boolean</dt>
+<dt><dfn>isDisplay</dfn> (obj:Object) :boolean</dt>
 <dd>
 <p>Test if an object is a Display.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>obj:Object &#8211; </li>
+<li>obj:Object &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Boolean &#8211; True if object is a Doodle Display.</li>
+<li>boolean &#8211; True if object is a Doodle Display.</li>
 </ul>
 
 

@@ -20,11 +20,13 @@
       Array_splice = Array.prototype.splice;
   
   /**
-   * @class {EventDispatcher}
-   * @param {Function} initializer
-   * @return {EventDispatcher}
+   * @class doodle.EventDispatcher
+   * @extends Object
+   * @constructor
+   * @return {doodle.EventDispatcher}  
    */
   doodle.EventDispatcher = function () {
+    /** @type {doodle.EventDispatcher} */
     var evt_disp = {};
 
     /*DEBUG*/
@@ -52,7 +54,7 @@
     if (typeof arguments[0] === 'function') {
       arguments[0].call(evt_disp);
     }
-
+    
     return evt_disp;
   };
 
@@ -61,7 +63,7 @@
     /**
      * Returns the string representation of the specified object.
      * @name toString
-     * @return {String}
+     * @return {string}
      */
     'toString': {
       enumerable: true,
@@ -96,9 +98,9 @@
      * Registers an event listener object with an EventDispatcher object
      * so that the listener receives notification of an event.
      * @name addEventListener
-     * @param {String} type
+     * @param {string} type
      * @param {Function} listener
-     * @param {Boolean} useCapture
+     * @param {boolean} useCapture
      * @throws {TypeError}
      */
     'addEventListener': {
@@ -130,9 +132,9 @@
     /**
      * Removes a listener from the EventDispatcher object.
      * @name removeEventListener
-     * @param {String} type
+     * @param {string} type
      * @param {Function} listener
-     * @param {Boolean} useCapture
+     * @param {boolean} useCapture
      * @throws {TypeError}
      */
     'removeEventListener': {
@@ -176,7 +178,7 @@
      * Lookup and call listener if registered for specific event type.
      * @name handleEvent
      * @param {Event} event
-     * @return {Boolean} true if node has listeners of event type.
+     * @return {boolean} true if node has listeners of event type.
      * @throws {TypeError}
      */
     'handleEvent': {
@@ -237,7 +239,7 @@
      * EventDispatcher object upon which the dispatchEvent() method is called.
      * @name dispatchEvent
      * @param {Event} event
-     * @return {Boolean} true if the event was successfully dispatched.
+     * @return {boolean} true if the event was successfully dispatched.
      * @throws {TypeError}
      */
     'dispatchEvent': {
@@ -334,7 +336,7 @@
      * Ignores propagation path, objects come from
      * @name broadcastEvent
      * @param {Event} event
-     * @return {Boolean} True if the event was successfully dispatched.
+     * @return {boolean} True if the event was successfully dispatched.
      * @throws {TypeError}
      * @throws {Error}
      */
@@ -381,8 +383,8 @@
      * Checks whether the EventDispatcher object has any listeners
      * registered for a specific type of event.
      * @name hasEventListener
-     * @param {String} type
-     * @return {Boolean}
+     * @param {string} type
+     * @return {boolean}
      * @throws {TypeError}
      */
     'hasEventListener': {
@@ -405,8 +407,8 @@
      * whereas the willTrigger() method examines the entire event flow for the
      * event specified by the type parameter.
      * @name willTrigger
-     * @param {String} type The type of event.
-     * @return {Boolean}
+     * @param {string} type The type of event.
+     * @return {boolean}
      * @throws {TypeError}
      */
     'willTrigger': {
@@ -447,7 +449,7 @@
    * Test if an object is an event dispatcher.
    * @name isEventDispatcher
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isEventDispatcher = doodle.EventDispatcher.isEventDispatcher = function (obj) {
@@ -461,7 +463,7 @@
    * Check if object inherits from event dispatcher.
    * @name inheritsEventDispatcher
    * @param {Object} obj
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   inheritsEventDispatcher = doodle.EventDispatcher.inheritsEventDispatcher = function (obj) {
@@ -482,9 +484,9 @@
   /**
    * @name check_eventdispatcher_type
    * @param {EventDispatcher} obj
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static

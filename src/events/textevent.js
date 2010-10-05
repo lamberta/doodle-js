@@ -15,15 +15,16 @@
       isEvent = doodle.Event.isEvent;
   
   /**
-   * @class TextEvent
+   * @class doodle.TextEvent
    * @extends UIEvent
-   * @param {String} type
-   * @param {Boolean} bubbles
-   * @param {Boolean} cancelable
-   * @param {HTMLElement} view
-   * @param {String} data
-   * @param {Number} inputMode
-   * @return {TextEvent}
+   * @constructor
+   * @param {string=} type
+   * @param {boolean=} bubbles
+   * @param {boolean=} cancelable
+   * @param {HTMLElement=} view
+   * @param {string=} data
+   * @param {number=} inputMode
+   * @return {doodle.TextEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
@@ -80,7 +81,7 @@
 
       /**
        * @name copy_textevent_properties
-       * @param {TextEvent} evt TextEvent to copy properties from.
+       * @param {doodle.TextEvent} evt TextEvent to copy properties from.
        * @private
        */
       copy_textevent_properties = function (evt) {
@@ -94,7 +95,7 @@
       return {
         /**
          * @name data
-         * @return {String} [read-only]
+         * @return {string} [read-only]
          * @property
          */
         'data': {
@@ -105,7 +106,7 @@
 
         /**
          * @name inputMode
-         * @return {Number} [read-only]
+         * @return {number} [read-only]
          * @property
          */
         'inputMode': {
@@ -116,12 +117,12 @@
 
         /**
          * @name initTextEvent
-         * @param {String} typeArg
-         * @param {Boolean} canBubbleArg
-         * @param {Boolean} cancelableArg
+         * @param {string} typeArg
+         * @param {boolean} canBubbleArg
+         * @param {boolean} cancelableArg
          * @param {HTMLElement} view
-         * @param {String} dataArg
-         * @param {Number} inputModeArg
+         * @param {string} dataArg
+         * @param {number} inputModeArg
          * @return {TextEvent}
          */
         'initTextEvent': {
@@ -153,7 +154,7 @@
          * @name __copyTextEventProperties
          * @param {TextEvent} evt
          * @param {Node} resetTarget
-         * @param {String} resetType
+         * @param {string} resetType
          * @return {TextEvent}
          * @private
          */
@@ -207,7 +208,7 @@
   textevent_static_properties = {
     /**
      * @name toString
-     * @return {String}
+     * @return {string}
      * @override
      */
     'toString': {
@@ -226,7 +227,7 @@
    * Test if an object is a TextEvent.
    * @name isTextEvent
    * @param {TextEvent} event
-   * @return {Boolean}
+   * @return {boolean}
    * @static
    */
   isTextEvent = doodle.TextEvent.isTextEvent = function (event) {
@@ -242,9 +243,9 @@
   /**
    * @name check_textevent_type
    * @param {TextEvent} event
-   * @param {String} caller
-   * @param {String} params
-   * @return {Boolean}
+   * @param {string} caller
+   * @param {string} params
+   * @return {boolean}
    * @throws {TypeError}
    * @memberOf utils.types
    * @static
