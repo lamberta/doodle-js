@@ -38,6 +38,7 @@
       /**
        * @name lineWidth
        * @return {number} [read-only]
+       * @property
        */
       'lineWidth': {
         enumerable: true,
@@ -48,6 +49,7 @@
       /**
        * @name lineCap
        * @return {string} [read-only]
+       * @property
        */
       'lineCap': {
         enumerable: true,
@@ -58,6 +60,7 @@
       /**
        * @name lineJoin
        * @return {string} [read-only]
+       * @property
        */
       'lineJoin': {
         enumerable: true,
@@ -73,6 +76,7 @@
        * required to intersect without going over the miter length.
        * @name lineMiter
        * @return {number} [read-only]
+       * @property
        */
       'lineMiter': {
         enumerable: true,
