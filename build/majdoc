@@ -41,6 +41,8 @@ CLASS_SRC['Node']="$SRC_HOME/node.js"
 CLASS_INHERITS['Node']='EventDispatcher:Object'
 CLASS_SRC['Sprite']="$SRC_HOME/sprite.js"
 CLASS_INHERITS['Sprite']='Node:EventDispatcher:Object'
+CLASS_SRC['Graphics']="$SRC_HOME/graphics.js"
+CLASS_INHERITS['Graphics']='Object'
 
 CLASS_SRC['ElementNode']="$SRC_HOME/elementnode.js"
 CLASS_INHERITS['ElementNode']='Node:EventDispatcher:Object'
@@ -365,7 +367,7 @@ function print_examples_list {
             fi
         done
         IFS="$_ifs"
-        throws_list="$examples_list\n</ul>"
+        examples_list="$examples_list\n</ul>"
     fi
     echo -e "$examples_list"
 }

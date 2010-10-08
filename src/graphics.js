@@ -15,6 +15,7 @@
       RADIAL = doodle.GradientType.RADIAL;
   
   /**
+   * @class doodle.Graphics
    * @param {Array} draw_commands Reference to draw commands array.
    * @param {Object} extrema Reference to object's extrema points.
    * @return {Object}
@@ -34,48 +35,64 @@
     Object.defineProperties(graphics, graphics_static_properties);
     //properties that require privacy
     Object.defineProperties(graphics, {
-      /*
-       * PROPERTIES
+      /**
+       * @name lineWidth
+       * @return {number} [read-only]
        */
       'lineWidth': {
         enumerable: true,
         configurable: false,
         get: function () { return line_width; }
       },
-      
+
+      /**
+       * @name lineCap
+       * @return {string} [read-only]
+       */
       'lineCap': {
         enumerable: true,
         configurable: false,
         get: function () { return line_cap; }
       },
 
+      /**
+       * @name lineJoin
+       * @return {string} [read-only]
+       */
       'lineJoin': {
         enumerable: true,
         configurable: false,
         get: function () { return line_join; }
       },
 
+      /**
+       * The miter value means that a second filled triangle must (if possible, given
+       * the miter length) be rendered at the join, with one line being the line between
+       * the two aforementioned corners, abutting the first triangle, and the other two
+       * being continuations of the outside edges of the two joining lines, as long as
+       * required to intersect without going over the miter length.
+       * @name lineMiter
+       * @return {number} [read-only]
+       */
       'lineMiter': {
         enumerable: true,
         configurable: false,
         get: function () { return line_miter; }
       },
-      
-      /*
-       * METHODS
-       */
 
-      /* Provide direct access to the canvas drawing api.
+      /**
+       * Provide direct access to the canvas drawing api.
        * Canvas context is called as the first argument to function.
        * Unable to set bounds from a user supplied function unless explictly set.
+       * @name draw
        * @param {Function} fn
-       * Ex:
-       * x = Object.create(doodle.sprite);
-       * x.graphics.draw(function (ctx) {
-       *   ctx.fillStyle = "#ff0000";
-       *   ctx.fillRect(this.x, this.y, 100, 100);
-       * });
-       * x.draw();
+       * @example
+       *   x = Object.create(doodle.sprite);<br/>
+       *   x.graphics.draw(function (ctx) {<br/>
+       *     ctx.fillStyle = "#ff0000";<br/>
+       *     ctx.fillRect(this.x, this.y, 100, 100);<br/>
+       *   });<br/>
+       *   x.draw();
        */
       'draw': {
         enumerable: false,
@@ -89,7 +106,9 @@
         }
       },
 
-      /* Remove all drawing commands for sprite.
+      /**
+       * Remove all drawing commands for sprite.
+       * @name clear
        */
       'clear': {
         enumerable: false,
@@ -106,11 +125,12 @@
         }
       },
 
-      /*
+      /**
+       * @name rect
        * @param {number} x
        * @param {number} y
-       * @param {number} w
-       * @param {number} h
+       * @param {number} width
+       * @param {number} height
        */
       'rect': {
         enumerable: false,
@@ -140,11 +160,11 @@
             ctx.closePath();
             ctx.stroke();
           });
-          
         }
       },
 
-      /*
+      /**
+       * @name circle
        * @param {number} x The x location of the center of the circle relative to the registration point of the parent display object (in pixels).
        * @param {number} y The y location of the center of the circle relative to the registration point of the parent display object (in pixels).
        * @param {number} radius
@@ -177,11 +197,11 @@
             ctx.closePath();
             ctx.stroke();
           });
-          
         }
       },
 
-      /*
+      /**
+       * @name ellipse
        * @param {number} x
        * @param {number} y
        * @param {number} width
@@ -225,11 +245,11 @@
             ctx.closePath();
             ctx.stroke();
           });
-          
         }
       },
 
-      /*
+      /**
+       * @name roundRect
        * @param {number} x
        * @param {number} y
        * @param {number} width
@@ -285,11 +305,11 @@
             ctx.closePath();
             ctx.stroke();
           });
-          
         }
       },
 
-      /*
+      /**
+       * @name moveTo
        * @param {number} x
        * @param {number} y
        */
@@ -308,11 +328,11 @@
           //update cursor
           cursor_x = x;
           cursor_y = y;
-          
         }
       },
 
-      /*
+      /**
+       * @name lineTo
        * @param {number} x
        * @param {number} y
        */
@@ -343,11 +363,12 @@
           //update cursor
           cursor_x = x;
           cursor_y = y;
-          
         }
       },
 
-      /* Quadratic curve to point.
+      /**
+       * Quadratic curve to point.
+       * @name curveTo
        * @param {Point} pt1 Control point
        * @param {Point} pt2 End point
        */
@@ -399,11 +420,12 @@
           //update cursor
           cursor_x = x2;
           cursor_y = y2;
-          
         }
       },
 
-      /* Bezier curve to point.
+      /**
+       * Bezier curve to point.
+       * @name bezierCurveTo
        * @param {Point} pt1 Control point 1
        * @param {Point} pt2 Control point 2
        * @param {Point} pt3 End point
@@ -472,12 +494,13 @@
           //update cursor
           cursor_x = x3;
           cursor_y = y3;
-
         }
       },
 
-      /* Specifies a simple one-color fill that subsequent calls to other
+      /**
+       * Specifies a simple one-color fill that subsequent calls to other
        * graphics methods use when drawing.
+       * @name beginFill
        * @param {Color} color In hex format.
        * @param {number} alpha
        */
@@ -496,6 +519,15 @@
         }
       },
 
+      /**
+       * @name beginGradientFill
+       * @param {GradientType} type
+       * @param {Point} pt1
+       * @param {Point} pt2
+       * @param {number} ratios
+       * @param {Array} colors
+       * @param {Array} alphas
+       */
       'beginGradientFill': {
         enumerable: true,
         writable: false,
@@ -539,6 +571,11 @@
         }
       },
 
+      /**
+       * @name beginPatternFill
+       * @param {HTMLImageElement} image
+       * @param {Pattern} repeat
+       */
       'beginPatternFill': {
         enumerable: true,
         writable: false,
@@ -551,11 +588,11 @@
           repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
           /*DEBUG*/
           check_string_type(repeat, gfx_node+'.graphics.beginPatternFill', 'image, *repeat*');
-          /*END_DEBUG*/
           if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
               repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
             throw new SyntaxError(gfx_node+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
           }
+          /*END_DEBUG*/
           
           if (typeof image === 'string') {
             //element id
@@ -601,10 +638,18 @@
               ctx.fillStyle = 'rgba(0,0,0,0)';
             }
           });
-          
         }
       },
 
+      /**
+       * @name lineStyle
+       * @param {number} thickness
+       * @param {Color} color
+       * @param {number} alpha
+       * @param {LineCap} caps
+       * @param {LineJoin} joints
+       * @param {number} miterLimit
+       */
       'lineStyle': {
         enumerable: true,
         writable: false,
@@ -662,6 +707,9 @@
         }
       },
 
+      /**
+       * @name beginPath
+       */
       'beginPath': {
         enumerable: false,
         writable: false,
@@ -674,6 +722,9 @@
         }
       },
 
+      /**
+       * @name closePath
+       */
       'closePath': {
         enumerable: false,
         writable: false,
@@ -688,7 +739,9 @@
         }
       },
 
-      //temp
+      /**
+       * @name endFill
+       */
       'endFill': {
         enumerable: false,
         writable: false,
@@ -700,7 +753,9 @@
         }
       },
       
-      //temp
+      /**
+       * @name stroke
+       */
       'stroke': {
         enumerable: false,
         writable: false,
@@ -721,16 +776,18 @@
   
 
   graphics_static_properties = {
-
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
+     * @return {string}
+     * @override
+     */
     'toString': {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Graphics]";
-      }
+      value: function () { return "[object Graphics]"; }
     }
-    
   };
 
 }());//end class closure

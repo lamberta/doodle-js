@@ -1,4 +1,3 @@
-
 $(document).ready(function () {
   //documentation urls
   var mdc_base = "https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/",
@@ -30,6 +29,7 @@ $(document).ready(function () {
         'Layer': doodle_base+"layer.html",
         'Node': doodle_base+"node.html",
         'Sprite': doodle_base+"sprite.html",
+        'Graphics': doodle_base+"graphics.html",
         'Matrix': doodle_base+"matrix.html",
         'Point': doodle_base+"point.html",
         'Rectangle': doodle_base+"rectangle.html",

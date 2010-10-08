@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Doodle.js - API: Graphics</title>
+<link href="./style/reset.css" rel="stylesheet" type="text/css">
+<link href="./style/main.css" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="./style/main.js"></script>
+</head>
+<body>
+
+<nav>
+<ul>
+<li>Display</li>
+<li>ElementNode</li>
+<li>Event</li>
+<li>EventDispatcher</li>
+<li>GradientType</li>
+<li>Graphics</li>
+<li>Keyboard</li>
+<li>KeyboardEvent</li>
+<li>Layer</li>
+<li>LineCap</li>
+<li>LineJoin</li>
+<li>Matrix</li>
+<li>MouseEvent</li>
+<li>Node</li>
+<li>Pattern</li>
+<li>Point</li>
+<li>Rectangle</li>
+<li>Sprite</li>
+<li>TextEvent</li>
+<li>TouchEvent</li>
+<li>UIEvent</li>
+<li>utils</li>
+<li>utils.types</li></ul>
+</nav>
+<div class="main">
+<h1>doodle.Graphics</h1>
+
+<section>
+<h2>Description:</h2>
+<dl>
+<dt><dfn>Graphics</dfn> (draw:Array, extrema:Object) :Object</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Inherits</h3>
+<ol>
+<li>Object</li>
+</ol>
+
+<h3>Parameters</h3>
+<ol>
+<li>draw:Array &#8211;  </li>
+<li>extrema:Object &#8211;  Reference to object's extrema points.</li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Object &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</dl>
+</section>
+
+<section>
+<h2>Methods</h2>
+<dl>
+<dt><dfn>bezierCurveTo</dfn> (pt1:Point, pt2:Point, pt3:Point) :void</dt>
+<dd>
+<p>Bezier curve to point.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>pt1:Point &#8211;  Control point 1</li>
+<li>pt2:Point &#8211;  Control point 2</li>
+<li>pt3:Point &#8211;  End point</li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>beginGradientFill</dfn> (type:GradientType, pt1:Point, pt2:Point, ratios:number, colors:Array, alphas:Array) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:GradientType &#8211;  </li>
+<li>pt1:Point &#8211;  </li>
+<li>pt2:Point &#8211;  </li>
+<li>ratios:number &#8211;  </li>
+<li>colors:Array &#8211;  </li>
+<li>alphas:Array &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>beginPath</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>beginPatternFill</dfn> (image:HTMLImageElement, repeat:Pattern) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>image:HTMLImageElement &#8211;  </li>
+<li>repeat:Pattern &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>circle</dfn> (x:number, y:number, radius:number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:number &#8211;  The x location of the center of the circle relative to the registration point of the parent display object (in pixels).</li>
+<li>y:number &#8211;  The y location of the center of the circle relative to the registration point of the parent display object (in pixels).</li>
+<li>radius:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>closePath</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>ellipse</dfn> (x:number, y:number, width:number, height:number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
+<li>width:number &#8211;  </li>
+<li>height:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>endFill</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineCap</dfn> () :string</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineJoin</dfn> () :string</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineStyle</dfn> (thickness:number, color:Color, alpha:number, caps:LineCap, joints:LineJoin, miterLimit:number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>thickness:number &#8211;  </li>
+<li>color:Color &#8211;  </li>
+<li>alpha:number &#8211;  </li>
+<li>caps:LineCap &#8211;  </li>
+<li>joints:LineJoin &#8211;  </li>
+<li>miterLimit:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineTo</dfn> (x:number, y:number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineWidth</dfn> () :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>moveTo</dfn> (x:number, y:number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>rect</dfn> (x:number, y:number, width:number, height:number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
+<li>width:number &#8211;  </li>
+<li>height:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>roundRect</dfn> (x:number, y:number, width:number, height:number, rx:number, ry:number) :void</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
+<li>width:number &#8211;  </li>
+<li>height:number &#8211;  </li>
+<li>rx:number &#8211;  </li>
+<li>ry:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>stroke</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>draw</dfn> (fn:Function) :void</dt>
+<dd>
+<p>Provide direct access to the canvas drawing api. Canvas context is called as the first argument to function. Unable to set bounds from a user supplied function unless explictly set.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>fn:Function &#8211;  </li>
+</ol>
+
+
+
+
+
+<h3>Examples</h3>
+<ul>
+<li>
+<samp>
+x = Object.create(doodle.sprite);<br/> x.graphics.draw(function (ctx) {<br/> ctx.fillStyle = "#ff0000";<br/> ctx.fillRect(this.x, this.y, 100, 100);<br/> });<br/> x.draw();
+</samp>
+</li>
+</ul>
+</details>
+</dd>
+<dt><dfn>curveTo</dfn> (pt1:Point, pt2:Point) :void</dt>
+<dd>
+<p>Quadratic curve to point.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>pt1:Point &#8211;  Control point</li>
+<li>pt2:Point &#8211;  End point</li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>clear</dfn> () :void</dt>
+<dd>
+<p>Remove all drawing commands for sprite.</p>
+<details>
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>toString</dfn> () :string</dt>
+<dd>
+<p>Returns the string representation of the specified object.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>beginFill</dfn> (color:Color, alpha:number) :void</dt>
+<dd>
+<p>Specifies a simple one-color fill that subsequent calls to other graphics methods use when drawing.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>color:Color &#8211;  In hex format.</li>
+<li>alpha:number &#8211;  </li>
+</ol>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineMiter</dfn> () :number</dt>
+<dd>
+<p>The miter value means that a second filled triangle must (if possible, given the miter length) be rendered at the join, with one line being the line between the two aforementioned corners, abutting the first triangle, and the other two being continuations of the outside edges of the two joining lines, as long as required to intersect without going over the miter length.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+</details>
+</dd>
+</section>
+</div>
+<footer>
+<a href="http://github.com/biilly/doodle-js/blob/master/BSD-LICENSE.txt">Copyright</a> <a href="http://www.lamberta.org">Billy Lamberta</a>
+</footer>
+</body>
+</html>
