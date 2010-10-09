@@ -15,9 +15,9 @@
       isEvent = doodle.Event.isEvent;
   
   /**
-   * @class doodle.UIEvent
-   * @extends Event
-   * @constructor
+   * @name doodle.UIEvent
+   * @class
+   * @augments doodle.Event
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable

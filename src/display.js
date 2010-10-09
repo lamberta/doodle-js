@@ -36,9 +36,9 @@
   
   /**
    * Doodle Display object.
-   * @class doodle.Display
-   * @extends doodle.ElementNode
-   * @constructor
+   * @name doodle.Display
+   * @class
+   * @augments doodle.ElementNode
    * @param {HTMLElement=} element
    * @return {doodle.Display}
    * @throws {TypeError} Must be a block style element.

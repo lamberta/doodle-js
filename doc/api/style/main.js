@@ -154,6 +154,16 @@ $(document).ready(function () {
     item.html(txt);
   });
 
+  /* Pretty up some of our see-also sources.
+   */
+  $('.main details h3:contains("See Also") + ul li').each(function () {
+    var item = $(this);
+    item.html(
+      item.html()
+        .replace(/\[Canvas API\]/, "<span class='param_annotation'>[Canvas API]</span>")
+        .replace(/\[Mozilla Tutorial\]/, "<span class='param_annotation'>[Mozilla Tutorial]</span>"));
+  });
+
 
   /* Add menu collapse button
    */

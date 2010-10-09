@@ -20,9 +20,9 @@
       Array_splice = Array.prototype.splice;
   
   /**
-   * @class doodle.EventDispatcher
-   * @extends Object
-   * @constructor
+   * @name doodle.EventDispatcher
+   * @class
+   * @augments Object
    * @return {doodle.EventDispatcher}  
    */
   doodle.EventDispatcher = function () {

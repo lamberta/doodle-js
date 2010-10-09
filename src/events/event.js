@@ -17,9 +17,9 @@
       isEvent;
   
   /**
-   * @class doodle.Event
-   * @extends Object
-   * @constructor
+   * @name doodle.Event
+   * @class
+   * @augments Object
    * @param {string=} type
    * @param {boolean=} bubbles = false
    * @param {boolean=} cancelable = false

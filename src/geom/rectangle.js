@@ -15,9 +15,9 @@
       min = Math.min;
   
   /**
-   * @class doodle.geom.Rectangle
-   * @extends Object
-   * @constructor
+   * @name doodle.geom.Rectangle
+   * @class
+   * @augments Object
    * @param {number=} x
    * @param {number=} y
    * @param {number=} width

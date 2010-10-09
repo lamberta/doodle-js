@@ -17,9 +17,9 @@
 
   /**
    * An node to display.
-   * @class doodle.Sprite
-   * @extends doodle.Node
-   * @constructor
+   * @name doodle.Sprite
+   * @class
+   * @augments doodle.Node
    * @param {string=} id Name or initialization function.
    * @return {doodle.Sprite} A sprite object.
    * @throws {SyntaxError} Invalid parameters.

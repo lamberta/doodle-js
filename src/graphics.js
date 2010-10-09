@@ -15,7 +15,9 @@
       RADIAL = doodle.GradientType.RADIAL;
   
   /**
-   * @class doodle.Graphics
+   * @name doodle.Graphics
+   * @class
+   * @augments Object
    * @param {Array} draw_commands Reference to draw commands array.
    * @param {Object} extrema Reference to object's extrema points.
    * @return {Object}
@@ -50,6 +52,8 @@
        * @name lineCap
        * @return {string} [read-only]
        * @property
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-linecap">context.lineCap</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#A_lineCap_example">A lineCap Example</a> [Mozilla Tutorial]
        */
       'lineCap': {
         enumerable: true,

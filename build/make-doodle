@@ -65,8 +65,9 @@ function build_full {
 
     cat ./src/eventdispatcher.js >> "$DEBUG_OUT_FILE"
     cat ./src/node.js >> "$DEBUG_OUT_FILE"
-    cat ./src/graphics.js >> "$DEBUG_OUT_FILE"
+    
     cat ./src/sprite.js >> "$DEBUG_OUT_FILE"
+    cat ./src/graphics.js >> "$DEBUG_OUT_FILE"
 
     cat ./src/elementnode.js >> "$DEBUG_OUT_FILE"
     cat ./src/layer.js >> "$DEBUG_OUT_FILE"

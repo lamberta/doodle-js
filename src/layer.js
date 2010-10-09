@@ -12,9 +12,9 @@
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @class doodle.Layer
-   * @extends doodle.ElementNode
-   * @constructor
+   * @name doodle.Layer
+   * @class
+   * @augments doodle.ElementNode
    * @param {string=} id
    * @param {HTMLCanvasElement=} element
    * @return {doodle.Layer}

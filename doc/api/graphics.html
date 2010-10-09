@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Doodle.js - API: Graphics</title>
+<title>Doodle.js - API: doodle.Graphics</title>
 <link href="./style/reset.css" rel="stylesheet" type="text/css">
 <link href="./style/main.css" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin" rel="stylesheet" type="text/css">
@@ -67,11 +67,96 @@
 
 
 
+
+
 </details>
 </dd>
 </dl>
 </section>
+<section>
+<h2>Properties</h2>
+<dl>
+<dt><dfn>lineCap</dfn> :string</dt>
+<dd>
+<p></p>
+<details>
 
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+<h3>See Also</h3>
+<ul>
+<li><a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-linecap">context.lineCap</a> [Canvas API]</li>
+<li><a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#A_lineCap_example">A lineCap Example</a> [Mozilla Tutorial]</li>
+</ul>
+</details>
+</dd>
+<dt><dfn>lineJoin</dfn> :string</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineWidth</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>lineMiter</dfn> :number</dt>
+<dd>
+<p>The miter value means that a second filled triangle must (if possible, given the miter length) be rendered at the join, with one line being the line between the two aforementioned corners, abutting the first triangle, and the other two being continuations of the outside edges of the two joining lines, as long as required to intersect without going over the miter length.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+</section>
 <section>
 <h2>Methods</h2>
 <dl>
@@ -86,6 +171,8 @@
 <li>pt2:Point &#8211;  Control point 2</li>
 <li>pt3:Point &#8211;  End point</li>
 </ol>
+
+
 
 
 
@@ -114,12 +201,16 @@
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>beginPath</dfn> () :void</dt>
 <dd>
 <p></p>
 <details>
+
+
 
 
 
@@ -146,6 +237,8 @@
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>circle</dfn> (x:number, y:number, radius:number) :void</dt>
@@ -165,12 +258,16 @@
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>closePath</dfn> () :void</dt>
 <dd>
 <p></p>
 <details>
+
+
 
 
 
@@ -199,6 +296,8 @@
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>endFill</dfn> () :void</dt>
@@ -211,38 +310,6 @@
 
 
 
-
-
-</details>
-</dd>
-<dt><dfn>lineCap</dfn> () :string</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>string &#8211; [read-only]</li>
-</ul>
-
-
-
-
-</details>
-</dd>
-<dt><dfn>lineJoin</dfn> () :string</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>string &#8211; [read-only]</li>
-</ul>
 
 
 
@@ -269,6 +336,8 @@
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>lineTo</dfn> (x:number, y:number) :void</dt>
@@ -285,21 +354,6 @@
 
 
 
-
-
-</details>
-</dd>
-<dt><dfn>lineWidth</dfn> () :number</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>number &#8211; [read-only]</li>
-</ul>
 
 
 
@@ -322,6 +376,8 @@
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>rect</dfn> (x:number, y:number, width:number, height:number) :void</dt>
@@ -336,6 +392,8 @@
 <li>width:number &#8211;  </li>
 <li>height:number &#8211;  </li>
 </ol>
+
+
 
 
 
@@ -364,12 +422,16 @@
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>stroke</dfn> () :void</dt>
 <dd>
 <p></p>
 <details>
+
+
 
 
 
@@ -402,6 +464,8 @@ x = Object.create(doodle.sprite);<br/> x.graphics.draw(function (ctx) {<br/> ctx
 </samp>
 </li>
 </ul>
+
+
 </details>
 </dd>
 <dt><dfn>curveTo</dfn> (pt1:Point, pt2:Point) :void</dt>
@@ -420,12 +484,16 @@ x = Object.create(doodle.sprite);<br/> x.graphics.draw(function (ctx) {<br/> ctx
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>clear</dfn> () :void</dt>
 <dd>
 <p>Remove all drawing commands for sprite.</p>
 <details>
+
+
 
 
 
@@ -451,6 +519,8 @@ x = Object.create(doodle.sprite);<br/> x.graphics.draw(function (ctx) {<br/> ctx
 
 
 
+
+
 </details>
 </dd>
 <dt><dfn>beginFill</dfn> (color:Color, alpha:number) :void</dt>
@@ -467,21 +537,6 @@ x = Object.create(doodle.sprite);<br/> x.graphics.draw(function (ctx) {<br/> ctx
 
 
 
-
-
-</details>
-</dd>
-<dt><dfn>lineMiter</dfn> () :number</dt>
-<dd>
-<p>The miter value means that a second filled triangle must (if possible, given the miter length) be rendered at the join, with one line being the line between the two aforementioned corners, abutting the first triangle, and the other two being continuations of the outside edges of the two joining lines, as long as required to intersect without going over the miter length.</p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>number &#8211; [read-only]</li>
-</ul>
 
 
 

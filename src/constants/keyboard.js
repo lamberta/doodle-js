@@ -1,5 +1,6 @@
 /**
- * @class doodle.Keyboard
+ * @name doodle.Keyboard
+ * @class
  * @static
  */
 Object.defineProperty(doodle, 'Keyboard', {

@@ -17,9 +17,9 @@
       sqrt = Math.sqrt;
   
   /**
-   * @class doodle.geom.Point
-   * @extends Object
-   * @constructor
+   * @name doodle.geom.Point
+   * @class
+   * @augments Object
    * @param {number=} x
    * @param {number=} y
    * @return {doodle.geom.Point}

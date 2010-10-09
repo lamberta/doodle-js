@@ -1,5 +1,6 @@
 /**
- * @class doodle.LineJoin
+ * @name doodle.LineJoin
+ * @class
  * @static
  */
 Object.defineProperty(doodle, 'LineJoin', {

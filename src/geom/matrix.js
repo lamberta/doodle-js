@@ -21,9 +21,9 @@
       tan = Math.tan;
   
   /**
-   * @class doodle.geom.Matrix
-   * @extends Object
-   * @constructor
+   * @name doodle.geom.Matrix
+   * @class
+   * @augments Object
    * @param {number=} a
    * @param {number=} b
    * @param {number=} c

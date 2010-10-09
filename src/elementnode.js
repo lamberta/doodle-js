@@ -20,9 +20,9 @@
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @class doodle.ElementNode
-   * @extends doodle.Node
-   * @constructor
+   * @name doodle.ElementNode
+   * @class
+   * @augments doodle.Node
    * @param {HTMLElement=} element
    * @param {string=} id
    * @return {doodle.ElementNode}

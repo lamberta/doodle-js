@@ -2,7 +2,9 @@
 
 /**
  * Doodle utilty functions.
- * @class doodle.utils
+ * @name doodle.utils
+ * @class
+ * @augments Object
  * @static
  */
 doodle.utils = Object.create({}, {

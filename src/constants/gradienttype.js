@@ -1,7 +1,8 @@
 /**
  * The GradientType class provides values for the type parameter in the
  * beginGradientFill() and lineGradientStyle() methods of the Graphics class.
- * @class doodle.GradientType
+ * @name doodle.GradientType
+ * @class
  * @static
  */
 Object.defineProperty(doodle, 'GradientType', {

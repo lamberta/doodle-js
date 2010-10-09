@@ -1,5 +1,6 @@
 /**
- * @class doodle.LineCap
+ * @name doodle.LineCap
+ * @class
  * @static
  */
 Object.defineProperty(doodle, 'LineCap', {

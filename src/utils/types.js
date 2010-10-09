@@ -1,6 +1,8 @@
 /**
  * Doodle type-checking functions.
- * @class doodle.utils.types
+ * @name doodle.utils.types
+ * @class
+ * @augments Object
  * @static
  */
 doodle.utils.types = Object.create({}, (function () {

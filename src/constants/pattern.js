@@ -1,5 +1,6 @@
 /**
- * @class doodle.Pattern
+ * @name doodle.Pattern
+ * @class
  * @static
  */
 Object.defineProperty(doodle, 'Pattern', {

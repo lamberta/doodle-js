@@ -26,9 +26,9 @@
       PI = Math.PI;
   
   /**
-   * @class doodle.Node
-   * @extends doodle.EventDispatcher
-   * @constructor
+   * @name doodle.Node
+   * @class
+   * @augments doodle.EventDispatcher
    * @param {string=} id|initializer
    * @return {doodle.Node}
    */
