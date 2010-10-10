@@ -9964,6 +9964,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @name lineWidth
        * @return {number} [read-only]
        * @property
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-linewidth">context.lineWidth</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#A_lineWidth_example">A lineWidth Example</a> [Canvas Tutorial]
        */
       'lineWidth': {
         enumerable: true,
@@ -9976,7 +9978,7 @@ Object.defineProperties(doodle.TextEvent, {
        * @return {string} [read-only]
        * @property
        * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-linecap">context.lineCap</a> [Canvas API]
-       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#A_lineCap_example">A lineCap Example</a> [Mozilla Tutorial]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#A_lineCap_example">A lineCap Example</a> [Canvas Tutorial]
        */
       'lineCap': {
         enumerable: true,
@@ -9988,6 +9990,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @name lineJoin
        * @return {string} [read-only]
        * @property
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-linejoin">context.lineJoin</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#A_lineJoin_example">A lineJoin Example</a> [Canvas Tutorial]
        */
       'lineJoin': {
         enumerable: true,
@@ -10004,6 +10008,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @name lineMiter
        * @return {number} [read-only]
        * @property
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-miterlimit">context.miterLimit</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#A_demo_of_the_miterLimit_property">A miterLimit Demo</a> [Canvas Tutorial]
        */
       'lineMiter': {
         enumerable: true,
@@ -10020,8 +10026,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @example
        *   x = Object.create(doodle.sprite);<br/>
        *   x.graphics.draw(function (ctx) {<br/>
-       *     ctx.fillStyle = "#ff0000";<br/>
-       *     ctx.fillRect(this.x, this.y, 100, 100);<br/>
+       *   &nbsp; ctx.fillStyle = "#ff0000";<br/>
+       *   &nbsp; ctx.fillRect(this.x, this.y, 100, 100);<br/>
        *   });<br/>
        *   x.draw();
        */
@@ -10062,6 +10068,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @param {number} y
        * @param {number} width
        * @param {number} height
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-rect">context.rect</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Rectangles">Rectangles</a> [Canvas Tutorial]
        */
       'rect': {
         enumerable: false,
@@ -10099,6 +10107,7 @@ Object.defineProperties(doodle.TextEvent, {
        * @param {number} x The x location of the center of the circle relative to the registration point of the parent display object (in pixels).
        * @param {number} y The y location of the center of the circle relative to the registration point of the parent display object (in pixels).
        * @param {number} radius
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Arcs">Arcs</a> [Canvas Tutorial]
        */
       'circle': {
         enumerable: false,
@@ -10243,6 +10252,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @name moveTo
        * @param {number} x
        * @param {number} y
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-moveto">context.moveTo</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#moveTo">moveTo</a> [Canvas Tutorial]
        */
       'moveTo': {
         enumerable: false,
@@ -10266,6 +10277,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @name lineTo
        * @param {number} x
        * @param {number} y
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-lineto">context.lineTo</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Lines">Lines</a> [Canvas Tutorial]
        */
       'lineTo': {
         enumerable: false,
@@ -10302,6 +10315,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @name curveTo
        * @param {Point} pt1 Control point
        * @param {Point} pt2 End point
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-quadraticCurveTo">context.quadraticCurveTo</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Bezier_and_quadratic_curves">Bezier and Quadratic Curves</a> [Canvas Tutorial]
        */
       'curveTo': {
         enumerable: false,
@@ -10360,6 +10375,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @param {Point} pt1 Control point 1
        * @param {Point} pt2 Control point 2
        * @param {Point} pt3 End point
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-bezierCurveTo">context.bezierCurveTo</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Bezier_and_quadratic_curves">Bezier and Quadratic Curves</a> [Canvas Tutorial]
        */
       'bezierCurveTo': {
         enumerable: false,
@@ -10434,6 +10451,8 @@ Object.defineProperties(doodle.TextEvent, {
        * @name beginFill
        * @param {Color} color In hex format.
        * @param {number} alpha
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-fillstyle">context.fillStyle</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#Colors">Colors</a> [Canvas Tutorial]
        */
       'beginFill': {
         enumerable: false,
@@ -10458,6 +10477,11 @@ Object.defineProperties(doodle.TextEvent, {
        * @param {number} ratios
        * @param {Array} colors
        * @param {Array} alphas
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createlineargradient">context.createLinearGradient</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createradialgradient">context.createRadialGradient</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-canvasgradient-addcolorstop">context.addColorStop</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-fillstyle">context.fillStyle</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#Gradients">Gradients</a> [Canvas Tutorial]
        */
       'beginGradientFill': {
         enumerable: true,
@@ -10506,6 +10530,9 @@ Object.defineProperties(doodle.TextEvent, {
        * @name beginPatternFill
        * @param {HTMLImageElement} image
        * @param {Pattern} repeat
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createpattern">context.createPattern</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-fillstyle">context.fillStyle</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#Patterns">Patterns</a> [Canvas Tutorial]
        */
       'beginPatternFill': {
         enumerable: true,
@@ -10580,6 +10607,11 @@ Object.defineProperties(doodle.TextEvent, {
        * @param {LineCap} caps
        * @param {LineJoin} joints
        * @param {number} miterLimit
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-miterlimit">context.lineWidth</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-strokestyle">context.strokeStyle</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-linecap">context.lineCap</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-linejoin">context.lineJoin</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-miterlimit">context.miterLimit</a> [Canvas API]
        */
       'lineStyle': {
         enumerable: true,
@@ -10640,6 +10672,8 @@ Object.defineProperties(doodle.TextEvent, {
 
       /**
        * @name beginPath
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-beginpath">context.beginPath</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Drawing_paths">Drawing Paths</a> [Canvas Tutorial]
        */
       'beginPath': {
         enumerable: false,
@@ -10655,6 +10689,9 @@ Object.defineProperties(doodle.TextEvent, {
 
       /**
        * @name closePath
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-closepath">context.closePath</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-stroke">context.stroke</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Drawing_paths">Drawing Paths</a> [Canvas Tutorial]
        */
       'closePath': {
         enumerable: false,
@@ -10672,6 +10709,8 @@ Object.defineProperties(doodle.TextEvent, {
 
       /**
        * @name endFill
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-fill">context.fill</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Drawing_paths">Drawing Paths</a> [Canvas Tutorial]
        */
       'endFill': {
         enumerable: false,
@@ -10686,6 +10725,8 @@ Object.defineProperties(doodle.TextEvent, {
       
       /**
        * @name stroke
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-stroke">context.stroke</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Drawing_paths">Drawing Paths</a> [Canvas Tutorial]
        */
       'stroke': {
         enumerable: false,
@@ -10712,6 +10753,7 @@ Object.defineProperties(doodle.TextEvent, {
      * @name toString
      * @return {string}
      * @override
+     * @see <a href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/toString">Object.toString</a> [JS Ref]
      */
     'toString': {
       enumerable: false,
