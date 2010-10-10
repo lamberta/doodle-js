@@ -28,7 +28,7 @@ function init_scene () {
 
   createBox();
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     box.vy += gravity;

@@ -2,7 +2,7 @@
 /*
  * EVENT
  */
-Object.defineProperties(doodle.Event, {
+Object.defineProperties(doodle.events.Event, {
   /**
    * @name CAPTURING_PHASE
    * @return {number} [read-only]
@@ -131,7 +131,7 @@ Object.defineProperties(doodle.Event, {
 /*
  * UI EVENT
  */
-Object.defineProperties(doodle.UIEvent, {
+Object.defineProperties(doodle.events.UIEvent, {
   /**
    * @name FOCUS_IN
    * @return {string} [read-only]
@@ -153,7 +153,7 @@ Object.defineProperties(doodle.UIEvent, {
  * MOUSE EVENT
  * Compatibility tables: http://www.quirksmode.org/dom/events/index.html
  */
-Object.defineProperties(doodle.MouseEvent, {
+Object.defineProperties(doodle.events.MouseEvent, {
   /**
    * To test for left/middle/right button check value for event.which (0,1,2).
    * @name CLICK
@@ -327,7 +327,7 @@ Object.defineProperties(doodle.MouseEvent, {
  * TOUCH EVENT
  * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
  */
-Object.defineProperties(doodle.TouchEvent, {
+Object.defineProperties(doodle.events.TouchEvent, {
   /**
    * @name TOUCH_START
    * @return {string} [read-only]
@@ -393,7 +393,7 @@ Object.defineProperties(doodle.TouchEvent, {
 /*
  * KEYBOARD EVENT
  */
-Object.defineProperties(doodle.KeyboardEvent, {
+Object.defineProperties(doodle.events.KeyboardEvent, {
   /**
    * @name KEY_PRESS
    * @return {string} [read-only]
@@ -533,7 +533,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
 /* TEXT EVENT
  */
-Object.defineProperties(doodle.TextEvent, {
+Object.defineProperties(doodle.events.TextEvent, {
   /**
    * @name TEXT_INPUT
    * @return {string} [read-only]

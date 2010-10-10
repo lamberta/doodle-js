@@ -33,7 +33,7 @@ function init_scene () {
   wave.graphics.moveTo(0, centerY);
   layer0.addChild(wave);
   
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     xpos += xspeed;

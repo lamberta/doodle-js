@@ -31,7 +31,7 @@ function init_scene () {
   ball.x = display.width/2;
   layer0.addChild(ball);
   
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     ball.y = centerY + Math.sin(angle) * range;

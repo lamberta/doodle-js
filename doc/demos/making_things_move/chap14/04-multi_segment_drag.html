@@ -31,7 +31,7 @@ function init_scene () {
     segments.push(segment);
   }
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     drag(segments[0], display.mouseX, display.mouseY);

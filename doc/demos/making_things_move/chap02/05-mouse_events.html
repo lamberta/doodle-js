@@ -27,14 +27,14 @@ function init_scene () {
   sprite.y = display.height/2;
   layer0.addChild(sprite);
 
-  sprite.addEventListener(doodle.MouseEvent.CLICK, onMouseEvent);
-  sprite.addEventListener(doodle.MouseEvent.DOUBLE_CLICK, onMouseEvent);
-  sprite.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseEvent);
-  sprite.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseEvent);
-  sprite.addEventListener(doodle.MouseEvent.MOUSE_OUT, onMouseEvent);
-  sprite.addEventListener(doodle.MouseEvent.MOUSE_OVER, onMouseEvent);
-  sprite.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseEvent);
-  sprite.addEventListener(doodle.MouseEvent.MOUSE_WHEEL, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.CLICK, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.DOUBLE_CLICK, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.MOUSE_OUT, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.MOUSE_OVER, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseEvent);
+  sprite.addEventListener(doodle.events.MouseEvent.MOUSE_WHEEL, onMouseEvent);
 
   function onMouseEvent (event) {
     console.log(event.target + ": " + event.type);

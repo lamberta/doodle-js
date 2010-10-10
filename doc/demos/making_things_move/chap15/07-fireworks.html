@@ -44,7 +44,7 @@ function init_scene () {
     layer0.addChild(ball);
   }
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     for (var i=0; i < numBalls; i++) {

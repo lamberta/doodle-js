@@ -42,7 +42,7 @@ function init_scene () {
   var line = doodle.Sprite();
   layer0.addChild(line);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     var particle, partA, partB;

@@ -36,7 +36,7 @@ function init_scene () {
   ball1.vx = -1;
   layer0.addChild(ball1);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     ball0.x += ball0.vx;

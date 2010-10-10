@@ -12,9 +12,9 @@
       check_event_type = doodle.utils.types.check_event_type,
       /*END_DEBUG*/
       //lookup help
-      CAPTURING_PHASE = doodle.Event.CAPTURING_PHASE,
-      AT_TARGET = doodle.Event.AT_TARGET,
-      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE,
+      CAPTURING_PHASE = doodle.events.Event.CAPTURING_PHASE,
+      AT_TARGET = doodle.events.Event.AT_TARGET,
+      BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE,
       //lookup help
       Array_indexOf = Array.prototype.indexOf,
       Array_splice = Array.prototype.splice;
@@ -177,7 +177,7 @@
     /**
      * Lookup and call listener if registered for specific event type.
      * @name handleEvent
-     * @param {Event} event
+     * @param {doodle.events.Event} event
      * @return {boolean} true if node has listeners of event type.
      * @throws {TypeError}
      */
@@ -238,7 +238,7 @@
      * Dispatches an event into the event flow. The event target is the
      * EventDispatcher object upon which the dispatchEvent() method is called.
      * @name dispatchEvent
-     * @param {Event} event
+     * @param {doodle.events.Event} event
      * @return {boolean} true if the event was successfully dispatched.
      * @throws {TypeError}
      */
@@ -335,7 +335,7 @@
      * Dispatches an event to every object with an active listener.
      * Ignores propagation path, objects come from
      * @name broadcastEvent
-     * @param {Event} event
+     * @param {doodle.events.Event} event
      * @return {boolean} True if the event was successfully dispatched.
      * @throws {TypeError}
      * @throws {Error}

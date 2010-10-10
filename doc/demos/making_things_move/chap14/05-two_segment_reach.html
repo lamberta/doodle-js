@@ -30,7 +30,7 @@ function init_scene () {
   segment1.y = display.height / 2;
   layer0.addChild(segment1);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     var target = reach(segment0, display.mouseX, display.mouseY);

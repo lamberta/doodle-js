@@ -39,7 +39,7 @@ function init_scene () {
   line.graphics.stroke();
   layer0.addChild(line);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     //move line with mouse

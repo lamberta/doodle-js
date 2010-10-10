@@ -27,12 +27,12 @@
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
       doodle_Layer = doodle.Layer,
-      //doodle_TouchEvent = doodle.TouchEvent,
+      //doodle_TouchEvent = doodle.events.TouchEvent,
       //recycle these event objects
-      evt_enterFrame = doodle.Event(doodle.Event.ENTER_FRAME),
-      evt_mouseEvent = doodle.MouseEvent(''),
-      //evt_touchEvent = doodle.TouchEvent(''),
-      evt_keyboardEvent = doodle.KeyboardEvent('');
+      evt_enterFrame = doodle.events.Event(doodle.events.Event.ENTER_FRAME),
+      evt_mouseEvent = doodle.events.MouseEvent(''),
+      //evt_touchEvent = doodle.events.TouchEvent(''),
+      evt_keyboardEvent = doodle.events.KeyboardEvent('');
   
   /**
    * Doodle Display object.
@@ -94,7 +94,7 @@
           $evt_mouseEvent = evt_mouseEvent,
           $evt_keyboardEvent = evt_keyboardEvent;
 
-      /* @param {MouseEvent} evt
+      /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_event (evt) {
         $dispatch_mouse_event(evt, $evt_mouseEvent,
@@ -102,7 +102,7 @@
                               mouseX, mouseY, $display);
       }
 
-      /* @param {MouseEvent} evt
+      /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_move (evt) {
         var x, y;
@@ -114,13 +114,13 @@
                                   x, y, $display);
       }
 
-      /* @param {MouseEvent} evt
+      /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_leave (evt) {
         $dispatch_mouseleave_event(evt, $evt_mouseEvent, display_scene_path, layers, layers.length, $display);
       }
 
-      /* @param {KeyboardEvent} evt
+      /* @param {doodle.events.KeyboardEvent} evt
        */
       function on_keyboard_event (evt) {
         $dispatch_keyboard_event(evt, $evt_keyboardEvent, $display);
@@ -137,12 +137,12 @@
       
       //Add display handlers
       //Redraw scene graph when children are added and removed.
-      $display.addEventListener(doodle.Event.ADDED, on_create_frame);
-      $display.addEventListener(doodle.Event.REMOVED, on_create_frame);
+      $display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
+      $display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
       //Add keyboard listeners to document.
-      document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
-      document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
-      document.addEventListener(doodle.KeyboardEvent.KEY_UP, on_keyboard_event, false);
+      document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
+      document.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
+      document.addEventListener(doodle.events.KeyboardEvent.KEY_UP, on_keyboard_event, false);
       
       return {
         /**
@@ -261,16 +261,16 @@
 
             //add event handlers
             //MouseEvents
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
             //this dispatches mouseleave and mouseout for display and layers
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
             //
-            elementArg.addEventListener(doodle.MouseEvent.CLICK, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_UP, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
             /*//TouchEvents
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
@@ -294,16 +294,16 @@
           value: function (elementArg) {
             //remove event handlers
             //MouseEvents
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
             //
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
             //
-            elementArg.removeEventListener(doodle.MouseEvent.CLICK, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_UP, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
             /*//TouchEvents
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
@@ -883,8 +883,8 @@
    * mouse position is within their bounds. The event then follows the event path.
    * The doodle mouse event is recycled by copying properties from the dom event.
    *
-   * @param {MouseEvent} evt DOM mouse event to copy properties from.
-   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {doodle.events.MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {doodle.events.MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
    * @param {number} count number of nodes in the scene path array.
    * @param {number} x Position of the mouse x coordiante.
@@ -944,8 +944,8 @@
    * the node.__pointInBounds property. This is only accessed in this function,
    * and is reset in 'dispatch_mouseleave_event'.
    *
-   * @param {MouseEvent} evt DOM mouse event to copy properties from.
-   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {doodle.events.MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {doodle.events.MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
    * @param {number} count number of nodes in the scene path array.
    * @param {number} x Position of the mouse x coordiante.
@@ -989,7 +989,7 @@
   /* not implemented
    */
   var dispatch_mousemove_event_IGNORELAYER = function (evt, mouseEvent, path, count, x, y,
-                                       display, layers, layer_count) {
+                                                       display, layers, layer_count) {
     var node,
         evt_disp_p = false;
     
@@ -1091,8 +1091,8 @@
    * Dispatches 'mouseout' and 'mouseleave' to the display and resets
    * the __pointInBounds property for all nodes.
    *
-   * @param {MouseEvent} evt DOM mouse event to copy properties from.
-   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {doodle.events.MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {doodle.events.MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
    * @param {Array} layers Reference to display's children array.
    * @param {number} layer_count number of nodes in the layers array. Later reused to be node scene path count.
@@ -1127,7 +1127,7 @@
 
   /* Called when the dom detects a keypress.
    * Doodle KeyboardEvent is reused by copying the dom event properties.
-   * @param {Event} evt DOM keyboard event to copy properties from.
+   * @param {doodle.events.Event} evt DOM keyboard event to copy properties from.
    * @return {boolean}
    * @private
    */

@@ -36,7 +36,7 @@ function init_scene () {
     balls.push(ball);
   }
   
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     balls.forEach(function (ball) {

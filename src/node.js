@@ -16,8 +16,8 @@
       check_context_type = doodle.utils.types.check_context_type,
       /*END_DEBUG*/
       //recycled events
-      evt_addedEvent = doodle.Event(doodle.Event.ADDED, true),
-      evt_removedEvent = doodle.Event(doodle.Event.REMOVED, true),
+      evt_addedEvent = doodle.events.Event(doodle.events.Event.ADDED, true),
+      evt_removedEvent = doodle.events.Event(doodle.events.Event.REMOVED, true),
       //lookup help
       doodle_Point = doodle.geom.Point,
       doodle_Matrix = doodle.geom.Matrix,

@@ -31,19 +31,19 @@ function init_scene () {
   var ball0 = Ball(20);
   ball0.x = Math.random() * display.width;
   ball0.y = Math.random() * display.height;
-  ball0.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onPress);
+  ball0.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onPress);
   layer0.addChild(ball0);
 
   var ball1 = Ball(20);
   ball1.x = Math.random() * display.width;
   ball1.y = Math.random() * display.height;
-  ball1.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onPress);
+  ball1.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onPress);
   layer0.addChild(ball1);
 
   var spring_line = doodle.Sprite();
   layer0.addChild(spring_line);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     if (!ball0Dragging) {
@@ -83,13 +83,13 @@ function init_scene () {
     if (event.target === ball1) {
       ball1Dragging = true;
     }
-    display.addEventListener(doodle.MouseEvent.MOUSE_UP, onRelease);
-    display.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onRelease);
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
   }
 
   function onRelease (event) {
-    display.removeEventListener(doodle.MouseEvent.MOUSE_UP, onRelease);
-    display.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, onRelease);
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
     ball0Dragging = false;
     ball1Dragging = false;
   }

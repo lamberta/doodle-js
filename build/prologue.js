@@ -8,3 +8,4 @@
 var doodle = {};
 //packages
 doodle.geom = {};
+doodle.events = {};

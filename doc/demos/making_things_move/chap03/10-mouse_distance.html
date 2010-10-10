@@ -39,7 +39,7 @@ function init_scene () {
   var sprite2 = doodle.Sprite();
   layer0.addChild(sprite2);
 
-  display.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+  display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
 
   function onMouseMove (event) {
     sprite2.graphics.clear();

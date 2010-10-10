@@ -38,7 +38,7 @@ function init_scene () {
     balls.push(ball);
   }
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     var ball0, ball1, dx, dy, dist, minDist,

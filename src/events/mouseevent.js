@@ -12,12 +12,12 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.MouseEvent
+   * @name doodle.events.MouseEvent
    * @class
-   * @augments doodle.UIEvent
+   * @augments doodle.events.UIEvent
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
@@ -33,13 +33,13 @@
    * @param {boolean=} metaKey
    * @param {number=} button Mouse button that caused the event (0|1|2)
    * @param {Node=} relatedTarget Secondary target for event (only for some events)
-   * @return {doodle.MouseEvent}
+   * @return {doodle.events.MouseEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.MouseEvent = function (type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY, 
-                                ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
+  doodle.events.MouseEvent = function (type, bubbles, cancelable, view, detail,
+                                       screenX, screenY, clientX, clientY, 
+                                       ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
     var mouseevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -60,7 +60,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      mouseevent = Object.create(doodle.UIEvent(init_obj));
+      mouseevent = Object.create(doodle.events.UIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -70,7 +70,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      mouseevent = Object.create(doodle.UIEvent(''));
+      mouseevent = Object.create(doodle.events.UIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -83,7 +83,7 @@
       check_boolean_type(cancelable, '[object MouseEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
       check_number_type(detail, '[object MouseEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
       /*END_DEBUG*/
-      mouseevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+      mouseevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
     Object.defineProperties(mouseevent, mouseevent_static_properties);
@@ -106,7 +106,7 @@
 
       /**
        * @name copy_mouseevent_properties
-       * @param {MouseEvent} evt MouseEvent to copy properties from.
+       * @param {doodle.events.MouseEvent} evt MouseEvent to copy properties from.
        * @throws {TypeError}
        * @private
        */
@@ -302,7 +302,7 @@
          * @param {boolean} metaKeyArg
          * @param {number} buttonArg
          * @param {Node} relatedTargetArg
-         * @return {MouseEvent}
+         * @return {doodle.events.MouseEvent}
          * @throws {TypeError}
          */
         'initMouseEvent': {
@@ -386,10 +386,10 @@
          * Copy the properties from another MouseEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyMouseEventProperties
-         * @param {MouseEvent} evt
+         * @param {doodle.events.MouseEvent} evt
          * @param {Node} resetTarget
          * @param {string} resetType
-         * @return {MouseEvent}
+         * @return {doodle.events.MouseEvent}
          * @throws {TypeError}
          * @private
          */
@@ -463,11 +463,11 @@
   /**
    * Test if an object is a MouseEvent.
    * @name isMouseEvent
-   * @param {MouseEvent} event
+   * @param {doodle.events.MouseEvent} event
    * @return {boolean}
    * @static
    */
-  isMouseEvent = doodle.MouseEvent.isMouseEvent = function (event) {
+  isMouseEvent = doodle.events.MouseEvent.isMouseEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -479,7 +479,7 @@
   /*DEBUG*/
   /**
    * @name check_mouseevent_type
-   * @param {MouseEvent} event
+   * @param {doodle.events.MouseEvent} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}

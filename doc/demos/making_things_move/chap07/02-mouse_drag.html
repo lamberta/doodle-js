@@ -27,16 +27,16 @@ function init_scene () {
   ball.y = 100;
   layer0.addChild(ball);
   
-  ball.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseDown);
+  ball.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
   
   function onMouseDown (event) {
-    display.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
-    display.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
   }
 
   function onMouseUp (event) {
-    display.removeEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
-    display.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
   }
 
   function onMouseMove (event) {

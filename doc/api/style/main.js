@@ -71,19 +71,20 @@ $(document).ready(function () {
    */
   $('.main dt, .main ol li').each(function () {
     var item = $(this),
-        txt = item.html(),
+        html = item.html().replace(/doodle\.events\./g, ''), //remove package info
         regexp;
+    
     for (var type in type_docs) {
       regexp = new RegExp(":"+type, 'g');
-      if (regexp.test(txt)) {
-        txt = txt.replace(regexp, ":<a href='"+ type_docs[type] +"'>"+ type +"</a>");
+      if (regexp.test(html)) {
+        html = html.replace(regexp, ":<a href='"+ type_docs[type] +"'>"+ type +"</a>");
       }
       regexp = new RegExp("\\|"+type, 'g');
-      if (regexp.test(txt)) {
-        txt = txt.replace(regexp, "|<a href='"+ type_docs[type] +"'>"+ type +"</a>");
+      if (regexp.test(html)) {
+        html = html.replace(regexp, "|<a href='"+ type_docs[type] +"'>"+ type +"</a>");
       }
     }
-    item.html(txt);
+    item.html(html);
   });
 
   /* Class description, inheritance list

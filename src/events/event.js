@@ -17,17 +17,17 @@
       isEvent;
   
   /**
-   * @name doodle.Event
+   * @name doodle.events.Event
    * @class
    * @augments Object
    * @param {string=} type
    * @param {boolean=} bubbles = false
    * @param {boolean=} cancelable = false
-   * @return {doodle.Event}
+   * @return {doodle.events.Event}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.Event = function (type, bubbles, cancelable) {
+  doodle.events.Event = function (type, bubbles, cancelable) {
     var event = Object.create(event_prototype),
         arg_len = arguments.length,
         init_obj, //function, event
@@ -60,7 +60,7 @@
 
       /**
        * @name copy_event_properties
-       * @param {doodle.Event} evt Event to copy properties from.
+       * @param {doodle.events.Event} evt Event to copy properties from.
        * @param {Node|boolean|null=} resetTarget Set new event target or null.
        * @param {string|boolean=} resetType Set new event type.
        * @throws {TypeError}
@@ -317,7 +317,7 @@
          * @param {string=} typeArg
          * @param {boolean=} canBubbleArg
          * @param {boolean=} cancelableArg
-         * @return {doodle.Event}
+         * @return {doodle.events.Event}
          * @throws {TypeError}
          */
         'initEvent': {
@@ -389,7 +389,7 @@
          * Copy the properties from another Event.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyEventProperties
-         * @param {Event} evt
+         * @param {doodle.events.Event} evt
          * @param {Node} resetTarget
          * @param {string} resetType
          * @throws {TypeError}
@@ -720,11 +720,11 @@
    * Test if an object is an event of any kind (Event/MouseEvent/etc).
    * Returns true on Doodle events as well as DOM events.
    * @name isEvent
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @return {boolean}
    * @static
    */
-  isEvent = doodle.Event.isEvent = function (event) {
+  isEvent = doodle.events.Event.isEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -742,7 +742,7 @@
   /*DEBUG*/
   /**
    * @name check_event_type
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}

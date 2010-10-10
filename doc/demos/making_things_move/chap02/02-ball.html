@@ -30,7 +30,7 @@ function init_scene () {
   ball.x = 20;
   ball.y = display.height/2;
 
-  ball.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  ball.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     ball.x += 1;

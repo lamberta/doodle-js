@@ -77,7 +77,7 @@ function init_scene () {
   gravitySlider.y = 10;
   layer0.addChild(gravitySlider);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     doVelocity();

@@ -28,8 +28,8 @@ function init_scene () {
   eventSprite.x = display.width/2;
   eventSprite.y = display.height/2;
 
-  eventSprite.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseDown);
-  eventSprite.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
+  eventSprite.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
+  eventSprite.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
 
   /* When a child is added or removed from the scene-graph, the
    * scene is automatically re-drawn.

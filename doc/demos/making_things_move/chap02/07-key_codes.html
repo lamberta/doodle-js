@@ -29,7 +29,7 @@ function init_scene () {
   ball.x = display.width/2;
   ball.y = display.height/2;
 
-  display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyboardEvent);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyboardEvent);
 
   function onKeyboardEvent (event) {
     switch (event.keyCode) {

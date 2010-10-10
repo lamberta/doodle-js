@@ -12,22 +12,22 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.UIEvent
+   * @name doodle.events.UIEvent
    * @class
-   * @augments doodle.Event
+   * @augments doodle.events.Event
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
    * @param {HTMLElement=} view
    * @param {number=} detail
-   * @return {doodle.UIEvent}
+   * @return {doodle.events.UIEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.UIEvent = function (type, bubbles, cancelable, view, detail) {
+  doodle.events.UIEvent = function (type, bubbles, cancelable, view, detail) {
     var uievent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -48,7 +48,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      uievent = Object.create(doodle.Event(init_obj));
+      uievent = Object.create(doodle.events.Event(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -58,7 +58,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      uievent = Object.create(doodle.Event(''));
+      uievent = Object.create(doodle.events.Event(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -68,7 +68,7 @@
       check_boolean_type(bubbles, '[object UIEvent]', 'type, *bubbles*, cancelable, view, detail');
       check_boolean_type(cancelable, '[object UIEvent]', 'type, bubbles, *cancelable*, view, detail');
       /*END_DEBUG*/
-      uievent = Object.create(doodle.Event(type, bubbles, cancelable));
+      uievent = Object.create(doodle.events.Event(type, bubbles, cancelable));
     }
     
     Object.defineProperties(uievent, uievent_static_properties);
@@ -86,7 +86,7 @@
 
       /**
        * @name copy_uievent_properties
-       * @param {UIEvent} evt UIEvent to copy properties from.
+       * @param {doodle.events.UIEvent} evt UIEvent to copy properties from.
        * @throws {TypeError}
        * @private
        */
@@ -212,7 +212,7 @@
          * @param {boolean} cancelableArg
          * @param {HTMLElement} viewArg
          * @param {number} detailArg
-         * @return {UIEvent}
+         * @return {doodle.events.UIEvent}
          * @throws {TypeError}
          */
         'initUIEvent': {
@@ -240,7 +240,7 @@
          * Copy the properties from another UIEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyUIEventProperties
-         * @param {UIEvent} evt
+         * @param {doodle.events.UIEvent} evt
          * @param {Node=} resetTarget
          * @param {string=} resetType
          * @return {Event}
@@ -317,11 +317,11 @@
    * Test if an object is an UIEvent or inherits from it.
    * Returns true on Doodle events as well as DOM events.
    * @name isUIEvent
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @return {boolean}
    * @static
    */
-  isUIEvent = doodle.UIEvent.isUIEvent = function (event) {
+  isUIEvent = doodle.events.UIEvent.isUIEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -338,7 +338,7 @@
   /*DEBUG*/
   /**
    * @name check_uievent_type
-   * @param {UIEvent} event
+   * @param {doodle.events.UIEvent} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}

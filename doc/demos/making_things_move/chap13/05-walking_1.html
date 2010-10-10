@@ -34,7 +34,7 @@ function init_scene () {
   segment1.y = segment0.getPin().y;
   layer0.addChild(segment1);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     cycle += 0.05;

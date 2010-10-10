@@ -36,7 +36,7 @@ function init_scene () {
     balls.push(ball);
   }
   
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     for (var i = balls.length-1; i > 0; i--) {
@@ -53,7 +53,7 @@ function init_scene () {
         console.log("removed " + ball.id + ", " + balls.length + " remaining.");
         
         if (balls.length <= 0) {
-          display.removeEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+          display.removeEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
           console.log("balls all gone!");
         }
       }

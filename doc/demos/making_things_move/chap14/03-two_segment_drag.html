@@ -28,7 +28,7 @@ function init_scene () {
   var segment1 = Segment(100, 20);
   layer0.addChild(segment1);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     drag(segment0, display.mouseX, display.mouseY);

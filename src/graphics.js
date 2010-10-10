@@ -10,7 +10,7 @@
       /*END_DEBUG*/
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
-      doodle_Event = doodle.Event,
+      doodle_Event = doodle.events.Event,
       LINEAR = doodle.GradientType.LINEAR,
       RADIAL = doodle.GradientType.RADIAL;
   

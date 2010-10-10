@@ -64,7 +64,7 @@ function init_scene () {
   lines[4].y = 250;
   lines[4].rotation = -30;
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     var ball_r = ball.radius;

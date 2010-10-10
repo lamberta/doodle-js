@@ -43,8 +43,8 @@ function init_scene () {
     layer0.addChild(tree);
   }
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
-  display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyDown);
 
   function onEnterFrame (event) {
     for (var i=0; i < numTrees; i++) {

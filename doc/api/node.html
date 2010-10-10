@@ -431,14 +431,14 @@
 
 </details>
 </dd>
-<dt><dfn>dispatchEvent</dfn> (event:Event) :boolean</dt>
+<dt><dfn>dispatchEvent</dfn> (event:doodle.events.Event) :boolean</dt>
 <dd>
 <p>Dispatches an event into the event flow. The event target is the EventDispatcher object upon which the dispatchEvent() method is called.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211;  </li>
+<li>event:doodle.events.Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -456,14 +456,14 @@
 
 </details>
 </dd>
-<dt><dfn>broadcastEvent</dfn> (event:Event) :boolean</dt>
+<dt><dfn>broadcastEvent</dfn> (event:doodle.events.Event) :boolean</dt>
 <dd>
 <p>Dispatches an event to every object with an active listener. Ignores propagation path, objects come from</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211;  </li>
+<li>event:doodle.events.Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -482,14 +482,14 @@
 
 </details>
 </dd>
-<dt><dfn>handleEvent</dfn> (event:Event) :boolean</dt>
+<dt><dfn>handleEvent</dfn> (event:doodle.events.Event) :boolean</dt>
 <dd>
 <p>Lookup and call listener if registered for specific event type.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>event:Event &#8211;  </li>
+<li>event:doodle.events.Event &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>

@@ -8,6 +8,7 @@
 var doodle = {};
 //packages
 doodle.geom = {};
+doodle.events = {};
 
 /* ES5 compatibility
  */
@@ -2552,17 +2553,17 @@ Object.defineProperty(doodle, 'LineJoin', {
       isEvent;
   
   /**
-   * @name doodle.Event
+   * @name doodle.events.Event
    * @class
    * @augments Object
    * @param {string=} type
    * @param {boolean=} bubbles = false
    * @param {boolean=} cancelable = false
-   * @return {doodle.Event}
+   * @return {doodle.events.Event}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.Event = function (type, bubbles, cancelable) {
+  doodle.events.Event = function (type, bubbles, cancelable) {
     var event = Object.create(event_prototype),
         arg_len = arguments.length,
         init_obj, //function, event
@@ -2595,7 +2596,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
       /**
        * @name copy_event_properties
-       * @param {doodle.Event} evt Event to copy properties from.
+       * @param {doodle.events.Event} evt Event to copy properties from.
        * @param {Node|boolean|null=} resetTarget Set new event target or null.
        * @param {string|boolean=} resetType Set new event type.
        * @throws {TypeError}
@@ -2852,7 +2853,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @param {string=} typeArg
          * @param {boolean=} canBubbleArg
          * @param {boolean=} cancelableArg
-         * @return {doodle.Event}
+         * @return {doodle.events.Event}
          * @throws {TypeError}
          */
         'initEvent': {
@@ -2924,7 +2925,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * Copy the properties from another Event.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyEventProperties
-         * @param {Event} evt
+         * @param {doodle.events.Event} evt
          * @param {Node} resetTarget
          * @param {string} resetType
          * @throws {TypeError}
@@ -3255,11 +3256,11 @@ Object.defineProperty(doodle, 'LineJoin', {
    * Test if an object is an event of any kind (Event/MouseEvent/etc).
    * Returns true on Doodle events as well as DOM events.
    * @name isEvent
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @return {boolean}
    * @static
    */
-  isEvent = doodle.Event.isEvent = function (event) {
+  isEvent = doodle.events.Event.isEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -3277,7 +3278,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   /*DEBUG*/
   /**
    * @name check_event_type
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}
@@ -3311,22 +3312,22 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.UIEvent
+   * @name doodle.events.UIEvent
    * @class
-   * @augments doodle.Event
+   * @augments doodle.events.Event
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
    * @param {HTMLElement=} view
    * @param {number=} detail
-   * @return {doodle.UIEvent}
+   * @return {doodle.events.UIEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.UIEvent = function (type, bubbles, cancelable, view, detail) {
+  doodle.events.UIEvent = function (type, bubbles, cancelable, view, detail) {
     var uievent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -3347,7 +3348,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      uievent = Object.create(doodle.Event(init_obj));
+      uievent = Object.create(doodle.events.Event(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -3357,7 +3358,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      uievent = Object.create(doodle.Event(''));
+      uievent = Object.create(doodle.events.Event(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -3367,7 +3368,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_boolean_type(bubbles, '[object UIEvent]', 'type, *bubbles*, cancelable, view, detail');
       check_boolean_type(cancelable, '[object UIEvent]', 'type, bubbles, *cancelable*, view, detail');
       /*END_DEBUG*/
-      uievent = Object.create(doodle.Event(type, bubbles, cancelable));
+      uievent = Object.create(doodle.events.Event(type, bubbles, cancelable));
     }
     
     Object.defineProperties(uievent, uievent_static_properties);
@@ -3385,7 +3386,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
       /**
        * @name copy_uievent_properties
-       * @param {UIEvent} evt UIEvent to copy properties from.
+       * @param {doodle.events.UIEvent} evt UIEvent to copy properties from.
        * @throws {TypeError}
        * @private
        */
@@ -3511,7 +3512,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @param {boolean} cancelableArg
          * @param {HTMLElement} viewArg
          * @param {number} detailArg
-         * @return {UIEvent}
+         * @return {doodle.events.UIEvent}
          * @throws {TypeError}
          */
         'initUIEvent': {
@@ -3539,7 +3540,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * Copy the properties from another UIEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyUIEventProperties
-         * @param {UIEvent} evt
+         * @param {doodle.events.UIEvent} evt
          * @param {Node=} resetTarget
          * @param {string=} resetType
          * @return {Event}
@@ -3616,11 +3617,11 @@ Object.defineProperty(doodle, 'LineJoin', {
    * Test if an object is an UIEvent or inherits from it.
    * Returns true on Doodle events as well as DOM events.
    * @name isUIEvent
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @return {boolean}
    * @static
    */
-  isUIEvent = doodle.UIEvent.isUIEvent = function (event) {
+  isUIEvent = doodle.events.UIEvent.isUIEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -3637,7 +3638,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   /*DEBUG*/
   /**
    * @name check_uievent_type
-   * @param {UIEvent} event
+   * @param {doodle.events.UIEvent} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}
@@ -3671,12 +3672,12 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.MouseEvent
+   * @name doodle.events.MouseEvent
    * @class
-   * @augments doodle.UIEvent
+   * @augments doodle.events.UIEvent
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
@@ -3692,13 +3693,13 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @param {boolean=} metaKey
    * @param {number=} button Mouse button that caused the event (0|1|2)
    * @param {Node=} relatedTarget Secondary target for event (only for some events)
-   * @return {doodle.MouseEvent}
+   * @return {doodle.events.MouseEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.MouseEvent = function (type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY, 
-                                ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
+  doodle.events.MouseEvent = function (type, bubbles, cancelable, view, detail,
+                                       screenX, screenY, clientX, clientY, 
+                                       ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
     var mouseevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -3719,7 +3720,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      mouseevent = Object.create(doodle.UIEvent(init_obj));
+      mouseevent = Object.create(doodle.events.UIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -3729,7 +3730,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      mouseevent = Object.create(doodle.UIEvent(''));
+      mouseevent = Object.create(doodle.events.UIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -3742,7 +3743,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_boolean_type(cancelable, '[object MouseEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
       check_number_type(detail, '[object MouseEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
       /*END_DEBUG*/
-      mouseevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+      mouseevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
     Object.defineProperties(mouseevent, mouseevent_static_properties);
@@ -3765,7 +3766,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
       /**
        * @name copy_mouseevent_properties
-       * @param {MouseEvent} evt MouseEvent to copy properties from.
+       * @param {doodle.events.MouseEvent} evt MouseEvent to copy properties from.
        * @throws {TypeError}
        * @private
        */
@@ -3961,7 +3962,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @param {boolean} metaKeyArg
          * @param {number} buttonArg
          * @param {Node} relatedTargetArg
-         * @return {MouseEvent}
+         * @return {doodle.events.MouseEvent}
          * @throws {TypeError}
          */
         'initMouseEvent': {
@@ -4045,10 +4046,10 @@ Object.defineProperty(doodle, 'LineJoin', {
          * Copy the properties from another MouseEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyMouseEventProperties
-         * @param {MouseEvent} evt
+         * @param {doodle.events.MouseEvent} evt
          * @param {Node} resetTarget
          * @param {string} resetType
-         * @return {MouseEvent}
+         * @return {doodle.events.MouseEvent}
          * @throws {TypeError}
          * @private
          */
@@ -4122,11 +4123,11 @@ Object.defineProperty(doodle, 'LineJoin', {
   /**
    * Test if an object is a MouseEvent.
    * @name isMouseEvent
-   * @param {MouseEvent} event
+   * @param {doodle.events.MouseEvent} event
    * @return {boolean}
    * @static
    */
-  isMouseEvent = doodle.MouseEvent.isMouseEvent = function (event) {
+  isMouseEvent = doodle.events.MouseEvent.isMouseEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -4138,7 +4139,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   /*DEBUG*/
   /**
    * @name check_mouseevent_type
-   * @param {MouseEvent} event
+   * @param {doodle.events.MouseEvent} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}
@@ -4172,12 +4173,12 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.TouchEvent
+   * @name doodle.events.TouchEvent
    * @class
-   * @augments doodle.UIEvent
+   * @augments doodle.events.UIEvent
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
@@ -4196,15 +4197,15 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @param {Array=} changedTouches ?
    * @param {number=} scale
    * @param {number=} rotation
-   * @return {doodle.TouchEvent}
+   * @return {doodle.events.TouchEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.TouchEvent = function (type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY,
-                                ctrlKey, altKey, shiftKey, metaKey,
-                                touches, targetTouches, changedTouches,
-                                scale, rotation) {
+  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail,
+                                       screenX, screenY, clientX, clientY,
+                                       ctrlKey, altKey, shiftKey, metaKey,
+                                       touches, targetTouches, changedTouches,
+                                       scale, rotation) {
     var touchevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -4225,7 +4226,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      touchevent = Object.create(doodle.UIEvent(init_obj));
+      touchevent = Object.create(doodle.events.UIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -4235,7 +4236,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      touchevent = Object.create(doodle.UIEvent(''));
+      touchevent = Object.create(doodle.events.UIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -4248,7 +4249,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_boolean_type(cancelable, '[object TouchEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
       check_number_type(detail, '[object TouchEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
       /*END_DEBUG*/
-      touchevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+      touchevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
     Object.defineProperties(touchevent, touchevent_static_properties);
@@ -4270,7 +4271,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
       /**
        * @name copy_touchevent_properties
-       * @param {TouchEvent} evt TouchEvent to copy properties from.
+       * @param {doodle.events.TouchEvent} evt TouchEvent to copy properties from.
        * @private
        */
       copy_touchevent_properties = function (evt) {
@@ -4456,7 +4457,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @param {Array} changedTouchesArg
          * @param {number} scaleArg
          * @param {number} rotationArg
-         * @return {TouchEvent}
+         * @return {doodle.events.TouchEvent}
          * @throws {TypeError}
          */
         'initTouchEvent': {
@@ -4549,10 +4550,10 @@ Object.defineProperty(doodle, 'LineJoin', {
          * Copy the properties from another TouchEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyTouchEventProperties
-         * @param {TouchEvent} evt
+         * @param {doodle.events.TouchEvent} evt
          * @param {Node} resetTarget
          * @param {string} resetType
-         * @return {TouchEvent}
+         * @return {doodle.events.TouchEvent}
          * @throws {TypeError}
          * @private
          */
@@ -4628,11 +4629,11 @@ Object.defineProperty(doodle, 'LineJoin', {
   /**
    * Test if an object is a TouchEvent.
    * @name isTouchEvent
-   * @param {TouchEvent} event
+   * @param {doodle.events.TouchEvent} event
    * @return {boolean}
    * @static
    */
-  isTouchEvent = doodle.TouchEvent.isTouchEvent = function (event) {
+  isTouchEvent = doodle.events.TouchEvent.isTouchEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -4644,7 +4645,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   /*DEBUG*/
   /**
    * @name check_touchevent_type
-   * @param {TouchEvent} event
+   * @param {doodle.events.TouchEvent} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}
@@ -4678,23 +4679,23 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.TextEvent
+   * @name doodle.events.TextEvent
    * @class
-   * @augments doodle.UIEvent
+   * @augments doodle.events.UIEvent
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
    * @param {HTMLElement=} view
    * @param {string=} data
    * @param {number=} inputMode
-   * @return {doodle.TextEvent}
+   * @return {doodle.events.TextEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
+  doodle.events.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
     var textevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -4715,7 +4716,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      textevent = Object.create(doodle.UIEvent(init_obj));
+      textevent = Object.create(doodle.events.UIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -4725,7 +4726,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      textevent = Object.create(doodle.UIEvent(''));
+      textevent = Object.create(doodle.events.UIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -4736,18 +4737,18 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_boolean_type(bubbles, '[object TextEvent]', 'type, *bubbles*, cancelable, view, data, inputMode');
       check_boolean_type(cancelable, '[object TextEvent]', 'type, bubbles, *cancelable*, view, data, inputMode');
       /*END_DEBUG*/
-      textevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
+      textevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
     
     Object.defineProperties(textevent, textevent_static_properties);
     //properties that require privacy
     Object.defineProperties(textevent, (function () {
       var evt_data = '',
-          evt_inputMode = doodle.TextEvent.INPUT_METHOD_UNKNOWN;
+          evt_inputMode = doodle.events.TextEvent.INPUT_METHOD_UNKNOWN;
 
       /**
        * @name copy_textevent_properties
-       * @param {doodle.TextEvent} evt TextEvent to copy properties from.
+       * @param {doodle.events.TextEvent} evt TextEvent to copy properties from.
        * @private
        */
       copy_textevent_properties = function (evt) {
@@ -4789,7 +4790,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @param {HTMLElement} view
          * @param {string} dataArg
          * @param {number} inputModeArg
-         * @return {TextEvent}
+         * @return {doodle.events.TextEvent}
          */
         'initTextEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, dataArg, inputModeArg) {
@@ -4798,7 +4799,7 @@ Object.defineProperty(doodle, 'LineJoin', {
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             viewArg = (viewArg === undefined) ? null : viewArg;
             dataArg = (dataArg === undefined) ? '' : dataArg;
-            inputModeArg = (inputModeArg === undefined) ? doodle.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
+            inputModeArg = (inputModeArg === undefined) ? doodle.events.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
             /*DEBUG*/
             check_string_type(typeArg, this+'.initTextEvent', '*type*, bubbles, cancelable, view, data, inputMode');
             check_boolean_type(canBubbleArg, this+'.initTextEvent', 'type, *bubbles*, cancelable, view, data, inputMode');
@@ -4818,10 +4819,10 @@ Object.defineProperty(doodle, 'LineJoin', {
          * Copy the properties from another TextEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyTextEventProperties
-         * @param {TextEvent} evt
+         * @param {doodle.events.TextEvent} evt
          * @param {Node} resetTarget
          * @param {string} resetType
-         * @return {TextEvent}
+         * @return {doodle.events.TextEvent}
          * @private
          */
         '__copyTextEventProperties': {
@@ -4892,11 +4893,11 @@ Object.defineProperty(doodle, 'LineJoin', {
   /**
    * Test if an object is a TextEvent.
    * @name isTextEvent
-   * @param {TextEvent} event
+   * @param {doodle.events.TextEvent} event
    * @return {boolean}
    * @static
    */
-  isTextEvent = doodle.TextEvent.isTextEvent = function (event) {
+  isTextEvent = doodle.events.TextEvent.isTextEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -4908,7 +4909,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   /*DEBUG*/
   /**
    * @name check_textevent_type
-   * @param {TextEvent} event
+   * @param {doodle.events.TextEvent} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}
@@ -4943,12 +4944,12 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.KeyboardEvent
+   * @name doodle.events.KeyboardEvent
    * @class
-   * @augments doodle.UIEvent
+   * @augments doodle.events.UIEvent
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
@@ -4957,12 +4958,12 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @param {number=} keyLocation
    * @param {string=} modifiersList White-space separated list of key modifiers.
    * @param {boolean=} repeat
-   * @return {doodle.KeyboardEvent}
+   * @return {doodle.events.KeyboardEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.KeyboardEvent = function (type, bubbles, cancelable, view,
-                                   keyIdentifier, keyLocation, modifiersList, repeat) {
+  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view,
+                                          keyIdentifier, keyLocation, modifiersList, repeat) {
     var keyboardevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -4983,7 +4984,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      keyboardevent = Object.create(doodle.UIEvent(init_obj));
+      keyboardevent = Object.create(doodle.events.UIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -4993,7 +4994,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      keyboardevent = Object.create(doodle.UIEvent(''));
+      keyboardevent = Object.create(doodle.events.UIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -5004,7 +5005,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       check_boolean_type(bubbles, '[object KeyboardEvent]', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
       check_boolean_type(cancelable, '[object KeyboardEvent]', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
       /*END_DEBUG*/
-      keyboardevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
+      keyboardevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
     
     Object.defineProperties(keyboardevent, keyboardevent_static_properties);
@@ -5021,7 +5022,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 
       /**
        * @name copy_keyboardevent_properties
-       * @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+       * @param {doodle.events.KeyboardEvent} evt KeyboardEvent to copy properties from.
        * @throws {TypeError}
        * @private
        */
@@ -5138,7 +5139,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @param {number} keyLocationArg
          * @param {string} modifiersListArg
          * @param {boolean} repeatArg
-         * @return {Event}
+         * @return {doodle.events.Event}
          * @throws {TypeError}
          */
         'initKeyboardEvent': {
@@ -5219,10 +5220,10 @@ Object.defineProperty(doodle, 'LineJoin', {
          * Copy the properties from another KeyboardEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyKeyboardEventProperties
-         * @param {KeyboardEvent} evt
+         * @param {doodle.events.KeyboardEvent} evt
          * @param {Node} resetTarget
          * @param {string} resetType
-         * @return {KeyboardEvent}
+         * @return {doodle.events.KeyboardEvent}
          * @throws {TypeError}
          * @private
          */
@@ -5295,11 +5296,11 @@ Object.defineProperty(doodle, 'LineJoin', {
   /**
    * Test if an object is a keyboard event.
    * @name isKeyboardEvent
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @return {boolean}
    * @static
    */
-  isKeyboardEvent = doodle.KeyboardEvent.isKeyboardEvent = function (event) {
+  isKeyboardEvent = doodle.events.KeyboardEvent.isKeyboardEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -5311,7 +5312,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   /*DEBUG*/
   /**
    * @name check_keyboardevent_type
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}
@@ -5335,7 +5336,7 @@ Object.defineProperty(doodle, 'LineJoin', {
 /*
  * EVENT
  */
-Object.defineProperties(doodle.Event, {
+Object.defineProperties(doodle.events.Event, {
   /**
    * @name CAPTURING_PHASE
    * @return {number} [read-only]
@@ -5464,7 +5465,7 @@ Object.defineProperties(doodle.Event, {
 /*
  * UI EVENT
  */
-Object.defineProperties(doodle.UIEvent, {
+Object.defineProperties(doodle.events.UIEvent, {
   /**
    * @name FOCUS_IN
    * @return {string} [read-only]
@@ -5486,7 +5487,7 @@ Object.defineProperties(doodle.UIEvent, {
  * MOUSE EVENT
  * Compatibility tables: http://www.quirksmode.org/dom/events/index.html
  */
-Object.defineProperties(doodle.MouseEvent, {
+Object.defineProperties(doodle.events.MouseEvent, {
   /**
    * To test for left/middle/right button check value for event.which (0,1,2).
    * @name CLICK
@@ -5660,7 +5661,7 @@ Object.defineProperties(doodle.MouseEvent, {
  * TOUCH EVENT
  * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
  */
-Object.defineProperties(doodle.TouchEvent, {
+Object.defineProperties(doodle.events.TouchEvent, {
   /**
    * @name TOUCH_START
    * @return {string} [read-only]
@@ -5726,7 +5727,7 @@ Object.defineProperties(doodle.TouchEvent, {
 /*
  * KEYBOARD EVENT
  */
-Object.defineProperties(doodle.KeyboardEvent, {
+Object.defineProperties(doodle.events.KeyboardEvent, {
   /**
    * @name KEY_PRESS
    * @return {string} [read-only]
@@ -5866,7 +5867,7 @@ Object.defineProperties(doodle.KeyboardEvent, {
 
 /* TEXT EVENT
  */
-Object.defineProperties(doodle.TextEvent, {
+Object.defineProperties(doodle.events.TextEvent, {
   /**
    * @name TEXT_INPUT
    * @return {string} [read-only]
@@ -8053,9 +8054,9 @@ Object.defineProperties(doodle.TextEvent, {
       check_event_type = doodle.utils.types.check_event_type,
       /*END_DEBUG*/
       //lookup help
-      CAPTURING_PHASE = doodle.Event.CAPTURING_PHASE,
-      AT_TARGET = doodle.Event.AT_TARGET,
-      BUBBLING_PHASE = doodle.Event.BUBBLING_PHASE,
+      CAPTURING_PHASE = doodle.events.Event.CAPTURING_PHASE,
+      AT_TARGET = doodle.events.Event.AT_TARGET,
+      BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE,
       //lookup help
       Array_indexOf = Array.prototype.indexOf,
       Array_splice = Array.prototype.splice;
@@ -8218,7 +8219,7 @@ Object.defineProperties(doodle.TextEvent, {
     /**
      * Lookup and call listener if registered for specific event type.
      * @name handleEvent
-     * @param {Event} event
+     * @param {doodle.events.Event} event
      * @return {boolean} true if node has listeners of event type.
      * @throws {TypeError}
      */
@@ -8279,7 +8280,7 @@ Object.defineProperties(doodle.TextEvent, {
      * Dispatches an event into the event flow. The event target is the
      * EventDispatcher object upon which the dispatchEvent() method is called.
      * @name dispatchEvent
-     * @param {Event} event
+     * @param {doodle.events.Event} event
      * @return {boolean} true if the event was successfully dispatched.
      * @throws {TypeError}
      */
@@ -8376,7 +8377,7 @@ Object.defineProperties(doodle.TextEvent, {
      * Dispatches an event to every object with an active listener.
      * Ignores propagation path, objects come from
      * @name broadcastEvent
-     * @param {Event} event
+     * @param {doodle.events.Event} event
      * @return {boolean} True if the event was successfully dispatched.
      * @throws {TypeError}
      * @throws {Error}
@@ -8562,8 +8563,8 @@ Object.defineProperties(doodle.TextEvent, {
       check_context_type = doodle.utils.types.check_context_type,
       /*END_DEBUG*/
       //recycled events
-      evt_addedEvent = doodle.Event(doodle.Event.ADDED, true),
-      evt_removedEvent = doodle.Event(doodle.Event.REMOVED, true),
+      evt_addedEvent = doodle.events.Event(doodle.events.Event.ADDED, true),
+      evt_removedEvent = doodle.events.Event(doodle.events.Event.REMOVED, true),
       //lookup help
       doodle_Point = doodle.geom.Point,
       doodle_Matrix = doodle.geom.Matrix,
@@ -9933,7 +9934,7 @@ Object.defineProperties(doodle.TextEvent, {
       /*END_DEBUG*/
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
-      doodle_Event = doodle.Event,
+      doodle_Event = doodle.events.Event,
       LINEAR = doodle.GradientType.LINEAR,
       RADIAL = doodle.GradientType.RADIAL;
   
@@ -11552,12 +11553,12 @@ Object.defineProperties(doodle.TextEvent, {
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
       doodle_Layer = doodle.Layer,
-      //doodle_TouchEvent = doodle.TouchEvent,
+      //doodle_TouchEvent = doodle.events.TouchEvent,
       //recycle these event objects
-      evt_enterFrame = doodle.Event(doodle.Event.ENTER_FRAME),
-      evt_mouseEvent = doodle.MouseEvent(''),
-      //evt_touchEvent = doodle.TouchEvent(''),
-      evt_keyboardEvent = doodle.KeyboardEvent('');
+      evt_enterFrame = doodle.events.Event(doodle.events.Event.ENTER_FRAME),
+      evt_mouseEvent = doodle.events.MouseEvent(''),
+      //evt_touchEvent = doodle.events.TouchEvent(''),
+      evt_keyboardEvent = doodle.events.KeyboardEvent('');
   
   /**
    * Doodle Display object.
@@ -11619,7 +11620,7 @@ Object.defineProperties(doodle.TextEvent, {
           $evt_mouseEvent = evt_mouseEvent,
           $evt_keyboardEvent = evt_keyboardEvent;
 
-      /* @param {MouseEvent} evt
+      /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_event (evt) {
         $dispatch_mouse_event(evt, $evt_mouseEvent,
@@ -11627,7 +11628,7 @@ Object.defineProperties(doodle.TextEvent, {
                               mouseX, mouseY, $display);
       }
 
-      /* @param {MouseEvent} evt
+      /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_move (evt) {
         var x, y;
@@ -11639,13 +11640,13 @@ Object.defineProperties(doodle.TextEvent, {
                                   x, y, $display);
       }
 
-      /* @param {MouseEvent} evt
+      /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_leave (evt) {
         $dispatch_mouseleave_event(evt, $evt_mouseEvent, display_scene_path, layers, layers.length, $display);
       }
 
-      /* @param {KeyboardEvent} evt
+      /* @param {doodle.events.KeyboardEvent} evt
        */
       function on_keyboard_event (evt) {
         $dispatch_keyboard_event(evt, $evt_keyboardEvent, $display);
@@ -11662,12 +11663,12 @@ Object.defineProperties(doodle.TextEvent, {
       
       //Add display handlers
       //Redraw scene graph when children are added and removed.
-      $display.addEventListener(doodle.Event.ADDED, on_create_frame);
-      $display.addEventListener(doodle.Event.REMOVED, on_create_frame);
+      $display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
+      $display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
       //Add keyboard listeners to document.
-      document.addEventListener(doodle.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
-      document.addEventListener(doodle.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
-      document.addEventListener(doodle.KeyboardEvent.KEY_UP, on_keyboard_event, false);
+      document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
+      document.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
+      document.addEventListener(doodle.events.KeyboardEvent.KEY_UP, on_keyboard_event, false);
       
       return {
         /**
@@ -11786,16 +11787,16 @@ Object.defineProperties(doodle.TextEvent, {
 
             //add event handlers
             //MouseEvents
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
             //this dispatches mouseleave and mouseout for display and layers
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
             //
-            elementArg.addEventListener(doodle.MouseEvent.CLICK, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_UP, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-            elementArg.addEventListener(doodle.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.addEventListener(doodle.events.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
             /*//TouchEvents
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
             elementArg.addEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
@@ -11819,16 +11820,16 @@ Object.defineProperties(doodle.TextEvent, {
           value: function (elementArg) {
             //remove event handlers
             //MouseEvents
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
             //
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_OUT, on_mouse_leave, false);
             //
-            elementArg.removeEventListener(doodle.MouseEvent.CLICK, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_UP, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
-            elementArg.removeEventListener(doodle.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.DOUBLE_CLICK, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_DOWN, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.CONTEXT_MENU, on_mouse_event, false);
+            elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_WHEEL, on_mouse_event, false);
             /*//TouchEvents
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_START, on_touch_event, false);
             elementArg.removeEventListener(doodle_TouchEvent.TOUCH_MOVE, on_touch_event, false);
@@ -12408,8 +12409,8 @@ Object.defineProperties(doodle.TextEvent, {
    * mouse position is within their bounds. The event then follows the event path.
    * The doodle mouse event is recycled by copying properties from the dom event.
    *
-   * @param {MouseEvent} evt DOM mouse event to copy properties from.
-   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {doodle.events.MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {doodle.events.MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
    * @param {number} count number of nodes in the scene path array.
    * @param {number} x Position of the mouse x coordiante.
@@ -12469,8 +12470,8 @@ Object.defineProperties(doodle.TextEvent, {
    * the node.__pointInBounds property. This is only accessed in this function,
    * and is reset in 'dispatch_mouseleave_event'.
    *
-   * @param {MouseEvent} evt DOM mouse event to copy properties from.
-   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {doodle.events.MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {doodle.events.MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
    * @param {number} count number of nodes in the scene path array.
    * @param {number} x Position of the mouse x coordiante.
@@ -12514,7 +12515,7 @@ Object.defineProperties(doodle.TextEvent, {
   /* not implemented
    */
   var dispatch_mousemove_event_IGNORELAYER = function (evt, mouseEvent, path, count, x, y,
-                                       display, layers, layer_count) {
+                                                       display, layers, layer_count) {
     var node,
         evt_disp_p = false;
     
@@ -12616,8 +12617,8 @@ Object.defineProperties(doodle.TextEvent, {
    * Dispatches 'mouseout' and 'mouseleave' to the display and resets
    * the __pointInBounds property for all nodes.
    *
-   * @param {MouseEvent} evt DOM mouse event to copy properties from.
-   * @param {MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
+   * @param {doodle.events.MouseEvent} evt DOM mouse event to copy properties from.
+   * @param {doodle.events.MouseEvent} mouseEvent Doodle mouse event to re-dispatch to nodes.
    * @param {Array} path Reference to the display's scene path.
    * @param {Array} layers Reference to display's children array.
    * @param {number} layer_count number of nodes in the layers array. Later reused to be node scene path count.
@@ -12652,7 +12653,7 @@ Object.defineProperties(doodle.TextEvent, {
 
   /* Called when the dom detects a keypress.
    * Doodle KeyboardEvent is reused by copying the dom event properties.
-   * @param {Event} evt DOM keyboard event to copy properties from.
+   * @param {doodle.events.Event} evt DOM keyboard event to copy properties from.
    * @return {boolean}
    * @private
    */

@@ -49,9 +49,9 @@ function init_scene () {
     layer0.addChild(tree);
   }
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
-  display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
-  display.addEventListener(doodle.KeyboardEvent.KEY_UP, onKeyUp);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyDown);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_UP, onKeyUp);
 
   function onEnterFrame (event) {
     vx += ax;

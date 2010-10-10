@@ -12,12 +12,12 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.TouchEvent
+   * @name doodle.events.TouchEvent
    * @class
-   * @augments doodle.UIEvent
+   * @augments doodle.events.UIEvent
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
@@ -36,15 +36,15 @@
    * @param {Array=} changedTouches ?
    * @param {number=} scale
    * @param {number=} rotation
-   * @return {doodle.TouchEvent}
+   * @return {doodle.events.TouchEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.TouchEvent = function (type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY,
-                                ctrlKey, altKey, shiftKey, metaKey,
-                                touches, targetTouches, changedTouches,
-                                scale, rotation) {
+  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail,
+                                       screenX, screenY, clientX, clientY,
+                                       ctrlKey, altKey, shiftKey, metaKey,
+                                       touches, targetTouches, changedTouches,
+                                       scale, rotation) {
     var touchevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -65,7 +65,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      touchevent = Object.create(doodle.UIEvent(init_obj));
+      touchevent = Object.create(doodle.events.UIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -75,7 +75,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      touchevent = Object.create(doodle.UIEvent(''));
+      touchevent = Object.create(doodle.events.UIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -88,7 +88,7 @@
       check_boolean_type(cancelable, '[object TouchEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
       check_number_type(detail, '[object TouchEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
       /*END_DEBUG*/
-      touchevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view, detail));
+      touchevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
     
     Object.defineProperties(touchevent, touchevent_static_properties);
@@ -110,7 +110,7 @@
 
       /**
        * @name copy_touchevent_properties
-       * @param {TouchEvent} evt TouchEvent to copy properties from.
+       * @param {doodle.events.TouchEvent} evt TouchEvent to copy properties from.
        * @private
        */
       copy_touchevent_properties = function (evt) {
@@ -296,7 +296,7 @@
          * @param {Array} changedTouchesArg
          * @param {number} scaleArg
          * @param {number} rotationArg
-         * @return {TouchEvent}
+         * @return {doodle.events.TouchEvent}
          * @throws {TypeError}
          */
         'initTouchEvent': {
@@ -389,10 +389,10 @@
          * Copy the properties from another TouchEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyTouchEventProperties
-         * @param {TouchEvent} evt
+         * @param {doodle.events.TouchEvent} evt
          * @param {Node} resetTarget
          * @param {string} resetType
-         * @return {TouchEvent}
+         * @return {doodle.events.TouchEvent}
          * @throws {TypeError}
          * @private
          */
@@ -468,11 +468,11 @@
   /**
    * Test if an object is a TouchEvent.
    * @name isTouchEvent
-   * @param {TouchEvent} event
+   * @param {doodle.events.TouchEvent} event
    * @return {boolean}
    * @static
    */
-  isTouchEvent = doodle.TouchEvent.isTouchEvent = function (event) {
+  isTouchEvent = doodle.events.TouchEvent.isTouchEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -484,7 +484,7 @@
   /*DEBUG*/
   /**
    * @name check_touchevent_type
-   * @param {TouchEvent} event
+   * @param {doodle.events.TouchEvent} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}

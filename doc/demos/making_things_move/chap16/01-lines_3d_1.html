@@ -43,7 +43,7 @@ function init_scene () {
   var lines = doodle.Sprite();
   layer0.addChild(lines);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     var angleX = (display.mouseY - vpY) * 0.001,

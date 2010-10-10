@@ -27,13 +27,13 @@ function init_scene () {
   ball.y = 100;
   layer0.addChild(ball);
   
-  ball.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseDownBall);
-  ball.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUpBall);
-  ball.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMoveBall);
+  ball.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDownBall);
+  ball.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUpBall);
+  ball.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMoveBall);
 
-  display.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseDownDisplay);
-  display.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUpDisplay);
-  display.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMoveDisplay);
+  display.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDownDisplay);
+  display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUpDisplay);
+  display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMoveDisplay);
   
   function onMouseDownBall (event) {
     console.log("mouse down - ball");

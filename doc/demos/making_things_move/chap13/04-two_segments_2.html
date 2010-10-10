@@ -37,13 +37,13 @@ function init_scene () {
   slider0.x = 320;
   slider0.y = 20;
   layer0.addChild(slider0);
-  slider0.addEventListener(doodle.Event.CHANGE, onChange);
+  slider0.addEventListener(doodle.events.Event.CHANGE, onChange);
 
   var slider1 = SimpleSlider(-160, 0, 0);
   slider1.x = 340;
   slider1.y = 20;
   layer0.addChild(slider1);
-  slider1.addEventListener(doodle.Event.CHANGE, onChange);
+  slider1.addEventListener(doodle.events.Event.CHANGE, onChange);
 
   function onChange (event) {
     segment0.rotation = slider0.value;

@@ -45,7 +45,7 @@ function init_scene () {
   ball.y = display.height/2;
   parent1.addChild(ball);
   
-  ball.addEventListener(doodle.MouseEvent.CLICK, onBallClick);
+  ball.addEventListener(doodle.events.MouseEvent.CLICK, onBallClick);
 
   function onBallClick (event) {
     parent2.addChild(ball);

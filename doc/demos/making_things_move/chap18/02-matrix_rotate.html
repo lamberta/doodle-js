@@ -29,7 +29,7 @@ function init_scene () {
   box.graphics.endFill();
   layer0.addChild(box);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     angle += 0.05;

@@ -42,7 +42,7 @@ function init_scene () {
     dots.push(dot);
   }
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
      for (var i = 0; i < numDots; i++) {

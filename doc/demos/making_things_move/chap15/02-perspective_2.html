@@ -35,8 +35,8 @@ function init_scene () {
   vpX = display.width / 2;
   vpY = display.height / 2;
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
-  display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyDown);
 
   function onEnterFrame (event) {
     if (zpos > -fl) {

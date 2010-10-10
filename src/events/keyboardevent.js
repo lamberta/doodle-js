@@ -13,12 +13,12 @@
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
       /*END_DEBUG*/
-      isEvent = doodle.Event.isEvent;
+      isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.KeyboardEvent
+   * @name doodle.events.KeyboardEvent
    * @class
-   * @augments doodle.UIEvent
+   * @augments doodle.events.UIEvent
    * @param {string=} type
    * @param {boolean=} bubbles
    * @param {boolean=} cancelable
@@ -27,12 +27,12 @@
    * @param {number=} keyLocation
    * @param {string=} modifiersList White-space separated list of key modifiers.
    * @param {boolean=} repeat
-   * @return {doodle.KeyboardEvent}
+   * @return {doodle.events.KeyboardEvent}
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.KeyboardEvent = function (type, bubbles, cancelable, view,
-                                   keyIdentifier, keyLocation, modifiersList, repeat) {
+  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view,
+                                          keyIdentifier, keyLocation, modifiersList, repeat) {
     var keyboardevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -53,7 +53,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      keyboardevent = Object.create(doodle.UIEvent(init_obj));
+      keyboardevent = Object.create(doodle.events.UIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -63,7 +63,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      keyboardevent = Object.create(doodle.UIEvent(''));
+      keyboardevent = Object.create(doodle.events.UIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -74,7 +74,7 @@
       check_boolean_type(bubbles, '[object KeyboardEvent]', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
       check_boolean_type(cancelable, '[object KeyboardEvent]', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
       /*END_DEBUG*/
-      keyboardevent = Object.create(doodle.UIEvent(type, bubbles, cancelable, view));
+      keyboardevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
     
     Object.defineProperties(keyboardevent, keyboardevent_static_properties);
@@ -91,7 +91,7 @@
 
       /**
        * @name copy_keyboardevent_properties
-       * @param {KeyboardEvent} evt KeyboardEvent to copy properties from.
+       * @param {doodle.events.KeyboardEvent} evt KeyboardEvent to copy properties from.
        * @throws {TypeError}
        * @private
        */
@@ -208,7 +208,7 @@
          * @param {number} keyLocationArg
          * @param {string} modifiersListArg
          * @param {boolean} repeatArg
-         * @return {Event}
+         * @return {doodle.events.Event}
          * @throws {TypeError}
          */
         'initKeyboardEvent': {
@@ -289,10 +289,10 @@
          * Copy the properties from another KeyboardEvent.
          * Allows for the reuse of this object for further dispatch.
          * @name __copyKeyboardEventProperties
-         * @param {KeyboardEvent} evt
+         * @param {doodle.events.KeyboardEvent} evt
          * @param {Node} resetTarget
          * @param {string} resetType
-         * @return {KeyboardEvent}
+         * @return {doodle.events.KeyboardEvent}
          * @throws {TypeError}
          * @private
          */
@@ -365,11 +365,11 @@
   /**
    * Test if an object is a keyboard event.
    * @name isKeyboardEvent
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @return {boolean}
    * @static
    */
-  isKeyboardEvent = doodle.KeyboardEvent.isKeyboardEvent = function (event) {
+  isKeyboardEvent = doodle.events.KeyboardEvent.isKeyboardEvent = function (event) {
     if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
       return false;
     } else {
@@ -381,7 +381,7 @@
   /*DEBUG*/
   /**
    * @name check_keyboardevent_type
-   * @param {Event} event
+   * @param {doodle.events.Event} event
    * @param {string} caller
    * @param {string} params
    * @return {boolean}

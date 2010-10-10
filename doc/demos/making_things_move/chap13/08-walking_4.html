@@ -45,7 +45,7 @@ function init_scene () {
   segment3.y = segment2.getPin().y;
   layer0.addChild(segment3);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     walk(segment0, segment1, cycle);

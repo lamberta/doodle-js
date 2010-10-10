@@ -72,8 +72,8 @@ function init_scene () {
   var triangle_graphics = doodle.Sprite();
   layer0.addChild(triangle_graphics);
 
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
-  display.addEventListener(doodle.KeyboardEvent.KEY_DOWN, onKeyDown);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyDown);
 
   function onEnterFrame (event) {
     var angleX = (display.mouseY - vpY) * 0.001,

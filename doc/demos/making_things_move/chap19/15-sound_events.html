@@ -40,7 +40,7 @@ function init_scene () {
     boing.currentTime = 0;
   });
   
-  display.addEventListener(doodle.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     var left = 0,
