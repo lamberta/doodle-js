@@ -2,4 +2,4 @@ build/*.tmp
 build/*.error
 build/*.jar
 src/TAGS
-doc/demos/*
+doc/demos/tmp/
