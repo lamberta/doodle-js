@@ -72,6 +72,14 @@ function build_full {
     cat ./src/elementnode.js >> "$DEBUG_OUT_FILE"
     cat ./src/layer.js >> "$DEBUG_OUT_FILE"
     cat ./src/display.js >> "$DEBUG_OUT_FILE"
+
+    #primitives...
+    cat ./src/primitives/constants/fontstyle.js >> "$DEBUG_OUT_FILE"
+    cat ./src/primitives/constants/fontvariant.js >> "$DEBUG_OUT_FILE"
+    cat ./src/primitives/constants/fontweight.js >> "$DEBUG_OUT_FILE"
+    cat ./src/primitives/constants/textalign.js >> "$DEBUG_OUT_FILE"
+    cat ./src/primitives/constants/textbaseline.js >> "$DEBUG_OUT_FILE"
+    cat ./src/primitives/text.js >> "$DEBUG_OUT_FILE"
 }
 
 
