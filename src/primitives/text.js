@@ -56,7 +56,7 @@
             graphics = text_sprite.graphics,
             extrema_minX = 0,
             extrema_maxX = 0,
-            extrema_minX = 0,
+            extrema_minY = 0,
             extrema_maxY = 0;
         
         //need to apply font style to measure width, but don't save it
@@ -243,7 +243,7 @@
           get: function () { return font_size; },
           set: function (fontSizeVar) {
             if (typeof fontSizeVar === 'string') {
-              fontSizeVar = parseInt(fontSizeVar);
+              fontSizeVar = parseInt(fontSizeVar, 10);
             }
             /*DEBUG*/
             check_number_type(fontSizeVar, this+'.fontSize');

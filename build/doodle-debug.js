@@ -9549,8 +9549,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     Object.defineProperties(sprite, sprite_static_properties);
     //properties that require privacy
     Object.defineProperties(sprite, (function () {
-      var draw_commands = [],
-          extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
+      var draw_commands = [];
       
       return {
         /**
@@ -9563,7 +9562,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         'graphics': {
           enumerable: false,
           configurable: false,
-          value:  Object.create(doodle.Graphics.call(sprite, draw_commands, extrema))
+          value:  Object.create(doodle.Graphics.call(sprite, draw_commands))
         },
 
         /**
@@ -9578,9 +9577,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           return {
             enumerable: true,
             configurable: false,
-            get: function () {
-              return width;
-            },
+            get: function () { return width; },
             set: function (n) {
               /*DEBUG*/
               check_number_type(n, this+'.width');
@@ -9602,9 +9599,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           return {
             enumerable: true,
             configurable: false,
-            get: function () {
-              return height;
-            },
+            get: function () { return height; },
             set: function (n) {
               /*DEBUG*/
               check_number_type(n, this+'.height');
@@ -9645,7 +9640,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           configurable: false,
           value: (function () {
             var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
-            
+
             return function (targetCoordSpace) {
               /*DEBUG*/
               check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
@@ -9656,12 +9651,14 @@ Object.defineProperties(doodle.events.TextEvent, {
                   child_bounds,
                   w = this.width,
                   h = this.height,
+                  //extrema points
+                  graphics = this.graphics,
+                  tl = {x: graphics.__minX, y: graphics.__minY},
+                  tr = {x: graphics.__minX+w, y: graphics.__minY},
+                  br = {x: graphics.__minX+w, y: graphics.__minY+h},
+                  bl = {x: graphics.__minX, y: graphics.__minY+h},
                   min = Math.min,
-                  max = Math.max,
-                  tl = {x: extrema.min_x, y: extrema.min_y},
-                  tr = {x: extrema.min_x+w, y: extrema.min_y},
-                  br = {x: extrema.min_x+w, y: extrema.min_y+h},
-                  bl = {x: extrema.min_x, y: extrema.min_y+h};
+                  max = Math.max;
               
               //transform corners to global
               this.__localToGlobal(tl); //top left
@@ -9769,12 +9766,12 @@ Object.defineProperties(doodle.events.TextEvent, {
             /*DEBUG*/
             check_context_type(ctx, this+'.__draw', '*context*');
             /*END_DEBUG*/
-            draw_commands.forEach(function (cmd) {
+            for (var i=0, len=draw_commands.length; i < len; i++) {
               /*DEBUG*/
-              check_function_type(cmd, sprite+'.__draw: [draw_commands]::', '*command*');
+              check_function_type(draw_commands[i], sprite+'.__draw: [draw_commands]::', '*command*');
               /*END_DEBUG*/
-              cmd.call(sprite, ctx);
-            });
+              draw_commands[i].call(sprite, ctx);
+            }
           }
         }
       };
@@ -9943,11 +9940,10 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @class
    * @augments Object
    * @param {Array} draw_commands Reference to draw commands array.
-   * @param {Object} extrema Reference to object's extrema points.
    * @return {Object}
    * @this {doodle.Sprite}
    */
-  doodle.Graphics = function (draw_commands, extrema) {
+  doodle.Graphics = function (draw_commands) {
     var graphics = {},
         gfx_node = this,
         cursor_x = 0,
@@ -9961,6 +9957,46 @@ Object.defineProperties(doodle.events.TextEvent, {
     Object.defineProperties(graphics, graphics_static_properties);
     //properties that require privacy
     Object.defineProperties(graphics, {
+      /**
+       * @property
+       * @private
+       */
+      '__minX': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+
+      /**
+       * @property
+       * @private
+       */
+      '__minY': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+
+      /**
+       * @property
+       * @private
+       */
+      '__maxX': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+
+      /**
+       * @property
+       * @private
+       */
+      '__maxY': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+      
       /**
        * @name lineWidth
        * @return {number} [read-only]
@@ -10058,7 +10094,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           gfx_node.width = 0;
           gfx_node.height = 0;
 
-          extrema.min_x = extrema.min_y = extrema.max_x = extrema.max_y = 0;
+          this.__minX = this.__minY = this.__maxX = this.__maxY = 0;
           cursor_x = cursor_y = 0;
         }
       },
@@ -10085,14 +10121,14 @@ Object.defineProperties(doodle.events.TextEvent, {
           /*END_DEBUG*/
 
           //update extremas
-          extrema.min_x = Math.min(0, x, extrema.min_x);
-          extrema.min_y = Math.min(0, y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+width, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
+          this.__minX = Math.min(0, x, this.__minX);
+          this.__minY = Math.min(0, y, this.__minY);
+          this.__maxX = Math.max(0, x, x+width, this.__maxX);
+          this.__maxY = Math.max(0, y, y+height, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
           
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -10122,14 +10158,14 @@ Object.defineProperties(doodle.events.TextEvent, {
           /*END_DEBUG*/
 
           //update extremas
-          extrema.min_x = Math.min(0, -radius+x, extrema.min_x);
-          extrema.min_y = Math.min(0, -radius+y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+radius, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+radius, extrema.max_y);
+          this.__minX = Math.min(0, -radius+x, this.__minX);
+          this.__minY = Math.min(0, -radius+y, this.__minY);
+          this.__maxX = Math.max(0, x, x+radius, this.__maxX);
+          this.__maxY = Math.max(0, y, y+radius, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -10166,14 +10202,14 @@ Object.defineProperties(doodle.events.TextEvent, {
               kry = 0.5522847498 * ry;
 
           //update extremas
-          extrema.min_x = Math.min(0, -rx+x, extrema.min_x);
-          extrema.min_y = Math.min(0, -ry+y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+rx, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+ry, extrema.max_y);
+          this.__minX = Math.min(0, -rx+x, this.__minX);
+          this.__minY = Math.min(0, -ry+y, this.__minY);
+          this.__maxX = Math.max(0, x, x+rx, this.__maxX);
+          this.__maxY = Math.max(0, y, y+ry, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -10221,14 +10257,14 @@ Object.defineProperties(doodle.events.TextEvent, {
               y1 = y + ry;
 
           //update extremas
-          extrema.min_x = Math.min(0, x, extrema.min_x);
-          extrema.min_y = Math.min(0, y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+width, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
+          this.__minX = Math.min(0, x, this.__minX);
+          this.__minY = Math.min(0, y, this.__minY);
+          this.__maxX = Math.max(0, x, x+width, this.__maxX);
+          this.__maxY = Math.max(0, y, y+height, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -10292,14 +10328,14 @@ Object.defineProperties(doodle.events.TextEvent, {
           /*END_DEBUG*/
 
           //update extremas
-          extrema.min_x = Math.min(0, x, cursor_x, extrema.min_x);
-          extrema.min_y = Math.min(0, y, cursor_y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, cursor_x, extrema.max_x);
-          extrema.max_y = Math.max(0, y, cursor_y, extrema.max_y);
+          this.__minX = Math.min(0, x, cursor_x, this.__minX);
+          this.__minY = Math.min(0, y, cursor_y, this.__minY);
+          this.__maxX = Math.max(0, x, cursor_x, this.__maxX);
+          this.__maxY = Math.max(0, y, cursor_y, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = extrema.max_x - extrema.min_x;
-          gfx_node.height = extrema.max_y - extrema.min_y;
+          gfx_node.width = this.__maxX - this.__minX;
+          gfx_node.height = this.__maxY - this.__minY;
           
           draw_commands.push(function (ctx) {
             ctx.lineTo(x, y);
@@ -10351,14 +10387,14 @@ Object.defineProperties(doodle.events.TextEvent, {
           }
           
           //update extremas
-          extrema.min_x = Math.min(0, x0, cx, x2, extrema.min_x);
-          extrema.min_y = Math.min(0, y0, cy, y2, extrema.min_y);
-          extrema.max_x = Math.max(0, x0, cx, x2, extrema.max_x);
-          extrema.max_y = Math.max(0, y0, cy, y2, extrema.max_y);
+          this.__minX = Math.min(0, x0, cx, x2, this.__minX);
+          this.__minY = Math.min(0, y0, cy, y2, this.__minY);
+          this.__maxX = Math.max(0, x0, cx, x2, this.__maxX);
+          this.__maxY = Math.max(0, y0, cy, y2, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.quadraticCurveTo(x1, y1, x2, y2);
@@ -10427,14 +10463,14 @@ Object.defineProperties(doodle.events.TextEvent, {
           }
 
           //update extremas
-          extrema.min_x = min(0, x0, cx_min, x3, extrema.min_x);
-          extrema.min_y = min(0, y0, cy_min, y3, extrema.min_y);
-          extrema.max_x = max(0, x0, cx_max, x3, extrema.max_x);
-          extrema.max_y = max(0, y0, cy_max, y3, extrema.max_y);
+          this.__minX = min(0, x0, cx_min, x3, this.__minX);
+          this.__minY = min(0, y0, cy_min, y3, this.__minY);
+          this.__maxX = max(0, x0, cx_max, x3, this.__maxX);
+          this.__maxY = max(0, y0, cy_max, y3, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
@@ -12947,6 +12983,7 @@ Object.defineProperty(doodle, 'TextAlign', {
  * @name doodle.TextBaseline
  * @class
  * @static
+ * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-textbaseline">context.textBaseline</a> [Canvas API]
  */
 Object.defineProperty(doodle, 'TextBaseline', {
   enumerable: true,
@@ -12954,6 +12991,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
   configurable: false,
   value: Object.create(null, {
     /**
+     * Let the anchor point's vertical position be the top of the em box of the first available font of the inline box.
      * @name TOP
      * @return {string} [read-only]
      * @property
@@ -12968,6 +13006,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
     },
 
     /**
+     * Let the anchor point's vertical position be half way between the bottom and the top of the em box of the first available font of the inline box.
      * @name MIDDLE
      * @return {string} [read-only]
      * @property
@@ -12982,6 +13021,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
     },
 
     /**
+     * Let the anchor point's vertical position be the bottom of the em box of the first available font of the inline box.
      * @name BOTTOM
      * @return {string} [read-only]
      * @property
@@ -12996,6 +13036,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
     },
 
     /**
+     * Let the anchor point's vertical position be the hanging baseline of the first available font of the inline box.
      * @name HANGING
      * @return {string} [read-only]
      * @property
@@ -13010,6 +13051,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
     },
 
     /**
+     * Let the anchor point's vertical position be the alphabetic baseline of the first available font of the inline box.
      * @name ALPHABETIC
      * @return {string} [read-only]
      * @property
@@ -13024,6 +13066,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
     },
 
     /**
+     * Let the anchor point's vertical position be the ideographic baseline of the first available font of the inline box.
      * @name IDEOGRAPHIC
      * @return {string} [read-only]
      * @property
@@ -13062,6 +13105,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
    * @param {string=} text Text to display.
    * @return {doodle.Text} A text object.
    * @throws {SyntaxError} Invalid parameters.
+   * @throws {TypeError} Text argument not a string.
    */
   doodle.Text = function (text) {
     var text_sprite = Object.create(doodle.Sprite());
@@ -13072,6 +13116,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
       var $text = '',
           font_family = "sans-serif",
           font_size = 10,//px
+          font_height = font_size,
           font_style = FontStyle.NORMAL,
           font_variant = FontVariant.NORMAL,
           font_weight = FontWeight.NORMAL,
@@ -13079,22 +13124,34 @@ Object.defineProperty(doodle, 'TextBaseline', {
           text_baseline = TextBaseline.ALPHABETIC,
           text_color = "#000000",
           text_strokecolor = "#000000",
+          text_strokewidth = 1,
           text_bgcolor;
 
+      /**
+       * @name redraw
+       * @private
+       */
       function redraw () {
         //if not part of the scene graph we'll have to whip up a context
         var $ctx = text_sprite.context || document.createElement('canvas').getContext('2d'),
             sprite_width,
-            sprite_height;
-        //need to apply font style to measure with, but don't save it
+            sprite_height,
+            graphics = text_sprite.graphics,
+            extrema_minX = 0,
+            extrema_maxX = 0,
+            extrema_minY = 0,
+            extrema_maxY = 0;
+        
+        //need to apply font style to measure width, but don't save it
         $ctx.save();
         $ctx.font = (font_style +' '+ font_variant +' '+ font_weight +' '+
                      font_size+"px" +' '+ font_family);
-        //assign sprite dimensions
-        text_sprite.width = sprite_width = $ctx.measureText($text).width;
-        text_sprite.height = sprite_height = font_size;
+        sprite_width = $ctx.measureText($text).width;
+        sprite_height = font_size;
+        //estimate font height since there's no built-in functionality
+        font_height = $ctx.measureText("m").width;
         $ctx.restore();
-        
+
         //clears sprite dimensions and drawing commands
         text_sprite.graphics.clear();
         text_sprite.graphics.draw(function (ctx) {
@@ -13102,7 +13159,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
             ctx.fillStyle = text_bgcolor;
             ctx.fillRect(0, 0, sprite_width, sprite_height);
           }
-          ctx.lineWidth = 1; //why do i need to set this?
+          ctx.lineWidth = text_strokewidth; //why do i need to set this?
           ctx.textAlign = text_align;
           ctx.textBaseline = text_baseline;
           ctx.font = (font_style +' '+ font_variant +' '+ font_weight +' '+
@@ -13116,12 +13173,64 @@ Object.defineProperty(doodle, 'TextBaseline', {
             ctx.strokeText($text, 0, 0);
           }
         });
+        
+        //assign sprite dimensions after graphics.clear()
+        text_sprite.width = sprite_width;
+        text_sprite.height = sprite_height;
+
+        //calculate bounding box extrema
+        switch (text_baseline) {
+        case TextBaseline.TOP:
+          extrema_minY = font_size - font_height;
+          extrema_maxY = font_size;
+          break;
+        case TextBaseline.MIDDLE:
+          extrema_minY = -font_height/2;
+          extrema_maxY = font_height/2;
+          break;
+        case TextBaseline.BOTTOM:
+          extrema_minY = -font_size;
+          break;
+        case TextBaseline.HANGING:
+          extrema_minY = font_size - font_height;
+          extrema_maxY = font_size;
+          break;
+        case TextBaseline.ALPHABETIC:
+          extrema_minY = -font_height;
+          break;
+        case TextBaseline.IDEOGRAPHIC:
+          extrema_minY = -font_size;
+          break;
+        }
+
+        switch (text_align) {
+        case TextAlign.START:
+          break;
+        case TextAlign.END:
+          extrema_minX = -sprite_width;
+          break;
+        case TextAlign.LEFT:
+          break;
+        case TextAlign.RIGHT:
+          extrema_minX = -sprite_width;
+          break;
+        case TextAlign.CENTER:
+          extrema_minX = -sprite_width/2;
+          break;
+        }
+        
+        //set extrema for bounds
+        graphics.__minX = extrema_minX;
+        graphics.__maxX = extrema_maxX;
+        graphics.__minY = extrema_minY;
+        graphics.__maxY = extrema_maxY;
       }
       
       return {
         /**
          * @name text
          * @return {String}
+         * @throws {TypeError}
          * @property
          */
         'text': {
@@ -13140,6 +13249,9 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name font
          * @return {String}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
+         * @throws {ReferenceError}
          * @property
          */
         'font': {
@@ -13186,6 +13298,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name fontFamily
          * @return {String}
+         * @throws {TypeError}
          * @property
          */
         'fontFamily': {
@@ -13203,7 +13316,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
 
         /**
          * @name fontSize
-         * @return {Number}
+         * @return {Number} In pixels.
+         * @throws {TypeError}
          * @property
          */
         'fontSize': {
@@ -13212,7 +13326,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return font_size; },
           set: function (fontSizeVar) {
             if (typeof fontSizeVar === 'string') {
-              fontSizeVar = parseInt(fontSizeVar);
+              fontSizeVar = parseInt(fontSizeVar, 10);
             }
             /*DEBUG*/
             check_number_type(fontSizeVar, this+'.fontSize');
@@ -13225,6 +13339,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name fontStyle
          * @return {FontStyle}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
         'fontStyle': {
@@ -13251,6 +13367,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name fontVariant
          * @return {FontVariant}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
         'fontVariant': {
@@ -13276,6 +13394,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name fontWeight
          * @return {FontWeight}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
         'fontWeight': {
@@ -13318,11 +13438,13 @@ Object.defineProperty(doodle, 'TextBaseline', {
         },
 
         /**
-         * @name textAlign
+         * @name align
          * @return {TextAlign}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
-        'textAlign': {
+        'align': {
           enumerable: true,
           configurable: false,
           get: function () { return text_align; },
@@ -13346,11 +13468,13 @@ Object.defineProperty(doodle, 'TextBaseline', {
         },
 
         /**
-         * @name textBaseline
+         * @name baseline
          * @return {TextBaseline}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
-        'textBaseline': {
+        'baseline': {
           enumerable: true,
           configurable: false,
           get: function () { return text_baseline; },
@@ -13375,8 +13499,31 @@ Object.defineProperty(doodle, 'TextBaseline', {
         },
 
         /**
+         * @name strokeWidth
+         * @return {Number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'strokeWidth': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return text_strokewidth; },
+          set: function (widthVar) {
+            /*DEBUG*/
+            check_number_type(widthVar, this+'.strokeWidth');
+            if (widthVar <= 0) {
+              throw new RangeError(this+".strokeWidth: Value must be greater than zero.");
+            }
+            /*END_DEBUG*/
+            text_strokewidth = widthVar;
+          }
+        },
+
+        /**
          * @name color
          * @return {Color}
+         * @throws {TypeError}
          * @property
          */
         'color': {
@@ -13399,6 +13546,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name strokeColor
          * @return {Color}
+         * @throws {TypeError}
          * @property
          */
         'strokeColor': {
@@ -13421,6 +13569,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name backgroundColor
          * @return {Color}
+         * @throws {TypeError}
          * @property
          */
         'backgroundColor': {
