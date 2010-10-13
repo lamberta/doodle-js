@@ -42,7 +42,7 @@ CLASS_INHERITS['EventDispatcher']='Object'
 CLASS_SRC['Node']="$SRC_HOME/node.js"
 CLASS_INHERITS['Node']='EventDispatcher:Object'
 CLASS_SRC['Sprite']="$SRC_HOME/sprite.js"
-CLASS_INHERITS['Sprite']='Node:EventDispatcher:Object'
+CLASS_INHERITS['Sprite']='Node:EventDispatcher:Objectw'
 CLASS_SRC['Graphics']="$SRC_HOME/graphics.js"
 CLASS_INHERITS['Graphics']='Object'
 
@@ -80,6 +80,16 @@ CLASS_SRC['Keyboard']="$SRC_HOME/constants/keyboard.js"
 CLASS_SRC['LineCap']="$SRC_HOME/constants/linecap.js"
 CLASS_SRC['LineJoin']="$SRC_HOME/constants/linejoin.js"
 CLASS_SRC['Pattern']="$SRC_HOME/constants/pattern.js"
+
+#primitives
+CLASS_SRC['FontStyle']="$SRC_HOME/primitives/constants/fontstyle.js"
+CLASS_SRC['FontVariant']="$SRC_HOME/primitives/constants/fontvariant.js"
+CLASS_SRC['FontWeight']="$SRC_HOME/primitives/constants/fontweight.js"
+CLASS_SRC['TextAlign']="$SRC_HOME/primitives/constants/textalign.js"
+CLASS_SRC['TextBaseline']="$SRC_HOME/primitives/constants/textbaseline.js"
+CLASS_SRC['Text']="$SRC_HOME/primitives/text.js"
+CLASS_INHERITS['Text']='Sprite:Node:EventDispatcher:Object'
+
 
 #parse multi-line doc comments from source file,
 #separate fields with '~' and concat to single line

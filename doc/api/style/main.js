@@ -33,6 +33,8 @@ $(document).ready(function () {
         'Matrix': doodle_base+"matrix.html",
         'Point': doodle_base+"point.html",
         'Rectangle': doodle_base+"rectangle.html",
+        //primitives
+        'Text': doodle_base+"text.html",
         //events
         'Event': doodle_base+"event.html",
         'KeyboardEvent': doodle_base+"keyboardevent.html",
@@ -46,6 +48,11 @@ $(document).ready(function () {
         'LineCap': doodle_base+"linecap.html",
         'LineJoin': doodle_base+"linejoin.html",
         'Pattern': doodle_base+"pattern.html",
+        'FontStyle': doodle_base+"fontstyle.html",
+        'FontVariant': doodle_base+"fontvariant.html",
+        'FontWeight': doodle_base+"fontweight.html",
+        'TextAlign': doodle_base+"textalign.html",
+        'TextBaseline': doodle_base+"textbaseline.html",
         //packages
         'utils': doodle_base+"utils.html",
         'utils.types': doodle_base+"utils-types.html",

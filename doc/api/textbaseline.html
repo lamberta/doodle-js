@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Doodle.js - API: doodle.LineCap</title>
+<title>Doodle.js - API: doodle.TextBaseline</title>
 <link href="./style/reset.css" rel="stylesheet" type="text/css">
 <link href="./style/main.css" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin" rel="stylesheet" type="text/css">
@@ -44,12 +44,12 @@
 <li>utils.types</li></ul>
 </nav>
 <div class="main">
-<h1>doodle.LineCap</h1>
+<h1>doodle.TextBaseline</h1>
 
 <section>
 <h2>Description:</h2>
 <dl>
-<dt><dfn>LineCap</dfn> </dt>
+<dt><dfn>TextBaseline</dfn> </dt>
 <dd>
 <p></p>
 <details>
@@ -64,7 +64,10 @@
 
 
 
-
+<h3>See Also</h3>
+<ul>
+<li><a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-textbaseline">context.textBaseline</a> [Canvas API]</li>
+</ul>
 </details>
 </dd>
 </dl>
@@ -73,28 +76,9 @@
 <section>
 <h2>Constants</h2>
 <dl>
-<dt><dfn>BUTT</dfn> :string</dt>
+<dt><dfn>MIDDLE</dfn> :string</dt>
 <dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>string &#8211; [read-only] Default</li>
-</ul>
-
-
-
-
-
-
-</details>
-</dd>
-<dt><dfn>ROUND</dfn> :string</dt>
-<dd>
-<p></p>
+<p>Let the anchor point's vertical position be half way between the bottom and the top of the em box of the first available font of the inline box.</p>
 <details>
 
 
@@ -111,9 +95,85 @@
 
 </details>
 </dd>
-<dt><dfn>SQUARE</dfn> :string</dt>
+<dt><dfn>ALPHABETIC</dfn> :string</dt>
 <dd>
-<p></p>
+<p>Let the anchor point's vertical position be the alphabetic baseline of the first available font of the inline box.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>BOTTOM</dfn> :string</dt>
+<dd>
+<p>Let the anchor point's vertical position be the bottom of the em box of the first available font of the inline box.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>HANGING</dfn> :string</dt>
+<dd>
+<p>Let the anchor point's vertical position be the hanging baseline of the first available font of the inline box.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>IDEOGRAPHIC</dfn> :string</dt>
+<dd>
+<p>Let the anchor point's vertical position be the ideographic baseline of the first available font of the inline box.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>TOP</dfn> :string</dt>
+<dd>
+<p>Let the anchor point's vertical position be the top of the em box of the first available font of the inline box.</p>
 <details>
 
 

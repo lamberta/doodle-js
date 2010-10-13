@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Doodle.js - API: doodle.Layer</title>
+<title>Doodle.js - API: doodle.Text</title>
 <link href="./style/reset.css" rel="stylesheet" type="text/css">
 <link href="./style/main.css" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin" rel="stylesheet" type="text/css">
@@ -44,19 +44,19 @@
 <li>utils.types</li></ul>
 </nav>
 <div class="main">
-<h1>doodle.Layer</h1>
+<h1>doodle.Text</h1>
 
 <section>
 <h2>Description:</h2>
 <dl>
-<dt><dfn>Layer</dfn> (id:string, element:HTMLCanvasElement) :Layer</dt>
+<dt><dfn>Text</dfn> (text:string) :Text</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Inherits</h3>
 <ol>
-<li>ElementNode</li>
+<li>Sprite</li>
 <li>Node</li>
 <li>EventDispatcher</li>
 <li>Object</li>
@@ -64,18 +64,18 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>id:string &#8211; <span class='param_annotation'>[optional]</span> </li>
-<li>element:HTMLCanvasElement &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>text:string &#8211; <span class='param_annotation'>[optional]</span> Text to display.</li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Layer &#8211; </li>
+<li>Text &#8211; A text object.</li>
 </ul>
 
 <h3>Throws</h3>
 <ul>
-<li>SyntaxError &#8211; </li>
+<li>SyntaxError &#8211; Invalid parameters.</li>
+<li>TypeError &#8211; Text argument not a string.</li>
 </ul>
 
 
@@ -88,9 +88,28 @@
 <section>
 <h2>Properties</h2>
 <dl>
-<dt><dfn>width</dfn> :number</dt>
+<dt><dfn>context</dfn> :CanvasRenderingContext2D</dt>
 <dd>
-<p>Canvas dimensions need to apply to HTML attributes.</p>
+<p>drawing context to use</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>CanvasRenderingContext2D &#8211; </li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>height</dfn> :number</dt>
+<dd>
+<p>Indicates the height of the sprite, in pixels.</p>
 <details>
 
 
@@ -103,6 +122,51 @@
 <h3>Throws</h3>
 <ul>
 <li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>width</dfn> :number</dt>
+<dd>
+<p>Indicates the width of the sprite, in pixels.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>align</dfn> :TextAlign</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>TextAlign &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
 </ul>
 
 
@@ -122,10 +186,7 @@
 <li>number &#8211; </li>
 </ul>
 
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-</ul>
+
 
 
 
@@ -144,25 +205,6 @@
 <li>Color &#8211; </li>
 </ul>
 
-
-
-
-
-
-</details>
-</dd>
-<dt><dfn>backgroundImage</dfn> :HTMLImageElement</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>HTMLImageElement &#8211; </li>
-</ul>
-
 <h3>Throws</h3>
 <ul>
 <li>TypeError &#8211; </li>
@@ -173,7 +215,7 @@
 
 </details>
 </dd>
-<dt><dfn>backgroundRepeat</dfn> :string</dt>
+<dt><dfn>baseline</dfn> :TextBaseline</dt>
 <dd>
 <p></p>
 <details>
@@ -182,7 +224,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>string &#8211; </li>
+<li>TextBaseline &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -215,7 +257,7 @@
 
 </details>
 </dd>
-<dt><dfn>context</dfn> :CanvasRenderingContext2D</dt>
+<dt><dfn>color</dfn> :Color</dt>
 <dd>
 <p></p>
 <details>
@@ -224,10 +266,13 @@
 
 <h3>Returns</h3>
 <ul>
-<li>CanvasRenderingContext2D &#8211; </li>
+<li>Color &#8211; </li>
 </ul>
 
-
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
 
 
 
@@ -253,7 +298,7 @@
 
 </details>
 </dd>
-<dt><dfn>element</dfn> :HTMLElement</dt>
+<dt><dfn>fontFamily</dfn> :String</dt>
 <dd>
 <p></p>
 <details>
@@ -262,17 +307,20 @@
 
 <h3>Returns</h3>
 <ul>
-<li>HTMLElement &#8211; </li>
+<li>String &#8211; </li>
 </ul>
 
-
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
 
 
 
 
 </details>
 </dd>
-<dt><dfn>height</dfn> :number</dt>
+<dt><dfn>font</dfn> :String</dt>
 <dd>
 <p></p>
 <details>
@@ -281,12 +329,105 @@
 
 <h3>Returns</h3>
 <ul>
-<li>number &#8211; </li>
+<li>String &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
 <ul>
 <li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
+<li>ReferenceError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>fontSize</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; In pixels.</li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>fontStyle</dfn> :FontStyle</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>FontStyle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>fontVariant</dfn> :FontVariant</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>FontVariant &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>fontWeight</dfn> :FontWeight</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>FontWeight &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>SyntaxError &#8211; </li>
 </ul>
 
 
@@ -306,10 +447,7 @@
 <li>string &#8211; </li>
 </ul>
 
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-</ul>
+
 
 
 
@@ -373,6 +511,95 @@
 
 </details>
 </dd>
+<dt><dfn>rotation</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>strokeColor</dfn> :Color</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Color &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>strokeWidth</dfn> :Number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>RangeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>text</dfn> :String</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>String &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
 <dt><dfn>transform</dfn> :Matrix</dt>
 <dd>
 <p></p>
@@ -404,10 +631,7 @@
 <li>boolean &#8211; </li>
 </ul>
 
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-</ul>
+
 
 
 
@@ -443,6 +667,25 @@
 <h3>Returns</h3>
 <ul>
 <li>number &#8211; </li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>graphics</dfn> :Graphics</dt>
+<dd>
+<p>The graphics object contains drawing operations to be stored in draw_commands. Objects and Arrays are passed by reference, so these will be modified</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Graphics &#8211; </li>
 </ul>
 
 
@@ -706,6 +949,31 @@
 
 </details>
 </dd>
+<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>targetCoordSpace:Node &#8211;  </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
 <dt><dfn>getChildById</dfn> (id:string) :Node|null</dt>
 <dd>
 <p></p>
@@ -744,6 +1012,56 @@
 <h3>Returns</h3>
 <ul>
 <li>Point &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>hitTestObject</dfn> (node:Node) :boolean</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node:Node &#8211;  </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>hitTestPoint</dfn> (pt:Point) :boolean</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>pt:Point &#8211;  </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -1090,22 +1408,28 @@
 
 </details>
 </dd>
-<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle|null</dt>
+<dt><dfn>compose</dfn> (x:number, y:number, width:number, height:number) :Sprite</dt>
 <dd>
-<p>The bounding box of a Node is a union of all it's child Sprite's bounds.</p>
+<p>Updates the position and size of this sprite.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>targetCoordSpace:Node &#8211;  </li>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
+<li>width:number &#8211;  </li>
+<li>height:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Rectangle|null &#8211; </li>
+<li>Sprite &#8211; </li>
 </ul>
 
-
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
 
 
 
@@ -1114,21 +1438,18 @@
 </dd>
 </section>
 <section>
-<h2>Class Functions</h2>
+<h2>Constants</h2>
 <dl>
-<dt><dfn>inheritsLayer</dfn> (obj:Object) :boolean</dt>
+<dt><dfn>INPUT_METHOD_DROP</dfn> :number</dt>
 <dd>
-<p>Check if object inherits from layer.</p>
+<p></p>
 <details>
 
-<h3>Parameters</h3>
-<ol>
-<li>obj:Object &#8211;  </li>
-</ol>
+
 
 <h3>Returns</h3>
 <ul>
-<li>boolean &#8211; </li>
+<li>number &#8211; [read-only]</li>
 </ul>
 
 
@@ -1138,19 +1459,187 @@
 
 </details>
 </dd>
-<dt><dfn>isLayer</dfn> (obj:Object) :boolean</dt>
+<dt><dfn>INPUT_METHOD_HANDWRITING</dfn> :number</dt>
 <dd>
-<p>Test if an object is a Layer.</p>
+<p></p>
 <details>
 
-<h3>Parameters</h3>
-<ol>
-<li>obj:Object &#8211;  </li>
-</ol>
+
 
 <h3>Returns</h3>
 <ul>
-<li>boolean &#8211; </li>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_IME</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_KEYBOARD</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_MULTIMODAL</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_OPTION</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_PASTE</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_SCRIPT</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_UNKNOWN</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>INPUT_METHOD_VOICE</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; [read-only]</li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>TEXT_INPUT</dfn> :string</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; [read-only]</li>
 </ul>
 
 
