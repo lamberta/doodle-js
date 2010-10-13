@@ -22,6 +22,7 @@
    * @param {string=} text Text to display.
    * @return {doodle.Text} A text object.
    * @throws {SyntaxError} Invalid parameters.
+   * @throws {TypeError} Text argument not a string.
    */
   doodle.Text = function (text) {
     var text_sprite = Object.create(doodle.Sprite());
@@ -32,6 +33,7 @@
       var $text = '',
           font_family = "sans-serif",
           font_size = 10,//px
+          font_height = font_size,
           font_style = FontStyle.NORMAL,
           font_variant = FontVariant.NORMAL,
           font_weight = FontWeight.NORMAL,
@@ -39,22 +41,34 @@
           text_baseline = TextBaseline.ALPHABETIC,
           text_color = "#000000",
           text_strokecolor = "#000000",
+          text_strokewidth = 1,
           text_bgcolor;
 
+      /**
+       * @name redraw
+       * @private
+       */
       function redraw () {
         //if not part of the scene graph we'll have to whip up a context
         var $ctx = text_sprite.context || document.createElement('canvas').getContext('2d'),
             sprite_width,
-            sprite_height;
-        //need to apply font style to measure with, but don't save it
+            sprite_height,
+            graphics = text_sprite.graphics,
+            extrema_minX = 0,
+            extrema_maxX = 0,
+            extrema_minX = 0,
+            extrema_maxY = 0;
+        
+        //need to apply font style to measure width, but don't save it
         $ctx.save();
         $ctx.font = (font_style +' '+ font_variant +' '+ font_weight +' '+
                      font_size+"px" +' '+ font_family);
-        //assign sprite dimensions
-        text_sprite.width = sprite_width = $ctx.measureText($text).width;
-        text_sprite.height = sprite_height = font_size;
+        sprite_width = $ctx.measureText($text).width;
+        sprite_height = font_size;
+        //estimate font height since there's no built-in functionality
+        font_height = $ctx.measureText("m").width;
         $ctx.restore();
-        
+
         //clears sprite dimensions and drawing commands
         text_sprite.graphics.clear();
         text_sprite.graphics.draw(function (ctx) {
@@ -62,7 +76,7 @@
             ctx.fillStyle = text_bgcolor;
             ctx.fillRect(0, 0, sprite_width, sprite_height);
           }
-          ctx.lineWidth = 1; //why do i need to set this?
+          ctx.lineWidth = text_strokewidth; //why do i need to set this?
           ctx.textAlign = text_align;
           ctx.textBaseline = text_baseline;
           ctx.font = (font_style +' '+ font_variant +' '+ font_weight +' '+
@@ -76,12 +90,64 @@
             ctx.strokeText($text, 0, 0);
           }
         });
+        
+        //assign sprite dimensions after graphics.clear()
+        text_sprite.width = sprite_width;
+        text_sprite.height = sprite_height;
+
+        //calculate bounding box extrema
+        switch (text_baseline) {
+        case TextBaseline.TOP:
+          extrema_minY = font_size - font_height;
+          extrema_maxY = font_size;
+          break;
+        case TextBaseline.MIDDLE:
+          extrema_minY = -font_height/2;
+          extrema_maxY = font_height/2;
+          break;
+        case TextBaseline.BOTTOM:
+          extrema_minY = -font_size;
+          break;
+        case TextBaseline.HANGING:
+          extrema_minY = font_size - font_height;
+          extrema_maxY = font_size;
+          break;
+        case TextBaseline.ALPHABETIC:
+          extrema_minY = -font_height;
+          break;
+        case TextBaseline.IDEOGRAPHIC:
+          extrema_minY = -font_size;
+          break;
+        }
+
+        switch (text_align) {
+        case TextAlign.START:
+          break;
+        case TextAlign.END:
+          extrema_minX = -sprite_width;
+          break;
+        case TextAlign.LEFT:
+          break;
+        case TextAlign.RIGHT:
+          extrema_minX = -sprite_width;
+          break;
+        case TextAlign.CENTER:
+          extrema_minX = -sprite_width/2;
+          break;
+        }
+        
+        //set extrema for bounds
+        graphics.__minX = extrema_minX;
+        graphics.__maxX = extrema_maxX;
+        graphics.__minY = extrema_minY;
+        graphics.__maxY = extrema_maxY;
       }
       
       return {
         /**
          * @name text
          * @return {String}
+         * @throws {TypeError}
          * @property
          */
         'text': {
@@ -100,6 +166,9 @@
         /**
          * @name font
          * @return {String}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
+         * @throws {ReferenceError}
          * @property
          */
         'font': {
@@ -146,6 +215,7 @@
         /**
          * @name fontFamily
          * @return {String}
+         * @throws {TypeError}
          * @property
          */
         'fontFamily': {
@@ -163,7 +233,8 @@
 
         /**
          * @name fontSize
-         * @return {Number}
+         * @return {Number} In pixels.
+         * @throws {TypeError}
          * @property
          */
         'fontSize': {
@@ -185,6 +256,8 @@
         /**
          * @name fontStyle
          * @return {FontStyle}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
         'fontStyle': {
@@ -211,6 +284,8 @@
         /**
          * @name fontVariant
          * @return {FontVariant}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
         'fontVariant': {
@@ -236,6 +311,8 @@
         /**
          * @name fontWeight
          * @return {FontWeight}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
         'fontWeight': {
@@ -278,11 +355,13 @@
         },
 
         /**
-         * @name textAlign
+         * @name align
          * @return {TextAlign}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
-        'textAlign': {
+        'align': {
           enumerable: true,
           configurable: false,
           get: function () { return text_align; },
@@ -306,11 +385,13 @@
         },
 
         /**
-         * @name textBaseline
+         * @name baseline
          * @return {TextBaseline}
+         * @throws {TypeError}
+         * @throws {SyntaxError}
          * @property
          */
-        'textBaseline': {
+        'baseline': {
           enumerable: true,
           configurable: false,
           get: function () { return text_baseline; },
@@ -335,8 +416,31 @@
         },
 
         /**
+         * @name strokeWidth
+         * @return {Number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'strokeWidth': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return text_strokewidth; },
+          set: function (widthVar) {
+            /*DEBUG*/
+            check_number_type(widthVar, this+'.strokeWidth');
+            if (widthVar <= 0) {
+              throw new RangeError(this+".strokeWidth: Value must be greater than zero.");
+            }
+            /*END_DEBUG*/
+            text_strokewidth = widthVar;
+          }
+        },
+
+        /**
          * @name color
          * @return {Color}
+         * @throws {TypeError}
          * @property
          */
         'color': {
@@ -359,6 +463,7 @@
         /**
          * @name strokeColor
          * @return {Color}
+         * @throws {TypeError}
          * @property
          */
         'strokeColor': {
@@ -381,6 +486,7 @@
         /**
          * @name backgroundColor
          * @return {Color}
+         * @throws {TypeError}
          * @property
          */
         'backgroundColor': {
