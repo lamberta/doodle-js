@@ -19,11 +19,10 @@
    * @class
    * @augments Object
    * @param {Array} draw_commands Reference to draw commands array.
-   * @param {Object} extrema Reference to object's extrema points.
    * @return {Object}
    * @this {doodle.Sprite}
    */
-  doodle.Graphics = function (draw_commands, extrema) {
+  doodle.Graphics = function (draw_commands) {
     var graphics = {},
         gfx_node = this,
         cursor_x = 0,
@@ -37,6 +36,46 @@
     Object.defineProperties(graphics, graphics_static_properties);
     //properties that require privacy
     Object.defineProperties(graphics, {
+      /**
+       * @property
+       * @private
+       */
+      '__minX': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+
+      /**
+       * @property
+       * @private
+       */
+      '__minY': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+
+      /**
+       * @property
+       * @private
+       */
+      '__maxX': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+
+      /**
+       * @property
+       * @private
+       */
+      '__maxY': {
+        enumerable: false,
+        configurable: false,
+        value: 0
+      },
+      
       /**
        * @name lineWidth
        * @return {number} [read-only]
@@ -134,7 +173,7 @@
           gfx_node.width = 0;
           gfx_node.height = 0;
 
-          extrema.min_x = extrema.min_y = extrema.max_x = extrema.max_y = 0;
+          this.__minX = this.__minY = this.__maxX = this.__maxY = 0;
           cursor_x = cursor_y = 0;
         }
       },
@@ -161,14 +200,14 @@
           /*END_DEBUG*/
 
           //update extremas
-          extrema.min_x = Math.min(0, x, extrema.min_x);
-          extrema.min_y = Math.min(0, y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+width, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
+          this.__minX = Math.min(0, x, this.__minX);
+          this.__minY = Math.min(0, y, this.__minY);
+          this.__maxX = Math.max(0, x, x+width, this.__maxX);
+          this.__maxY = Math.max(0, y, y+height, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
           
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -198,14 +237,14 @@
           /*END_DEBUG*/
 
           //update extremas
-          extrema.min_x = Math.min(0, -radius+x, extrema.min_x);
-          extrema.min_y = Math.min(0, -radius+y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+radius, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+radius, extrema.max_y);
+          this.__minX = Math.min(0, -radius+x, this.__minX);
+          this.__minY = Math.min(0, -radius+y, this.__minY);
+          this.__maxX = Math.max(0, x, x+radius, this.__maxX);
+          this.__maxY = Math.max(0, y, y+radius, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -242,14 +281,14 @@
               kry = 0.5522847498 * ry;
 
           //update extremas
-          extrema.min_x = Math.min(0, -rx+x, extrema.min_x);
-          extrema.min_y = Math.min(0, -ry+y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+rx, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+ry, extrema.max_y);
+          this.__minX = Math.min(0, -rx+x, this.__minX);
+          this.__minY = Math.min(0, -ry+y, this.__minY);
+          this.__maxX = Math.max(0, x, x+rx, this.__maxX);
+          this.__maxY = Math.max(0, y, y+ry, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -297,14 +336,14 @@
               y1 = y + ry;
 
           //update extremas
-          extrema.min_x = Math.min(0, x, extrema.min_x);
-          extrema.min_y = Math.min(0, y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, x+width, extrema.max_x);
-          extrema.max_y = Math.max(0, y, y+height, extrema.max_y);
+          this.__minX = Math.min(0, x, this.__minX);
+          this.__minY = Math.min(0, y, this.__minY);
+          this.__maxX = Math.max(0, x, x+width, this.__maxX);
+          this.__maxY = Math.max(0, y, y+height, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.beginPath();
@@ -368,14 +407,14 @@
           /*END_DEBUG*/
 
           //update extremas
-          extrema.min_x = Math.min(0, x, cursor_x, extrema.min_x);
-          extrema.min_y = Math.min(0, y, cursor_y, extrema.min_y);
-          extrema.max_x = Math.max(0, x, cursor_x, extrema.max_x);
-          extrema.max_y = Math.max(0, y, cursor_y, extrema.max_y);
+          this.__minX = Math.min(0, x, cursor_x, this.__minX);
+          this.__minY = Math.min(0, y, cursor_y, this.__minY);
+          this.__maxX = Math.max(0, x, cursor_x, this.__maxX);
+          this.__maxY = Math.max(0, y, cursor_y, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = extrema.max_x - extrema.min_x;
-          gfx_node.height = extrema.max_y - extrema.min_y;
+          gfx_node.width = this.__maxX - this.__minX;
+          gfx_node.height = this.__maxY - this.__minY;
           
           draw_commands.push(function (ctx) {
             ctx.lineTo(x, y);
@@ -427,14 +466,14 @@
           }
           
           //update extremas
-          extrema.min_x = Math.min(0, x0, cx, x2, extrema.min_x);
-          extrema.min_y = Math.min(0, y0, cy, y2, extrema.min_y);
-          extrema.max_x = Math.max(0, x0, cx, x2, extrema.max_x);
-          extrema.max_y = Math.max(0, y0, cy, y2, extrema.max_y);
+          this.__minX = Math.min(0, x0, cx, x2, this.__minX);
+          this.__minY = Math.min(0, y0, cy, y2, this.__minY);
+          this.__maxX = Math.max(0, x0, cx, x2, this.__maxX);
+          this.__maxY = Math.max(0, y0, cy, y2, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.quadraticCurveTo(x1, y1, x2, y2);
@@ -503,14 +542,14 @@
           }
 
           //update extremas
-          extrema.min_x = min(0, x0, cx_min, x3, extrema.min_x);
-          extrema.min_y = min(0, y0, cy_min, y3, extrema.min_y);
-          extrema.max_x = max(0, x0, cx_max, x3, extrema.max_x);
-          extrema.max_y = max(0, y0, cy_max, y3, extrema.max_y);
+          this.__minX = min(0, x0, cx_min, x3, this.__minX);
+          this.__minY = min(0, y0, cy_min, y3, this.__minY);
+          this.__maxX = max(0, x0, cx_max, x3, this.__maxX);
+          this.__maxY = max(0, y0, cy_max, y3, this.__maxY);
           
           //update size for bounding box
-          gfx_node.width = -extrema.min_x + extrema.max_x;
-          gfx_node.height = -extrema.min_y + extrema.max_y;
+          gfx_node.width = -this.__minX + this.__maxX;
+          gfx_node.height = -this.__minY + this.__maxY;
 
           draw_commands.push(function (ctx) {
             ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);

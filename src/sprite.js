@@ -37,8 +37,7 @@
     Object.defineProperties(sprite, sprite_static_properties);
     //properties that require privacy
     Object.defineProperties(sprite, (function () {
-      var draw_commands = [],
-          extrema = {min_x:0, max_x:0, min_y:0, max_y:0};
+      var draw_commands = [];
       
       return {
         /**
@@ -51,7 +50,7 @@
         'graphics': {
           enumerable: false,
           configurable: false,
-          value:  Object.create(doodle.Graphics.call(sprite, draw_commands, extrema))
+          value:  Object.create(doodle.Graphics.call(sprite, draw_commands))
         },
 
         /**
@@ -66,9 +65,7 @@
           return {
             enumerable: true,
             configurable: false,
-            get: function () {
-              return width;
-            },
+            get: function () { return width; },
             set: function (n) {
               /*DEBUG*/
               check_number_type(n, this+'.width');
@@ -90,9 +87,7 @@
           return {
             enumerable: true,
             configurable: false,
-            get: function () {
-              return height;
-            },
+            get: function () { return height; },
             set: function (n) {
               /*DEBUG*/
               check_number_type(n, this+'.height');
@@ -133,7 +128,7 @@
           configurable: false,
           value: (function () {
             var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
-            
+
             return function (targetCoordSpace) {
               /*DEBUG*/
               check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
@@ -144,12 +139,14 @@
                   child_bounds,
                   w = this.width,
                   h = this.height,
+                  //extrema points
+                  graphics = this.graphics,
+                  tl = {x: graphics.__minX, y: graphics.__minY},
+                  tr = {x: graphics.__minX+w, y: graphics.__minY},
+                  br = {x: graphics.__minX+w, y: graphics.__minY+h},
+                  bl = {x: graphics.__minX, y: graphics.__minY+h},
                   min = Math.min,
-                  max = Math.max,
-                  tl = {x: extrema.min_x, y: extrema.min_y},
-                  tr = {x: extrema.min_x+w, y: extrema.min_y},
-                  br = {x: extrema.min_x+w, y: extrema.min_y+h},
-                  bl = {x: extrema.min_x, y: extrema.min_y+h};
+                  max = Math.max;
               
               //transform corners to global
               this.__localToGlobal(tl); //top left
@@ -257,12 +254,12 @@
             /*DEBUG*/
             check_context_type(ctx, this+'.__draw', '*context*');
             /*END_DEBUG*/
-            draw_commands.forEach(function (cmd) {
+            for (var i=0, len=draw_commands.length; i < len; i++) {
               /*DEBUG*/
-              check_function_type(cmd, sprite+'.__draw: [draw_commands]::', '*command*');
+              check_function_type(draw_commands[i], sprite+'.__draw: [draw_commands]::', '*command*');
               /*END_DEBUG*/
-              cmd.call(sprite, ctx);
-            });
+              draw_commands[i].call(sprite, ctx);
+            }
           }
         }
       };
