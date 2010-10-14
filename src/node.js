@@ -695,6 +695,10 @@
         /*END_DEBUG*/
         children.splice(pos, 1); //remove child
         children.splice(index, 0, child); //place child at new position
+        //reorder this display's scene path
+        if (this.root) {
+          this.root.__sortAllChildren();
+        }
       }
     },
 
@@ -716,6 +720,10 @@
         /*END_DEBUG*/
         var children = this.children;
         children[index1] = children.splice(index2, 1, children[index1])[0];
+        //reorder this display's scene path
+        if (this.root) {
+          this.root.__sortAllChildren();
+        }
       }
     },
 
