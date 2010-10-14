@@ -544,7 +544,7 @@
         /*DEBUG*/
         check_node_type(node, this+'.addChild', '*node*');
         /*END_DEBUG*/
-        return this.addChildAt(node, this.children.length);
+        return this.addChildAt(node, 0);
       }
     },
 
