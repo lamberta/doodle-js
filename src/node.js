@@ -552,6 +552,7 @@
      * @name removeChildAt
      * @param {number} index
      * @throws {TypeError}
+     * @throws {RangeError}
      */
     'removeChildAt': {
       enumerable: true,
@@ -560,6 +561,9 @@
       value: function (index) {
         /*DEBUG*/
         check_number_type(index, this+'.removeChildAt', '*index*');
+        if (index < 0 || index >= this.children.length) {
+          throw new RangeError(this+".removeChildAt(*index*): Index out of range.");
+        }
         /*END_DEBUG*/
         var children = this.children,
             child = children[index],
@@ -593,6 +597,7 @@
      * @name removeChild
      * @param {Node} node
      * @throws {TypeError}
+     * @throws {ReferenceError}
      */
     'removeChild': {
       enumerable: false,
@@ -601,6 +606,9 @@
       value: function (node) {
         /*DEBUG*/
         check_node_type(node, this+'.removeChild', '*node*');
+        if (node.parent !== this) {
+          throw new ReferenceError(this+".removeChild: "+ node.id +" is not a child of this node.");
+        }
         /*END_DEBUG*/
         this.removeChildAt(this.children.indexOf(node));
       }
@@ -681,6 +689,9 @@
         /*DEBUG*/
         check_node_type(child, this+'.setChildIndex', '*child*, index');
         check_number_type(index, this+'.setChildIndex', 'child, *index*');
+        if (child.parent !== this) {
+          throw new ReferenceError(this+".setChildIndex: "+ child.id +" is not a child of this node.");
+        }
         /*END_DEBUG*/
         var children = this.children,
             len = children.length,
@@ -708,18 +719,30 @@
      * @param {number} index1
      * @param {number} index2
      * @throws {TypeError}
+     * @throws {RangeError}
      */
     'swapChildrenAt': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (index1, index2) {
+        var children = this.children,
+            node;
         /*DEBUG*/
         check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
         check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
+        if (index1 > children.length - 1 || index1 < -children.length) {
+          throw new RangeError(this+'.swapChildrenAt(*index1*, index2): Index position out of range.');
+        }
+        if (index2 > children.length - 1 || index2 < -children.length) {
+          throw new RangeError(this+'.swapChildrenAt(index1, *index2*): Index position out of range.');
+        }
         /*END_DEBUG*/
-        var children = this.children;
-        children[index1] = children.splice(index2, 1, children[index1])[0];
+        //need to get a little fancy so we can refer to negative indexes
+        node = children.splice(index1, 1, undefined)[0];
+        children.splice(index1, 1, children.splice(index2, 1, undefined)[0]);
+        children[children.indexOf(undefined)] = node;
+        
         //reorder this display's scene path
         if (this.root) {
           this.root.__sortAllChildren();
@@ -741,6 +764,12 @@
         /*DEBUG*/
         check_node_type(node1, this+'.swapChildren', '*node1*, node2');
         check_node_type(node2, this+'.swapChildren', 'node1, *node2*');
+        if (node1.parent !== this) {
+          throw new ReferenceError(this+".swapChildren: "+ node1.id +" is not a child of this node.");
+        }
+        if (node2.parent !== this) {
+          throw new ReferenceError(this+".swapChildren: "+ node2.id +" is not a child of this node.");
+        }
         /*END_DEBUG*/
         var children = this.children;
         this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
@@ -778,6 +807,7 @@
      * @name swapDepthAt
      * @param {number} index
      * @throws {TypeError}
+     * @throws {RangeError}
      */
     'swapDepthAt': {
       enumerable: true,
@@ -787,9 +817,12 @@
         var parent = this.parent;
         /*DEBUG*/
         check_number_type(index, this+'.swapDepthAt', '*index*');
-        check_node_type(parent, this+'.swapDepthAt(node): No parent node found.');
+        check_node_type(parent, this+'.swapDepthAt::parent: No parent node found.');
+        if (index >= parent.children.length || index < -parent.children.length) {
+          throw new RangeError(this+'.swapDepthAt(*index*): Index position out of range.');
+        }
         /*END_DEBUG*/
-        parent.swapChildrenAt(index, parent.children.indexOf(this));
+        parent.swapChildrenAt(parent.children.indexOf(this), index);
       }
     },
     
