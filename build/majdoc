@@ -89,6 +89,8 @@ CLASS_SRC['TextAlign']="$SRC_HOME/primitives/constants/textalign.js"
 CLASS_SRC['TextBaseline']="$SRC_HOME/primitives/constants/textbaseline.js"
 CLASS_SRC['Text']="$SRC_HOME/primitives/text.js"
 CLASS_INHERITS['Text']='Sprite:Node:EventDispatcher:Object'
+CLASS_SRC['Image']="$SRC_HOME/primitives/image.js"
+CLASS_INHERITS['Image']='Sprite:Node:EventDispatcher:Object'
 
 
 #parse multi-line doc comments from source file,

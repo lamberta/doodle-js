@@ -35,6 +35,7 @@ $(document).ready(function () {
         'Rectangle': doodle_base+"rectangle.html",
         //primitives
         'Text': doodle_base+"text.html",
+        'Image': doodle_base+"image.html",
         //events
         'Event': doodle_base+"event.html",
         'KeyboardEvent': doodle_base+"keyboardevent.html",

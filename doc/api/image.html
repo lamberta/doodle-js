@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Doodle.js - API: doodle.Layer</title>
+<title>Doodle.js - API: doodle.Image</title>
 <link href="./style/reset.css" rel="stylesheet" type="text/css">
 <link href="./style/main.css" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin" rel="stylesheet" type="text/css">
@@ -45,19 +45,19 @@
 <li>utils.types</li></ul>
 </nav>
 <div class="main">
-<h1>doodle.Layer</h1>
+<h1>doodle.Image</h1>
 
 <section>
 <h2>Description:</h2>
 <dl>
-<dt><dfn>Layer</dfn> (id:string, element:HTMLCanvasElement) :Layer</dt>
+<dt><dfn>Image</dfn> (imageSrc:string) :Image</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Inherits</h3>
 <ol>
-<li>ElementNode</li>
+<li>Sprite</li>
 <li>Node</li>
 <li>EventDispatcher</li>
 <li>Object</li>
@@ -65,18 +65,18 @@
 
 <h3>Parameters</h3>
 <ol>
-<li>id:string &#8211; <span class='param_annotation'>[optional]</span> </li>
-<li>element:HTMLCanvasElement &#8211; <span class='param_annotation'>[optional]</span> </li>
+<li>imageSrc:string &#8211; <span class='param_annotation'>[optional]</span> Image element or url.</li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Layer &#8211; </li>
+<li>Image &#8211; A text object.</li>
 </ul>
 
 <h3>Throws</h3>
 <ul>
-<li>SyntaxError &#8211; </li>
+<li>SyntaxError &#8211; Invalid parameters.</li>
+<li>TypeError &#8211; Text argument not a string.</li>
 </ul>
 
 
@@ -89,9 +89,50 @@
 <section>
 <h2>Properties</h2>
 <dl>
+<dt><dfn>context</dfn> :CanvasRenderingContext2D</dt>
+<dd>
+<p>drawing context to use</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>CanvasRenderingContext2D &#8211; </li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>height</dfn> :number</dt>
+<dd>
+<p>Indicates the height of the sprite, in pixels.</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
 <dt><dfn>width</dfn> :number</dt>
 <dd>
-<p>Canvas dimensions need to apply to HTML attributes.</p>
+<p>Indicates the width of the sprite, in pixels.</p>
 <details>
 
 
@@ -123,74 +164,7 @@
 <li>number &#8211; </li>
 </ul>
 
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-</ul>
 
-
-
-
-</details>
-</dd>
-<dt><dfn>backgroundColor</dfn> :Color</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>Color &#8211; </li>
-</ul>
-
-
-
-
-
-
-</details>
-</dd>
-<dt><dfn>backgroundImage</dfn> :HTMLImageElement</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>HTMLImageElement &#8211; </li>
-</ul>
-
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-</ul>
-
-
-
-
-</details>
-</dd>
-<dt><dfn>backgroundRepeat</dfn> :string</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>string &#8211; </li>
-</ul>
-
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-<li>SyntaxError &#8211; </li>
-</ul>
 
 
 
@@ -207,25 +181,6 @@
 <h3>Returns</h3>
 <ul>
 <li>Array &#8211; </li>
-</ul>
-
-
-
-
-
-
-</details>
-</dd>
-<dt><dfn>context</dfn> :CanvasRenderingContext2D</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>CanvasRenderingContext2D &#8211; </li>
 </ul>
 
 
@@ -254,7 +209,7 @@
 
 </details>
 </dd>
-<dt><dfn>element</dfn> :HTMLElement</dt>
+<dt><dfn>element</dfn> :HTMLImageElement</dt>
 <dd>
 <p></p>
 <details>
@@ -263,31 +218,13 @@
 
 <h3>Returns</h3>
 <ul>
-<li>HTMLElement &#8211; </li>
-</ul>
-
-
-
-
-
-
-</details>
-</dd>
-<dt><dfn>height</dfn> :number</dt>
-<dd>
-<p></p>
-<details>
-
-
-
-<h3>Returns</h3>
-<ul>
-<li>number &#8211; </li>
+<li>HTMLImageElement &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
 <ul>
 <li>TypeError &#8211; </li>
+<li>URIError &#8211; </li>
 </ul>
 
 
@@ -307,10 +244,7 @@
 <li>string &#8211; </li>
 </ul>
 
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-</ul>
+
 
 
 
@@ -374,6 +308,51 @@
 
 </details>
 </dd>
+<dt><dfn>rotation</dfn> :number</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>number &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>src</dfn> :string</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>string &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+<li>URIError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
 <dt><dfn>transform</dfn> :Matrix</dt>
 <dd>
 <p></p>
@@ -405,10 +384,7 @@
 <li>boolean &#8211; </li>
 </ul>
 
-<h3>Throws</h3>
-<ul>
-<li>TypeError &#8211; </li>
-</ul>
+
 
 
 
@@ -444,6 +420,25 @@
 <h3>Returns</h3>
 <ul>
 <li>number &#8211; </li>
+</ul>
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>graphics</dfn> :Graphics</dt>
+<dd>
+<p>The graphics object contains drawing operations to be stored in draw_commands. Objects and Arrays are passed by reference, so these will be modified</p>
+<details>
+
+
+
+<h3>Returns</h3>
+<ul>
+<li>Graphics &#8211; </li>
 </ul>
 
 
@@ -707,6 +702,31 @@
 
 </details>
 </dd>
+<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>targetCoordSpace:Node &#8211;  </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>Rectangle &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
 <dt><dfn>getChildById</dfn> (id:string) :Node|null</dt>
 <dd>
 <p></p>
@@ -745,6 +765,56 @@
 <h3>Returns</h3>
 <ul>
 <li>Point &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>hitTestObject</dfn> (node:Node) :boolean</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>node:Node &#8211;  </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>boolean &#8211; </li>
+</ul>
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>hitTestPoint</dfn> (pt:Point) :boolean</dt>
+<dd>
+<p></p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>pt:Point &#8211;  </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>boolean &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -1095,70 +1165,28 @@
 
 </details>
 </dd>
-<dt><dfn>getBounds</dfn> (targetCoordSpace:Node) :Rectangle|null</dt>
+<dt><dfn>compose</dfn> (x:number, y:number, width:number, height:number) :Sprite</dt>
 <dd>
-<p>The bounding box of a Node is a union of all it's child Sprite's bounds.</p>
+<p>Updates the position and size of this sprite.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>targetCoordSpace:Node &#8211;  </li>
+<li>x:number &#8211;  </li>
+<li>y:number &#8211;  </li>
+<li>width:number &#8211;  </li>
+<li>height:number &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
 <ul>
-<li>Rectangle|null &#8211; </li>
+<li>Sprite &#8211; </li>
 </ul>
 
-
-
-
-
-
-</details>
-</dd>
-</section>
-<section>
-<h2>Class Functions</h2>
-<dl>
-<dt><dfn>inheritsLayer</dfn> (obj:Object) :boolean</dt>
-<dd>
-<p>Check if object inherits from layer.</p>
-<details>
-
-<h3>Parameters</h3>
-<ol>
-<li>obj:Object &#8211;  </li>
-</ol>
-
-<h3>Returns</h3>
+<h3>Throws</h3>
 <ul>
-<li>boolean &#8211; </li>
+<li>TypeError &#8211; </li>
 </ul>
-
-
-
-
-
-
-</details>
-</dd>
-<dt><dfn>isLayer</dfn> (obj:Object) :boolean</dt>
-<dd>
-<p>Test if an object is a Layer.</p>
-<details>
-
-<h3>Parameters</h3>
-<ol>
-<li>obj:Object &#8211;  </li>
-</ol>
-
-<h3>Returns</h3>
-<ul>
-<li>boolean &#8211; </li>
-</ul>
-
-
 
 
 

@@ -85,6 +85,9 @@
         /**
          * @name element
          * @return {HTMLImageElement}
+         * @throws {TypeError}
+         * @throws {URIError}
+         * @property
          */
         'element': {
           enumerable: true,
@@ -103,6 +106,7 @@
          * @name src
          * @return {string}
          * @throws {TypeError}
+         * @throws {URIError}
          * @property
          */
         'src': {

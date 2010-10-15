@@ -13763,6 +13763,9 @@ Object.defineProperty(doodle, 'TextBaseline', {
         /**
          * @name element
          * @return {HTMLImageElement}
+         * @throws {TypeError}
+         * @throws {URIError}
+         * @property
          */
         'element': {
           enumerable: true,
@@ -13781,6 +13784,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
          * @name src
          * @return {string}
          * @throws {TypeError}
+         * @throws {URIError}
          * @property
          */
         'src': {
