@@ -80,6 +80,7 @@ function build_full {
     cat ./src/primitives/constants/textalign.js >> "$DEBUG_OUT_FILE"
     cat ./src/primitives/constants/textbaseline.js >> "$DEBUG_OUT_FILE"
     cat ./src/primitives/text.js >> "$DEBUG_OUT_FILE"
+    cat ./src/primitives/image.js >> "$DEBUG_OUT_FILE"
 }
 
 

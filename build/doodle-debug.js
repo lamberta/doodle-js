@@ -9091,7 +9091,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         check_node_type(node, this+'.addChild', '*node*');
         /*END_DEBUG*/
-        return this.addChildAt(node, this.children.length);
+        return this.addChildAt(node, 0);
       }
     },
 
@@ -9099,6 +9099,7 @@ Object.defineProperties(doodle.events.TextEvent, {
      * @name removeChildAt
      * @param {number} index
      * @throws {TypeError}
+     * @throws {RangeError}
      */
     'removeChildAt': {
       enumerable: true,
@@ -9107,6 +9108,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (index) {
         /*DEBUG*/
         check_number_type(index, this+'.removeChildAt', '*index*');
+        if (index < 0 || index >= this.children.length) {
+          throw new RangeError(this+".removeChildAt(*index*): Index out of range.");
+        }
         /*END_DEBUG*/
         var children = this.children,
             child = children[index],
@@ -9140,6 +9144,7 @@ Object.defineProperties(doodle.events.TextEvent, {
      * @name removeChild
      * @param {Node} node
      * @throws {TypeError}
+     * @throws {ReferenceError}
      */
     'removeChild': {
       enumerable: false,
@@ -9148,6 +9153,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (node) {
         /*DEBUG*/
         check_node_type(node, this+'.removeChild', '*node*');
+        if (node.parent !== this) {
+          throw new ReferenceError(this+".removeChild: "+ node.id +" is not a child of this node.");
+        }
         /*END_DEBUG*/
         this.removeChildAt(this.children.indexOf(node));
       }
@@ -9228,6 +9236,9 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         check_node_type(child, this+'.setChildIndex', '*child*, index');
         check_number_type(index, this+'.setChildIndex', 'child, *index*');
+        if (child.parent !== this) {
+          throw new ReferenceError(this+".setChildIndex: "+ child.id +" is not a child of this node.");
+        }
         /*END_DEBUG*/
         var children = this.children,
             len = children.length,
@@ -9242,6 +9253,10 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*END_DEBUG*/
         children.splice(pos, 1); //remove child
         children.splice(index, 0, child); //place child at new position
+        //reorder this display's scene path
+        if (this.root) {
+          this.root.__sortAllChildren();
+        }
       }
     },
 
@@ -9251,18 +9266,34 @@ Object.defineProperties(doodle.events.TextEvent, {
      * @param {number} index1
      * @param {number} index2
      * @throws {TypeError}
+     * @throws {RangeError}
      */
     'swapChildrenAt': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (index1, index2) {
+        var children = this.children,
+            node;
         /*DEBUG*/
         check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
         check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
+        if (index1 > children.length - 1 || index1 < -children.length) {
+          throw new RangeError(this+'.swapChildrenAt(*index1*, index2): Index position out of range.');
+        }
+        if (index2 > children.length - 1 || index2 < -children.length) {
+          throw new RangeError(this+'.swapChildrenAt(index1, *index2*): Index position out of range.');
+        }
         /*END_DEBUG*/
-        var children = this.children;
-        children[index1] = children.splice(index2, 1, children[index1])[0];
+        //need to get a little fancy so we can refer to negative indexes
+        node = children.splice(index1, 1, undefined)[0];
+        children.splice(index1, 1, children.splice(index2, 1, undefined)[0]);
+        children[children.indexOf(undefined)] = node;
+        
+        //reorder this display's scene path
+        if (this.root) {
+          this.root.__sortAllChildren();
+        }
       }
     },
 
@@ -9280,6 +9311,12 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         check_node_type(node1, this+'.swapChildren', '*node1*, node2');
         check_node_type(node2, this+'.swapChildren', 'node1, *node2*');
+        if (node1.parent !== this) {
+          throw new ReferenceError(this+".swapChildren: "+ node1.id +" is not a child of this node.");
+        }
+        if (node2.parent !== this) {
+          throw new ReferenceError(this+".swapChildren: "+ node2.id +" is not a child of this node.");
+        }
         /*END_DEBUG*/
         var children = this.children;
         this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
@@ -9317,6 +9354,7 @@ Object.defineProperties(doodle.events.TextEvent, {
      * @name swapDepthAt
      * @param {number} index
      * @throws {TypeError}
+     * @throws {RangeError}
      */
     'swapDepthAt': {
       enumerable: true,
@@ -9326,9 +9364,12 @@ Object.defineProperties(doodle.events.TextEvent, {
         var parent = this.parent;
         /*DEBUG*/
         check_number_type(index, this+'.swapDepthAt', '*index*');
-        check_node_type(parent, this+'.swapDepthAt(node): No parent node found.');
+        check_node_type(parent, this+'.swapDepthAt::parent: No parent node found.');
+        if (index >= parent.children.length || index < -parent.children.length) {
+          throw new RangeError(this+'.swapDepthAt(*index*): Index position out of range.');
+        }
         /*END_DEBUG*/
-        parent.swapChildrenAt(index, parent.children.indexOf(this));
+        parent.swapChildrenAt(parent.children.indexOf(this), index);
       }
     },
     
@@ -10592,7 +10633,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           if (typeof image === 'string') {
             //element id
             if (image[0] === '#') {
-              image = get_element(image, gfx_node+'.graphics..beginPatternFill');
+              image = get_element(image);
             } else {
               //url
               (function () {
@@ -13630,6 +13671,182 @@ Object.defineProperty(doodle, 'TextBaseline', {
       configurable: false,
       value: function () {
         return "[object Text]";
+      }
+    }
+  };
+
+}());//end class closure
+/*globals doodle, Image*/
+
+(function () {
+  var image_sprite_static_properties,
+      /*DEBUG*/
+      check_string_type = doodle.utils.types.check_string_type,
+      /*END_DEBUG*/
+      get_element = doodle.utils.get_element,
+      doodle_Event = doodle.events.Event,
+      Event_LOAD = doodle.events.Event.LOAD,
+      Event_CHANGE = doodle.events.Event.CHANGE;
+
+  /**
+   * A image sprite to display.
+   * @name doodle.Image
+   * @class
+   * @augments doodle.Sprite
+   * @param {string=} imageSrc Image element or url.
+   * @return {doodle.Image} A text object.
+   * @throws {SyntaxError} Invalid parameters.
+   * @throws {TypeError} Text argument not a string.
+   */
+  doodle.Image = function (imageSrc) {
+    var image_sprite = Object.create(doodle.Sprite());
+
+    Object.defineProperties(image_sprite, image_sprite_static_properties);
+    //properties that require privacy
+    Object.defineProperties(image_sprite, (function () {
+      var img_element = null;
+
+      function add_image_element (img) {
+        img_element = img;
+        if (img_element.id !== '') {
+          /*DEBUG*/
+          check_string_type(img_element.id, this+'::add_image_element::img_element.id');
+          /*END_DEBUG*/
+          image_sprite.id = img_element.id;
+        }
+        image_sprite.width = img_element.width;
+        image_sprite.height = img_element.height;
+        image_sprite.graphics.draw(function (ctx) {
+          ctx.drawImage(img_element, 0, 0);
+        });
+        image_sprite.dispatchEvent(doodle_Event(Event_LOAD));
+      }
+
+      function remove_image_element () {
+        if (img_element !== null) {
+          img_element = null;
+          image_sprite.graphics.clear();
+          image_sprite.dispatchEvent(doodle_Event(Event_CHANGE));
+        }
+      }
+      
+      function load_image (img_elem) {
+        var image = get_element(img_elem);
+        //element id
+        if (typeof img_elem === 'string') {
+          image_sprite.id = img_elem;
+        }
+        /*DEBUG*/
+        if (!image || (image && image.tagName !== 'IMG')) {
+          throw new TypeError(this+"::load_image(*img_elem*): Parameter must be an image object, or element id.");
+        }
+        /*END_DEBUG*/
+
+        //check if image has already been loaded
+        if (image.complete) {
+          add_image_element(image);
+        } else {
+          //if not, assign load handlers
+          image.onload = function () {
+            add_image_element(image);
+          };
+          image.onerror = function () {
+            throw new URIError('[object Image](imageSrc): Unable to load ' + image.src);
+          };
+          image.onabort = function () {
+            throw new URIError('[object Image](imageSrc): Unable to load ' + image.src);
+          };
+        }
+      }
+      
+      return {
+        /**
+         * @name element
+         * @return {HTMLImageElement}
+         */
+        'element': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return img_element; },
+          set: function (imageVar) {
+            if (imageVar === null || imageVar === false) {
+              remove_image_element();
+            } else {
+              load_image(imageVar);
+            }
+          }
+        },
+        
+        /**
+         * @name src
+         * @return {string}
+         * @throws {TypeError}
+         * @property
+         */
+        'src': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return (img_element === null) ? null : img_element.src; },
+          set: function (srcVar) {
+            if (srcVar === null || srcVar === false) {
+              remove_image_element();
+            } else {
+              /*DEBUG*/
+              check_string_type(srcVar, this+'.src');
+              /*END_DEBUG*/
+              var image = new Image();
+              image.src = encodeURI(srcVar);
+              load_image(image);
+            }
+          }
+        }
+        
+      };
+    }()));//end defineProperties
+
+    
+    switch (arguments.length) {
+    case 0:
+      break;
+    case 1:
+      //passed function or text string
+      if (typeof arguments[0] === 'function') {
+        arguments[0].call(image_sprite);
+        imageSrc = undefined;
+      } else {
+        //constructor param can be an image element or url
+        if (typeof imageSrc !== 'string') {
+          image_sprite.element = imageSrc;
+        } else if (typeof imageSrc === 'string' && imageSrc[0] === '#') {
+          image_sprite.element = imageSrc;
+        } else {
+          image_sprite.src = imageSrc;
+        }
+      }
+      break;
+    default:
+      /*DEBUG*/
+      throw new SyntaxError("[object Image](imageSrc): Invalid number of parameters.");
+      /*END_DEBUG*/
+    }
+    
+    return image_sprite;
+  };
+
+  
+  image_sprite_static_properties = {
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
+     * @return {string}
+     * @override
+     */
+    'toString': {
+      enumerable: false,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return "[object Image]";
       }
     }
   };

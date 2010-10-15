@@ -671,7 +671,7 @@
           if (typeof image === 'string') {
             //element id
             if (image[0] === '#') {
-              image = get_element(image, gfx_node+'.graphics..beginPatternFill');
+              image = get_element(image);
             } else {
               //url
               (function () {
