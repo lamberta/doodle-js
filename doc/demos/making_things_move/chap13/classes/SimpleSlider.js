@@ -34,7 +34,7 @@ function SimpleSlider (min, max, value) {
 
     _handle = doodle.Sprite();
     simple_slider.addChild(_handle);
-    _handle.addEventListener(doodle.MouseEvent.MOUSE_DOWN, onMouseDown);
+    _handle.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
 
     draw();
     updatePosition();
@@ -72,13 +72,13 @@ function SimpleSlider (min, max, value) {
     var handleRange = _height - _handleHeight,
         valueRange = _max - _min;
     _value = (handleRange - _handle.y) / handleRange * valueRange + _min;
-    simple_slider.dispatchEvent(doodle.Event(doodle.Event.CHANGE));
+    simple_slider.dispatchEvent(doodle.events.Event(doodle.events.Event.CHANGE));
   }
 
   function onMouseDown (event) {
     var display = simple_slider.root;
-    display.addEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
-    display.addEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
   }
 
   function onMouseMove (event) {
@@ -92,8 +92,8 @@ function SimpleSlider (min, max, value) {
 
   function onMouseUp (event) {
     var display = simple_slider.root;
-    display.removeEventListener(doodle.MouseEvent.MOUSE_MOVE, onMouseMove);
-    display.removeEventListener(doodle.MouseEvent.MOUSE_UP, onMouseUp);
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
   }
 
   function invalidate () {
