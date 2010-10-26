@@ -3,3 +3,4 @@ build/*.error
 build/*.jar
 src/TAGS
 doc/demos/tmp/
+doc/notes/tmp/
