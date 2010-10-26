@@ -1,0 +1,48 @@
+# Doodle.js classes at a glance.
+
+#geometry
+doodle.geom
+  - Point
+  - Rect
+  - Matrix
+
+#events
+doodle.events
+  - Event
+  - UIEvent => Event
+  - MouseEvent => UIEvent => Event
+  - TouchEvent => UIEvent => Event
+  - TextEvent => UIEvent => Event
+  - KeyboardEvent => UIEvent => Event
+
+#base classes
+doodle
+  - EventDispatcher
+  - Node => EventDispatcher
+  - Sprite => Node => EventDispatcher
+  - ElementNode => Node => EventDispatcher
+  - Layer => ElementNode => Node => EventDispatcher
+  - Display => ElementNode => Node => EventDispatcher
+  - Graphics
+
+#primitives
+doodle
+  - Image => Sprite => Node => EventDispatcher
+  - Text => Sprite => Node => EventDispatcher
+
+#utility functions
+doodle.utils
+  - types
+
+#constants
+doodle
+  - FontStyle
+  - FontVariant
+  - FontWeight
+  - TextAlign
+  - TextBaseline
+  - LineCap
+  - LineJoin
+  - GradientType
+  - Pattern
+  - Keyboard
