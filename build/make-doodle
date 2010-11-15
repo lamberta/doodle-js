@@ -11,6 +11,7 @@ function print_help_and_exit {
     echo "  -P      Profiling build. Debugging stripped but not compiled."
     echo "  -S      Leave stats monitor in compiled build."
     echo "  -A      Generate API docs."
+    echo "  -T      Create etags file (requires Exuberant Ctags)."
     echo " Compiler Options:"
     echo -e "  -W=n    Warning level.\t(0:quiet, 1:default, 2:vebose)"
     echo -e "  -C=n    Compilation level.\t(0:whitespace, 1:simple, 2:advanced)"
@@ -191,7 +192,7 @@ function make_etags {
 
 
 #parse args
-while getopts "hcJ:dDPSW:C:A" option; do
+while getopts "hcJ:dDPSTW:C:A" option; do
     case $option in
         h) print_help_and_exit;;
         c) clean_up; exit 0;;
@@ -200,6 +201,7 @@ while getopts "hcJ:dDPSW:C:A" option; do
         D) BUILD_DEBUG=1; BUILD_DEBUG_ONLY=1;;
         P) BUILD_STRIP=1;;
         S) BUILD_STATS=1;;
+        T) BUILD_TAGS=1;;
         W) WARNING_LEVEL="$OPTARG";;
         C) COMPILATION_LEVEL="$OPTARG";;
         A) BUILD_API_DOCS=1;;
@@ -221,7 +223,9 @@ echo "For more options: $(basename $0) -h"
 
 echo "Build:"
 
-make_etags
+if [ -n "$BUILD_TAGS" ]; then
+    make_etags
+fi
 
 #creates debug version
 build_full
