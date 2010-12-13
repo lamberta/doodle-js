@@ -339,28 +339,7 @@
           value: function () {
             create_scene_path(this, display_scene_path, true).reverse();
             /*DEBUG*/
-            if (display_scene_path.length === 0) {
-              throw new RangeError(this+'.__sortAllChildren: display_scene_path array should never be zero.');
-            }
-            /*END_DEBUG*/
-            /*** not-implemented-yet
-            //move layers toward the bottom of the stack
-            display_scene_path.sort(function (a, b) {
-              if ((isDisplay(a) || isDisplay(b)) ||
-                  (isLayer(a) && isLayer(b)) ||
-                  (!isLayer(a) && !isLayer(b))) {
-                return 0;
-              } else if (isLayer(a) && !isLayer(b)) {
-                return -1;
-              } else if (!isLayer(a) && isLayer(b)) {
-                return 1;
-              }
-            });
-            ***/
-            /*DEBUG*/
-            if (!isDisplay(display_scene_path[0])) {
-              throw new ReferenceError(this+'.__sortAllChildren: Error sorting display_scene_path.');
-            }
+            doodle.utils.type_check(display_scene_path[0], 'Display');
             /*END_DEBUG*/
           }
         },
@@ -827,13 +806,18 @@
    *
    */
   draw_scene_graph = function (scene_path, count) {
+    /*DEBUG*/
+    doodle.utils.type_check(scene_path, 'array', count, 'number');
+    /*END_DEBUG*/
     var node,
         display,
         ctx,
-        bounds;
-    
-    while (count--) {
-      node = scene_path[count];
+        bounds,
+        i = 0;
+
+    for (; i < count; i++) {
+    //while (count--) {
+      node = scene_path[i];
       display = node.root;
       ctx = node.context;
       
@@ -894,8 +878,11 @@
    * @private
    */
   dispatch_mouse_event = function (evt, mouseEvent, path, count, x, y, display) {
+    /*DEBUG*/
+    doodle.utils.type_check(evt, 'MouseEvent', mouseEvent, 'MouseEvent', path, 'array', count, 'number', x, 'number', y, 'number', display, 'Display');
+    /*END_DEBUG*/
     while (count--) {
-      if(path[count].__getBounds(display).contains(x, y)) {
+      if (path[count].__getBounds(display).contains(x, y)) {
         path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }

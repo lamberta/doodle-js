@@ -411,6 +411,102 @@ doodle.utils = Object.create({}, {
  */
 doodle.utils.types = Object.create({}, (function () {
 
+  function assert_type (test, arg, type) {
+    if (test === false) {
+      var err = new TypeError(arg + " must be of type '" + type + "'");
+      err.arg = arg;
+      err.type = type;
+      throw err;
+    } else {
+      return true;
+    }
+  }
+  
+  function check_arg_type (arg, type) {
+    if (typeof type !== 'string') {
+      throw new SyntaxError("check_arg_type(arg, type): Invalid type.");
+    }
+    switch (type) {
+    case 'boolean':
+      assert_type(typeof arg === 'boolean', arg, type);
+      break;
+    case 'number':
+      assert_type(typeof arg === 'number', arg, type);
+      break;
+    case 'string':
+      assert_type(typeof arg === 'string', arg, type);
+      break;
+    case 'function':
+      assert_type(typeof arg === 'function', arg, type);
+      break;
+    case 'object':
+      assert_type(typeof arg === 'object', arg, type);
+      break;
+    case 'array':
+      assert_type(Array.isArray(arg), arg, type);
+      break;
+    case 'canvas':
+      assert_type(Object.prototype.toLocaleString.call(arg) === '[object HTMLCanvasElement]', arg, type);
+      break;
+    case 'context':
+      assert_type(Object.prototype.toLocaleString.call(arg) === '[object CanvasRenderingContext2D]', arg, type);
+      break;
+    case 'block':
+      assert_type(doodle.utils.get_style_property(element, 'display') === 'block', arg, type);
+      break;
+    case 'Display':
+      assert_type(Object.prototype.toLocaleString.call(arg) === '[object Display]', arg, type);
+      break;
+    case 'Event':
+      assert_type(Object.prototype.toLocaleString.call(arg) === '[object Event]', arg, type);
+      break;
+    case 'MouseEvent':
+      assert_type(Object.prototype.toLocaleString.call(arg) === '[object MouseEvent]', arg, type);
+      break;
+    default:
+      throw new SyntaxError("check_arg_type(arg, type): Unknown type.");
+    }
+  }
+
+  /**
+   * @name check_type
+   * @param {*} Argument to type check.
+   * @param {type} arg type Name of type.
+   * @param {function=} callback Function to run if a TypeError is thrown.
+   * @throws {SyntaxError}
+   * @throws {TypeError}
+   */
+  doodle.utils.type_check = function (arg, type, /*[arg, type, ...]*/ callback) {
+    var args = Array.prototype.slice.call(arguments),
+        len = args.length,
+        i = 0;
+    if (typeof args[len-1] === 'function') {
+      callback = args.pop();
+      len = args.length;
+    }
+    if (len % 2 !== 0) {
+      throw new SyntaxError("type_check: Each argument must have an associated type.");
+    }
+    try {
+      for (; i < len; i++) {
+        if (i % 2 === 0) {
+          check_arg_type(args[i], args[i+1]);
+        }
+      }
+    } catch (err) {
+      if (err instanceof TypeError) {
+        if (typeof callback === 'function') {
+          callback(err.arg, err.type);
+        } else {
+          console.trace();
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
+  }
+
   /**
    * @name throw_type_error
    * @param {string} type Name of type.
@@ -11602,7 +11698,7 @@ Object.defineProperties(doodle.events.TextEvent, {
   
 }());//end class closure
 /*jslint nomen: false, plusplus: false*/
-/*globals doodle, document, setInterval, clearInterval, Stats*/
+/*globals doodle, document, console, setInterval, clearInterval, Stats*/
 
 (function () {
   var display_static_properties,
@@ -11620,6 +11716,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
+      check_array_type = doodle.utils.types.check_array_type,
       check_layer_type = doodle.utils.types.check_layer_type,
       check_block_element = doodle.utils.types.check_block_element,
       check_point_type = doodle.utils.types.check_point_type,
@@ -11942,28 +12039,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           value: function () {
             create_scene_path(this, display_scene_path, true).reverse();
             /*DEBUG*/
-            if (display_scene_path.length === 0) {
-              throw new RangeError(this+'.__sortAllChildren: display_scene_path array should never be zero.');
-            }
-            /*END_DEBUG*/
-            /*** not-implemented-yet
-            //move layers toward the bottom of the stack
-            display_scene_path.sort(function (a, b) {
-              if ((isDisplay(a) || isDisplay(b)) ||
-                  (isLayer(a) && isLayer(b)) ||
-                  (!isLayer(a) && !isLayer(b))) {
-                return 0;
-              } else if (isLayer(a) && !isLayer(b)) {
-                return -1;
-              } else if (!isLayer(a) && isLayer(b)) {
-                return 1;
-              }
-            });
-            ***/
-            /*DEBUG*/
-            if (!isDisplay(display_scene_path[0])) {
-              throw new ReferenceError(this+'.__sortAllChildren: Error sorting display_scene_path.');
-            }
+						doodle.utils.type_check(display_scene_path[0], 'Display');
             /*END_DEBUG*/
           }
         },
@@ -12430,13 +12506,18 @@ Object.defineProperties(doodle.events.TextEvent, {
    *
    */
   draw_scene_graph = function (scene_path, count) {
+    /*DEBUG*/
+		doodle.utils.type_check(scene_path, 'array', count, 'number');
+    /*END_DEBUG*/
     var node,
         display,
         ctx,
-        bounds;
-    
-    while (count--) {
-      node = scene_path[count];
+				bounds,
+				i = 0;
+
+		for (; i < count; i++) {
+    //while (count--) {
+      node = scene_path[i];
       display = node.root;
       ctx = node.context;
       
@@ -12497,8 +12578,11 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @private
    */
   dispatch_mouse_event = function (evt, mouseEvent, path, count, x, y, display) {
-    while (count--) {
-      if(path[count].__getBounds(display).contains(x, y)) {
+		/*DEBUG*/
+		doodle.utils.type_check(evt, 'MouseEvent', mouseEvent, 'MouseEvent', path, 'array', count, 'number', x, 'number', y, 'number', display, 'Display');
+		/*END_DEBUG*/
+		while (count--) {
+      if (path[count].__getBounds(display).contains(x, y)) {
         path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
