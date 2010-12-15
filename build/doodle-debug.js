@@ -9187,7 +9187,8 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         check_node_type(node, this+'.addChild', '*node*');
         /*END_DEBUG*/
-        return this.addChildAt(node, 0);
+        //add to end of children array
+        return this.addChildAt(node, this.children.length);
       }
     },
 
@@ -11698,7 +11699,7 @@ Object.defineProperties(doodle.events.TextEvent, {
   
 }());//end class closure
 /*jslint nomen: false, plusplus: false*/
-/*globals doodle, document, console, setInterval, clearInterval, Stats*/
+/*globals doodle, document, setInterval, clearInterval, Stats*/
 
 (function () {
   var display_static_properties,
@@ -11716,7 +11717,6 @@ Object.defineProperties(doodle.events.TextEvent, {
       check_boolean_type = doodle.utils.types.check_boolean_type,
       check_number_type = doodle.utils.types.check_number_type,
       check_string_type = doodle.utils.types.check_string_type,
-      check_array_type = doodle.utils.types.check_array_type,
       check_layer_type = doodle.utils.types.check_layer_type,
       check_block_element = doodle.utils.types.check_block_element,
       check_point_type = doodle.utils.types.check_point_type,
@@ -12039,7 +12039,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           value: function () {
             create_scene_path(this, display_scene_path, true).reverse();
             /*DEBUG*/
-						doodle.utils.type_check(display_scene_path[0], 'Display');
+            doodle.utils.type_check(display_scene_path[0], 'Display');
             /*END_DEBUG*/
           }
         },
@@ -12507,15 +12507,15 @@ Object.defineProperties(doodle.events.TextEvent, {
    */
   draw_scene_graph = function (scene_path, count) {
     /*DEBUG*/
-		doodle.utils.type_check(scene_path, 'array', count, 'number');
+    doodle.utils.type_check(scene_path, 'array', count, 'number');
     /*END_DEBUG*/
     var node,
         display,
         ctx,
-				bounds,
-				i = 0;
+        bounds,
+        i = 0;
 
-		for (; i < count; i++) {
+    for (; i < count; i++) {
     //while (count--) {
       node = scene_path[i];
       display = node.root;
@@ -12578,10 +12578,10 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @private
    */
   dispatch_mouse_event = function (evt, mouseEvent, path, count, x, y, display) {
-		/*DEBUG*/
-		doodle.utils.type_check(evt, 'MouseEvent', mouseEvent, 'MouseEvent', path, 'array', count, 'number', x, 'number', y, 'number', display, 'Display');
-		/*END_DEBUG*/
-		while (count--) {
+    /*DEBUG*/
+    doodle.utils.type_check(evt, 'MouseEvent', mouseEvent, 'MouseEvent', path, 'array', count, 'number', x, 'number', y, 'number', display, 'Display');
+    /*END_DEBUG*/
+    while (count--) {
       if (path[count].__getBounds(display).contains(x, y)) {
         path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
