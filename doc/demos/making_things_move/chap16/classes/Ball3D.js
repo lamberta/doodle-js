@@ -10,7 +10,7 @@ function Ball3D (radius, color) {
     this.vz = 0;
     this.mass = 1;
 
-    this.graphics.lineStyle(0);
+    this.graphics.lineStyle(1);
     this.graphics.beginFill(color);
     this.graphics.circle(0, 0, this.radius);
     this.graphics.endFill();

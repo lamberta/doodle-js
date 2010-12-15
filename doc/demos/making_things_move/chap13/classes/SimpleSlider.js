@@ -48,7 +48,7 @@ function SimpleSlider (min, max, value) {
   function drawBack () {
     _back.graphics.clear();
     _back.graphics.beginFill(_backColor);
-    _back.graphics.lineStyle(0, _backBorderColor);
+    _back.graphics.lineStyle(1, _backBorderColor);
     _back.graphics.roundRect(0, 0, _backWidth, _height, _backRadius, _backRadius);
     _back.graphics.endFill();
     _back.x = _width / 2 - _backWidth / 2;
@@ -57,7 +57,7 @@ function SimpleSlider (min, max, value) {
   function drawHandle () {
     _handle.graphics.clear();
     _handle.graphics.beginFill(_handleColor);
-    _handle.graphics.lineStyle(0, _handleBorderColor);
+    _handle.graphics.lineStyle(1, _handleBorderColor);
     _handle.graphics.roundRect(0, 0, _width, _handleHeight, _handleRadius, _handleRadius);
     _handle.graphics.endFill();
   }

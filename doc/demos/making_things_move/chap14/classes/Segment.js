@@ -9,7 +9,7 @@ function Segment (segmentWidth, segmentHeight, color) {
 
     function init () {
       //draw the segment itself
-      this.graphics.lineStyle(0);
+      this.graphics.lineStyle(1);
       this.graphics.beginFill(color);
       this.graphics.roundRect(-segmentHeight / 2,
                               -segmentHeight / 2,

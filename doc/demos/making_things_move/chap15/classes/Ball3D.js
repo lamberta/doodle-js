@@ -11,7 +11,7 @@ function Ball3D (radius, color) {
     this.vz = 0;
     this.mass = 1;
 
-    this.graphics.lineStyle(0);
+    this.graphics.lineStyle(1);
     this.graphics.beginFill(color);
     this.graphics.circle(0, 0, this.radius);
     this.graphics.endFill();
@@ -21,7 +21,7 @@ function Ball3D (radius, color) {
      */
     this.color_transform = function (colorValue) {
       this.graphics.clear();
-      this.graphics.lineStyle(0);
+      this.graphics.lineStyle(1);
       this.graphics.beginFill(colorValue);
       this.graphics.circle(0, 0, this.radius);
       this.graphics.endFill();
