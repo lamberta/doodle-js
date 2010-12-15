@@ -40,6 +40,7 @@ function build_full {
     echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
     cat ./src/utils/types.js >> "$DEBUG_OUT_FILE"
     echo "/*END_DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
+    cat ./src/utils/type_check.js >> "$DEBUG_OUT_FILE"
     
     echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
     cat "$STATS_FILE" >> "$DEBUG_OUT_FILE"
