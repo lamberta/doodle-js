@@ -1,13 +1,9 @@
 /*globals doodle*/
-
 (function () {
   var rect_static_properties,
-      isRect,
       temp_array = new Array(4),
       /*DEBUG*/
-      check_rect_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       //lookup help
       doodle_Rectangle,
@@ -53,7 +49,7 @@
           get: function () { return x; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.x');
+            type_check(n, 'number', {label: 'Rectangle.x', id:this.toString()});
             /*END_DEBUG*/
             x = n;
           }
@@ -71,7 +67,7 @@
           get: function () { return y; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.y');
+            type_check(n, 'number', {label: 'Rectangle.y', id:this.toString()});
             /*END_DEBUG*/
             y = n;
           }
@@ -89,7 +85,7 @@
           get: function () { return width; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n, 'number', {label: 'Rectangle.width', id:this.toString()});
             /*END_DEBUG*/
             width = n;
           }
@@ -107,7 +103,7 @@
           get: function () { return height; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n, 'number', {label: 'Rectangle.height', id:this.toString()});
             /*END_DEBUG*/
             height = n;
           }
@@ -161,7 +157,7 @@
         rect.compose.apply(rect, init_obj);
       } else {
         /*DEBUG*/
-        check_rect_type(init_obj, '[object Rectangle](rect)');
+        type_check(init_obj, 'Rectangle', {label: 'Rectangle', id:this.toString(), params:'rectangle', message:"Unable to initialize with Rectangle object."});
         /*END_DEBUG*/
         rect.compose(init_obj.x, init_obj.y, init_obj.width, init_obj.height);
       }
@@ -191,7 +187,7 @@
       },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.top');
+        type_check(n, 'number', {label: 'Rectangle.top', id:this.toString()});
         /*END_DEBUG*/
         this.y = n;
         this.height -= n;
@@ -212,7 +208,7 @@
       },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.right');
+        type_check(n, 'number', {label: 'Rectangle.right', id:this.toString()});
         /*END_DEBUG*/
         this.width = n - this.x;
       }
@@ -232,7 +228,7 @@
       },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.bottom');
+        type_check(n, 'number', {label: 'Rectangle.bottom', id:this.toString()});
         /*END_DEBUG*/
         this.height = n - this.y;
       }
@@ -252,7 +248,7 @@
       },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.left');
+        type_check(n, 'number', {label: 'Rectangle.left', id:this.toString()});
         /*END_DEBUG*/
         this.x = n;
         this.width -= n;
@@ -268,7 +264,7 @@
       writable: false,
       configurable: false,
       value: function () {
-        return "(x="+ this.x +", y="+ this.y +", w="+ this.width +", h="+ this.height +")";
+        return "(x="+ this.x +",y="+ this.y +",w="+ this.width +",h="+ this.height +")";
       }
     },
 
@@ -290,8 +286,8 @@
      * @name compose
      * @param {number} x
      * @param {number} y
-     * @param {number} width
-     * @param {number} height
+     * @param {number} w
+     * @param {number} h
      * @return {Rectangle}
      * @throws {TypeError}
      */
@@ -299,17 +295,14 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (x, y, width, height) {
+      value: function (x, y, w, h) {
         /*DEBUG*/
-        check_number_type(x, this+'.compose', '*x*, y, width, height');
-        check_number_type(y, this+'.compose', 'x, *y*, width, height');
-        check_number_type(width, this+'.compose', 'x, y, *width*, height');
-        check_number_type(height, this+'.compose', 'x, y, width, *height*');
+        type_check(x, 'number', y, 'number', w, 'number', h, 'number', {label: 'Rectangle.compose', params: ['x','y','width','height'], id:this.toString()});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
+        this.width = w;
+        this.height = h;
         return this;
       }
     },
@@ -328,7 +321,7 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.__compose', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.__compose', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
         this.compose.apply(this, rect.__toArray());
         return this;
@@ -363,8 +356,7 @@
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.offset', '*dx*, dy');
-        check_number_type(dy, this+'.offset', 'dx, *dy*');
+        type_check(dx, 'number', dy, 'number', {label: 'Rectangle.offset', params:['dx', 'dy'], id:this.toString()});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -389,8 +381,7 @@
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.inflate', '*dx*, dy');
-        check_number_type(dy, this+'.inflate', 'dx, *dy*');
+        type_check(dx, 'number', dy, 'number', {label: 'Rectangle.inflate', params:['dx', 'dy'], id:this.toString()});
         /*END_DEBUG*/
         this.x -= dx;
         this.width += 2 * dx;
@@ -413,10 +404,9 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.equals', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.equals', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
-        return (this.x === rect.x && this.y === rect.y &&
-                this.width === rect.width && this.height === rect.height);
+        return (this.x === rect.x && this.y === rect.y && this.width === rect.width && this.height === rect.height);
       }
     },
 
@@ -449,11 +439,9 @@
       configurable: false,
       value: function (x, y) {
         /*DEBUG*/
-        check_number_type(x, this+'.contains', '*x*, y');
-        check_number_type(y, this+'.contains', 'x, *y*');
+        type_check(x, 'number', y, 'number', {label: 'Rectangle.contains', params:['x', 'y'], id:this.toString()});
         /*END_DEBUG*/
-        return (x >= this.left && x <= this.right &&
-                y >= this.top && y <= this.bottom);
+        return (x >= this.left && x <= this.right && y >= this.top && y <= this.bottom);
       }
     },
 
@@ -471,7 +459,7 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.containsPoint', '*point*');
+        type_check(pt, 'Point', {label:'Rectangle.containsPoint', params:'point', id:this.toString()});
         /*END_DEBUG*/
         return this.contains(pt.x, pt.y);
       }
@@ -490,13 +478,12 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.containsRect', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.containsRect', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
-        //check each corner
-        return (this.contains(rect.x, rect.y) &&           //top-left
-                this.contains(rect.right, rect.y) &&       //top-right
-                this.contains(rect.right, rect.bottom) &&  //bot-right
-                this.contains(rect.x, rect.bottom));       //bot-left
+        var right = rect.x + rect.width,
+            bot = rect.y + rect.height;
+        //check corners: tl, tr, br, bl
+        return (this.contains(rect.x, rect.y) && this.contains(right, rect.y) && this.contains(right, bot) && this.contains(rect.x, bot));
       }
     },
 
@@ -513,13 +500,12 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.intersects', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.intersects', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
-        //check each corner
-        return (this.contains(rect.x, rect.y) ||           //top-left
-                this.contains(rect.right, rect.y) ||       //top-right
-                this.contains(rect.right, rect.bottom) ||  //bot-right
-                this.contains(rect.x, rect.bottom));       //bot-left
+        var right = rect.x + rect.width,
+            bot = rect.y + rect.height;
+        //check corners: tl, tr, br, bl
+        return (this.contains(rect.x, rect.y) || this.contains(right, rect.y) || this.contains(right, bot) || this.contains(rect.x, rect.bot));
       }
     },
 
@@ -539,14 +525,14 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.intersection', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.intersection', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
         var r = doodle_Rectangle(0, 0, 0, 0);
         if (this.intersects(rect)) {
-          r.left = max(this.left, rect.left);
-          r.top = max(this.top, rect.top);
-          r.right = min(this.right, rect.right);
-          r.bottom = min(this.bottom, rect.bottom);
+          r.left = max(this.left, rect.x);
+          r.top = max(this.top, rect.y);
+          r.right = min(this.right, rect.x + rect.width);
+          r.bottom = min(this.bottom, rect.y + rect.height);
         }
         return r;
       }
@@ -566,13 +552,13 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.intersection', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.__intersection', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
         if (this.intersects(rect)) {
-          this.left = max(this.left, rect.left);
-          this.top = max(this.top, rect.top);
-          this.right = min(this.right, rect.right);
-          this.bottom = min(this.bottom, rect.bottom);
+          this.left = max(this.left, rect.x);
+          this.top = max(this.top, rect.y);
+          this.right = min(this.right, rect.x + rect.width);
+          this.bottom = min(this.bottom, rect.y + rect.height);
         }
         return this;
       }
@@ -592,13 +578,13 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.union', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.union', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
         var r = doodle_Rectangle(0, 0, 0, 0);
-        r.left = min(this.left, rect.left);
-        r.top = min(this.top, rect.top);
-        r.right = max(this.right, rect.right);
-        r.bottom = max(this.bottom, rect.bottom);
+        r.left = min(this.left, rect.x);
+        r.top = min(this.top, rect.y);
+        r.right = max(this.right, rect.x + rect.width);
+        r.bottom = max(this.bottom, rect.y + rect.height);
         return r;
       }
     },
@@ -617,64 +603,38 @@
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.__union', '*rect*');
+        type_check(rect, 'Rectangle', {label: 'Rectangle.__union', params:'rectangle', id:this.toString()});
         /*END_DEBUG*/
         //a bit tricky, if applied directly it doesn't work
-        var l = min(this.left, rect.left),
-            t = min(this.top, rect.top),
-            r = max(this.right, rect.right),
-            b = max(this.bottom, rect.bottom);
+        var l = min(this.left, rect.x),
+            t = min(this.top, rect.y),
+            r = max(this.right, rect.x + rect.width),
+            b = max(this.bottom, rect.y + rect.height);
         this.left = l;
         this.top = t;
         this.right = r;
         this.bottom = b;
-        
         return this;
       }
     }
     
   };//end rect_static_properties definition
-
-  /*
-   * CLASS FUNCTIONS
-   */
-
-  /**
-   * Check if a given object contains a numeric rectangle properties including
-   * x, y, width, height, top, bottom, right, left.
-   * Does not check if a rectangle is actually a doodle.geom.rectangle.
-   * @name isRect
-   * @param {Rectangle} rect Object with numeric rectangle parameters.
-   * @return {boolean}
-   * @static
-   */
-  isRect = doodle.geom.Rectangle.isRect = function (rect) {
-    return (typeof rect.x     === "number" && typeof rect.y      === "number" &&
-            typeof rect.width === "number" && typeof rect.height === "number" &&
-            typeof rect.top   === "number" && typeof rect.bottom === "number" &&
-            typeof rect.left  === "number" && typeof rect.right  === "number");
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_rect_type
-   * @param {Rectangle} rect
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller, param) {
-    if (isRect(rect)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_rect_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Rectangle.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
+
+/*
+ * CLASS FUNCTIONS
+ */
+
+/**
+ * Check if a given object contains a numeric rectangle properties including
+ * x, y, width, height, top, bottom, right, left.
+ * Does not check if a rectangle is actually a doodle.geom.rectangle.
+ * @name isRect
+ * @param {Rectangle} rect Object with numeric rectangle parameters.
+ * @return {boolean}
+ * @static
+ */
+doodle.geom.Rectangle.isRectangle = function (rect) {
+  return (typeof rect === 'object' && typeof rect.x === "number" && typeof rect.y === "number" && typeof rect.width === "number" && typeof rect.height === "number");
+};
