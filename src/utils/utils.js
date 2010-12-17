@@ -8,7 +8,6 @@
  * @static
  */
 doodle.utils = Object.create({}, {
-
   /*
    * COLOR UTILS
    */
