@@ -1,16 +1,12 @@
 /*globals doodle*/
-
 (function () {
   var matrix_static_properties,
-      isMatrix,
       //recycle object for internal calculations
       temp_array = new Array(6),
       temp_point = {x: null, y: null},
       temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       /*DEBUG*/
-      check_matrix_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       //lookup help
       doodle_Matrix,
@@ -51,7 +47,6 @@
           $temp_array = temp_array;
       
       return {
-
         /**
          * The value that affects the positioning of pixels along the x axis
          * when scaling or rotating an image.
@@ -66,7 +61,7 @@
           get: function () { return a; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.a');
+            type_check(n, 'number', {label:'Matrix.a', id:this.toString()});
             /*END_DEBUG*/
             a = n;
           }
@@ -86,7 +81,7 @@
           get: function () { return b; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.b');
+            type_check(n, 'number', {label:'Matrix.b', id:this.toString()});
             /*END_DEBUG*/
             b = n;
           }
@@ -106,7 +101,7 @@
           get: function () { return c; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.c');
+            type_check(n, 'number', {label:'Matrix.c', id:this.toString()});
             /*END_DEBUG*/
             c = n;
           }
@@ -126,7 +121,7 @@
           get: function () { return d; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.d');
+            type_check(n, 'number', {label:'Matrix.d', id:this.toString()});
             /*END_DEBUG*/
             d = n;
           }
@@ -145,7 +140,7 @@
           get: function () { return tx; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.tx');
+            type_check(n, 'number', {label:'Matrix.tx', id:this.toString()});
             /*END_DEBUG*/
             tx = n;
           }
@@ -164,7 +159,7 @@
           get: function () { return ty; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.ty');
+            type_check(n, 'number', {label:'Matrix.ty', id:this.toString()});
             /*END_DEBUG*/
             ty = n;
           }
@@ -180,14 +175,13 @@
           writable: false,
           configurable: false,
           value: function () {
-            var matrix = $temp_array;
-            matrix[0] = a;
-            matrix[1] = b;
-            matrix[2] = c;
-            matrix[3] = d;
-            matrix[4] = tx;
-            matrix[5] = ty;
-            return matrix;
+            $temp_array[0] = a;
+            $temp_array[1] = b;
+            $temp_array[2] = c;
+            $temp_array[3] = d;
+            $temp_array[4] = tx;
+            $temp_array[5] = ty;
+            return $temp_array;
           }
         }
         
@@ -195,7 +189,8 @@
     }()));//end defineProperties
     
 
-    //initialize matrix
+    /* initialize matrix
+     */
     switch (arg_len) {
     case 0:
       //defaults to 1,0,0,1,0,0
@@ -220,7 +215,7 @@
         matrix.compose.apply(matrix, init_obj);
       } else {
         /*DEBUG*/
-        check_matrix_type(init_obj, '[object Matrix](matrix)');
+        type_check(init_obj, 'Matrix', {label:'doodle.geom.Matrix', id:this.toString(), params:'matrix', message:"Invalid initialization object."});
         /*END_DEBUG*/
         matrix.compose(init_obj.a, init_obj.b, init_obj.c, init_obj.d, init_obj.tx, init_obj.ty);
       }
@@ -254,12 +249,7 @@
       configurable: false,
       value: function (a, b, c, d, tx, ty) {
         /*DEBUG*/
-        check_number_type(a, this+'.compose', '*a*, b, c, d, tx, ty');
-        check_number_type(b, this+'.compose', 'a, *b*, c, d, tx, ty');
-        check_number_type(c, this+'.compose', 'a, b, *c*, d, tx, ty');
-        check_number_type(d, this+'.compose', 'a, b, c, *d*, tx, ty');
-        check_number_type(tx, this+'.compose', 'a, b, c, d, *tx*, ty');
-        check_number_type(ty, this+'.compose', 'a, b, c, d, tx, *ty*');
+        type_check(a, 'number', b, 'number', c, 'number', d, 'number', tx, 'number', ty, 'number', {label:'Matrix.compose', id:this.toString(), params:['a','b','c','d','tx','ty']});
         /*END_DEBUG*/
         this.a  = a;
         this.b  = b;
@@ -295,8 +285,7 @@
       writable: false,
       configurable: false,
       value: function () {
-        return ("(a="+ this.a +", b="+ this.b +", c="+ this.c +
-                ", d="+ this.d +", tx="+ this.tx +", ty="+ this.ty +")");
+        return ("(a="+ this.a +",b="+ this.b +",c="+ this.c +",d="+ this.d +",tx="+ this.tx +",ty="+ this.ty +")");
       }
     },
 
@@ -313,16 +302,9 @@
       configurable: false,
       value: function (m) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.equals', '*matrix*');
+        type_check(m, 'Matrix', {label:'Matrix.equals', id:this.toString(), params:'matrix'});
         /*END_DEBUG*/
-        return ((this && m && 
-                 this.a  === m.a &&
-                 this.b  === m.b &&
-                 this.c  === m.c &&
-                 this.d  === m.d &&
-                 this.tx === m.tx &&
-                 this.ty === m.ty) || 
-                (!this && !m));
+        return (this.a  === m.a && this.b  === m.b && this.c  === m.c && this.d  === m.d && this.tx === m.tx && this.ty === m.ty);
       }
     },
 
@@ -375,7 +357,7 @@
       configurable: false,
       value: function (m) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.multiply', '*matrix*');
+        type_check(m, 'Matrix', {label:'Matrix.multiply', id:this.toString(), params:'matrix'});
         /*END_DEBUG*/
         var a  = this.a * m.a  + this.c * m.b,
             b  = this.b * m.a  + this.d * m.b,
@@ -383,7 +365,6 @@
             d  = this.b * m.c  + this.d * m.d,
             tx = this.a * m.tx + this.c * m.ty + this.tx,
             ty = this.b * m.tx + this.d * m.ty + this.ty;
-        
         return this.compose(a, b, c, d, tx, ty);
       }
     },
@@ -399,12 +380,12 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (radians) {
+      value: function (r) {
         /*DEBUG*/
-        check_number_type(radians, this+'.rotate', '*radians*');
+        type_check(r, 'number', {label:'Matrix.rotate', id:this.toString(), params:'radians'});
         /*END_DEBUG*/
-        var c = cos(radians),
-            s = sin(radians),
+        var c = cos(r),
+            s = sin(r),
             m = temp_matrix;
         m.a = c;
         m.b = s;
@@ -412,7 +393,6 @@
         m.d = c;
         m.tx = 0;
         m.ty = 0;
-        
         return this.multiply(m);
       }
     },
@@ -428,13 +408,13 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (radians) {
+      value: function (r) {
         /*DEBUG*/
-        check_number_type(radians, this+'.deltaRotate', '*radians*');
+        type_check(r, 'number', {label:'Matrix.deltaRotate', id:this.toString(), params:'radians'});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
-        this.rotate(radians);
+        this.rotate(r);
         this.tx = x;
         this.ty = y;
         return this;
@@ -454,12 +434,12 @@
       get: function () {
         return atan2(this.b, this.a);
       },
-      set: function (radians) {
+      set: function (r) {
         /*DEBUG*/
-        check_number_type(radians, this+'.rotation', '*radians*');
+        type_check(r, 'number', {label:'Matrix.rotation', id:this.toString(), message:"Parameter must be a number in radians."});
         /*END_DEBUG*/
-        var c = cos(radians),
-            s = sin(radians);
+        var c = cos(r),
+            s = sin(r);
         this.compose(c, s, -s, c, this.tx, this.ty);
       }
     },
@@ -478,8 +458,7 @@
       configurable: false,
       value: function (sx, sy) {
         /*DEBUG*/
-        check_number_type(sx, this+'.scale', '*sx*, sy');
-        check_number_type(sy, this+'.scale', 'sx, *sy*');
+        type_check(sx, 'number', sy, 'number', {label:'Matrix.scale', id:this.toString(), params:['sx','sy']});
         /*END_DEBUG*/
         var m = temp_matrix;
         m.a = sx;
@@ -488,7 +467,6 @@
         m.d = sy;
         m.tx = 0;
         m.ty = 0;
-        
         return this.multiply(m);
       }
     },
@@ -507,8 +485,7 @@
       configurable: false,
       value: function (sx, sy) {
         /*DEBUG*/
-        check_number_type(sx, this+'.deltaScale', '*sx*, sy');
-        check_number_type(sy, this+'.deltaScale', 'sx, *sy*');
+        type_check(sx, 'number', sy, 'number', {label:'Matrix.deltaScale', id:this.toString(), params:['sx','sy']});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -533,8 +510,7 @@
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.translate', '*dx*, dy');
-        check_number_type(dy, this+'.translate', 'dx, *dy*');
+        type_check(dx, 'number', dy, 'number', {label:'Matrix.translate', id:this.toString(), params:['dx','dy']});
         /*END_DEBUG*/
         this.tx += dx;
         this.ty += dy;
@@ -555,8 +531,7 @@
       configurable: false,
       value: function (skewX, skewY) {
         /*DEBUG*/
-        check_number_type(skewX, this+'.skew', '*skewX*, skewY');
-        check_number_type(skewY, this+'.skew', 'skewX, *skewY*');
+        type_check(skewX, 'number', skewY, 'number', {label:'Matrix.skew', id:this.toString(), params:['skewX','skewY']});
         /*END_DEBUG*/
         var sx = tan(skewX),
             sy = tan(skewY),
@@ -567,7 +542,6 @@
         m.d = 1;
         m.tx = 0;
         m.ty = 0;
-        
         return this.multiply(m);
       }
     },
@@ -586,8 +560,7 @@
       configurable: false,
       value: function (skewX, skewY) {
         /*DEBUG*/
-        check_number_type(skewX, this+'.deltaSkew', '*skewX*, skewY');
-        check_number_type(skewY, this+'.deltaSkew', 'skewX, *skewY*');
+        type_check(skewX, 'number', skewY, 'number', {label:'Matrix.deltaSkew', id:this.toString(), params:['skewX','skewY']});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -611,7 +584,7 @@
       configurable: false,
       value: function (m) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.add', '*matrix*');
+        type_check(m, 'Matrix', {label:'Matrix.add', id:this.toString(), params:'matrix'});
         /*END_DEBUG*/
         this.a  += m.a;
         this.b  += m.b;
@@ -658,10 +631,9 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.transformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.transformPoint', id:this.toString(), params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx,
-                            this.b * pt.x + this.d * pt.y + this.ty);
+        return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx, this.b * pt.x + this.d * pt.y + this.ty);
       }
     },
 
@@ -675,15 +647,15 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.__transformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.__transformPoint', id:this.toString(), params:'point'});
         /*END_DEBUG*/
-        var x = point.x,
-            y = point.y;
-        point.x = this.a * x + this.c * y + this.tx;
-        point.y = this.b * x + this.d * y + this.ty;
-        return point;
+        var x = pt.x,
+            y = pt.y;
+        pt.x = this.a * x + this.c * y + this.tx;
+        pt.y = this.b * x + this.d * y + this.ty;
+        return pt;
       }
     },
 
@@ -702,10 +674,9 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.deltaTransformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.deltaTransformPoint', id:this.toString(), params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y,
-                            this.b * pt.x + this.d * pt.y);
+        return doodle_Point(this.a * pt.x + this.c * pt.y, this.b * pt.x + this.d * pt.y);
       }
     },
 
@@ -719,15 +690,15 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.__deltaTransformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.__deltaTransformPoint', id:this.toString(), params:'point'});
         /*END_DEBUG*/
-        var x = point.x,
-            y = point.y;
-        point.x = this.a * x + this.c * y;
-        point.y = this.b * x + this.d * y;
-        return point;
+        var x = pt.x,
+            y = pt.y;
+        pt.x = this.a * x + this.c * y;
+        pt.y = this.b * x + this.d * y;
+        return pt;
       }
     },
 
@@ -739,13 +710,12 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (pt, radians) {
+      value: function (pt, r) {
         /*DEBUG*/
-        check_point_type(pt, this+'.rotateAroundExternalPoint', '*point*, radians');
-        check_number_type(radians, this+'.rotateAroundExternalPoint', 'point, *radians*');
+        type_check(pt, 'Point', r, 'number', {label:'Matrix.rotateAroundExternalPoint', id:this.toString(), params:['point', 'radians']});
         /*END_DEBUG*/
-        var c = cos(radians),
-            s = sin(radians),
+        var c = cos(r),
+            s = sin(r),
             m = temp_matrix,
             reg_pt = temp_point; //new registration point
         //parent rotation matrix, global space
@@ -776,16 +746,14 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (point, radians) {
+      value: function (point, r) {
         /*DEBUG*/
-        check_point_type(point, this+'.rotateAroundInternalPoint', '*point*, radians');
-        check_number_type(radians, this+'.rotateAroundInternalPoint', 'point, *radians*');
+        type_check(point, 'Point', r, 'number', {label:'Matrix.rotateAroundInternalPoint', id:this.toString(), params:['point', 'radians']});
         /*END_DEBUG*/
         var pt = temp_point;
         pt.x = this.a * point.x + this.c * point.y + this.tx;
         pt.y = this.b * point.x + this.d * point.y + this.ty;
-        
-        return this.rotateAroundExternalPoint(pt, radians);
+        return this.rotateAroundExternalPoint(pt, r);
       }
     },
 
@@ -799,14 +767,12 @@
       configurable: false,
       value: function (pt_int, pt_ext) {
         /*DEBUG*/
-        check_point_type(pt_int, this+'.matchInternalPointWithExternal', '*pt_int*, pt_ext');
-        check_point_type(pt_ext, this+'.matchInternalPointWithExternal', 'pt_int, *pt_ext*');
+        type_check(pt_int, 'Point', pt_ext, 'Point', {label:'Matrix.matchInternalPointWithExternal', id:this.toString(), params:['point', 'point']});
         /*END_DEBUG*/
         var pt = temp_point;
         //transform point
         pt.x = this.a * pt_int.x + this.c * pt_int.y + this.tx;
         pt.y = this.b * pt_int.x + this.d * pt_int.y + this.ty;
-        
         return this.translate(pt_ext.x - pt.x, pt_ext.y - pt.y);
       }
     },
@@ -824,8 +790,7 @@
       configurable: false,
       value: function (m, t) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.interpolate', '*matrix*, t');
-        check_number_type(t, this+'.interpolate', 'matrix, *t*');
+        type_check(m, 'Matrix', t, 'number', {label:'Matrix.interpolate', id:this.toString(), params:['matrix', 'time']});
         /*END_DEBUG*/
         this.a  = this.a  + (m.a  - this.a)  * t;
         this.b  = this.b  + (m.b  - this.b)  * t;
@@ -837,47 +802,23 @@
       }
     }
   };//end matrix_static_properties defintion
-
-  
-  /*
-   * CLASS FUNCTIONS
-   */
-  
-  /**
-   * Check if a given object contains a numeric matrix properties.
-   * Does not check if a matrix is actually a doodle.geom.matrix.
-   * @name isMatrix
-   * @param {Object} m
-   * @return {boolean}
-   * @static
-   */
-  isMatrix = doodle.geom.Matrix.isMatrix = function (m) {
-    return (m !== undefined && m !== null &&
-            typeof m.a  === 'number' && typeof m.b  === 'number' &&
-            typeof m.c  === 'number' && typeof m.d  === 'number' &&
-            typeof m.tx === 'number' && typeof m.ty === 'number');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_matrix_type
-   * @param {Object} obj
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_matrix_type = doodle.utils.types.check_matrix_type = function (obj, caller, param) {
-    if (isMatrix(obj)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_matrix_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Matrix.");
-    }
-  };
-  /*END_DEBUG*/
-  
 }());//end class closure
+
+/*
+ * CLASS FUNCTIONS
+ */
+
+/**
+ * Check if a given object contains a numeric matrix properties.
+ * Does not check if a matrix is actually a doodle.geom.matrix.
+ * @name isMatrix
+ * @param {Object} m
+ * @return {boolean}
+ * @static
+ */
+doodle.geom.Matrix.isMatrix = function (m) {
+  return (typeof m === 'object' &&
+          typeof m.a  === 'number' && typeof m.b  === 'number' &&
+          typeof m.c  === 'number' && typeof m.d  === 'number' &&
+          typeof m.tx === 'number' && typeof m.ty === 'number');
+};

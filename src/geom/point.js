@@ -1,14 +1,11 @@
 /*globals doodle*/
-
 (function () {
   var point_static_properties,
       distance,
-      isPoint,
       temp_array = new Array(2),
       temp_point = {x:0, y:0},
       /*DEBUG*/
-      check_point_type,
-      check_number_type = doodle.utils.types.check_number_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       //lookup help
       doodle_Point,
@@ -52,7 +49,7 @@
           get: function () { return x; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.x');
+            type_check(n, 'number', {label: 'Point.x', id:this.toString()});
             /*END_DEBUG*/
             x = n;
           }
@@ -71,7 +68,7 @@
           get: function () { return y; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.y');
+            type_check(n, 'number', {label: 'Point.y', id:this.toString()});
             /*END_DEBUG*/
             y = n;
           }
@@ -122,7 +119,7 @@
         point.compose.apply(point, init_obj);
       } else {
         /*DEBUG*/
-        check_point_type(init_obj, '[object Point](point)');
+        type_check(init_obj, 'Point', {label: 'doodle.geom.Point', id:this.toString(), message:"Unable to initialize from point object."});
         /*END_DEBUG*/
         point.compose(init_obj.x, init_obj.y);
       }
@@ -176,7 +173,7 @@
       writable: false,
       configurable: false,
       value: function () {
-        return "(x=" + this.x + ", y=" + this.y + ")";
+        return "(x=" + this.x + ",y=" + this.y + ")";
       }
     },
 
@@ -194,8 +191,7 @@
       configurable: false,
       value: function (x, y) {
         /*DEBUG*/
-        check_number_type(x, this+'.compose', '*x*, y');
-        check_number_type(y, this+'.compose', 'x, *y*');
+        type_check(x, 'number', y, 'number', {label: 'Point.compose', params: ['x', 'y'], id:this.toString()});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -230,12 +226,9 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.equals', '*point*');
+        type_check(pt, 'Point', {label: 'Point.equals', params: 'point', id:this.toString()});
         /*END_DEBUG*/
-        return ((this && pt &&
-                 this.x === pt.x &&
-                 this.y === pt.y) ||
-                (!this && !pt));
+        return (this.x === pt.x && this.y === pt.y);
       }
     },
 
@@ -253,7 +246,7 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.add', '*point*');
+        type_check(pt, 'Point', {label: 'Point.add', params: 'point', id:this.toString()});
         /*END_DEBUG*/
         return doodle_Point(this.x + pt.x, this.y + pt.y);
       }
@@ -273,7 +266,7 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.subtract', '*point*');
+        type_check(pt, 'Point', {label: 'Point.subtract', params: 'point', id:this.toString()});
         /*END_DEBUG*/
         return doodle_Point(this.x - pt.x, this.y - pt.y);
       }
@@ -291,8 +284,7 @@
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.offset', '*dx*, dy');
-        check_number_type(dy, this+'.offset', 'dx, *dy*');
+        type_check(dx, 'number', dy, 'number', {label: 'Point.offset', id:this.toString(), params: ['dx', 'dy']});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -314,7 +306,7 @@
       configurable: false,
       value: function (thickness) {
         /*DEBUG*/
-        check_number_type(thickness, this+'.normalize', '*thickness*');
+        type_check(thickness, 'number', {label: 'Point.normalize', id:this.toString(), params: 'thickness'});
         /*END_DEBUG*/
         this.x = (this.x / this.length) * thickness;
         this.y = (this.y / this.length) * thickness;
@@ -342,13 +334,10 @@
       configurable: false,
       value: function (pt1, pt2, t) {
         /*DEBUG*/
-        check_point_type(pt1, this+'.interpolate', '*pt1*, pt2, t');
-        check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
-        check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
+        type_check(pt1, 'Point', pt2, 'Point', t, 'number', {label: 'Point.interpolate', id:this.toString(), params: ['point', 'point', 'time']});
         /*END_DEBUG*/
         return doodle_Point(pt1.x + (pt2.x - pt1.x) * t,
                             pt1.y + (pt2.y - pt1.y) * t);
-
         /* correct version?
            var nx = pt2.x - pt1.x;
            var ny = pt2.y - pt1.y;
@@ -375,8 +364,7 @@
       configurable: false,
       value: function (len, angle) {
         /*DEBUG*/
-        check_number_type(len, this+'.polar', '*len*, angle');
-        check_number_type(angle, this+'.polar', 'len, *angle*');
+        type_check(len, 'number', angle, 'number', {label: 'Point.polar', id:this.toString(), params: ['len', 'angle']});
         /*END_DEBUG*/
         return doodle_Point(len*cos(angle), len*sin(angle));
       }
@@ -399,46 +387,23 @@
    */
   distance = doodle.geom.Point.distance = function (pt1, pt2) {
     /*DEBUG*/
-    check_point_type(pt1, this+'.distance', '*pt1*, pt2');
-    check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
+    type_check(pt1, 'Point', pt2, 'Point', {label: 'Point.distance', id:this.toString(), params: ['point', 'point']});
     /*END_DEBUG*/
     var dx = pt2.x - pt1.x,
         dy = pt2.y - pt1.y;
     return sqrt(dx*dx + dy*dy);
   };
-
-  /**
-   * Check if a given object contains a numeric x and y property.
-   * Does not check if a point is actually a doodle.geom.point.
-   * @name isPoint
-   * @param {Point} pt
-   * @return {boolean}
-   * @static
-   */
-  isPoint = doodle.geom.Point.isPoint = function (pt) {
-    return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_point_type
-   * @param {Object} pt
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_point_type = doodle.utils.types.check_point_type = function (pt, caller, param) {
-    if (!isPoint(pt)) {
-      caller = (caller === undefined) ? "check_point_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a point.");
-    } else {
-      return true;
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
+
+/**
+ * Check if a given object contains a numeric x and y property.
+ * Does not check if a point is actually a doodle.geom.point.
+ * @name isPoint
+ * @param {Point} pt
+ * @return {boolean}
+ * @static
+ */
+doodle.geom.Point.isPoint = function (pt) {
+  return (typeof pt === 'object' && typeof pt.x === 'number' && typeof pt.y === 'number');
+};
