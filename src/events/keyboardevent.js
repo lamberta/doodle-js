@@ -3,15 +3,10 @@
 /* DOM 3 Event: KeyboardEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
  */
-
 (function () {
   var keyboardevent_static_properties,
-      isKeyboardEvent,
       /*DEBUG*/
-      check_keyboardevent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -31,8 +26,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view,
-                                          keyIdentifier, keyLocation, modifiersList, repeat) {
+  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat) {
     var keyboardevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -70,9 +64,8 @@
       cancelable = (cancelable === undefined) ? false : cancelable;
       view = (view === undefined) ? null : view;
       /*DEBUG*/
-      check_string_type(type, '[object KeyboardEvent]', '*type*, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-      check_boolean_type(bubbles, '[object KeyboardEvent]', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-      check_boolean_type(cancelable, '[object KeyboardEvent]', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
+      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', keyIdentifier, '*', keyLocation, '*', modifiersList, '*', repeat, '*',
+                 {label:'KeyboardEvent', params:['type','bubbles','cancelable','view','keyIdentifier','keyLocation','modifiersList','repeat'], id:this.toString()+"[type="+this.type+"]"});
       /*END_DEBUG*/
       keyboardevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
@@ -97,7 +90,7 @@
        */
       copy_keyboardevent_properties = function (evt) {
         /*DEBUG*/
-        check_keyboardevent_type(evt, 'copy_keyboardevent_properties', '*event*');
+        console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent");
         /*END_DEBUG*/
         if (evt.keyIdentifier !== undefined) { evt_keyIdentifier = evt.keyIdentifier; }
         if (evt.keyLocation !== undefined) { evt_keyLocation = evt.keyLocation; }
@@ -212,8 +205,8 @@
          * @throws {TypeError}
          */
         'initKeyboardEvent': {
-          value: function (typeArg, canBubbleArg, cancelableArg, viewArg,
-                           keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, keyIdentifierArg,
+                           keyLocationArg, modifiersListArg, repeatArg) {
             //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
@@ -223,18 +216,13 @@
             modifiersListArg = (modifiersListArg === undefined) ? "" : modifiersListArg;
             repeatArg = (repeatArg === undefined) ? false : repeatArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initKeyboardEvent', '*type*, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-            check_boolean_type(canBubbleArg, this+'.initKeyboardEvent', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-            check_boolean_type(cancelableArg, this+'.initKeyboardEvent', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
-            check_string_type(keyIdentifierArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, *keyIdentifier*, keyLocation, modifiersList, repeat');
-            check_number_type(keyLocationArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, *keyLocation*, modifiersList, repeat');
-            check_string_type(modifiersListArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, keyLocation, *modifiersList*, repeat');
-            check_boolean_type(repeatArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, *repeat*');
+            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', viewArg, '*', keyIdentifierArg, 'string', keyLocationArg, 'number', modifiersListArg, 'string', repeatArg, 'boolean',
+                       {label:'KeyboardEvent.initKeyboardEvent', id:this.toString()+"[type="+this.type+"]",
+                        params:['typeArg','canBubbleArg','cancelableArg','viewArg','keyIdentifierArg','keyLocationArg','modifiersListArg','repeatArg']});
             /*END_DEBUG*/
             evt_keyIdentifier = keyIdentifierArg;
             evt_keyLocation = keyLocationArg;
             evt_repeat = repeatArg;
-            
             //parse string of white-space separated list of modifier key identifiers
             modifiersListArg.split(" ").forEach(function (modifier) {
               switch (modifier) {
@@ -252,7 +240,6 @@
                 break;
               }
             });
-            
             this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
             return this;
           }
@@ -268,7 +255,7 @@
         'getModifierState': {
           value: function (key) {
             /*DEBUG*/
-            check_string_type(key, this+'.getModifierState', '*key*');
+            type_check(key, 'string', {label:'KeyboardEvent.getModifierState', params:'key', id:this.toString()+"[type="+this.type+"]"});
             /*END_DEBUG*/
             switch (key) {
             case 'Alt':
@@ -303,13 +290,9 @@
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyKeyboardEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyKeyboardEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent");
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_keyboardevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);
@@ -325,8 +308,7 @@
         /*DEBUG*/
         //make sure we've checked our dummy type string
         if (keyboardevent.type === undefined || keyboardevent.type === '' ||
-            keyboardevent.bubbles === undefined ||
-            keyboardevent.cancelable === undefined) {
+            keyboardevent.bubbles === undefined || keyboardevent.cancelable === undefined) {
           throw new SyntaxError("[object KeyboardEvent](function): Must call 'this.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -336,8 +318,7 @@
       }
     } else {
       //standard instantiation
-      keyboardevent.initKeyboardEvent(type, bubbles, cancelable, view,
-                                      keyIdentifier, keyLocation, modifiersList, repeat);
+      keyboardevent.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat);
     }
     
     return keyboardevent;
@@ -358,46 +339,29 @@
     }
   };
 
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a keyboard event.
-   * @name isKeyboardEvent
-   * @param {doodle.events.Event} event
-   * @return {boolean}
-   * @static
-   */
-  isKeyboardEvent = doodle.events.KeyboardEvent.isKeyboardEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object KeyboardEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_keyboardevent_type
-   * @param {doodle.events.Event} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_keyboardevent_type = doodle.utils.types.check_keyboardevent_type = function (event, caller, param) {
-    if (isKeyboardEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_keyboardevent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an KeyboardEvent.");
-    }
-  };
-  /*END_DEBUG*/
-
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a keyboard event.
+ * @name isKeyboardEvent
+ * @param {doodle.events.Event} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.KeyboardEvent.isKeyboardEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object KeyboardEvent]' || (evt.constructor && evt.constructor.name === 'KeyboardEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};

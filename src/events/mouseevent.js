@@ -5,12 +5,8 @@
  */
 (function () {
   var mouseevent_static_properties,
-      isMouseEvent,
       /*DEBUG*/
-      check_mouseevent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -38,7 +34,7 @@
    * @throws {SyntaxError}
    */
   doodle.events.MouseEvent = function (type, bubbles, cancelable, view, detail,
-                                       screenX, screenY, clientX, clientY, 
+                                       screenX, screenY, clientX, clientY,
                                        ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
     var mouseevent,
         arg_len = arguments.length,
@@ -78,10 +74,8 @@
       view = (view === undefined) ? null : view;
       detail = (detail === undefined) ? 0 : detail;
       /*DEBUG*/
-      check_string_type(type, '[object MouseEvent]', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-      check_boolean_type(bubbles, '[object MouseEvent]', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-      check_boolean_type(cancelable, '[object MouseEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-      check_number_type(detail, '[object MouseEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', detail, 'number', screenX, '*', screenY, '*', clientX, '*', clientY, '*', ctrlKey, '*', altKey, '*', shiftKey, '*', metaKey, '*', button, '*', relatedTarget, '*',
+                 {label:'MouseEvent', id:this.toString()+"[type="+this.type+"]", params:['type','bubbles','cancelable','view','detail','screenX','screenY', 'clientX','clientY','ctrlKey','altKey','shiftKey','metaKey', 'button','relatedTarget']});
       /*END_DEBUG*/
       mouseevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
@@ -112,7 +106,7 @@
        */
       copy_mouseevent_properties = function (evt) {
         /*DEBUG*/
-        check_mouseevent_type(evt, 'copy_mouseevent_properties', '*event*');
+        console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent.", this.toString()+"[type="+this.type+"]", evt);
         /*END_DEBUG*/
         evt_x = (evt.x !== undefined) ? evt.x : 0;
         evt_y = (evt.y !== undefined) ? evt.y : 0;
@@ -326,19 +320,9 @@
             buttonArg = (buttonArg === undefined) ? 0 : buttonArg;
             relatedTarget = (relatedTargetArg === undefined) ? null : relatedTargetArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initMouseEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(canBubbleArg, this+'.initMouseEvent', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(cancelableArg, this+'.initMouseEvent', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(detailArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(screenXArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, *screenX*, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(screenYArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, *screenY*, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(clientXArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, *clientX*, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(clientYArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, *clientY*, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(ctrlKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, *ctrlKey*, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(altKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, *altKey*, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(shiftKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, *shiftKey*, metaKey, button, relatedTarget');
-            check_boolean_type(metaKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, *metaKey*, button, relatedTarget');
-            check_number_type(buttonArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, *button*, relatedTarget');
+            type_check(typeArg, 'string', canBubbleArg, 'boolean', canBubbleArg, 'boolean', viewArg, '*', detailArg, 'number', screenXArg, 'number', screenYArg, 'number', clientXArg, 'number', clientYArg, 'number', ctrlKeyArg, 'boolean', altKeyArg, 'boolean', shiftKeyArg, 'boolean', metaKeyArg, 'boolean', buttonArg, 'number', relatedTargetArg, '*',
+                       {label:'MouseEvent.initMouseEvent', id:this.toString()+"[type="+this.type+"]",
+                        params:['typeArg','canBubbleArg','cancelableArg','viewArg','detailArg','screenXArg','screenYArg','clientXArg','clientYArg','ctrlKeyArg','altKeyArg','shiftKeyArg','metaKeyArg','buttonArg','relatedTargetArg']});
             /*END_DEBUG*/
             evt_screenX = screenXArg;
             evt_screenY = screenYArg;
@@ -350,7 +334,6 @@
             evt_metaKey = metaKeyArg;
             evt_button = buttonArg;
             evt_relatedTarget = relatedTargetArg;
-
             return this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
           }
         },
@@ -365,7 +348,7 @@
         'getModifierState': {
           value: function (key) {
             /*DEBUG*/
-            check_string_type(key, this+'.getModifierState', '*key*');
+            type_check(key, 'string', {label:'MouseEvent.getModifierState', params:'key', id:this.toString()+"[type="+this.type+"]"});
             /*END_DEBUG*/
             switch (key) {
             case 'Alt':
@@ -400,13 +383,9 @@
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyMouseEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyMouseEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent");
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_mouseevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);
@@ -423,8 +402,7 @@
         /*DEBUG*/
         //make sure we've checked our dummy type string
         if (mouseevent.type === undefined || mouseevent.type === '' ||
-            mouseevent.bubbles === undefined ||
-            mouseevent.cancelable === undefined) {
+            mouseevent.bubbles === undefined || mouseevent.cancelable === undefined) {
           throw new SyntaxError("[object MouseEvent](function): Must call 'this.initMouseEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -434,9 +412,7 @@
       }
     } else {
       //standard instantiation
-      mouseevent.initMouseEvent(type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY, 
-                                ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
+      mouseevent.initMouseEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
     }
     
     return mouseevent;
@@ -456,46 +432,29 @@
     }
   };
 
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a MouseEvent.
-   * @name isMouseEvent
-   * @param {doodle.events.MouseEvent} event
-   * @return {boolean}
-   * @static
-   */
-  isMouseEvent = doodle.events.MouseEvent.isMouseEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object MouseEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_mouseevent_type
-   * @param {doodle.events.MouseEvent} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, params) {
-    if (isMouseEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_mouseevent_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must be an MouseEvent.");
-    }
-  };
-  /*END_DEBUG*/
-
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a MouseEvent.
+ * @name isMouseEvent
+ * @param {doodle.events.MouseEvent} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.MouseEvent.isMouseEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object MouseEvent]' || (evt.constructor && evt.constructor.name === 'MouseEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};

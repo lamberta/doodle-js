@@ -8,11 +8,7 @@
   var event_prototype,
       event_static_properties,
       /*DEBUG*/
-      check_event_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_node_type = doodle.utils.types.check_node_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent;
   
@@ -67,16 +63,14 @@
        * @private
        */
       copy_event_properties = function (evt, resetTarget, resetType) {
-        /*DEBUG*/
-        check_event_type(evt, 'copy_event_properties', '*event*, target, type');
-        /*END_DEBUG*/
         resetTarget = (resetTarget === undefined) ? false : resetTarget;
+        resetType = (resetType === undefined) ? false : resetType;
+        /*DEBUG*/
+        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", this.toString()+"[type="+this.type+"]", evt);
+        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", this.toString()+"[type="+this.type+"]", resetTarget);
+        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", this.toString()+"[type="+this.type+"]", resetType);
+        /*END_DEBUG*/
         if (resetTarget !== false) {
-          /*DEBUG*/
-          if (resetTarget !== null) {
-            check_node_type(evt, 'copy_event_properties', 'event, *target*, type');
-          }
-          /*END_DEBUG*/
           evt_currentTarget = resetTarget;
           evt_target = resetTarget;
         } else {
@@ -84,9 +78,6 @@
           evt_target = evt.target;
         }
         if (resetType) {
-          /*DEBUG*/
-          check_string_type(resetType, 'copy_event_properties', 'event, target, *type*');
-          /*END_DEBUG*/
           evt_type = resetType;
         } else {
           evt_type = evt.type;
@@ -101,12 +92,8 @@
         evt_returnValue = evt.returnValue;
         evt_clipboardData = evt.clipboardData;
         //check for doodle internal event properties
-        if (evt.__cancel) {
-          __cancel = true;
-        }
-        if (evt.__cancelNow) {
-          __cancelNow = true;
-        }
+        if (evt.__cancel) { __cancel = true; }
+        if (evt.__cancelNow) { __cancelNow = true; }
       };
       
       return {
@@ -131,7 +118,7 @@
           enumerable: false,
           value: function (typeArg) {
             /*DEBUG*/
-            check_string_type(typeArg, this+'.__setType', '*type*');
+            console.assert(typeof typeArg === 'string', "typeArg is a string.");
             /*END_DEBUG*/
             evt_type = typeArg;
           }
@@ -170,7 +157,7 @@
           get: function () { return evt_cancelBubble; },
           set: function (cancelArg) {
             /*DEBUG*/
-            check_boolean_type(cancelArg, this+'.cancelBubble');
+            type_check(cancelArg, 'boolean', {label:'Event.cancelBubble', params:'cancel', id:this.toString()+"[type="+this.type+"]"});
             /*END_DEBUG*/
             evt_cancelBubble = cancelArg;
           }
@@ -222,6 +209,9 @@
         '__setCurrentTarget': {
           enumerable: false,
           value: function (targetArg) {
+            /*DEBUG*/
+            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            /*END_DEBUG*/
             evt_currentTarget = targetArg;
             return this;
           }
@@ -246,6 +236,9 @@
         '__setTarget': {
           enumerable: false,
           value: function (targetArg) {
+            /*DEBUG*/
+            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            /*END_DEBUG*/
             evt_target = targetArg;
             return this;
           }
@@ -272,7 +265,7 @@
           enumerable: false,
           value: function (phaseArg) {
             /*DEBUG*/
-            check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
+            console.assert(typeof phaseArg === 'number', "phaseArg is a number.");
             /*END_DEBUG*/
             evt_eventPhase = phaseArg;
             return this;
@@ -324,19 +317,15 @@
           enumerable: true,
           configurable: false,
           value: function (typeArg, canBubbleArg, cancelableArg) {
-            //parameter defaults
             typeArg = (typeArg === undefined) ? "undefined" : typeArg;
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
-            check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
-            check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
+            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', {label:'Event.initEvent', params:['type','canBubble','cancelable'], id:this.toString()+"[type="+this.type+"]"});
             /*END_DEBUG*/
             evt_type = typeArg;
             evt_bubbles = canBubbleArg;
             evt_cancelable = cancelableArg;
-            
             return this;
           }
         },
@@ -361,7 +350,7 @@
           configurable: false,
           value: function () {
             if (!this.cancelable) {
-              throw new Error(this+'.stopPropagation: Event can not be cancelled.');
+              throw new Error(this.toString()+"[type="+this.type+"] Event.stopPropagation: Event can not be cancelled.");
             } else {
               __cancel = true;
             }
@@ -377,7 +366,7 @@
           configurable: false,
           value: function () {
             if (!this.cancelable) {
-              throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
+              throw new Error(this.toString()+"[type="+this.type+"] Event.stopImmediatePropagation: Event can not be cancelled.");
             } else {
               __cancel = true;
               __cancelNow = true;
@@ -402,13 +391,9 @@
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_event_type(evt, this+'.__copyEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.Event.isEvent(evt), "evt is an Event.", this);
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or a Node.", this);
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is false or a string.", this);
             /*END_DEBUG*/
             copy_event_properties(evt, resetTarget, resetType);
             return this;
@@ -429,10 +414,8 @@
       if (typeof init_obj === 'function') {
         init_obj.call(event);
         /*DEBUG*/
-        if (event.type === undefined ||
-            event.bubbles === undefined ||
-            event.cancelable === undefined) {
-          throw new SyntaxError("[object Event](function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
+        if (event.type === undefined || event.bubbles === undefined || event.cancelable === undefined) {
+          throw new SyntaxError(this.toString()+"[type="+this.type+"] (function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
         }
         /*END_DEBUG*/
       } else {
@@ -457,9 +440,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Event]";
-      }
+      value: function () { return "[object Event]"; }
     }
   };//end event_static_properties
 
@@ -724,41 +705,18 @@
    * @return {boolean}
    * @static
    */
-  isEvent = doodle.events.Event.isEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
+  isEvent = doodle.events.Event.isEvent = function (evt) {
+    if (typeof evt === 'object') {
+      while (evt) {
+        //for DOM events we need to check it's constructor name
+        if (evt.toString() === '[object Event]' || (evt.constructor && evt.constructor.name === 'Event')) {
+          return true;
+        } else {
+          evt = Object.getPrototypeOf(evt);
+        }
+      }
     }
-    return (event === '[object Event]' ||
-            event === '[object UIEvent]' ||
-            event === '[object MouseEvent]' ||
-            event === '[object TouchEvent]' ||
-            event === '[object KeyboardEvent]' ||
-            event === '[object TextEvent]' ||
-            event === '[object WheelEvent]');
+    return false;
   };
-
-  /*DEBUG*/
-  /**
-   * @name check_event_type
-   * @param {doodle.events.Event} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_event_type = doodle.utils.types.check_event_type = function (event, caller, param) {
-    if (isEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_event_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an Event.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure

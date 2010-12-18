@@ -5,12 +5,8 @@
  */
 (function () {
   var uievent_static_properties,
-      isUIEvent,
       /*DEBUG*/
-      check_uievent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -64,9 +60,8 @@
       bubbles = (bubbles === undefined) ? false : bubbles;
       cancelable = (cancelable === undefined) ? false : cancelable;
       /*DEBUG*/
-      check_string_type(type, '[object UIEvent]', '*type*, bubbles, cancelable, view, detail');
-      check_boolean_type(bubbles, '[object UIEvent]', 'type, *bubbles*, cancelable, view, detail');
-      check_boolean_type(cancelable, '[object UIEvent]', 'type, bubbles, *cancelable*, view, detail');
+      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', detail, '*',
+                 {label:'UIEvent', params:['type','bubbles','cancelable','view','detail'], id:this.toString()+"[type="+this.type+"]"});
       /*END_DEBUG*/
       uievent = Object.create(doodle.events.Event(type, bubbles, cancelable));
     }
@@ -92,7 +87,7 @@
        */
       copy_uievent_properties = function (evt) {
         /*DEBUG*/
-        check_uievent_type(evt, 'copy_uievent_properties', '*event*');
+        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", this.toString()+"[type="+this.type+"]", evt);
         /*END_DEBUG*/
         if (evt.view !== undefined) { evt_view = evt.view; }
         if (evt.detail !== undefined) { evt_detail = evt.detail; }
@@ -217,20 +212,15 @@
          */
         'initUIEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg) {
-            //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             viewArg = (viewArg === undefined) ? null : viewArg;
             detailArg = (detailArg === undefined) ? 0 : detailArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initUIEvent', '*type*, bubbles, cancelable, view, detail');
-            check_boolean_type(canBubbleArg, this+'.initUIEvent', 'type, *bubbles*, cancelable, view, detail');
-            check_boolean_type(cancelableArg, this+'.initUIEvent', 'type, bubbles, *cancelable*, view, detail');
-            check_number_type(detailArg, this+'.initUIEvent', 'type, bubbles, cancelable, view, *detail*');
+            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', viewArg, '*', detailArg, 'number', {label:'UIEvent.initUIEvent', params:['type','canBubble','cancelable','view','detail'], id:this.toString()+"[type="+this.type+"]"});
             /*END_DEBUG*/
             evt_view = viewArg;
             evt_detail = detailArg;
-            
             this.initEvent(typeArg, canBubbleArg, cancelableArg);
             return this;
           }
@@ -254,13 +244,9 @@
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyUIEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyUIEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent");
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_uievent_properties(evt);
             return this.__copyEventProperties(evt, resetTarget, resetType);
@@ -309,52 +295,30 @@
     }
   };
 
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is an UIEvent or inherits from it.
-   * Returns true on Doodle events as well as DOM events.
-   * @name isUIEvent
-   * @param {doodle.events.Event} event
-   * @return {boolean}
-   * @static
-   */
-  isUIEvent = doodle.events.UIEvent.isUIEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object UIEvent]' ||
-            event === '[object MouseEvent]' ||
-            event === '[object TouchEvent]' ||
-            event === '[object KeyboardEvent]' ||
-            event === '[object TextEvent]' ||
-            event === '[object WheelEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_uievent_type
-   * @param {doodle.events.UIEvent} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_uievent_type = doodle.utils.types.check_uievent_type = function (event, caller, param) {
-    if (isUIEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_uievent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an UIEvent.");
-    }
-  };
-  /*END_DEBUG*/
-
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is an UIEvent or inherits from it.
+ * Returns true on Doodle events as well as DOM events.
+ * @name isUIEvent
+ * @param {doodle.events.Event} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.UIEvent.isUIEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object UIEvent]' || (evt.constructor && evt.constructor.name === 'UIEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};

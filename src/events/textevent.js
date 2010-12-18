@@ -5,12 +5,8 @@
  */
 (function () {
   var textevent_static_properties,
-      isTextEvent,
       /*DEBUG*/
-      check_textevent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -66,9 +62,8 @@
       cancelable = (cancelable === undefined) ? false : cancelable;
       view = (view === undefined) ? null : view;
       /*DEBUG*/
-      check_string_type(type, '[object TextEvent]', '*type*, bubbles, cancelable, view, data, inputMode');
-      check_boolean_type(bubbles, '[object TextEvent]', 'type, *bubbles*, cancelable, view, data, inputMode');
-      check_boolean_type(cancelable, '[object TextEvent]', 'type, bubbles, *cancelable*, view, data, inputMode');
+      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', data, '*', inputMode, '*',
+                 {label:'TextEvent', id:this.toString()+"[type="+this.type+"]", params:['type','bubbles','cancelable','view','data','inputMode']});
       /*END_DEBUG*/
       textevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
@@ -86,7 +81,7 @@
        */
       copy_textevent_properties = function (evt) {
         /*DEBUG*/
-        check_textevent_type(evt, 'copy_textevent_properties', '*event*');
+        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", this.toString()+"[type="+this.type+"]", evt);
         /*END_DEBUG*/
         if (evt.data !== undefined) { evt_data = evt.data; }
         if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }
@@ -134,15 +129,11 @@
             dataArg = (dataArg === undefined) ? '' : dataArg;
             inputModeArg = (inputModeArg === undefined) ? doodle.events.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initTextEvent', '*type*, bubbles, cancelable, view, data, inputMode');
-            check_boolean_type(canBubbleArg, this+'.initTextEvent', 'type, *bubbles*, cancelable, view, data, inputMode');
-            check_boolean_type(cancelableArg, this+'.initTextEvent', 'type, bubbles, *cancelable*, view, data, inputMode');
-            check_string_type(dataArg, this+'.initTextEvent', 'type, bubbles, cancelable, view, *data*, inputMode');
-            check_number_type(inputModeArg, this+'.initTextEvent', 'type, bubbles, cancelable, view, data, *inputMode*');
+            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', viewArg, '*', dataArg, 'string', inputModeArg, 'number',
+                       {label:'TextEvent.initTextEvent', id:this.toString()+"[type="+this.type+"]", params:['typeArg','canBubbleArg','cancelableArg','viewArg','dataArg','inputModeArg']});
             /*END_DEBUG*/
             evt_data = dataArg;
             evt_inputMode = inputModeArg;
-            
             this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
             return this;
           }
@@ -165,13 +156,9 @@
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyTextEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyTextEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent");
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_textevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);
@@ -187,8 +174,7 @@
         /*DEBUG*/
         //make sure we've checked our dummy type string
         if (textevent.type === undefined || textevent.type === '' ||
-            textevent.bubbles === undefined ||
-            textevent.cancelable === undefined) {
+            textevent.bubbles === undefined || textevent.cancelable === undefined) {
           throw new SyntaxError("[object TextEvent](function): Must call 'this.initTextEvent(type, bubbles, cancelable, view, data, inputMode)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -218,47 +204,30 @@
       value: function () { return "[object TextEvent]"; }
     }
   };
-
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a TextEvent.
-   * @name isTextEvent
-   * @param {doodle.events.TextEvent} event
-   * @return {boolean}
-   * @static
-   */
-  isTextEvent = doodle.events.TextEvent.isTextEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object TextEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_textevent_type
-   * @param {doodle.events.TextEvent} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, params) {
-    if (isTextEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_textevent_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must be an TextEvent.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a TextEvent.
+ * @name isTextEvent
+ * @param {doodle.events.TextEvent} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.TextEvent.isTextEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object TextEvent]' || (evt.constructor && evt.constructor.name === 'TextEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};
