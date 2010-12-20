@@ -1,18 +1,10 @@
 /*globals doodle*/
-
 (function () {
   var sprite_static_properties,
-      isSprite,
-      inheritsSprite,
       /*DEBUG*/
-      check_sprite_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_function_type = doodle.utils.types.check_function_type,
-      check_point_type = doodle.utils.types.check_point_type,
-      check_node_type = doodle.utils.types.check_node_type,
-      check_context_type = doodle.utils.types.check_context_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      //lookup help
       doodle_Rectangle = doodle.geom.Rectangle;
 
   /**
@@ -68,7 +60,8 @@
             get: function () { return width; },
             set: function (n) {
               /*DEBUG*/
-              check_number_type(n, this+'.width');
+              type_check(n, 'number', {label:'Sprite.width', id:this.id});
+              range_check(isFinite(n), {label:'Sprite.width', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               width = n;
             }
@@ -90,7 +83,8 @@
             get: function () { return height; },
             set: function (n) {
               /*DEBUG*/
-              check_number_type(n, this+'.height');
+              type_check(n, 'number', {label:'Sprite.height', id:this.id});
+              range_check(isFinite(n), {label:'Sprite.height', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               height = n;
             }
@@ -110,7 +104,7 @@
           configurable: false,
           value: function (targetCoordSpace) {
             /*DEBUG*/
-            check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
+            type_check(targetCoordSpace, 'Node', {label:'Sprite.getBounds', id:this.id, params:'targetCoordSpace', inherits:true});
             /*END_DEBUG*/
             return this.__getBounds(targetCoordSpace).clone();
           }
@@ -128,10 +122,9 @@
           configurable: false,
           value: (function () {
             var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
-
             return function (targetCoordSpace) {
               /*DEBUG*/
-              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              type_check(targetCoordSpace, 'Node', {label:'Sprite.__getBounds', id:this.id, params:'targetCoordSpace', inherits:true});
               /*END_DEBUG*/
               var children = this.children,
                   len = children.length,
@@ -215,7 +208,7 @@
           configurable: false,
           value: function (node) {
             /*DEBUG*/
-            check_node_type(node, this+'.hitTestObject', '*sprite*');
+            type_check(node, 'Node', {label:'Sprite.hitTestObject', id:this.id, params:'node', inherits:true});
             /*END_DEBUG*/
             return this.getBounds(this).intersects(node.getBounds(this));
           }
@@ -233,7 +226,7 @@
           configurable: false,
           value: function (pt) {
             /*DEBUG*/
-            check_point_type(pt, this+'.hitTestPoint', '*point*');
+            type_check(pt, 'Point', {label:'Sprite.hitTestPoint', id:this.id, params:'point'});
             /*END_DEBUG*/
             return this.getBounds(this).containsPoint(this.globalToLocal(pt));
           }
@@ -252,11 +245,11 @@
           configurable: false,
           value: function (ctx) {
             /*DEBUG*/
-            check_context_type(ctx, this+'.__draw', '*context*');
+            type_check(ctx, 'context', {label:'Sprite.__draw', id:this.id, params:'context'});
             /*END_DEBUG*/
             for (var i=0, len=draw_commands.length; i < len; i++) {
               /*DEBUG*/
-              check_function_type(draw_commands[i], sprite+'.__draw: [draw_commands]::', '*command*');
+              console.assert(typeof draw_commands[i] === 'function', "draw command is a function", draw_commands[i]);
               /*END_DEBUG*/
               draw_commands[i].call(sprite, ctx);
             }
@@ -287,12 +280,11 @@
       return {
         enumerable: true,
         configurable: false,
-        get: function () {
-          return this.transform.rotation * to_degrees;
-        },
+        get: function () { return this.transform.rotation * to_degrees; },
         set: function (deg) {
           /*DEBUG*/
-          check_number_type(deg, this+'.rotation', '*degrees*');
+          type_check(deg, 'number', {label:'Sprite.rotation', id:this.id, message:"Property must be a number specified in degrees."});
+          range_check(isFinite(deg), {label:'Sprite.rotation', id:this.id, message:"Parameter must be a finite number."});
           /*END_DEBUG*/
           this.transform.rotation = deg * to_radians;
         }
@@ -309,9 +301,7 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Sprite]";
-      }
+      value: function () { return "[object Sprite]"; }
     },
 
     /**
@@ -319,8 +309,8 @@
      * @name compose
      * @param {number} x
      * @param {number} y
-     * @param {number} width
-     * @param {number} height
+     * @param {number} w
+     * @param {number} h
      * @return {Sprite}
      * @throws {TypeError}
      */
@@ -328,82 +318,41 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (x, y, width, height) {
+      value: function (x, y, w, h) {
         /*DEBUG*/
-        check_number_type(x, this+'.compose', '*x*, y, width, height');
-        check_number_type(y, this+'.compose', 'x, *y*, width, height');
-        check_number_type(width, this+'.compose', 'x, y, *width*, height');
-        check_number_type(height, this+'.compose', 'x, y, width, *height*');
+        type_check(x, 'number', y, 'number', w, 'number', h, 'number', {label:'Sprite.compose', id:this.id, params:['x', 'y', 'width', 'height']});
+        range_check(isFinite(x), isFinite(y), isFinite(w), isFinite(h), {label:'Sprite.compose', id:this.id, message:"Parameters must all be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
+        this.width = w;
+        this.height = h;
         return this;
       }
     }
   };//end sprite_static_properties
-  
-  
-  /*
-   * CLASS METHODS
-   */
+}());//end class closure
 
-  /**
-   * @name isSprite
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isSprite = doodle.Sprite.isSprite = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Sprite]');
-  };
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Check if object inherits from Sprite.
-   * If it doesn't return false.
-   * @name inheritsSprite
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsSprite = doodle.Sprite.inheritsSprite = function (obj) {
+/**
+ * Test if an object is a Sprite or inherits from one.
+ * @name isSprite
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.Sprite.isSprite = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isSprite(obj)) {
+      if (obj.toLocaleString() === '[object Sprite]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_sprite_type
-   * @param {Sprite} sprite
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, params) {
-    if (inheritsSprite(sprite)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_sprite_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must inherit from Sprite.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};

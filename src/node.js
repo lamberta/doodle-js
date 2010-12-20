@@ -1,19 +1,13 @@
 /*jslint nomen: false, plusplus: false*/
-/*globals doodle, check_display_type*/
+/*globals doodle*/
 
 (function () {
   var node_count = 0,
       node_static_properties,
-      isNode,
-      inheritsNode,
       /*DEBUG*/
-      check_node_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_matrix_type = doodle.utils.types.check_matrix_type,
-      check_point_type = doodle.utils.types.check_point_type,
-      check_context_type = doodle.utils.types.check_context_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       //recycled events
       evt_addedEvent = doodle.events.Event(doodle.events.Event.ADDED, true),
@@ -87,7 +81,7 @@
           get: function () { return node_id; },
           set: function (idArg) {
             /*DEBUG*/
-            check_string_type(idArg, this+'.id');
+            type_check(idArg, 'string', {label:'Node.id', id:this.id});
             /*END_DEBUG*/
             node_id = idArg;
           }
@@ -107,10 +101,7 @@
           get: function () { return root; },
           set: function (node) {
             /*DEBUG*/
-            if (node !== null) {
-              //no lookup help since it's not defined until display.js
-              doodle.utils.types.check_display_type(node, this+'.root');
-            }
+            node === null || type_check(node, 'Display', {label:'Node.root', id:this.id, inherits:true});
             /*END_DEBUG*/
             root = node;
           }
@@ -130,9 +121,7 @@
           get: function () { return parent; },
           set: function (node) {
             /*DEBUG*/
-            if (node !== null) {
-              check_node_type(node, this+'.parent');
-            }
+            node === null || type_check(node, 'Node', {label:'Node.parent', id:this.id, inherits:true});
             /*END_DEBUG*/
             parent = node;
           }
@@ -149,9 +138,7 @@
         return {
           enumerable: true,
           configurable: false,
-          get: function () {
-            return children;
-          }
+          get: function () { return children; }
         };
       }()),
 
@@ -168,7 +155,7 @@
           get: function () { return transform; },
           set: function (matrix) {
             /*DEBUG*/
-            check_matrix_type(matrix, this+'.transform');
+            type_check(matrix, 'Matrix', {label:'Node.transform', id:this.id});
             /*END_DEBUG*/
             transform = matrix;
           }
@@ -188,7 +175,7 @@
           get: function () { return visible; },
           set: function (isVisible) {
             /*DEBUG*/
-            check_boolean_type(isVisible, node+'.visible');
+            type_check(isVisible, 'boolean', {label:'Node.visible', id:this.id});
             /*END_DEBUG*/
             visible = isVisible;
           }
@@ -208,7 +195,8 @@
           get: function () { return alpha; },
           set: function (alphaArg) {
             /*DEBUG*/
-            check_number_type(alphaArg, node+'.alpha');
+            type_check(alphaArg, 'number', {label:'Node.alpha', id:this.id});
+            range_check(isFinite(alphaArg), {label:'Node.alpha', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha = (alphaArg > 1) ? 1 : ((alphaArg < 0) ? 0 : alphaArg);
           }
@@ -227,7 +215,7 @@
         configurable: false,
         value: function (targetCoordSpace) {
           /*DEBUG*/
-          check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
+          type_check(targetCoordSpace, 'Node', {label:'Node.getBounds', params:'targetCoordSpace', id:this.id, inherits:true});
           /*END_DEBUG*/
           return this.__getBounds(targetCoordSpace).clone();
         }
@@ -245,10 +233,9 @@
         configurable: false,
         value: (function () {
           var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
-          
           return function (targetCoordSpace) {
             /*DEBUG*/
-            check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+            type_check(targetCoordSpace, 'Node', {label:'Node.__getBounds', params:'targetCoordSpace', id:this.id, inherits:true});
             /*END_DEBUG*/
             var bounding_box = null,
                 child_bounds,
@@ -293,12 +280,11 @@
     'x': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.tx;
-      },
+      get: function () { return this.transform.tx; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.x');
+        type_check(n, 'number', {label:'Node.x', id:this.id});
+        range_check(isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.tx = n;
       }
@@ -312,12 +298,11 @@
     'y': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.ty;
-      },
+      get: function () { return this.transform.ty; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.y');
+        type_check(n, 'number', {label:'Node.y', id:this.id});
+        range_check(isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.ty = n;
       }
@@ -353,7 +338,8 @@
       configurable: false,
       value: function (deg) {
         /*DEBUG*/
-        check_number_type(deg, this+'.rotate', '*degrees*');
+        type_check(deg, 'number', {label:'Node.rotate', id:this.id, params:'degrees', message:"Parameter must be a number in degrees."});
+        range_check(isFinite(deg), {label:'Node.rotate', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotate(deg * PI / 180);
       }
@@ -367,12 +353,11 @@
     'rotation': {
       enumerable: true,
       configurable: true,
-      get: function () {
-        return this.transform.rotation * 180 / PI;
-      },
+      get: function () { return this.transform.rotation * 180 / PI; },
       set: function (deg) {
         /*DEBUG*/
-        check_number_type(deg, this+'.rotation', '*degrees*');
+        type_check(deg, 'number', {label:'Node.rotation', id:this.id, message:"Parameter must be a number in degrees."});
+        range_check(isFinite(deg), {label:'Node.rotation', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotation = deg * PI / 180;
       }
@@ -386,12 +371,11 @@
     'scaleX': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.a;
-      },
+      get: function () { return this.transform.a; },
       set: function (sx) {
         /*DEBUG*/
-        check_number_type(sx, this+'.scaleX');
+        type_check(sx, 'number', {label:'Node.scaleX', id:this.id});
+        range_check(isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.a = sx;
       }
@@ -405,12 +389,11 @@
     'scaleY': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.d;
-      },
+      get: function () { return this.transform.d; },
       set: function (sy) {
         /*DEBUG*/
-        check_number_type(sy, this+'.scaleY');
+        type_check(sy, 'number', {label:'Node.scaleY', id:this.id});
+        range_check(isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.d = sy;
       }
@@ -431,7 +414,7 @@
         while (node) {
           if (node.context) {
             /*DEBUG*/
-            check_context_type(node.context, this+'.context (traversal)');
+            type_check(node.context, 'context', {label:'Node.context', id:this.id});
             /*END_DEBUG*/
             return node.context;
           }
@@ -493,17 +476,15 @@
             display = this.root,
             node_parent = node.parent,
             i;
-
         /*DEBUG*/
-        check_node_type(node, this+'.addChildAt', '*node*, index');
-        check_number_type(index, this+'.addChildAt', 'node, *index*');
+        type_check(node, 'Node', index, 'number', {label:'Node.addChildAt', params:['node', 'index'], inherits:true, id:this.id});
+        range_check(index >= -children.length, index <= children.length, {label:'Node.addChildAt', params:['node', '*index*'], id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
         
         //if already a child then ignore
         if (children.indexOf(node) !== -1) {
           return false;
         }
-
         //if it had another parent, remove from their children
         if (node_parent !== null && node_parent !== this) {
           node.parent.removeChild(node);
@@ -542,7 +523,7 @@
       configurable: false,
       value: function (node) {
         /*DEBUG*/
-        check_node_type(node, this+'.addChild', '*node*');
+        type_check(node,'Node', {label:'Node.addChild', id:this.id, params:'node', inherits:true});
         /*END_DEBUG*/
         //add to end of children array
         return this.addChildAt(node, this.children.length);
@@ -552,6 +533,7 @@
     /**
      * @name removeChildAt
      * @param {number} index
+     * @return {Node} Removed child node.
      * @throws {TypeError}
      * @throws {RangeError}
      */
@@ -561,42 +543,36 @@
       configurable: false,
       value: function (index) {
         /*DEBUG*/
-        check_number_type(index, this+'.removeChildAt', '*index*');
-        if (index < 0 || index >= this.children.length) {
-          throw new RangeError(this+".removeChildAt(*index*): Index out of range.");
-        }
+        type_check(index,'number', {label:'Node.removeChildAt', id:this.id, params:'index'});
+        range_check(index >= -this.children.length, index < this.children.length, {label:'Node.removeChildAt', params:'*index*', id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
-        var children = this.children,
-            child = children[index],
-            display = this.root,
-            child_descendants = create_scene_path(child, []), //includes child
+        var child = this.children.splice(index, 1)[0],    //unadopt
+            child_descendants = create_scene_path(child), //includes child
             i = child_descendants.length,
             j = i;
-        
         //event dispatching depends on an intact scene graph
-        if (display) {
+        if (this.root) {
           while (i--) {
             child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
           }
+          while (j--) {
+            child_descendants[j].root = null;
+          }
         }
-        //un-adopt child
-        children.splice(index, 1);
-        
         //reset child and descendants
         child.parent = null;
-        while (j--) {
-          child_descendants[j].root = null;
-        }
         //reorder this display's scene path
-        if (display) {
-          display.__sortAllChildren();
+        if (this.root) {
+          this.root.__sortAllChildren();
         }
+        return child;
       }
     },
 
     /**
      * @name removeChild
      * @param {Node} node
+     * @return {Node} Removed child node.
      * @throws {TypeError}
      * @throws {ReferenceError}
      */
@@ -606,18 +582,18 @@
       configurable: false,
       value: function (node) {
         /*DEBUG*/
-        check_node_type(node, this+'.removeChild', '*node*');
-        if (node.parent !== this) {
-          throw new ReferenceError(this+".removeChild: "+ node.id +" is not a child of this node.");
-        }
+        type_check(node,'Node', {label:'Node.removeChild', id:this.id, params:'node', inherits:true});
+        reference_check(node.parent === this, {label:'Node.removeChild', params:'*node*', id:this.id, message:"Can not remove a Node that is not a child."});
+				console.assert(this.children.indexOf(node) !== -1, "Node found in children", node);
         /*END_DEBUG*/
-        this.removeChildAt(this.children.indexOf(node));
+        return this.removeChildAt(this.children.indexOf(node));
       }
     },
 
     /**
      * @name removeChildById
      * @param {string} id
+     * @return {Node} Removed child node.
      * @throws {TypeError}
      */
     'removeChildById': {
@@ -626,9 +602,9 @@
       configurable: false,
       value: function (id) {
         /*DEBUG*/
-        check_string_type(id, this+'.removeChildById', '*id*');
+        type_check(id, 'string', {label:'Node.removeChildById', id:this.id, params:'id'});
         /*END_DEBUG*/
-        this.removeChild(this.getChildById(id));
+        return this.removeChild(this.getChildById(id));
       }
     },
 
@@ -641,9 +617,36 @@
       writable: false,
       configurable: false,
       value: function () {
-        var i = this.children.length;
-        while (i--) {
-          this.removeChildAt(i);
+        var children = this.children,
+            display = this.root,
+            child_descendants = create_scene_path(this, []),
+            n = children.length,
+            i, j;
+        /*DEBUG*/
+        console.assert(child_descendants[child_descendants.length-1] === this, "Last item in array is this Node.");
+        /*END_DEBUG*/
+        child_descendants.pop(); //remove this node
+        i = j = child_descendants.length;
+        
+        //event dispatching depends on an intact scene graph
+        if (display) {
+          while (i--) {
+            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
+          }
+        }
+        //reset root of all descendants
+        while (j--) {
+          child_descendants[j].root = null;
+        }
+        //reset parent of children
+        while (n--) {
+          children[n].parent = null;
+        }
+        //un-adopt children
+        children.length = 0;
+        //reorder this display's scene path
+        if (display) {
+          display.__sortAllChildren();
         }
       }
     },
@@ -651,7 +654,7 @@
     /**
      * @name getChildById
      * @param {string} id
-     * @return {Node|null}
+     * @return {Node|undefined}
      * @throws {TypeError}
      */
     'getChildById': {
@@ -660,7 +663,7 @@
       configurable: false,
       value: function (id) {
         /*DEBUG*/
-        check_string_type(id, this+'.getChildById', '*id*');
+        type_check(id, 'string', {label:'Node.getChildById', params:'id', id:this.id});
         /*END_DEBUG*/
         var children = this.children,
             len = children.length,
@@ -670,7 +673,7 @@
             return children[i];
           }
         }
-        return null;
+        return undefined;
       }
     },
 
@@ -687,30 +690,24 @@
       writable: false,
       configurable: false,
       value: function (child, index) {
-        /*DEBUG*/
-        check_node_type(child, this+'.setChildIndex', '*child*, index');
-        check_number_type(index, this+'.setChildIndex', 'child, *index*');
-        if (child.parent !== this) {
-          throw new ReferenceError(this+".setChildIndex: "+ child.id +" is not a child of this node.");
-        }
-        /*END_DEBUG*/
         var children = this.children,
             len = children.length,
             pos = children.indexOf(child);
         /*DEBUG*/
-        if (pos === -1) {
-          throw new ReferenceError(this+'.setChildIndex(*child*, index): ' + child + ' does not exist on child list.');
-        }
-        if (index > len || index < -len) {
-          throw new RangeError(this+'.setChildIndex(child, *index*): ' + index + ' does not exist on child list.');
-        }
+        type_check(child,'Node', index,'number', {label:'Node.setChildIndex', params:['child', 'index'], id:this.id, inherits:true});
+        range_check(index >= -children.length, index < children.length, {label:'Node.setChildIndex', params:['child', '*index*'], id:this.id, message:"Index out of range."});
+        reference_check(child.parent === this, {label:'Node.setChildIndex', params:['*child*','index'], id:this.id, message:"Can not set the index of a Node that is not a child."});
+        console.assert(pos !== -1, "Found child node, should be able to detect range with index.", this);
         /*END_DEBUG*/
-        children.splice(pos, 1); //remove child
+        children.splice(pos, 1);          //remove child
         children.splice(index, 0, child); //place child at new position
-        //reorder this display's scene path
         if (this.root) {
+          //reorder this display's scene path
           this.root.__sortAllChildren();
         }
+        /*DEBUG*/
+        console.assert(len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -728,26 +725,31 @@
       configurable: false,
       value: function (index1, index2) {
         var children = this.children,
-            node;
+            temp_node;
         /*DEBUG*/
-        check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
-        check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
-        if (index1 > children.length - 1 || index1 < -children.length) {
-          throw new RangeError(this+'.swapChildrenAt(*index1*, index2): Index position out of range.');
-        }
-        if (index2 > children.length - 1 || index2 < -children.length) {
-          throw new RangeError(this+'.swapChildrenAt(index1, *index2*): Index position out of range.');
-        }
+        var test_len = children.length;
+        type_check(index1,'number', index2,'number', {label:'Node.swapChildrenAt', params:['index1', 'index2'], id:this.id});
+        range_check(index1 >= -test_len, index1 < test_len, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
+        range_check(index2 >= -test_len, index2 < test_len, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
+        //asserts
+        console.assert(doodle.Node.isNode(children[index1]), "Child is a Node.", children[index1]);
+        console.assert(doodle.Node.isNode(children[index2]), "Child is a Node.", children[index2]);
+        console.assert(children[index1].parent === this, "Child's parent is this Node.", children[index1]);
+        console.assert(children[index2].parent === this, "Child's parent is this Node.", children[index2]);
         /*END_DEBUG*/
-        //need to get a little fancy so we can refer to negative indexes
-        node = children.splice(index1, 1, undefined)[0];
-        children.splice(index1, 1, children.splice(index2, 1, undefined)[0]);
-        children[children.indexOf(undefined)] = node;
         
-        //reorder this display's scene path
+        //need to get a little fancy so we can refer to negative indexes
+        temp_node = children.splice(index1, 1, undefined)[0];
+        children.splice(index1, 1, children.splice(index2, 1, undefined)[0]);
+        children[children.indexOf(undefined)] = temp_node;
+        
         if (this.root) {
+          //reorder this display's scene path
           this.root.__sortAllChildren();
         }
+        /*DEBUG*/
+        console.assert(test_len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -762,18 +764,18 @@
       writable: false,
       configurable: false,
       value: function (node1, node2) {
-        /*DEBUG*/
-        check_node_type(node1, this+'.swapChildren', '*node1*, node2');
-        check_node_type(node2, this+'.swapChildren', 'node1, *node2*');
-        if (node1.parent !== this) {
-          throw new ReferenceError(this+".swapChildren: "+ node1.id +" is not a child of this node.");
-        }
-        if (node2.parent !== this) {
-          throw new ReferenceError(this+".swapChildren: "+ node2.id +" is not a child of this node.");
-        }
-        /*END_DEBUG*/
         var children = this.children;
+        /*DEBUG*/
+        var test_len = children.length;
+        type_check(node1, 'Node', node2, 'Node', {label:'Node.swapChildren', id:this.id, params:['node1', 'node2'], inherits:true});
+        reference_check(node1.parent === this, node2.parent === this, {label:'Node.swapChildren', params:['child1','child2'], id:this.id, message:"Can not swap a Node that is not a child."});
+        /*END_DEBUG*/
+
         this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
+        
+        /*DEBUG*/
+        console.assert(test_len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -791,15 +793,21 @@
       value: function I(node) {
         var parent = this.parent,
             children;
+        
         /*DEBUG*/
-        check_node_type(node, this+'.swapDepths', '*node*');
-        check_node_type(parent, this+'.swapDepths(node): No parent node found.');
-        if (node.parent !== parent) {
-          throw new ReferenceError(this+".swapDepths(node): "+ this.id +" node and "+ node.id + " node do not share a parent.");
-        }
+        type_check(node, 'Node', {label:'Node.swapDepths', params:'node', id:this.id, inherits:true});
+        reference_check(parent !== null, node.parent === parent, {label:'Node.swapDepths', params:'*node*', id:this.id, message:"Can not swap positions with a Node that has a different parent."});
+        //asserts
+        console.assert(doodle.Node.isNode(parent), "parent is a Node", parent);
+        var test_len = parent.children.length;
         /*END_DEBUG*/
+        
         children = parent.children;
         parent.swapChildrenAt(children.indexOf(this), children.indexOf(node));
+        
+        /*DEBUG*/
+        console.assert(test_len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -817,13 +825,19 @@
       value: function (index) {
         var parent = this.parent;
         /*DEBUG*/
-        check_number_type(index, this+'.swapDepthAt', '*index*');
-        check_node_type(parent, this+'.swapDepthAt::parent: No parent node found.');
-        if (index >= parent.children.length || index < -parent.children.length) {
-          throw new RangeError(this+'.swapDepthAt(*index*): Index position out of range.');
-        }
+        type_check(index, 'number', {label:'Node.swapDepthAt', params:'index', id:this.id});
+        reference_check(parent !== null, {label:'Node.swapDepthAt', params:'*index*', id:this.id, message:"Node does not have a parent."});
+        
+        console.assert(doodle.Node.isNode(parent), "Node has parent Node.");
+        var test_len = parent.children.length;
+        range_check(index >= -test_len, index1 < test_len, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
+
         parent.swapChildrenAt(parent.children.indexOf(this), index);
+
+        /*DEBUG*/
+        console.assert(test_len-1 === children.length, "Children array length is one less than before.");
+        /*END_DEBUG*/
       }
     },
     
@@ -840,7 +854,7 @@
       configurable: false,
       value: function (node) {
         /*DEBUG*/
-        check_node_type(node, this+'.contains', '*node*');
+        type_check(node, 'Node', {label:'Node.contains', params:'node', id:this.id, inherits:true});
         /*END_DEBUG*/
         return (create_scene_path(this, []).indexOf(node) !== -1) ? true : false;
       }
@@ -848,7 +862,7 @@
 
     /**
      * @name localToGlobal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      */
@@ -856,25 +870,28 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.localToGlobal', '*point*');
+        type_check(pt, 'Point', {label:'Node.localToGlobal', params:'point', id:this.id});
         /*END_DEBUG*/
         var node = this.parent;
         //apply each transformation from this node up to root
-        point = this.transform.transformPoint(point); //new point
+        pt = this.transform.transformPoint(pt); //new point
         while (node) {
-          node.transform.__transformPoint(point); //modify point
+          /*DEBUG*/
+          console.assert(doodle.Node.isNode(node), "node is a Node", node);
+          /*END_DEBUG*/
+          node.transform.__transformPoint(pt); //modify point
           node = node.parent;
         }
-        return point;
+        return pt;
       }
     },
 
     /**
      * Same as localToGlobal, but modifies a point in place.
      * @name __localToGlobal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      * @private
@@ -883,23 +900,26 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.localToGlobal', '*point*');
+        type_check(pt, 'Point', {label:'Node.__localToGlobal', params:'point', id:this.id});
         /*END_DEBUG*/
         var node = this;
         //apply each transformation from this node up to root
         while (node) {
-          node.transform.__transformPoint(point); //modify point
+          /*DEBUG*/
+          console.assert(doodle.Node.isNode(node), "node is a Node", node);
+          /*END_DEBUG*/
+          node.transform.__transformPoint(pt); //modify point
           node = node.parent;
         }
-        return point;
+        return pt;
       }
     },
 
     /**
      * @name globalToLocal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      */
@@ -907,20 +927,20 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.globalToLocal', '*point*');
+        type_check(pt, 'Point', {label:'Node.globalToLocal', id:this.id, params:'point'});
         /*END_DEBUG*/
         var global_pt = {x:0, y:0};
         this.__localToGlobal(global_pt);
-        return doodle_Point(point.x - global_pt.x, point.y - global_pt.y);
+        return doodle_Point(pt.x - global_pt.x, pt.y - global_pt.y);
       }
     },
 
     /**
      * Same as globalToLocal, but modifies a point in place.
      * @name __globalToLocal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      * @private
@@ -929,79 +949,40 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.globalToLocal', '*point*');
+        type_check(pt, 'Point', {label:'Node.__globalToLocal', id:this.id, params:'point'});
         /*END_DEBUG*/
-        var global_pt = {x:0, y:0};
+        var global_pt = {x:0, y:0}; //use temp point instead?
         this.__localToGlobal(global_pt);
-        point.x = point.x - global_pt.x;
-        point.y = point.y - global_pt.y;
-        return point;
+        pt.x = pt.x - global_pt.x;
+        pt.y = pt.y - global_pt.y;
+        return pt;
       }
     }
   };//end node_static_properties
+}());//end class closure
 
-  
-  /*
-   * CLASS METHODS
-   */
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Test if an object is an node.
-   * @name isNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isNode = doodle.Node.isNode = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Node]');
-  };
-
-  /**
-   * Check if object inherits from node.
-   * @name inheritsNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsNode = doodle.Node.inheritsNode = function (obj) {
+/**
+ * Test if an object inherits from Node.
+ * @name isNode
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.Node.isNode = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isNode(obj)) {
+      if (obj.toString() === '[object Node]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_node_type
-   * @param {Node} node
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_node_type = doodle.utils.types.check_node_type = function (node, caller, param) {
-    if (inheritsNode(node)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_node_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Node.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};

@@ -6,9 +6,9 @@
       temp_point = {x:0, y:0},
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       //lookup help
-      doodle_Point,
       cos = Math.cos,
       sin = Math.sin,
       sqrt = Math.sqrt;
@@ -23,7 +23,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle_Point = doodle.geom.Point = function (x, y) {
+  doodle.geom.Point = function Point (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -49,7 +49,8 @@
           get: function () { return x; },
           set: function (n) {
             /*DEBUG*/
-            type_check(n, 'number', {label: 'Point.x', id:this.toString()});
+            type_check(n,'number', {label:'Point.x', id:this.id});
+            range_check(isFinite(n), {label:'Point.x', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             x = n;
           }
@@ -68,7 +69,8 @@
           get: function () { return y; },
           set: function (n) {
             /*DEBUG*/
-            type_check(n, 'number', {label: 'Point.y', id:this.toString()});
+            type_check(n,'number', {label:'Point.y', id:this.id});
+            range_check(isFinite(n), {label:'Point.y', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             y = n;
           }
@@ -85,12 +87,30 @@
           writable: false,
           configurable: false,
           value: function () {
-            var pt = $temp_array;
-            pt[0] = x;
-            pt[1] = y;
-            return pt;
+            $temp_array[0] = x;
+            $temp_array[1] = y;
+            return $temp_array;
           }
-        }
+        },
+
+        /**
+         * @name id
+         * @return {string}
+         */
+        'id': (function () {
+          var id = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () { return (id === null) ? this.toString() : id; },
+            set: function (idArg) {
+              /*DEBUG*/
+              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              /*END_DEBUG*/
+              id = idArg;
+            }
+          };
+        }())
       };
     }()));//end defineProperties
 
@@ -119,7 +139,7 @@
         point.compose.apply(point, init_obj);
       } else {
         /*DEBUG*/
-        type_check(init_obj, 'Point', {label: 'doodle.geom.Point', id:this.toString(), message:"Unable to initialize from point object."});
+        type_check(init_obj,'Point', {label: 'doodle.geom.Point', id:this.id, message:"Unable to initialize from point object."});
         /*END_DEBUG*/
         point.compose(init_obj.x, init_obj.y);
       }
@@ -136,17 +156,15 @@
   
   point_static_properties = {
     /**
-     * The length of the line segment from (0,0) to this point.
-     * @name length
-     * @return {number}
-     * @property
+     * Returns a string that contains the values of the x and y coordinates.
+     * @name toString
+     * @return {string}
      */
-    'length': {
+    'toString': {
       enumerable: true,
+      writable: false,
       configurable: false,
-      get: function () {
-        return distance(temp_point, this);
-      }
+      value: function () { return "(x=" + this.x + ",y=" + this.y + ")"; }
     },
 
     /**
@@ -158,23 +176,19 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return this.__toArray().concat();
-      }
+      value: function () { return this.__toArray().concat(); }
     },
-    
+
     /**
-     * Returns a string that contains the values of the x and y coordinates.
-     * @name toString
-     * @return {string}
+     * The length of the line segment from (0,0) to this point.
+     * @name length
+     * @return {number}
+     * @property
      */
-    'toString': {
+    'length': {
       enumerable: true,
-      writable: false,
       configurable: false,
-      value: function () {
-        return "(x=" + this.x + ",y=" + this.y + ")";
-      }
+      get: function () { return distance(temp_point, this); }
     },
 
     /**
@@ -191,7 +205,8 @@
       configurable: false,
       value: function (x, y) {
         /*DEBUG*/
-        type_check(x, 'number', y, 'number', {label: 'Point.compose', params: ['x', 'y'], id:this.toString()});
+        type_check(x,'number', y,'number', {label:'Point.compose', params:['x','y'], id:this.id});
+        range_check(isFinite(x), isFinite(y), {label:'Point.compose', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -208,9 +223,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return doodle_Point(this.x, this.y);
-      }
+      value: function () { return Point(this.x, this.y); }
     },
 
     /**
@@ -226,7 +239,7 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        type_check(pt, 'Point', {label: 'Point.equals', params: 'point', id:this.toString()});
+        type_check(pt, 'Point', {label:'Point.equals', params:'point', id:this.id});
         /*END_DEBUG*/
         return (this.x === pt.x && this.y === pt.y);
       }
@@ -246,9 +259,9 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        type_check(pt, 'Point', {label: 'Point.add', params: 'point', id:this.toString()});
+        type_check(pt,'Point', {label:'Point.add', params:'point', id:this.id});
         /*END_DEBUG*/
-        return doodle_Point(this.x + pt.x, this.y + pt.y);
+        return Point(this.x + pt.x, this.y + pt.y);
       }
     },
 
@@ -266,9 +279,9 @@
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        type_check(pt, 'Point', {label: 'Point.subtract', params: 'point', id:this.toString()});
+        type_check(pt,'Point', {label:'Point.subtract', params:'point', id:this.id});
         /*END_DEBUG*/
-        return doodle_Point(this.x - pt.x, this.y - pt.y);
+        return Point(this.x - pt.x, this.y - pt.y);
       }
     },
 
@@ -284,7 +297,8 @@
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        type_check(dx, 'number', dy, 'number', {label: 'Point.offset', id:this.toString(), params: ['dx', 'dy']});
+        type_check(dx,'number', dy,'number', {label:'Point.offset', id:this.id, params:['dx','dy']});
+        range_check(isFinite(dx), isFinite(dy), {label:'Point.offset', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -306,7 +320,8 @@
       configurable: false,
       value: function (thickness) {
         /*DEBUG*/
-        type_check(thickness, 'number', {label: 'Point.normalize', id:this.toString(), params: 'thickness'});
+        type_check(thickness,'number', {label:'Point.normalize', id:this.id, params:'thickness'});
+        range_check(isFinite(thickness), {label:'Point.normalize', params:'thickness', id:this.id});
         /*END_DEBUG*/
         this.x = (this.x / this.length) * thickness;
         this.y = (this.y / this.length) * thickness;
@@ -334,10 +349,10 @@
       configurable: false,
       value: function (pt1, pt2, t) {
         /*DEBUG*/
-        type_check(pt1, 'Point', pt2, 'Point', t, 'number', {label: 'Point.interpolate', id:this.toString(), params: ['point', 'point', 'time']});
+        type_check(pt1,'Point', pt2,'Point', t,'number', {label:'Point.interpolate', id:this.id, params:['point','point','time']});
+        range_check(isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
         /*END_DEBUG*/
-        return doodle_Point(pt1.x + (pt2.x - pt1.x) * t,
-                            pt1.y + (pt2.y - pt1.y) * t);
+        return Point(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
         /* correct version?
            var nx = pt2.x - pt1.x;
            var ny = pt2.y - pt1.y;
@@ -364,9 +379,10 @@
       configurable: false,
       value: function (len, angle) {
         /*DEBUG*/
-        type_check(len, 'number', angle, 'number', {label: 'Point.polar', id:this.toString(), params: ['len', 'angle']});
+        type_check(len,'number', angle,'number', {label:'Point.polar', id:this.id, params:['len','angle']});
+        range_check(isFinite(len), isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        return doodle_Point(len*cos(angle), len*sin(angle));
+        return Point(len*cos(angle), len*sin(angle));
       }
     }
     
@@ -387,7 +403,7 @@
    */
   distance = doodle.geom.Point.distance = function (pt1, pt2) {
     /*DEBUG*/
-    type_check(pt1, 'Point', pt2, 'Point', {label: 'Point.distance', id:this.toString(), params: ['point', 'point']});
+    type_check(pt1,'Point', pt2,'Point', {label:'Point.distance', params:['point','point']});
     /*END_DEBUG*/
     var dx = pt2.x - pt1.x,
         dy = pt2.y - pt1.y;

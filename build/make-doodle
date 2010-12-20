@@ -36,11 +36,8 @@ WARNING_LEVEL=1 #quiet, [default], verbose
 function build_full {
     cat ./build/prologue.js > "$DEBUG_OUT_FILE"
     cat ./src/utils/compat/es5.js >> "$DEBUG_OUT_FILE"
-    cat ./src/utils/utils.js >> "$DEBUG_OUT_FILE"
-    echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
-    cat ./src/utils/types.js >> "$DEBUG_OUT_FILE"
-    echo "/*END_DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
     cat ./src/utils/debug.js >> "$DEBUG_OUT_FILE"
+    cat ./src/utils/utils.js >> "$DEBUG_OUT_FILE"
     
     echo "/*DEBUG_STATS*/" >> "$DEBUG_OUT_FILE"
     cat "$STATS_FILE" >> "$DEBUG_OUT_FILE"

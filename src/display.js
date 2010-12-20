@@ -4,7 +4,6 @@
 (function () {
   var display_static_properties,
       display_count = 0,
-      isDisplay,
       create_frame,
       clear_scene_graph,
       draw_scene_graph,
@@ -14,12 +13,8 @@
       dispatch_mouseleave_event,
       dispatch_keyboard_event,
       /*DEBUG*/
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_layer_type = doodle.utils.types.check_layer_type,
-      check_block_element = doodle.utils.types.check_block_element,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       create_scene_path = doodle.utils.create_scene_path,
       isLayer = doodle.Layer.isLayer,
@@ -59,7 +54,7 @@
     if (element && typeof element !== 'function') {
       element = get_element(element);
       /*DEBUG*/
-      check_block_element(element, '[object Display](element)');
+      type_check(element,'block', {label:'Display', id:this.id, message:"Invalid element."});
       /*END_DEBUG*/
       id = get_element_property(element, 'id');
     }
@@ -97,9 +92,7 @@
       /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_event (evt) {
-        $dispatch_mouse_event(evt, $evt_mouseEvent,
-                              display_scene_path, display_scene_path.length,
-                              mouseX, mouseY, $display);
+        $dispatch_mouse_event(evt, $evt_mouseEvent, display_scene_path, display_scene_path.length, mouseX, mouseY, $display);
       }
 
       /* @param {doodle.events.MouseEvent} evt
@@ -109,9 +102,7 @@
         mouseX = x = evt_offset_p ? evt.offsetX : evt.clientX - dom_element.offsetLeft;
         mouseY = y = evt_offset_p ? evt.offsetY : evt.clientY - dom_element.offsetTop;
         
-        $dispatch_mousemove_event(evt, $evt_mouseEvent,
-                                  display_scene_path, display_scene_path.length,
-                                  x, y, $display);
+        $dispatch_mousemove_event(evt, $evt_mouseEvent, display_scene_path, display_scene_path.length, x, y, $display);
       }
 
       /* @param {doodle.events.MouseEvent} evt
@@ -137,8 +128,10 @@
       
       //Add display handlers
       //Redraw scene graph when children are added and removed.
-      $display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
-      $display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
+			//**when objects removed in event loop, causing it to re-run before its finished
+      //$display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
+      //$display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
+			
       //Add keyboard listeners to document.
       document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
       document.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
@@ -196,7 +189,8 @@
           set: function (n) {
             var i = layers.length;
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n,'number', {label:'Display.width', id:this.id});
+            range_check(isFinite(n), {label:'Display.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'width', n+"px");
             width = n;
@@ -221,7 +215,8 @@
           set: function (n) {
             var i = layers.length;
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n,'number', {label:'Display.height', id:this.id});
+            range_check(isFinite(n), {label:'Display.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'height', n+"px");
             height = n;
@@ -247,7 +242,7 @@
           writable: false,
           value: function (elementArg) {
             /*DEBUG*/
-            check_block_element(elementArg, this+'.element');
+            type_check(elementArg,'block', {label:'Display.__addDomElement', params:'elementArg', id:this.id});
             /*END_DEBUG*/
             //need to stack the canvas elements on top of each other
             set_element_property(elementArg, 'position', 'relative');
@@ -292,6 +287,9 @@
           enumerable: false,
           writable: false,
           value: function (elementArg) {
+            /*DEBUG*/
+            //make sure it exists here
+            /*END_DEBUG*/
             //remove event handlers
             //MouseEvents
             elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
@@ -339,7 +337,7 @@
           value: function () {
             create_scene_path(this, display_scene_path, true).reverse();
             /*DEBUG*/
-            doodle.utils.type_check(display_scene_path[0], 'Display');
+            type_check(display_scene_path[0],'Display', {label:'Display.__sortAllChildren', id:this.id});
             /*END_DEBUG*/
           }
         },
@@ -356,7 +354,7 @@
           configurable: false,
           value: function (point) {
             /*DEBUG*/
-            check_point_type(point, this+'.getNodesUnderPoint', '*point*');
+            type_check(point,'Point', {label:'Display.getNodesUnderPoint', params:'point', id:this.id});
             /*END_DEBUG*/
             var nodes = [],
                 scene_path = display_scene_path,
@@ -391,8 +389,7 @@
             var super_addChildAt = $display.addChildAt;
             return function (layer, index) {
               /*DEBUG*/
-              check_layer_type(layer, this+'.addChildAt', '*layer*, index');
-              check_number_type(index, this+'.addChildAt', 'layer, *index*');
+              type_check(layer,'Layer', index,'number', {label:'Display.addChildAt', params:['layer','index'], id:this.id});
               /*END_DEBUG*/
               //inherit display dimensions
               layer.width = this.width;
@@ -419,7 +416,7 @@
             var super_removeChildAt = $display.removeChildAt;
             return function (index) {
               /*DEBUG*/
-              check_number_type(index, this+'.removeChildAt', '*index*');
+              type_check(index,'number', {label:'Display.removeChildAt', params:'index', id:this.id});
               /*END_DEBUG*/
               //remove from dom
               this.element.removeChild(layers[index].element);
@@ -444,8 +441,7 @@
             var super_swapChildrenAt = $display.swapChildrenAt;
             return function (idx1, idx2) {
               /*DEBUG*/
-              check_number_type(idx1, this+'.swapChildrenAt', '*index1*, index2');
-              check_number_type(idx2, this+'.swapChildrenAt', 'index1, *index2*');
+              type_check(idx1,'number', idx2,'number', {label:'Display.swapChildrenAt', params:['index1','index2'], id:this.id});
               /*END_DEBUG*/
               //swap dom elements
               if (idx1 > idx2) {
@@ -504,7 +500,7 @@
                 get: function () { return debug_stats; },
                 set: function (useStats) {
                   /*DEBUG*/
-                  check_boolean_type(useStats, $display+'.debug.stats');
+                  type_check(useStats,'boolean', {label:'Display.debug.stats', params:'useStats', id:this.id});
                   /*END_DEBUG*/
                   if (useStats && !debug_stats) {
                     debug_stats = new Stats();
@@ -539,10 +535,8 @@
             set: function (fps) {
               /*DEBUG*/
               if (fps !== false && fps !== 0) {
-                check_number_type(fps, this+'.frameRate');
-                if (fps < 0 || !isFinite(1000/fps)) {
-                  throw new RangeError(this+'.frameRate: Invalid framerate.');
-                }
+                type_check(fps,'number', {label:'Display.frameRate', params:'fps', id:this.id});
+                range_check(fps >= 0, isFinite(1000/fps), {label:'Display.frameRate', params:'fps', id:this.id, message:"Invalid frame rate."});
               }
               /*END_DEBUG*/
               if (fps === 0 || fps === false) {
@@ -580,7 +574,7 @@
       } else {
         //passed element
         /*DEBUG*/
-        check_block_element(element, '[object Display](element)');
+        type_check(element,'block', {label:'Display', id:this.id, message:"Invalid initialization."});
         /*END_DEBUG*/
         display.element = element;
       }
@@ -591,7 +585,7 @@
 
     /*DEBUG*/
     //can't proceed with initialization without an element to work with
-    check_block_element(display.element, '[object Display].element');
+    type_check(display.element,'block', {label:'Display.element', id:this.id, message:"Invalid initialization."});
     /*END_DEBUG*/
     
     //draw at least 1 frame
@@ -645,9 +639,7 @@
     'addLayer': {
       value: function (id) {
         /*DEBUG*/
-        if (id !== undefined) {
-          check_string_type(id, this+'.addLayer', '*id*');
-        }
+        id === undefined || type_check(id,'string', {label:'Display.addLayer', params:'id', id:this.id});
         /*END_DEBUG*/
         return this.addChild(doodle_Layer(id));
       }
@@ -662,7 +654,7 @@
     'removeLayer': {
       value: function (id) {
         /*DEBUG*/
-        check_string_type(id, this+'.removeLayer', '*id*');
+        type_check(id,'string', {label:'Display.removeLayer', params:'id', id:this.id});
         /*END_DEBUG*/
         return this.removeChildById(id);
       }
@@ -771,6 +763,9 @@
         }
       }
 
+			/*DEBUG*/
+			//console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
+			/*END_DEBUG*/
       draw_scene_graph(scene_path, path_count);
       
       /*DEBUG_STATS*/
@@ -805,20 +800,25 @@
   /*
    *
    */
-  draw_scene_graph = function (scene_path, count) {
-    /*DEBUG*/
-    doodle.utils.type_check(scene_path, 'array', count, 'number');
-    /*END_DEBUG*/
+  draw_scene_graph = function (scene_path) {
     var node,
-        display,
+				count = scene_path.length,
+        display = scene_path[0],
         ctx,
         bounds,
-        i = 0;
+        i = 1; //ignore display
 
     for (; i < count; i++) {
     //while (count--) {
       node = scene_path[i];
-      display = node.root;
+			/*DEBUG*/
+			console.assert(Array.isArray(scene_path), "scene_path is an array", scene_path);
+			console.assert(scene_path.length === count, "scene_path.length === count", count, scene_path.length);
+			console.assert(doodle.Node.isNode(node), "node is a Node", node, i, scene_path);
+			console.assert(doodle.Display.isDisplay(display), "display is a Display", display);
+			console.assert(node.context && node.context.toString() === '[object CanvasRenderingContext2D]', "node.context is a context", node.context, node.id);
+			/*END_DEBUG*/
+      //display = node.root;
       ctx = node.context;
       
       if (ctx && node.visible) {
@@ -879,7 +879,13 @@
    */
   dispatch_mouse_event = function (evt, mouseEvent, path, count, x, y, display) {
     /*DEBUG*/
-    doodle.utils.type_check(evt, 'MouseEvent', mouseEvent, 'MouseEvent', path, 'array', count, 'number', x, 'number', y, 'number', display, 'Display');
+    console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is a MouseEvent", evt);
+    console.assert(doodle.events.MouseEvent.isMouseEvent(mouseEvent), "mouseEvent is a MouseEvent", mouseEvent);
+    console.assert(Array.isArray(path), "path is an array", path);
+    console.assert(typeof count === 'number', "count is a number", count);
+    console.assert(typeof x === 'number', "x is a number", x);
+    console.assert(typeof y === 'number', "y is a number", y);
+    console.assert(doodle.Display.isDisplay(display), "display is a Display object", display);
     /*END_DEBUG*/
     while (count--) {
       if (path[count].__getBounds(display).contains(x, y)) {
@@ -1122,45 +1128,29 @@
     display.broadcastEvent(keyboardEvent.__copyKeyboardEventProperties(evt, null));
     return true;
   };
-
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a Display.
-   * @name isDisplay
-   * @param {Object} obj
-   * @return {boolean} True if object is a Doodle Display.
-   * @static
-   */
-  isDisplay = doodle.Display.isDisplay = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Display]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_display_type
-   * @param {Display} display
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_display_type = function (display, caller, params) {
-    if (isDisplay(display)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_display_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must be a Display.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a Display.
+ * @name isDisplay
+ * @param {Object} obj
+ * @return {boolean} True if object is a Doodle Display.
+ * @static
+ */
+doodle.Display.isDisplay = function (obj) {
+  if (typeof obj === 'object') {
+    while (obj) {
+      if (obj.toString() === '[object Display]') {
+        return true;
+      } else {
+        obj = Object.getPrototypeOf(obj);
+      }
+    }
+  }
+  return false;
+};

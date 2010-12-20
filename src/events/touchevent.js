@@ -36,11 +36,8 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail,
-                                       screenX, screenY, clientX, clientY,
-                                       ctrlKey, altKey, shiftKey, metaKey,
-                                       touches, targetTouches, changedTouches,
-                                       scale, rotation) {
+  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
+                                       ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation) {
     var touchevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -79,9 +76,8 @@
       view = (view === undefined) ? null : view;
       detail = (detail === undefined) ? 0 : detail;
       /*DEBUG*/
-      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', detail, 'number', screenX, '*', screenY, '*', clientX, '*', clientY, '*', ctrlKey, '*', altKey, '*', shiftKey, '*', metaKey, '*', touches, '*', targetTouches, '*', changedTouches, '*', scale, '*', rotation, '*',
-                 {label:'TouchEvent', id:this.toString()+"[type="+this.type+"]",
-                  params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
+      type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'number', screenX,'*', screenY,'*', clientX,'*', clientY,'*', ctrlKey,'*', altKey,'*', shiftKey,'*', metaKey,'*', touches,'*', targetTouches,'*', changedTouches,'*', scale,'*', rotation,'*',
+                 {label:'TouchEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
       /*END_DEBUG*/
       touchevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
@@ -110,7 +106,7 @@
        */
       copy_touchevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent.", this.toString()+"[type="+this.type+"]", evt);
+        console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent.", this.id, evt);
         /*END_DEBUG*/
         if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
         if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
@@ -295,11 +291,8 @@
          * @throws {TypeError}
          */
         'initTouchEvent': {
-          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
-                           screenXArg, screenYArg, clientXArg, clientYArg,
-                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
-                           touchesArg, targetTouchesArg, changedTouchesArg,
-                           scaleArg, rotationArg) {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg,
+                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, touchesArg, targetTouchesArg, changedTouchesArg, scaleArg, rotationArg) {
             //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
@@ -319,10 +312,9 @@
             scaleArg = (scaleArg === undefined) ? 1 : scaleArg;
             rotationArg = (rotationArg === undefined) ? 0 : rotationArg;
             /*DEBUG*/
-            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', viewArg, '*', detailArg, 'number', screenXArg, 'number', screenYArg, 'number',
-                       clientXArg, 'number', clientYArg, 'number', ctrlKeyArg, 'boolean', altKeyArg, 'boolean', shiftKeyArg, 'boolean', metaKeyArg, 'boolean', touchesArg, '*',targetTouchesArg, '*', changedTouchesArg, '*', scaleArg, 'number', rotationArg, 'number',
-                 {label:'TouchEvent', id:this.toString()+"[type="+this.type+"]",
-                  params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', detailArg,'number', screenXArg,'number', screenYArg,'number',
+                       clientXArg,'number', clientYArg,'number', ctrlKeyArg,'boolean', altKeyArg,'boolean', shiftKeyArg,'boolean', metaKeyArg,'boolean', touchesArg,'*', targetTouchesArg,'*', changedTouchesArg,'*', scaleArg,'number', rotationArg,'number',
+                       {label:'TouchEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
             /*END_DEBUG*/
             evt_screenX = screenXArg;
             evt_screenY = screenYArg;
@@ -352,7 +344,7 @@
         'getModifierState': {
           value: function (key) {
             /*DEBUG*/
-            type_check(key, 'string', {label:'TouchEvent.getModifierState', params:'key', id:this.toString()+"[type="+this.type+"]"});
+            type_check(key,'string', {label:'TouchEvent.getModifierState', params:'key', id:this.id});
             /*END_DEBUG*/
             switch (key) {
             case 'Alt':

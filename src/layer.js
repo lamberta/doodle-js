@@ -3,11 +3,9 @@
 (function () {
   var layer_static_properties,
       layer_count = 0,
-      isLayer,
-      inheritsLayer,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_canvas_type = doodle.utils.types.check_canvas_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       set_element_property = doodle.utils.set_element_property;
   
@@ -47,7 +45,8 @@
           get: function () { return width; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n,'number', {label:'Layer.width', id:this.id});
+            range_check(isFinite(n), {label:'Layer.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             width = set_element_property(this.element, 'width', n, 'html');
           }
@@ -67,7 +66,8 @@
           get: function () { return height; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n,'number', {label:'Layer.height', id:this.id});
+            range_check(isFinite(n), {label:'Layer.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             height = set_element_property(this.element, 'height', n, 'html');
           }
@@ -100,7 +100,7 @@
           writable: false,
           value: function (elementArg) {
             /*DEBUG*/
-            check_canvas_type(elementArg, this+'.element');
+            console.assert(typeof elementArg === 'object' && elementArg.toString() === '[object HTMLCanvasElement]', "elementArg is a canvas", elementArg);
             /*END_DEBUG*/
             //need to stack canvas elements inside div
             set_element_property(elementArg, 'position', 'absolute');
@@ -125,9 +125,7 @@
         '__removeDomElement': {
           enumerable: false,
           writable: false,
-          value: function (elementArg) {
-            context = null;
-          }
+          value: function (elementArg) { context = null; }
         }
         
       };
@@ -145,7 +143,7 @@
       break;
     case 2:
       /*DEBUG*/
-      check_canvas_type(element, '[object Layer]', 'id, *element*');
+      type_check(element,'canvas', {label:'Layer', id:this.id, message:"Invalid initialization."});
       /*END_DEBUG*/
       layer.element = element;
       break;
@@ -174,9 +172,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Layer]";
-      }
+      value: function () { return "[object Layer]"; }
     },
 
     /**
@@ -197,66 +193,29 @@
       }())
     }
   };//end layer_static_properties
+  
+}());//end class closure
 
-  /*
-   * CLASS METHODS
-   */
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Test if an object is a Layer.
-   * @name isLayer
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isLayer = doodle.Layer.isLayer = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Layer]');
-  };
-
-  /**
-   * Check if object inherits from layer.
-   * @name inheritsLayer
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
+/**
+ * Test if an object is a Layer.
+ * @name isLayer
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.Layer.isLayer = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isLayer(obj)) {
+      if (obj.toString() === '[object Layer]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_layer_type
-   * @param {Layer} layer
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_layer_type = function (layer, caller, param) {
-    if (inheritsLayer(layer)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_layer_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Layer.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};

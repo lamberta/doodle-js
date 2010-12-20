@@ -1,7 +1,6 @@
 /*DEBUG*/
 /*jslint nomen: false, plusplus: false*/
 /*globals doodle, console*/
-
 doodle.utils.debug = {};
 
 (function () {
@@ -43,6 +42,25 @@ doodle.utils.debug = {};
   }
 
   /*
+   * Tests an object to see if it's an Event type.
+   * For DOM events it tests the constuctor name.
+   */
+  function assert_event_type (obj, type, inheritsp) {
+    if (typeof obj === 'object') {
+      var type_str = "[object " + type + "]";
+      inheritsp = (typeof inheritsp === 'boolean') ? inheritsp : false;
+      while (obj) {
+        if (obj.toString() === type_str || (obj.constructor && obj.constructor.name === type)) {
+          return true;
+        } else {
+          obj = inheritsp ? Object.getPrototypeOf(obj) : null;
+        }
+      }
+    }
+    throw new TypeError();
+  }
+
+  /*
    * @param {*} arg Object to check type of.
    * @param {string} type Supported type.
    * @return {boolean}
@@ -50,14 +68,18 @@ doodle.utils.debug = {};
    * @throws {SyntaxError} On invalid invocation.
    */
   function test_type (arg, type, inheritsp) {
-    //automatically throw error
-    if (arg === undefined || arg === null) {
-      throw new TypeError();
-    }
-    
     switch (type) {
+      //any type will match
+    case '*':
+      return true;
       /* JavaScript types
        */
+    case 'undefined':
+      assert_error(arg === undefined, TypeError);
+      break;
+    case 'null':
+      assert_error(arg === null, TypeError);
+      break;
     case 'number':
     case 'string':
     case 'boolean':
@@ -97,6 +119,8 @@ doodle.utils.debug = {};
     case 'TouchEvent':
     case 'TextEvent':
     case 'KeyboardEvent':
+      assert_event_type(arg, type, inheritsp);
+      break;
       //Doodle objects
     case 'EventDispatcher':
     case 'Node':

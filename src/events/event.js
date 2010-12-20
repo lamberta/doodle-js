@@ -1,4 +1,4 @@
-/*globals doodle*/
+/*globals doodle, console*/
 
 /* Will probably want to implement the dom event interface:
  * http://www.w3.org/TR/DOM-Level-3-Events/
@@ -66,9 +66,9 @@
         resetTarget = (resetTarget === undefined) ? false : resetTarget;
         resetType = (resetType === undefined) ? false : resetType;
         /*DEBUG*/
-        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", this.toString()+"[type="+this.type+"]", evt);
-        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", this.toString()+"[type="+this.type+"]", resetTarget);
-        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", this.toString()+"[type="+this.type+"]", resetType);
+        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", this.id, evt);
+        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", this.id, resetTarget);
+        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", this.id, resetType);
         /*END_DEBUG*/
         if (resetTarget !== false) {
           evt_currentTarget = resetTarget;
@@ -97,6 +97,25 @@
       };
       
       return {
+        /**
+         * @name id
+         * @return {string}
+         */
+        'id': (function () {
+          var id = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () { return (id === null) ? this.toString()+"[type="+this.type+"]" : id; },
+            set: function (idArg) {
+              /*DEBUG*/
+              idArg === null || type_check(idArg,'string', {label:'Event.id', id:this.id});
+              /*END_DEBUG*/
+              id = idArg;
+            }
+          };
+        }()),
+        
         /**
          * @name type
          * @return {string} [read-only]
@@ -157,7 +176,7 @@
           get: function () { return evt_cancelBubble; },
           set: function (cancelArg) {
             /*DEBUG*/
-            type_check(cancelArg, 'boolean', {label:'Event.cancelBubble', params:'cancel', id:this.toString()+"[type="+this.type+"]"});
+            type_check(cancelArg, 'boolean', {label:'Event.cancelBubble', params:'cancel', id:this.id});
             /*END_DEBUG*/
             evt_cancelBubble = cancelArg;
           }
@@ -265,7 +284,8 @@
           enumerable: false,
           value: function (phaseArg) {
             /*DEBUG*/
-            console.assert(typeof phaseArg === 'number', "phaseArg is a number.");
+            console.assert(isFinite(phaseArg), "phaseArg is a finite number", phaseArg);
+            console.assert(phaseArg >= 0, "phaseArg is greater than 0", phaseArg);
             /*END_DEBUG*/
             evt_eventPhase = phaseArg;
             return this;
@@ -321,7 +341,7 @@
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             /*DEBUG*/
-            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', {label:'Event.initEvent', params:['type','canBubble','cancelable'], id:this.toString()+"[type="+this.type+"]"});
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg, 'boolean', {label:'Event.initEvent', params:['type','canBubble','cancelable'], id:this.id});
             /*END_DEBUG*/
             evt_type = typeArg;
             evt_bubbles = canBubbleArg;
@@ -336,9 +356,7 @@
         'preventDefault': {
           enumerable: true,
           configurable: false,
-          value: function () {
-            evt_defaultPrevented = true;
-          }
+          value: function () { evt_defaultPrevented = true; }
         },
 
         /**
@@ -350,7 +368,7 @@
           configurable: false,
           value: function () {
             if (!this.cancelable) {
-              throw new Error(this.toString()+"[type="+this.type+"] Event.stopPropagation: Event can not be cancelled.");
+              throw new Error(this.id + " Event.stopPropagation: Event can not be cancelled.");
             } else {
               __cancel = true;
             }
@@ -366,7 +384,7 @@
           configurable: false,
           value: function () {
             if (!this.cancelable) {
-              throw new Error(this.toString()+"[type="+this.type+"] Event.stopImmediatePropagation: Event can not be cancelled.");
+              throw new Error(this.id + " Event.stopImmediatePropagation: Event can not be cancelled.");
             } else {
               __cancel = true;
               __cancelNow = true;
@@ -415,7 +433,7 @@
         init_obj.call(event);
         /*DEBUG*/
         if (event.type === undefined || event.bubbles === undefined || event.cancelable === undefined) {
-          throw new SyntaxError(this.toString()+"[type="+this.type+"] (function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
+          throw new SyntaxError(this.id + "(function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
         }
         /*END_DEBUG*/
       } else {

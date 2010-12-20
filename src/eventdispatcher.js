@@ -1,15 +1,9 @@
 /*globals doodle*/
-
 (function () {
   var evtDisp_static_properties,
       dispatcher_queue,
-      isEventDispatcher,
-      inheritsEventDispatcher,
       /*DEBUG*/
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_function_type = doodle.utils.types.check_function_type,
-      check_event_type = doodle.utils.types.check_event_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       //lookup help
       CAPTURING_PHASE = doodle.events.Event.CAPTURING_PHASE,
@@ -40,6 +34,21 @@
     Object.defineProperties(evt_disp, evtDisp_static_properties);
     //properties that require privacy
     Object.defineProperties(evt_disp, {
+      'id': (function () {
+        var id = null;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return (id === null) ? this.toString() : id; },
+          set: function (idVar) {
+            /*DEBUG*/
+            idVar === null || type_check(idVar,'string', {label:'EventDispatcher.id', message:"Property must be a string or null.", id:this.id});
+            /*END_DEBUG*/
+            id = idVar;
+          }
+        };
+      }()),
+      
       'eventListeners': (function () {
         var event_listeners = {};
         return {
@@ -69,29 +78,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object EventDispatcher]";
-      }
-    },
-
-    /**
-     * Call function passing object as 'this'.
-     * @name modify
-     * @param {Function} fn
-     * @return {Object}
-     * @throws {TypeError}
-     */
-    'modify': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (fn) {
-        /*DEBUG*/
-        check_function_type(fn, this+'.modify', '*function*');
-        /*END_DEBUG*/
-        fn.call(this);
-        return this;
-      }
+      value: function () { return "[object EventDispatcher]"; }
     },
 
     /**
@@ -110,9 +97,7 @@
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        check_string_type(type, this+'.addEventListener', '*type*, listener, useCapture');
-        check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
-        check_boolean_type(useCapture, this+'.addEventListener', 'type, listener, *useCapture*');
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'EventDispatcher.addEventListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
         var eventListeners = this.eventListeners;
         
@@ -144,9 +129,7 @@
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        check_string_type(type, this+'.removeEventListener', '*type*, listener, useCapture');
-        check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
-        check_boolean_type(useCapture, this+'.removeEventListener', 'type, listener, *useCapture*');
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'EventDispatcher.removeEventListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
         var eventListeners = this.eventListeners,
             handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
@@ -187,7 +170,7 @@
       configurable: false,
       value: function (event) {
         /*DEBUG*/
-        check_event_type(event, this+'.handleEvent');
+        type_check(event, 'Event', {label:'EventDispatcher.handleEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
         
         //check for listeners that match event type
@@ -207,7 +190,7 @@
           count = listeners.length;
           for (i = 0; i < count; i += 1) {
             /*DEBUG*/
-            check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
+            console.assert(typeof listeners[i] === 'function', "listener is a function", listeners[i]);
             /*END_DEBUG*/
             //pass event to handler
             rv = listeners[i].call(this, event);
@@ -260,7 +243,7 @@
             i; //counter
 
         /*DEBUG*/
-        check_event_type(event, this+'.dispatchEvent', '*event*');
+        type_check(event, 'Event', {label:'EventDispatcher.dispatchEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         //can't dispatch an event that's already stopped
@@ -351,7 +334,7 @@
             dq_count = disp_queue.length;
         
         /*DEBUG*/
-        check_event_type(event, this+'.broadcastEvent', '*event*');
+        type_check(event, 'Event', {label:'EventDispatcher.broadcastEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         if (event.__cancel) {
@@ -393,7 +376,7 @@
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        check_string_type(type, this+'.hasEventListener', '*type*');
+        type_check(type,'string', {label:'EventDispatcher.hasEventListener', params:'type', id:this.id});
         /*END_DEBUG*/
         return this.eventListeners.hasOwnProperty(type);
       }
@@ -417,7 +400,7 @@
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        check_string_type(type, this+'.willTrigger', '*type*');
+        type_check(type,'string', {label:'EventDispatcher.willTrigger', params:'type', id:this.id});
         /*END_DEBUG*/
         if (this.eventListeners.hasOwnProperty(type)) {
           //hasEventListener
@@ -444,62 +427,29 @@
   
   //holds all objects with event listeners
   dispatcher_queue = doodle.EventDispatcher.dispatcher_queue = [];
+  
+}());//end class closure
 
-  /**
-   * Test if an object is an event dispatcher.
-   * @name isEventDispatcher
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isEventDispatcher = doodle.EventDispatcher.isEventDispatcher = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object EventDispatcher]');
-  };
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Check if object inherits from event dispatcher.
-   * @name inheritsEventDispatcher
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsEventDispatcher = doodle.EventDispatcher.inheritsEventDispatcher = function (obj) {
+/**
+ * Test if an object is an event dispatcher.
+ * @name isEventDispatcher
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.EventDispatcher.isEventDispatcher = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isEventDispatcher(obj)) {
+      if (obj.toString() === '[object EventDispatcher]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_eventdispatcher_type
-   * @param {EventDispatcher} obj
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
-    if (inheritsEventDispatcher(obj)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_eventdispatcher_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an EventDispatcher.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};

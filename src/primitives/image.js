@@ -3,7 +3,7 @@
 (function () {
   var image_sprite_static_properties,
       /*DEBUG*/
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       get_element = doodle.utils.get_element,
       doodle_Event = doodle.events.Event,
@@ -32,7 +32,7 @@
         img_element = img;
         if (img_element.id !== '') {
           /*DEBUG*/
-          check_string_type(img_element.id, this+'::add_image_element::img_element.id');
+          console.assert(typeof img_element.id === 'string', "img_element.id is a string", img_element.id);
           /*END_DEBUG*/
           image_sprite.id = img_element.id;
         }
@@ -118,7 +118,7 @@
               remove_image_element();
             } else {
               /*DEBUG*/
-              check_string_type(srcVar, this+'.src');
+              type_check(srcVar, 'string', {label:'Image.id', id:this.id});
               /*END_DEBUG*/
               var image = new Image();
               image.src = encodeURI(srcVar);

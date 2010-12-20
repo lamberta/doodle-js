@@ -65,7 +65,7 @@
       view = (view === undefined) ? null : view;
       /*DEBUG*/
       type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', keyIdentifier, '*', keyLocation, '*', modifiersList, '*', repeat, '*',
-                 {label:'KeyboardEvent', params:['type','bubbles','cancelable','view','keyIdentifier','keyLocation','modifiersList','repeat'], id:this.toString()+"[type="+this.type+"]"});
+                 {label:'KeyboardEvent', params:['type','bubbles','cancelable','view','keyIdentifier','keyLocation','modifiersList','repeat'], id:this.id});
       /*END_DEBUG*/
       keyboardevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
@@ -205,8 +205,7 @@
          * @throws {TypeError}
          */
         'initKeyboardEvent': {
-          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, keyIdentifierArg,
-                           keyLocationArg, modifiersListArg, repeatArg) {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
             //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
@@ -216,9 +215,8 @@
             modifiersListArg = (modifiersListArg === undefined) ? "" : modifiersListArg;
             repeatArg = (repeatArg === undefined) ? false : repeatArg;
             /*DEBUG*/
-            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', viewArg, '*', keyIdentifierArg, 'string', keyLocationArg, 'number', modifiersListArg, 'string', repeatArg, 'boolean',
-                       {label:'KeyboardEvent.initKeyboardEvent', id:this.toString()+"[type="+this.type+"]",
-                        params:['typeArg','canBubbleArg','cancelableArg','viewArg','keyIdentifierArg','keyLocationArg','modifiersListArg','repeatArg']});
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', keyIdentifierArg,'string', keyLocationArg,'number', modifiersListArg,'string', repeatArg,'boolean',
+                       {label:'KeyboardEvent.initKeyboardEvent', id:this.id, params:['typeArg','canBubbleArg','cancelableArg','viewArg','keyIdentifierArg','keyLocationArg','modifiersListArg','repeatArg']});
             /*END_DEBUG*/
             evt_keyIdentifier = keyIdentifierArg;
             evt_keyLocation = keyLocationArg;
@@ -255,7 +253,7 @@
         'getModifierState': {
           value: function (key) {
             /*DEBUG*/
-            type_check(key, 'string', {label:'KeyboardEvent.getModifierState', params:'key', id:this.toString()+"[type="+this.type+"]"});
+            type_check(key,'string', {label:'KeyboardEvent.getModifierState', params:'key', id:this.id});
             /*END_DEBUG*/
             switch (key) {
             case 'Alt':

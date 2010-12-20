@@ -6,6 +6,7 @@
 
 //the global object
 var doodle = {};
+doodle.utils = {};
 //packages
 doodle.geom = {};
 doodle.events = {};
@@ -21,592 +22,24 @@ if (typeof Function.prototype.bind !== 'function') {
     };
   };
 }
-/*globals doodle, document*/
+/*DEBUG*/
+/*jslint nomen: false, plusplus: false*/
+/*globals doodle, console*/
+doodle.utils.debug = {};
 
-/**
- * Doodle utilty functions.
- * @name doodle.utils
- * @class
- * @augments Object
- * @static
- */
-doodle.utils = Object.create({}, {
-
-  /*
-   * COLOR UTILS
-   */
-
-  /**
-   * @name hex_to_rgb
-   * @param {Color} color
-   * @return {Array} [r, g, b]
-   * @throws {TypeError}
-   * @static
-   */
-  'hex_to_rgb': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value:function (color) {
-      //number in octal format or string prefixed with #
-      if (typeof color === 'string') {
-        color = (color[0] === '#') ? color.slice(1) : color;
-        color = parseInt(color, 16);
-      }
-      /*DEBUG*/
-      doodle.utils.types.check_number_type(color, 'hex_to_rgb', "*color{0xffffff|#ffffff}*");
-      /*END_DEBUG*/
-      return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
-    }
-  },
-
-  /**
-   * @name hex_to_rgb_str
-   * @param {Color} color
-   * @param {number} alpha
-   * @return {string}
-   * @throws {TypeError}
-   * @static
-   */
-  'hex_to_rgb_str': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (color, alpha) {
-      var doodle_utils = doodle.utils;
-      alpha = (alpha === undefined) ? 1 : alpha;
-      /*DEBUG*/
-      doodle.utils.types.check_number_type(alpha, 'hex_to_rgb_str', '*color*');
-      /*END_DEBUG*/
-      color = doodle_utils.hex_to_rgb(color);
-      return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
-    }
-  },
-  
-  /**
-   * @name rgb_str_to_hex
-   * @param {string} rgb_str
-   * @return {string}
-   * @throws {TypeError}
-   * @static
-   */
-  'rgb_str_to_hex': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (rgb_str) {
-      /*DEBUG*/
-      doodle.utils.types.check_string_type(rgb_str, 'rgb_str_to_hex', '*rgb_str*');
-      /*END_DEBUG*/   
-      var doodle_utils = doodle.utils,
-          rgb = doodle_utils.rgb_str_to_rgb(rgb_str);
-      /*DEBUG*/
-      doodle.utils.types.check_array_type(rgb, 'rgb_str_to_hex::rgb');
-      /*END_DEBUG*/
-      return doodle_utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
-    }
-  },
-
-  /**
-   * @name rgb_str_to_rgb
-   * @param {Color} color
-   * @return {Array}
-   * @throws {TypeError}
-   * @throws {SyntaxError}
-   * @static
-   */
-  'rgb_str_to_rgb': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: (function () {
-      var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?(.*)\\)$");
-      return function (color) {
-        /*DEBUG*/
-        doodle.utils.types.check_string_type(color, 'rgb_str_to_rgb', '*color*');
-        /*END_DEBUG*/
-        color = color.trim().match(rgb_regexp);
-        /*DEBUG*/
-        //if it's not an array, it didn't parse correctly
-        if (!Array.isArray(color)) {
-          throw new SyntaxError("rgb_str_to_rgb(*color*): Invalid rgb color format: 'rgba(n, n, n, n)'.");
-        }
-        /*END_DEBUG*/
-        var rgb = [parseInt(color[1], 10),
-                   parseInt(color[2], 10),
-                   parseInt(color[3], 10)],
-            alpha = parseFloat(color[4]);
-        if (typeof alpha === 'number' && !isNaN(alpha)) {
-          rgb.push(alpha);
-        }
-        return rgb;
-      };
-    }())
-  },
-  
-  /**
-   * @name rgb_to_hex
-   * @param {number} r
-   * @param {number} g
-   * @param {number} b
-   * @return {string}
-   * @throws {TypeError}
-   * @static
-   */
-  'rgb_to_hex': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (r, g, b) {
-      /*DEBUG*/
-      var check_number_type = doodle.utils.types.check_number_type;
-      check_number_type(r, 'rgb_to_hex', '*r*, g, b');
-      check_number_type(g, 'rgb_to_hex', 'r, *g*, b');
-      check_number_type(b, 'rgb_to_hex', 'r, g, *b*');
-      /*END_DEBUG*/
-      var hex_color = (b | (g << 8) | (r << 16)).toString(16);
-      return '#'+ String('000000'+hex_color).slice(-6); //pad out
-    }
-  },
-
-  /**
-   * @name rgb_to_rgb_str
-   * @param {number} r
-   * @param {number} g
-   * @param {number} b
-   * @param {number} a
-   * @return {string}
-   * @throws {TypeError}
-   * @static
-   */
-  'rgb_to_rgb_str': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (r, g, b, a) {
-      a = (a === undefined) ? 1 : a;
-      /*DEBUG*/
-      var check_number_type = doodle.utils.types.check_number_type;
-      check_number_type(r, 'rgb_to_rgb_str', '*r*, g, b, a');
-      check_number_type(g, 'rgb_to_rgb_str', 'r, *g*, b, a');
-      check_number_type(b, 'rgb_to_rgb_str', 'r, g, *b*, a');
-      check_number_type(a, 'rgb_to_rgb_str', 'r, g, b, *a*');
-      /*END_DEBUG*/
-      a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
-      if (a === 1) {
-        return "rgb("+ r +","+ g +","+ b +")";
-      } else {
-        return "rgba("+ r +","+ g +","+ b +","+ a +")";
-      }
-    }
-  },
-
-  /*
-   * DOM ACCESS
-   */
-
-  /**
-   * Returns HTML element from id name or element itself.
-   * @name get_element
-   * @param {HTMLElement|string} element
-   * @return {HTMLElement}
-   * @static
-   */
-  'get_element': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (element) {
-      if (typeof element === 'string') {
-        //lop off pound-sign if given
-        element = (element[0] === '#') ? element.slice(1) : element;
-        return document.getElementById(element);
-      } else {
-        //if it has an element property, we'll call it an element
-        return (element && element.tagName) ? element : null;
-      }
-    }
-  },
-
-  /**
-   * Returns css property of element, it's own or inherited.
-   * @name get_style_property
-   * @param {HTMLElement} element
-   * @param {string} property
-   * @param {boolean} useComputedStyle
-   * @return {*}
-   * @throws {TypeError}
-   * @throws {ReferenceError}
-   * @static
-   */
-  'get_style_property': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (element, property, useComputedStyle) {
-      useComputedStyle = (useComputedStyle === undefined) ? true : false;
-      /*DEBUG*/
-      doodle.utils.types.check_string_type(property, 'get_style_property', 'element, *property*, useComputedStyle');
-      doodle.utils.types.check_boolean_type(useComputedStyle, 'get_style_property', 'element, property, *useComputedStyle*');
-      /*END_DEBUG*/
-      try {
-        if (useComputedStyle && document.defaultView && document.defaultView.getComputedStyle) {
-          return document.defaultView.getComputedStyle(element, null)[property];
-        } else if (element.currentStyle) {
-          return element.currentStyle[property];
-        } else if (element.style) {
-          return element.style[property];
-        } else {
-          throw new ReferenceError("get_style_property: Cannot read property '"+property+"' of "+element+".");
-        }
-      } catch (e) {
-        throw new ReferenceError("get_style_property: Cannot read property '"+property+"' of "+element+".");
-      }
-    }
-  },
-  
-  /**
-   * Returns property of an element. CSS properties take precedence over HTML attributes.
-   * @name get_element_property
-   * @param {HTMLElement} element
-   * @param {string} property
-   * @param {string} returnType 'int'|'float' Return type.
-   * @param {boolean} useComputedStyle
-   * @return {*}
-   * @throws {ReferenceError}
-   * @static
-   */
-  'get_element_property': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (element, property, returnType, useComputedStyle) {
-      returnType = returnType || false;
-      var val,
-          obj;
-      try {
-        val = doodle.utils.get_style_property(element, property, useComputedStyle);
-      } catch (e) {
-        val = undefined;
-      }
-      if (val === undefined || val === null || val === '') {
-        /*DEBUG*/
-        if (typeof element.getAttribute !== 'function') {
-          throw new ReferenceError("get_element_property(*element*, property, returnType, useComputedStyle): Parameter is not a valid element.");
-        }
-        /*END_DEBUG*/
-        val = element.getAttribute(property);
-      }
-      if (returnType !== false) {
-        switch (returnType) {
-        case 'int':
-          val = parseInt(val, 10);
-          val = isNaN(val) ? null : val;
-          break;
-        case 'number':
-        case 'float':
-          val = parseFloat(val);
-          val = isNaN(val) ? null : val;
-          break;
-        case 'string':
-          val = String(val);
-          break;
-        case 'object':
-          obj = {};
-          val = obj[property] = val;
-          break;
-        default:
-          break;
-        }
-      }
-      return val;
-    }
-  },
-
-  /**
-   * @name set_element_property
-   * @param {HTMLElement} element
-   * @param {string} property
-   * @param {*} value
-   * @param {string} type 'css'|'html' Set CSS property or HTML attribute.
-   * @return {*}
-   * @throws {TypeError}
-   * @throws {SyntaxError}
-   * @static
-   */
-  'set_element_property': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: function (element, property, value, type) {
-      type = (type === undefined) ? 'css' : type;
-      /*DEBUG*/
-      var check_string_type = doodle.utils.types.check_string_type;
-      check_string_type(property, 'set_element_property', 'element, *property*, value, type');
-      check_string_type(type, 'set_element_property', 'element, property, value, *type*');
-      /*END_DEBUG*/
-      switch (type) {
-      case 'css':
-        element.style[property] = value;
-        break;
-      case 'html':
-        element.setAttribute(property, value);
-        break;
-      default:
-        throw new SyntaxError("set_element_property: type must be 'css' property or 'html' attribute.");
-      }
-      return value;
-    }
-  },
-
-  /*
-   * SCENE GRAPH
-   */
-  
-  /**
-   * Creates a scene graph path from a given node and all it's descendants.
-   * @name create_scene_path
-   * @param {Node} node
-   * @param {Array} array Array to store the path nodes in.
-   * @param {boolean} clearArray Empty array passed as parameter before storing nodes in it.
-   * @return {Array} The array passed to the function (modified in place).
-   * @throws {TypeError}
-   * @static
-   */
-  'create_scene_path': {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: (function () {
-      return function create_scene_path (node, array, clearArray) {
-        array = (array === undefined) ? [] : array;
-        clearArray = (clearArray === undefined) ? false : clearArray;
-        /*DEBUG*/
-        doodle.utils.types.check_array_type(array, 'create_scene_path');
-        doodle.utils.types.check_boolean_type(clearArray, 'create_scene_path');
-        /*END_DEBUG*/
-        var i = node.children.length;
-        if (clearArray) {
-          array.splice(0, array.length);
-        }
-        if (i !== 0) {
-          while (i--) {
-            create_scene_path(node.children[i], array, false);
-          }
-        }
-        array.push(node);
-        return array; //return for further operations on array (reverse)
-      };
-    }())
-  }
-  
-});
-/*DEBUG_STATS*/
-/**
- * Doodle type-checking functions.
- * @name doodle.utils.types
- * @class
- * @augments Object
- * @static
- */
-doodle.utils.types = Object.create({}, (function () {
-  /**
-   * @name throw_type_error
-   * @param {string} type Name of type.
-   * @param {string=} caller Name of calling function.
-   * @param {string=} params Parameter names for function.
-   * @throws {TypeError}
-   * @static
-   * @private
-   */
-  function throw_type_error (type, caller, params) {
-    if (typeof type !== 'string') {
-      throw new TypeError("throw_type_error: type must be a string.");
-    }
-    caller = (caller === undefined) ? "throw_type_error" : caller;
-    params = (params === undefined || params === null) ? "" : '('+params+')';
-    throw new TypeError(caller + params +": Parameter must be a "+ type +".");
-  }
-  
-  return {
-    /**
-     * Type-checking for a number. Throws a TypeError if the test fails.
-     * @name check_number_type
-     * @param {Object} obj Object to test.
-     * @param {string} caller Function name to print in error message.
-     * @param {string} param Parameters to print in error message.
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_number_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (obj, caller, params) {
-        return (typeof obj === 'number') ?
-          true : throw_type_error('number', caller || 'check_number_type', params);
-      }
-    },
-
-    /**
-     * @name check_boolean_type
-     * @param {boolean} bool
-     * @param {string} caller Function name to print in error message.
-     * @param {string} param Parameters to print in error message.
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_boolean_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (bool, caller, params) {
-        return (typeof bool === 'boolean') ?
-          true : throw_type_error('boolean', caller || 'check_boolean_type', params);
-      }
-    },
-
-    /**
-     * @name check_string_type
-     * @param {string}
-     * @param {string} caller
-     * @param {string} params
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_string_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (str, caller, params) {
-        return (typeof str === 'string') ?
-          true : throw_type_error('string', caller || 'check_string_type', params);
-      }
-    },
-
-    /**
-     * @name check_function_type
-     * @param {Function} fn
-     * @param {string} caller
-     * @param {string} params
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_function_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (fn, caller, params) {
-        return (typeof fn === 'function') ?
-          true : throw_type_error('function', caller || 'check_function_type', params);
-      }
-    },
-
-    /**
-     * @name check_array_type
-     * @param {Array} array
-     * @param {string} caller
-     * @param {string} params
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_array_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (array, caller, params) {
-        return (Array.isArray(array)) ?
-          true : throw_type_error('array', caller || 'check_array_type', params);
-      }
-    },
-
-    /**
-     * @name check_canvas_type
-     * @param {HTMLCanvasElement} canvas
-     * @param {string} caller
-     * @param {string} params
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_canvas_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (canvas, caller, params) {
-        return (canvas && typeof canvas.toString === 'function' &&
-                canvas.toString() === '[object HTMLCanvasElement]') ?
-          true : throw_type_error('canvas element', caller || 'check_canvas_type', params);
-      }
-    },
-
-    /**
-     * @name check_context_type
-     * @param {CanvasRenderingContext2D} ctx
-     * @param {string} caller
-     * @param {string} params
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_context_type': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (ctx, caller, params) {
-        return (ctx && typeof ctx.toString === 'function' &&
-                ctx.toString() === '[object CanvasRenderingContext2D]') ?
-          true : throw_type_error('canvas context', caller || 'check_context_type', params);
-      }
-    },
-
-    /**
-     * @name check_block_element
-     * @param {HTMLElement} element
-     * @param {string} caller
-     * @param {string} params
-     * @return {boolean}
-     * @throws {TypeError}
-     * @static
-     */
-    'check_block_element': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (element, caller, params) {
-        try {
-          return (doodle.utils.get_style_property(element, 'display') === 'block') ?
-            true : throw_type_error('HTML block element', caller || 'check_block_type', params);
-        } catch (e) {
-          throw_type_error('HTML block element', caller || 'check_block_type', params);
-        }
-      }
-    }
-    
-  };
-}()));
-/*END_DEBUG_STATS*/
 (function () {
   /*
-   * Throws a TypeError if the test fails.
+   * Throws a given error type if the test fails.
    * @param {boolean} testp
+   * @param {function} Err Error constructor.
    * @return {boolean} True on success.
-   * @throws {TypeError} On test being false.
-   * @throws {SyntaxError} On invalid invocation.
+   * @throws {Error} On test being false.
    */
-  function assert_type (testp) {
-    if (typeof testp !== 'boolean') {
-      throw new SyntaxError("assert_type(test): Argument must be a boolean value.");
+  function assert_error (testp, Err) {
+    if (testp === true) {
+      return true;
     }
-    if (testp === false) {
-      throw new TypeError();
-    }
-    return testp;
+    throw new Err();
   }
 
   /*
@@ -619,13 +52,29 @@ doodle.utils.types = Object.create({}, (function () {
    */
   function assert_object_type (obj, type, inheritsp) {
     if (typeof obj === 'object') {
-      if (arguments.length > 3 || typeof type !== 'string') {
-        throw new SyntaxError("assert_object_type(arg, type, inheritsp): Invalid arguments.");
-      }
       type = "[object " + type + "]";
       inheritsp = (typeof inheritsp === 'boolean') ? inheritsp : false;
       while (obj) {
-        if (Object.prototype.toLocaleString.call(obj) === type) {
+        if (obj.toString() === type) {
+          return true;
+        } else {
+          obj = inheritsp ? Object.getPrototypeOf(obj) : null;
+        }
+      }
+    }
+    throw new TypeError();
+  }
+
+  /*
+   * Tests an object to see if it's an Event type.
+   * For DOM events it tests the constuctor name.
+   */
+  function assert_event_type (obj, type, inheritsp) {
+    if (typeof obj === 'object') {
+      var type_str = "[object " + type + "]";
+      inheritsp = (typeof inheritsp === 'boolean') ? inheritsp : false;
+      while (obj) {
+        if (obj.toString() === type_str || (obj.constructor && obj.constructor.name === type)) {
           return true;
         } else {
           obj = inheritsp ? Object.getPrototypeOf(obj) : null;
@@ -642,97 +91,100 @@ doodle.utils.types = Object.create({}, (function () {
    * @throws {TypeError} On type failure.
    * @throws {SyntaxError} On invalid invocation.
    */
-  function check_arg_type (arg, type, inheritsp) {
-    if (arguments.length > 3 || typeof type !== 'string') {
-      throw new SyntaxError("check_arg_type(arg, type, inheritsp): Invalid parameters.");
-    }
-    try {
-      if (arg === undefined || arg === null) {
-        throw new TypeError();
-      }
-      switch (type) {
+  function test_type (arg, type, inheritsp) {
+    switch (type) {
+      //any type will match
+    case '*':
+      return true;
       /* JavaScript types
        */
-      case 'boolean':
-      case 'number':
-      case 'string':
-      case 'function':
-      case 'object':
-        assert_type(typeof arg === type);
-        break;
-      case 'array':
-        assert_type(Array.isArray(arg));
-        break;
-        
-      /* HTML types
-       */
-      case 'block':
-        assert_type(doodle.utils.get_style_property(element, 'display') === 'block');
-        break;
-      case 'canvas':
-      case 'HTMLCanvasElement':
-        assert_object_type(arg, 'HTMLCanvasElement', inheritsp);
-        break;
-      case 'context':
-      case 'CanvasRenderingContext2D':
-        assert_object_type(arg, 'CanvasRenderingContext2D', inheritsp);
-        break;
-
+    case 'undefined':
+      assert_error(arg === undefined, TypeError);
+      break;
+    case 'null':
+      assert_error(arg === null, TypeError);
+      break;
+    case 'number':
+    case 'string':
+    case 'boolean':
+    case 'function':
+    case 'object':
+      assert_error(typeof arg === type, TypeError);
+      break;
+    case 'array':
+      assert_error(Array.isArray(arg), TypeError);
+      break;
+      
       /* Geom objects are defined by key numeric properties, not by instantiation.
        */
-      case 'Point':
-        doodle.utils.type_check(arg.x, 'number', arg.y, 'number');
-        break;
-      case 'Rectangle':
-        doodle.utils.type_check(arg.x, 'number', arg.y, 'number', arg.width, 'number', arg.height, 'number', arg.top, 'number', arg.bottom, 'number', arg.left, 'number', arg.right, 'number');
-        break;
-      case 'Matrix':
-        doodle.utils.type_check(arg.a, 'number', arg.b, 'number', arg.c, 'number', arg.d, 'number', arg.tx, 'number', arg.ty, 'number');
-        break;
+    case 'Point':
+      assert_error(typeof arg.x === 'number', TypeError);
+      assert_error(typeof arg.y === 'number', TypeError);
+      break;
+    case 'Rectangle':
+      assert_error(typeof arg.x === 'number', TypeError);
+      assert_error(typeof arg.y === 'number', TypeError);
+      assert_error(typeof arg.width === 'number', TypeError);
+      assert_error(typeof arg.height === 'number', TypeError);
+      break;
+    case 'Matrix':
+      assert_error(typeof arg.a === 'number', TypeError);
+      assert_error(typeof arg.b === 'number', TypeError);
+      assert_error(typeof arg.c === 'number', TypeError);
+      assert_error(typeof arg.d === 'number', TypeError);
+      assert_error(typeof arg.tx === 'number', TypeError);
+      assert_error(typeof arg.ty === 'number', TypeError);
+      break;
 
       //Events
-      case 'Event':
-      case 'UIEvent':
-      case 'MouseEvent':
-      case 'TouchEvent':
-      case 'TextEvent':
-      case 'KeyboardEvent':
+    case 'Event':
+    case 'UIEvent':
+    case 'MouseEvent':
+    case 'TouchEvent':
+    case 'TextEvent':
+    case 'KeyboardEvent':
+      assert_event_type(arg, type, inheritsp);
+      break;
       //Doodle objects
-      case 'EventDispatcher':
-      case 'Node':
-      case 'Sprite':
-      case 'Graphics':
-      case 'ElementNode':
-      case 'Layer':
-      case 'Display':
+    case 'EventDispatcher':
+    case 'Node':
+    case 'Sprite':
+    case 'Graphics':
+    case 'ElementNode':
+    case 'Layer':
+    case 'Display':
       //Doodle primitives
-      case 'Image':
-      case 'Text':
-        assert_object_type(arg, type, inheritsp);
-        break;
-      default:
-        throw new SyntaxError("check_arg_type(arg, *type*): Unknown type '" + type + "'.");
-      }
-    } catch (err) {
-      if (err instanceof TypeError) {
-        //we'll be using these when formating the error message
-        err.arg = arg;
-        err.type = type;
-      }
-      throw err;
+    case 'Image':
+    case 'Text':
+      assert_object_type(arg, type, inheritsp);
+      break;
+
+      /* HTML types
+       */
+    case 'block':
+      assert_error(doodle.utils.get_style_property(arg, 'display') === 'block', TypeError);
+      break;
+    case 'canvas':
+    case 'HTMLCanvasElement':
+      assert_object_type(arg, 'HTMLCanvasElement', inheritsp);
+      break;
+    case 'context':
+    case 'CanvasRenderingContext2D':
+      assert_object_type(arg, 'CanvasRenderingContext2D', inheritsp);
+      break;
+      
+    default:
+      throw new SyntaxError("check_arg_type(arg, *type*, inheritsp): Unknown type '" + type + "'.");
     }
     return true;
   }
-
+  
   /**
-   * @param {number} arg_count Number of arguments we're checking.
+   * Options object checks run for all types.
    * @param {object} options
+   * @param {number} arg_count Number of arguments we're checking, indicates TypeError.
    */
-  function check_params (arg_count, options) {
-    //passed args must come in pairs and have at least 2
-    if (arg_count < 2 || arg_count % 2 !== 0) {
-      throw new SyntaxError("type_check(arg, type, [arg, type, ... options, callback]): Invalid arguments.");
-    }
+  function check_options (options, arg_count) {
     //check options
     if (typeof options !== 'object') {
       throw new TypeError("check_options(options): Argument must be an object.");
@@ -742,42 +194,73 @@ doodle.utils.types = Object.create({}, (function () {
     } else if (typeof options.trace !== 'boolean') {
       throw new TypeError("check_options: options.trace must be a boolean.");
     }
-    if (options.params !== undefined) {
-      if (!Array.isArray(options.params)) {
-        throw new TypeError("type_check: options.params must be an array.");
-      } else if (options.params.length !== arg_count/2) {
-        throw new SyntaxError("type_check: options.params must correspond to the supplied args.");
-      }
-    }
     if (options.label !== undefined && typeof options.label !== 'string') {
-      throw new TypeError("type_check: options.label must be a string.");
+      throw new TypeError("check_options: options.label must be a string.");
+    }
+    if (options.id !== undefined && typeof options.id !== 'string') {
+      throw new TypeError("check_options: options.id must be a string.");
     }
     if (options.message !== undefined && typeof options.message !== 'string') {
-      throw new TypeError("type_check: options.message must be a string.");
+      throw new TypeError("check_options: options.message must be a string.");
     }
-    if (options.inherits !== undefined && typeof options.inherits !== 'boolean') {
-      throw new TypeError("type_check: options.inherits must be a boolean.");
+    if (options.params !== undefined) {
+      if (typeof options.params === 'string') { options.params = [options.params]; }
+      if (!Array.isArray(options.params)) {
+        throw new TypeError("check_options: options.params must be a string or an array of strings.");
+      }
+    }
+    if (typeof arg_count === 'number') {
+      //passed args must come in pairs and have at least 2
+      if (arg_count < 2 || arg_count % 2 !== 0) {
+        throw new SyntaxError("type_check(arg, type, [arg, type, ... options, callback]): Invalid arguments.");
+      }
+      if (options.inherits !== undefined && typeof options.inherits !== 'boolean') {
+        throw new TypeError("type_check: options.inherits must be a boolean.");
+      }
+      if (options.params !== undefined) {
+        if (!Array.isArray(options.params) || options.params.length !== arg_count/2) {
+          throw new SyntaxError("check_options: options.params must correspond to the supplied args.");
+        }
+      }
     }
   }
 
-  function format_error_message (err, options) {
+  function format_type_error_message (err, options, arg, type, index, arg_count) {
+    check_options(options, arg_count);
     if (options.message) {
       err.message = options.message;
     } else {
-      err.message = err.arg + " must be of type '" + err.type + "'.";
+      err.message = arg + " must be of type '" + type + "'.";
     }
     if (options.label) {
+      if (options.id) {
+        options.label = "[id=" + options.id + "] " + options.label;
+      }
       if (options.params) {
         //highlight the parameter invalid parameter
-        options.params[err.i] = "*" + options.params[err.i] + "*";
+        options.params[index/2] = "*" + options.params[index/2] + "*";
         options.label = options.label + "(" + options.params.toString() + ")";
       }
       err.message = options.label + ": " + err.message;
     }
-    //remove our extra properties
-    delete err.i;
-    delete err.arg;
-    delete err.type;
+  }
+  
+  function format_error_message (err, options) {
+    check_options(options);
+    if (options.message) {
+      err.message = options.message;
+    } else {
+      err.message = "Invalid arguments.";
+    }
+    if (options.label) {
+      if (options.id) {
+        options.label = "[id=" + options.id + "] " + options.label;
+      }
+      if (options.params) {
+        options.label = options.label + "(" + options.params.toString() + ")";
+      }
+      err.message = options.label + ": " + err.message;
+    }
   }
 
   /**
@@ -798,57 +281,451 @@ doodle.utils.types = Object.create({}, (function () {
    * @throws {SyntaxError}
    * @throws {TypeError}
    */
-  doodle.utils.type_check = function (arg, type, /*[arg, type, ...]*/ options, callback) {
-    var args = Array.prototype.slice.call(arguments),
-        len = args.length,
-        last_arg = args[len-1],
-        i = 0;
-    //pop off the optional callback and options
-    if (typeof last_arg === 'function') {
-      callback = args.pop();
-      len = args.length;
-      last_arg = args[len-1];
+  doodle.utils.debug.type_check = function (arg, type, /*[arg, type, ...]*/ options, callback) {
+    arg = Array.prototype.slice.call(arguments);
+    callback = (typeof arg[arg.length-1] === 'function') ? arg.pop() : null;
+    options = (typeof arg[arg.length-1] === 'object') ? arg.pop() : {trace: true};
+    //iterate args taking 2 at a time
+    for (var i=0, len=arg.length; i < len; i++) {
+      if (i % 2 === 0) {
+        try {
+          test_type(arg[i], arg[i+1], options.inherits);
+        } catch (error) {
+          if (error instanceof TypeError) {
+            format_type_error_message(error, options, arg[i], arg[i+1], i, len);
+            if (options.trace) { console.trace(); }
+            if (callback) {
+              callback(error, arg[i], arg[i+1]);
+              return false;
+            }
+          }
+          throw error;
+        }
+      }
     }
-    if (typeof last_arg === 'object') {
-      options = args.pop();
-      len = args.length;
-    } else {
-      options = {trace: true};
-    }
-    check_params(len, options);
-    
-    /* loop over args taking 2 at a time
-     * check_arg_type throws a TypeError on failure, pass options.params index with it
-     */
-    try {
-      for (; i < len; i++) {
-        if (i % 2 === 0) {
-          try {
-            check_arg_type(args[i], args[i+1], options.inherits);
-          } catch (err) {
-            err.i = i/2; //options.params index
-            throw err;
+    return true;
+  };
+
+  /**
+   * @name range_check
+   */
+  doodle.utils.debug.range_check = function (test, /*[test, ...]*/ options, callback) {
+    test = Array.prototype.slice.call(arguments);
+    callback = (typeof test[test.length-1] === 'function') ? test.pop() : null;
+    options = (typeof test[test.length-1] === 'object') ? test.pop() : {trace: true};
+    //iterate args taking 2 at a time
+    for (var i=0, len=test.length; i < len; i++) {
+      try {
+        assert_error(test[i], RangeError);
+      } catch (error) {
+        if (error instanceof RangeError) {
+          format_error_message(error, options);
+          if (options.trace) { console.trace(); }
+          if (callback) {
+            callback(error);
+            return false;
           }
         }
-      }
-    } catch (err) {
-      if (err instanceof TypeError) {
-        format_error_message(err, options);
-        if (options.trace) {
-          console.trace();
-        }
-        //if callback present, run instead of throwing error
-        if (typeof callback === 'function') {
-          callback(err.arg, err.type, options);
-        } else {
-          throw err;
-        }
-      } else {
-        //unexpected error
-        throw err;
+        throw error;
       }
     }
-  };//end type_check
+    return true;
+  };
+
+  /**
+   * @name reference_check
+   */
+  doodle.utils.debug.reference_check = function (test, /*[test, ...]*/ options, callback) {
+    test = Array.prototype.slice.call(arguments);
+    callback = (typeof test[test.length-1] === 'function') ? test.pop() : null;
+    options = (typeof test[test.length-1] === 'object') ? test.pop() : {trace: true};
+    //iterate args taking 2 at a time
+    for (var i=0, len=test.length; i < len; i++) {
+      try {
+        assert_error(test[i], ReferenceError);
+      } catch (error) {
+        if (error instanceof ReferenceError) {
+          format_error_message(error, options);
+          if (options.trace) { console.trace(); }
+          if (callback) {
+            callback(error);
+            return false;
+          }
+        }
+        throw error;
+      }
+    }
+    return true;
+  };
+
+}());
+/*END_DEBUG*/
+/*globals doodle, document*/
+(function () {
+  /*DEBUG*/
+  var type_check = doodle.utils.debug.type_check;
+  /*END_DEBUG*/
+  
+  /**
+   * Doodle utilty functions.
+   * @name doodle.utils
+   * @class
+   * @augments Object
+   * @static
+   */
+  Object.defineProperties(doodle.utils, {
+    /*
+     * COLOR UTILS
+     */
+
+    /**
+     * @name hex_to_rgb
+     * @param {Color} color
+     * @return {Array} [r, g, b]
+     * @throws {TypeError}
+     * @static
+     */
+    'hex_to_rgb': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value:function (color) {
+        //number in octal format or string prefixed with #
+        if (typeof color === 'string') {
+          color = (color[0] === '#') ? color.slice(1) : color;
+          color = parseInt(color, 16);
+        }
+        /*DEBUG*/
+        type_check(color,'number', {label:'hex_to_rgb', params:'color', message:"Invalid color format [0xffffff|#ffffff]."});
+        /*END_DEBUG*/
+        return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
+      }
+    },
+
+    /**
+     * @name hex_to_rgb_str
+     * @param {Color} color
+     * @param {number} alpha
+     * @return {string}
+     * @throws {TypeError}
+     * @static
+     */
+    'hex_to_rgb_str': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (color, alpha) {
+        var doodle_utils = doodle.utils;
+        alpha = (alpha === undefined) ? 1 : alpha;
+        /*DEBUG*/
+        type_check(color,'*', alpha,'number', {label:'hex_to_rgb_str', params:['color','alpha']});
+        /*END_DEBUG*/
+        color = doodle_utils.hex_to_rgb(color);
+        return doodle_utils.rgb_to_rgb_str(color[0], color[1], color[2], alpha);
+      }
+    },
+    
+    /**
+     * @name rgb_str_to_hex
+     * @param {string} rgb_str
+     * @return {string}
+     * @throws {TypeError}
+     * @static
+     */
+    'rgb_str_to_hex': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (rgb_str) {
+        /*DEBUG*/
+        type_check(rgb_str,'string', {label:'rgb_str_to_hex', params:'color', message:"Paramater must be a RGB string."});
+        /*END_DEBUG*/   
+        var doodle_utils = doodle.utils,
+            rgb = doodle_utils.rgb_str_to_rgb(rgb_str);
+        /*DEBUG*/
+        console.assert(Array.isArray(rgb), "rgb is an array", rgb);
+        /*END_DEBUG*/
+        return doodle_utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
+      }
+    },
+
+    /**
+     * @name rgb_str_to_rgb
+     * @param {Color} color
+     * @return {Array}
+     * @throws {TypeError}
+     * @throws {SyntaxError}
+     * @static
+     */
+    'rgb_str_to_rgb': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: (function () {
+        var rgb_regexp = new RegExp("^rgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,?(.*)\\)$");
+        return function (color) {
+          /*DEBUG*/
+          type_check(color,'string', {label:'rgb_str_to_rgb', params:'color', message:"Parameter must be in RGB string format: 'rgba(n, n, n, n)'."});
+          /*END_DEBUG*/
+          color = color.trim().match(rgb_regexp);
+          /*DEBUG*/
+          //if it's not an array, it didn't parse correctly
+          console.assert(Array.isArray(color), "color is an array", color);
+          /*END_DEBUG*/
+          var rgb = [parseInt(color[1], 10), parseInt(color[2], 10), parseInt(color[3], 10)], alpha = parseFloat(color[4]);
+          if (typeof alpha === 'number' && !isNaN(alpha)) {
+            rgb.push(alpha);
+          }
+          return rgb;
+        };
+      }())
+    },
+    
+    /**
+     * @name rgb_to_hex
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @return {string}
+     * @throws {TypeError}
+     * @static
+     */
+    'rgb_to_hex': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (r, g, b) {
+        /*DEBUG*/
+        type_check(r,'number', g,'number', b,'number', {label:'rgb_to_hex', params:['r','g','b']});
+        /*END_DEBUG*/
+        var hex_color = (b | (g << 8) | (r << 16)).toString(16);
+        return '#'+ String('000000'+hex_color).slice(-6); //pad out
+      }
+    },
+
+    /**
+     * @name rgb_to_rgb_str
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @param {number} a
+     * @return {string}
+     * @throws {TypeError}
+     * @static
+     */
+    'rgb_to_rgb_str': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (r, g, b, a) {
+        a = (a === undefined) ? 1 : a;
+        /*DEBUG*/
+        type_check(r,'number', g,'number', b,'number', a,'number', {label:'rgb_to_rgb_str', params:['r','g','b','a']});
+        /*END_DEBUG*/
+        a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
+        if (a === 1) {
+          return "rgb("+ r +","+ g +","+ b +")";
+        } else {
+          return "rgba("+ r +","+ g +","+ b +","+ a +")";
+        }
+      }
+    },
+
+    /*
+     * DOM ACCESS
+     */
+
+    /**
+     * Returns HTML element from id name or element itself.
+     * @name get_element
+     * @param {HTMLElement|string} element
+     * @return {HTMLElement}
+     * @static
+     */
+    'get_element': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (element) {
+        if (typeof element === 'string') {
+          //lop off pound-sign if given
+          element = (element[0] === '#') ? element.slice(1) : element;
+          return document.getElementById(element);
+        } else {
+          //if it has an element property, we'll call it an element
+          return (element && element.tagName) ? element : null;
+        }
+      }
+    },
+
+    /**
+     * Returns css property of element, it's own or inherited.
+     * @name get_style_property
+     * @param {HTMLElement} element
+     * @param {string} property
+     * @param {boolean} useComputedStyle
+     * @return {*}
+     * @throws {TypeError}
+     * @throws {ReferenceError}
+     * @static
+     */
+    'get_style_property': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (element, property, useComputedStyle) {
+        useComputedStyle = (useComputedStyle === undefined) ? true : false;
+        /*DEBUG*/
+        type_check(element,'*', property,'string', useComputedStyle,'boolean', {label:'get_style_property', params:['element','property','useComputedStyle']});
+        /*END_DEBUG*/
+        try {
+          if (useComputedStyle && document.defaultView && document.defaultView.getComputedStyle) {
+            return document.defaultView.getComputedStyle(element, null)[property];
+          } else if (element.currentStyle) {
+            return element.currentStyle[property];
+          } else if (element.style) {
+            return element.style[property];
+          } else {
+            throw new ReferenceError("get_style_property: Cannot read property '"+property+"' of "+element+".");
+          }
+        } catch (e) {
+          throw new ReferenceError("get_style_property: Cannot read property '"+property+"' of "+element+".");
+        }
+      }
+    },
+    
+    /**
+     * Returns property of an element. CSS properties take precedence over HTML attributes.
+     * @name get_element_property
+     * @param {HTMLElement} element
+     * @param {string} property
+     * @param {string} returnType 'int'|'float' Return type.
+     * @param {boolean} useComputedStyle
+     * @return {*}
+     * @throws {ReferenceError}
+     * @static
+     */
+    'get_element_property': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (element, property, returnType, useComputedStyle) {
+        returnType = returnType || false;
+        var val,
+        obj;
+        try {
+          val = doodle.utils.get_style_property(element, property, useComputedStyle);
+        } catch (e) {
+          val = undefined;
+        }
+        if (val === undefined || val === null || val === '') {
+          /*DEBUG*/
+          if (typeof element.getAttribute !== 'function') {
+            throw new ReferenceError("get_element_property(*element*, property, returnType, useComputedStyle): Parameter is not a valid element.");
+          }
+          /*END_DEBUG*/
+          val = element.getAttribute(property);
+        }
+        if (returnType !== false) {
+          switch (returnType) {
+          case 'int':
+            val = parseInt(val, 10);
+            val = isNaN(val) ? null : val;
+            break;
+          case 'number':
+          case 'float':
+            val = parseFloat(val);
+            val = isNaN(val) ? null : val;
+            break;
+          case 'string':
+            val = String(val);
+            break;
+          case 'object':
+            obj = {};
+            val = obj[property] = val;
+            break;
+          default:
+            break;
+          }
+        }
+        return val;
+      }
+    },
+
+    /**
+     * @name set_element_property
+     * @param {HTMLElement} element
+     * @param {string} property
+     * @param {*} value
+     * @param {string} type 'css'|'html' Set CSS property or HTML attribute.
+     * @return {*}
+     * @throws {TypeError}
+     * @throws {SyntaxError}
+     * @static
+     */
+    'set_element_property': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (element, property, value, type) {
+        type = (type === undefined) ? 'css' : type;
+        /*DEBUG*/
+        type_check(element,'*', property,'string', value,'*', type,'string', {label:'set_style_property', params:['element','property','value','type']});
+        /*END_DEBUG*/
+        switch (type) {
+        case 'css':
+          element.style[property] = value;
+          break;
+        case 'html':
+          element.setAttribute(property, value);
+          break;
+        default:
+          throw new SyntaxError("set_element_property: type must be 'css' property or 'html' attribute.");
+        }
+        return value;
+      }
+    },
+
+    /*
+     * SCENE GRAPH
+     */
+    
+    /**
+     * Creates a scene graph path from a given node and all it's descendants.
+     * @name create_scene_path
+     * @param {Node} node
+     * @param {Array} array Array to store the path nodes in.
+     * @param {boolean} clearArray Empty array passed as parameter before storing nodes in it.
+     * @return {Array} The array passed to the function (modified in place).
+     * @throws {TypeError}
+     * @static
+     */
+    'create_scene_path': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function create_scene_path (node, array, clearArray) {
+        array = (array === undefined) ? [] : array;
+        clearArray = (clearArray === undefined) ? false : clearArray;
+        /*DEBUG*/
+        type_check(node,'Node', array,'array', clearArray,'boolean', {label:'create_scene_path', params:['node','array','clearArray'], inherits:true});
+        /*END_DEBUG*/
+        var i = node.children.length;
+        if (clearArray) {
+          array.splice(0, array.length);
+        }
+        if (i !== 0) {
+          while (i--) {
+            create_scene_path(node.children[i], array, false);
+          }
+        }
+        array.push(node);
+        return array; //return for further operations on array (reverse)
+      }
+    }
+    
+  });
+
 }());
 /*DEBUG_STATS*/
 /*
@@ -2792,7 +2669,7 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   })
 });
-/*globals doodle*/
+/*globals doodle, console*/
 
 /* Will probably want to implement the dom event interface:
  * http://www.w3.org/TR/DOM-Level-3-Events/
@@ -2802,11 +2679,7 @@ Object.defineProperty(doodle, 'LineJoin', {
   var event_prototype,
       event_static_properties,
       /*DEBUG*/
-      check_event_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_node_type = doodle.utils.types.check_node_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent;
   
@@ -2861,16 +2734,14 @@ Object.defineProperty(doodle, 'LineJoin', {
        * @private
        */
       copy_event_properties = function (evt, resetTarget, resetType) {
-        /*DEBUG*/
-        check_event_type(evt, 'copy_event_properties', '*event*, target, type');
-        /*END_DEBUG*/
         resetTarget = (resetTarget === undefined) ? false : resetTarget;
+        resetType = (resetType === undefined) ? false : resetType;
+        /*DEBUG*/
+        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", this.id, evt);
+        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", this.id, resetTarget);
+        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", this.id, resetType);
+        /*END_DEBUG*/
         if (resetTarget !== false) {
-          /*DEBUG*/
-          if (resetTarget !== null) {
-            check_node_type(evt, 'copy_event_properties', 'event, *target*, type');
-          }
-          /*END_DEBUG*/
           evt_currentTarget = resetTarget;
           evt_target = resetTarget;
         } else {
@@ -2878,9 +2749,6 @@ Object.defineProperty(doodle, 'LineJoin', {
           evt_target = evt.target;
         }
         if (resetType) {
-          /*DEBUG*/
-          check_string_type(resetType, 'copy_event_properties', 'event, target, *type*');
-          /*END_DEBUG*/
           evt_type = resetType;
         } else {
           evt_type = evt.type;
@@ -2895,15 +2763,30 @@ Object.defineProperty(doodle, 'LineJoin', {
         evt_returnValue = evt.returnValue;
         evt_clipboardData = evt.clipboardData;
         //check for doodle internal event properties
-        if (evt.__cancel) {
-          __cancel = true;
-        }
-        if (evt.__cancelNow) {
-          __cancelNow = true;
-        }
+        if (evt.__cancel) { __cancel = true; }
+        if (evt.__cancelNow) { __cancelNow = true; }
       };
       
       return {
+        /**
+         * @name id
+         * @return {string}
+         */
+        'id': (function () {
+          var id = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () { return (id === null) ? this.toString()+"[type="+this.type+"]" : id; },
+            set: function (idArg) {
+              /*DEBUG*/
+              idArg === null || type_check(idArg,'string', {label:'Event.id', id:this.id});
+              /*END_DEBUG*/
+              id = idArg;
+            }
+          };
+        }()),
+        
         /**
          * @name type
          * @return {string} [read-only]
@@ -2925,7 +2808,7 @@ Object.defineProperty(doodle, 'LineJoin', {
           enumerable: false,
           value: function (typeArg) {
             /*DEBUG*/
-            check_string_type(typeArg, this+'.__setType', '*type*');
+            console.assert(typeof typeArg === 'string', "typeArg is a string.");
             /*END_DEBUG*/
             evt_type = typeArg;
           }
@@ -2964,7 +2847,7 @@ Object.defineProperty(doodle, 'LineJoin', {
           get: function () { return evt_cancelBubble; },
           set: function (cancelArg) {
             /*DEBUG*/
-            check_boolean_type(cancelArg, this+'.cancelBubble');
+            type_check(cancelArg, 'boolean', {label:'Event.cancelBubble', params:'cancel', id:this.id});
             /*END_DEBUG*/
             evt_cancelBubble = cancelArg;
           }
@@ -3016,6 +2899,9 @@ Object.defineProperty(doodle, 'LineJoin', {
         '__setCurrentTarget': {
           enumerable: false,
           value: function (targetArg) {
+            /*DEBUG*/
+            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            /*END_DEBUG*/
             evt_currentTarget = targetArg;
             return this;
           }
@@ -3040,6 +2926,9 @@ Object.defineProperty(doodle, 'LineJoin', {
         '__setTarget': {
           enumerable: false,
           value: function (targetArg) {
+            /*DEBUG*/
+            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            /*END_DEBUG*/
             evt_target = targetArg;
             return this;
           }
@@ -3066,7 +2955,8 @@ Object.defineProperty(doodle, 'LineJoin', {
           enumerable: false,
           value: function (phaseArg) {
             /*DEBUG*/
-            check_number_type(phaseArg, this+'.__setEventPhase', '*phase*');
+            console.assert(isFinite(phaseArg), "phaseArg is a finite number", phaseArg);
+            console.assert(phaseArg >= 0, "phaseArg is greater than 0", phaseArg);
             /*END_DEBUG*/
             evt_eventPhase = phaseArg;
             return this;
@@ -3118,19 +3008,15 @@ Object.defineProperty(doodle, 'LineJoin', {
           enumerable: true,
           configurable: false,
           value: function (typeArg, canBubbleArg, cancelableArg) {
-            //parameter defaults
             typeArg = (typeArg === undefined) ? "undefined" : typeArg;
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initEvent', '*type*, bubbles, cancelable');
-            check_boolean_type(canBubbleArg, this+'.initEvent', 'type, *bubbles*, cancelable');
-            check_boolean_type(cancelableArg, this+'.initEvent', 'type, bubbles, *cancelable*');
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg, 'boolean', {label:'Event.initEvent', params:['type','canBubble','cancelable'], id:this.id});
             /*END_DEBUG*/
             evt_type = typeArg;
             evt_bubbles = canBubbleArg;
             evt_cancelable = cancelableArg;
-            
             return this;
           }
         },
@@ -3141,9 +3027,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         'preventDefault': {
           enumerable: true,
           configurable: false,
-          value: function () {
-            evt_defaultPrevented = true;
-          }
+          value: function () { evt_defaultPrevented = true; }
         },
 
         /**
@@ -3155,7 +3039,7 @@ Object.defineProperty(doodle, 'LineJoin', {
           configurable: false,
           value: function () {
             if (!this.cancelable) {
-              throw new Error(this+'.stopPropagation: Event can not be cancelled.');
+              throw new Error(this.id + " Event.stopPropagation: Event can not be cancelled.");
             } else {
               __cancel = true;
             }
@@ -3171,7 +3055,7 @@ Object.defineProperty(doodle, 'LineJoin', {
           configurable: false,
           value: function () {
             if (!this.cancelable) {
-              throw new Error(this+'.stopImmediatePropagation: Event can not be cancelled.');
+              throw new Error(this.id + " Event.stopImmediatePropagation: Event can not be cancelled.");
             } else {
               __cancel = true;
               __cancelNow = true;
@@ -3196,13 +3080,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_event_type(evt, this+'.__copyEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.Event.isEvent(evt), "evt is an Event.", this);
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or a Node.", this);
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is false or a string.", this);
             /*END_DEBUG*/
             copy_event_properties(evt, resetTarget, resetType);
             return this;
@@ -3223,10 +3103,8 @@ Object.defineProperty(doodle, 'LineJoin', {
       if (typeof init_obj === 'function') {
         init_obj.call(event);
         /*DEBUG*/
-        if (event.type === undefined ||
-            event.bubbles === undefined ||
-            event.cancelable === undefined) {
-          throw new SyntaxError("[object Event](function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
+        if (event.type === undefined || event.bubbles === undefined || event.cancelable === undefined) {
+          throw new SyntaxError(this.id + "(function): Must call 'this.initEvent(type, bubbles, cancelable)' within the function argument.");
         }
         /*END_DEBUG*/
       } else {
@@ -3251,9 +3129,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Event]";
-      }
+      value: function () { return "[object Event]"; }
     }
   };//end event_static_properties
 
@@ -3518,42 +3394,19 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @return {boolean}
    * @static
    */
-  isEvent = doodle.events.Event.isEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
+  isEvent = doodle.events.Event.isEvent = function (evt) {
+    if (typeof evt === 'object') {
+      while (evt) {
+        //for DOM events we need to check it's constructor name
+        if (evt.toString() === '[object Event]' || (evt.constructor && evt.constructor.name === 'Event')) {
+          return true;
+        } else {
+          evt = Object.getPrototypeOf(evt);
+        }
+      }
     }
-    return (event === '[object Event]' ||
-            event === '[object UIEvent]' ||
-            event === '[object MouseEvent]' ||
-            event === '[object TouchEvent]' ||
-            event === '[object KeyboardEvent]' ||
-            event === '[object TextEvent]' ||
-            event === '[object WheelEvent]');
+    return false;
   };
-
-  /*DEBUG*/
-  /**
-   * @name check_event_type
-   * @param {doodle.events.Event} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_event_type = doodle.utils.types.check_event_type = function (event, caller, param) {
-    if (isEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_event_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an Event.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
 /*globals doodle*/
@@ -3563,12 +3416,8 @@ Object.defineProperty(doodle, 'LineJoin', {
  */
 (function () {
   var uievent_static_properties,
-      isUIEvent,
       /*DEBUG*/
-      check_uievent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -3622,9 +3471,8 @@ Object.defineProperty(doodle, 'LineJoin', {
       bubbles = (bubbles === undefined) ? false : bubbles;
       cancelable = (cancelable === undefined) ? false : cancelable;
       /*DEBUG*/
-      check_string_type(type, '[object UIEvent]', '*type*, bubbles, cancelable, view, detail');
-      check_boolean_type(bubbles, '[object UIEvent]', 'type, *bubbles*, cancelable, view, detail');
-      check_boolean_type(cancelable, '[object UIEvent]', 'type, bubbles, *cancelable*, view, detail');
+      type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'*',
+                 {label:'UIEvent', params:['type','bubbles','cancelable','view','detail'], id:this.id});
       /*END_DEBUG*/
       uievent = Object.create(doodle.events.Event(type, bubbles, cancelable));
     }
@@ -3650,7 +3498,7 @@ Object.defineProperty(doodle, 'LineJoin', {
        */
       copy_uievent_properties = function (evt) {
         /*DEBUG*/
-        check_uievent_type(evt, 'copy_uievent_properties', '*event*');
+        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", this.id, evt);
         /*END_DEBUG*/
         if (evt.view !== undefined) { evt_view = evt.view; }
         if (evt.detail !== undefined) { evt_detail = evt.detail; }
@@ -3775,20 +3623,15 @@ Object.defineProperty(doodle, 'LineJoin', {
          */
         'initUIEvent': {
           value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg) {
-            //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
             viewArg = (viewArg === undefined) ? null : viewArg;
             detailArg = (detailArg === undefined) ? 0 : detailArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initUIEvent', '*type*, bubbles, cancelable, view, detail');
-            check_boolean_type(canBubbleArg, this+'.initUIEvent', 'type, *bubbles*, cancelable, view, detail');
-            check_boolean_type(cancelableArg, this+'.initUIEvent', 'type, bubbles, *cancelable*, view, detail');
-            check_number_type(detailArg, this+'.initUIEvent', 'type, bubbles, cancelable, view, *detail*');
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', detailArg,'number', {label:'UIEvent.initUIEvent', params:['type','canBubble','cancelable','view','detail'], id:this.id});
             /*END_DEBUG*/
             evt_view = viewArg;
             evt_detail = detailArg;
-            
             this.initEvent(typeArg, canBubbleArg, cancelableArg);
             return this;
           }
@@ -3812,13 +3655,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_uievent_type(evt, this+'.__copyUIEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyUIEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyUIEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent");
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_uievent_properties(evt);
             return this.__copyEventProperties(evt, resetTarget, resetType);
@@ -3867,55 +3706,33 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   };
 
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is an UIEvent or inherits from it.
-   * Returns true on Doodle events as well as DOM events.
-   * @name isUIEvent
-   * @param {doodle.events.Event} event
-   * @return {boolean}
-   * @static
-   */
-  isUIEvent = doodle.events.UIEvent.isUIEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object UIEvent]' ||
-            event === '[object MouseEvent]' ||
-            event === '[object TouchEvent]' ||
-            event === '[object KeyboardEvent]' ||
-            event === '[object TextEvent]' ||
-            event === '[object WheelEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_uievent_type
-   * @param {doodle.events.UIEvent} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_uievent_type = doodle.utils.types.check_uievent_type = function (event, caller, param) {
-    if (isUIEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_uievent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an UIEvent.");
-    }
-  };
-  /*END_DEBUG*/
-
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is an UIEvent or inherits from it.
+ * Returns true on Doodle events as well as DOM events.
+ * @name isUIEvent
+ * @param {doodle.events.Event} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.UIEvent.isUIEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object UIEvent]' || (evt.constructor && evt.constructor.name === 'UIEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};
 /*globals doodle*/
 
 /* DOM 2 Event: MouseEvent:UIEvent
@@ -3923,12 +3740,8 @@ Object.defineProperty(doodle, 'LineJoin', {
  */
 (function () {
   var mouseevent_static_properties,
-      isMouseEvent,
       /*DEBUG*/
-      check_mouseevent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -3955,8 +3768,7 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.MouseEvent = function (type, bubbles, cancelable, view, detail,
-                                       screenX, screenY, clientX, clientY, 
+  doodle.events.MouseEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
                                        ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
     var mouseevent,
         arg_len = arguments.length,
@@ -3996,10 +3808,8 @@ Object.defineProperty(doodle, 'LineJoin', {
       view = (view === undefined) ? null : view;
       detail = (detail === undefined) ? 0 : detail;
       /*DEBUG*/
-      check_string_type(type, '[object MouseEvent]', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-      check_boolean_type(bubbles, '[object MouseEvent]', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-      check_boolean_type(cancelable, '[object MouseEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-      check_number_type(detail, '[object MouseEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
+      type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'number', screenX,'*', screenY,'*', clientX,'*', clientY,'*', ctrlKey,'*', altKey,'*', shiftKey,'*', metaKey,'*', button,'*', relatedTarget,'*',
+                 {label:'MouseEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY', 'clientX','clientY','ctrlKey','altKey','shiftKey','metaKey', 'button','relatedTarget']});
       /*END_DEBUG*/
       mouseevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
@@ -4030,7 +3840,7 @@ Object.defineProperty(doodle, 'LineJoin', {
        */
       copy_mouseevent_properties = function (evt) {
         /*DEBUG*/
-        check_mouseevent_type(evt, 'copy_mouseevent_properties', '*event*');
+        console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent.", this.id, evt);
         /*END_DEBUG*/
         evt_x = (evt.x !== undefined) ? evt.x : 0;
         evt_y = (evt.y !== undefined) ? evt.y : 0;
@@ -4224,10 +4034,8 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @throws {TypeError}
          */
         'initMouseEvent': {
-          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
-                           screenXArg, screenYArg, clientXArg, clientYArg,
-                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
-                           buttonArg, relatedTargetArg) {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg,
+                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, buttonArg, relatedTargetArg) {
             //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
@@ -4244,19 +4052,8 @@ Object.defineProperty(doodle, 'LineJoin', {
             buttonArg = (buttonArg === undefined) ? 0 : buttonArg;
             relatedTarget = (relatedTargetArg === undefined) ? null : relatedTargetArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initMouseEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(canBubbleArg, this+'.initMouseEvent', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(cancelableArg, this+'.initMouseEvent', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(detailArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(screenXArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, *screenX*, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(screenYArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, *screenY*, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(clientXArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, *clientX*, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_number_type(clientYArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, *clientY*, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(ctrlKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, *ctrlKey*, altKey, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(altKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, *altKey*, shiftKey, metaKey, button, relatedTarget');
-            check_boolean_type(shiftKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, *shiftKey*, metaKey, button, relatedTarget');
-            check_boolean_type(metaKeyArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, *metaKey*, button, relatedTarget');
-            check_number_type(buttonArg, this+'.initMouseEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, *button*, relatedTarget');
+            type_check(typeArg,'string', canBubbleArg,'boolean', canBubbleArg,'boolean', viewArg,'*', detailArg,'number', screenXArg,'number', screenYArg,'number', clientXArg,'number', clientYArg,'number', ctrlKeyArg,'boolean', altKeyArg,'boolean', shiftKeyArg,'boolean', metaKeyArg,'boolean', buttonArg,'number', relatedTargetArg,'*',
+                       {label:'MouseEvent.initMouseEvent', id:this.id, params:['typeArg','canBubbleArg','cancelableArg','viewArg','detailArg','screenXArg','screenYArg','clientXArg','clientYArg','ctrlKeyArg','altKeyArg','shiftKeyArg','metaKeyArg','buttonArg','relatedTargetArg']});
             /*END_DEBUG*/
             evt_screenX = screenXArg;
             evt_screenY = screenYArg;
@@ -4268,7 +4065,6 @@ Object.defineProperty(doodle, 'LineJoin', {
             evt_metaKey = metaKeyArg;
             evt_button = buttonArg;
             evt_relatedTarget = relatedTargetArg;
-
             return this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
           }
         },
@@ -4283,7 +4079,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         'getModifierState': {
           value: function (key) {
             /*DEBUG*/
-            check_string_type(key, this+'.getModifierState', '*key*');
+            type_check(key,'string', {label:'MouseEvent.getModifierState', params:'key', id:this.id});
             /*END_DEBUG*/
             switch (key) {
             case 'Alt':
@@ -4318,13 +4114,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_mouseevent_type(evt, this+'.__copyMouseEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyMouseEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyMouseEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent", this.id);
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_mouseevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);
@@ -4341,8 +4133,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         /*DEBUG*/
         //make sure we've checked our dummy type string
         if (mouseevent.type === undefined || mouseevent.type === '' ||
-            mouseevent.bubbles === undefined ||
-            mouseevent.cancelable === undefined) {
+            mouseevent.bubbles === undefined || mouseevent.cancelable === undefined) {
           throw new SyntaxError("[object MouseEvent](function): Must call 'this.initMouseEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -4352,9 +4143,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       }
     } else {
       //standard instantiation
-      mouseevent.initMouseEvent(type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY, 
-                                ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
+      mouseevent.initMouseEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
     }
     
     return mouseevent;
@@ -4374,49 +4163,32 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   };
 
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a MouseEvent.
-   * @name isMouseEvent
-   * @param {doodle.events.MouseEvent} event
-   * @return {boolean}
-   * @static
-   */
-  isMouseEvent = doodle.events.MouseEvent.isMouseEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object MouseEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_mouseevent_type
-   * @param {doodle.events.MouseEvent} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_mouseevent_type = doodle.utils.types.check_mouseevent_type = function (event, caller, params) {
-    if (isMouseEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_mouseevent_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must be an MouseEvent.");
-    }
-  };
-  /*END_DEBUG*/
-
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a MouseEvent.
+ * @name isMouseEvent
+ * @param {doodle.events.MouseEvent} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.MouseEvent.isMouseEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object MouseEvent]' || (evt.constructor && evt.constructor.name === 'MouseEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};
 /*globals doodle*/
 
 /* TouchEvent support is expermental.
@@ -4424,12 +4196,8 @@ Object.defineProperty(doodle, 'LineJoin', {
  */
 (function () {
   var touchevent_static_properties,
-      isTouchEvent,
       /*DEBUG*/
-      check_touchevent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -4459,11 +4227,8 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail,
-                                       screenX, screenY, clientX, clientY,
-                                       ctrlKey, altKey, shiftKey, metaKey,
-                                       touches, targetTouches, changedTouches,
-                                       scale, rotation) {
+  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
+                                       ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation) {
     var touchevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -4502,10 +4267,8 @@ Object.defineProperty(doodle, 'LineJoin', {
       view = (view === undefined) ? null : view;
       detail = (detail === undefined) ? 0 : detail;
       /*DEBUG*/
-      check_string_type(type, '[object TouchEvent]', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-      check_boolean_type(bubbles, '[object TouchEvent]', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-      check_boolean_type(cancelable, '[object TouchEvent]', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-      check_number_type(detail, '[object TouchEvent]', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
+      type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'number', screenX,'*', screenY,'*', clientX,'*', clientY,'*', ctrlKey,'*', altKey,'*', shiftKey,'*', metaKey,'*', touches,'*', targetTouches,'*', changedTouches,'*', scale,'*', rotation,'*',
+                 {label:'TouchEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
       /*END_DEBUG*/
       touchevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
     }
@@ -4534,7 +4297,7 @@ Object.defineProperty(doodle, 'LineJoin', {
        */
       copy_touchevent_properties = function (evt) {
         /*DEBUG*/
-        check_touchevent_type(evt, 'copy_touchevent_properties', '*event*');
+        console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent.", this.id, evt);
         /*END_DEBUG*/
         if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
         if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
@@ -4719,11 +4482,8 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @throws {TypeError}
          */
         'initTouchEvent': {
-          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg,
-                           screenXArg, screenYArg, clientXArg, clientYArg,
-                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg,
-                           touchesArg, targetTouchesArg, changedTouchesArg,
-                           scaleArg, rotationArg) {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg,
+                           ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, touchesArg, targetTouchesArg, changedTouchesArg, scaleArg, rotationArg) {
             //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
@@ -4743,20 +4503,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             scaleArg = (scaleArg === undefined) ? 1 : scaleArg;
             rotationArg = (rotationArg === undefined) ? 0 : rotationArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initTouchEvent', '*type*, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(canBubbleArg, this+'.initTouchEvent', 'type, *bubbles*, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(cancelableArg, this+'.initTouchEvent', 'type, bubbles, *cancelable*, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(detailArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, *detail*, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(screenXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, *screenX*, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(screenYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, *screenY*, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(clientXArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, *clientX*, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(clientYArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, *clientY*, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(ctrlKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, *ctrlKey*, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(altKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, *altKey*, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(shiftKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, *shiftKey*, metaKey, touches, targetTouches, changedTouches, scale, rotation');
-            check_boolean_type(metaKeyArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, *metaKey*, touches, targetTouches, changedTouches, scale, rotation');
-            check_number_type(scaleArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, *scale*, rotation');
-            check_number_type(rotationArg, this+'.initTouchEvent', 'type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, *rotation*');
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', detailArg,'number', screenXArg,'number', screenYArg,'number',
+                       clientXArg,'number', clientYArg,'number', ctrlKeyArg,'boolean', altKeyArg,'boolean', shiftKeyArg,'boolean', metaKeyArg,'boolean', touchesArg,'*', targetTouchesArg,'*', changedTouchesArg,'*', scaleArg,'number', rotationArg,'number',
+                       {label:'TouchEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
             /*END_DEBUG*/
             evt_screenX = screenXArg;
             evt_screenY = screenYArg;
@@ -4771,7 +4520,6 @@ Object.defineProperty(doodle, 'LineJoin', {
             evt_changedTouches = changedTouchesArg;
             evt_scale = scaleArg;
             evt_rotation = rotationArg;
-
             this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg, detailArg);
             return this;
           }
@@ -4787,7 +4535,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         'getModifierState': {
           value: function (key) {
             /*DEBUG*/
-            check_string_type(key, this+'.getModifierState', '*key*');
+            type_check(key,'string', {label:'TouchEvent.getModifierState', params:'key', id:this.id});
             /*END_DEBUG*/
             switch (key) {
             case 'Alt':
@@ -4822,13 +4570,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_touchevent_type(evt, this+'.__copyTouchEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyTouchEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyTouchEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent");
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_touchevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);
@@ -4845,8 +4589,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         /*DEBUG*/
         //make sure we've checked our dummy type string
         if (touchevent.type === undefined || touchevent.type === '' ||
-            touchevent.bubbles === undefined ||
-            touchevent.cancelable === undefined) {
+            touchevent.bubbles === undefined || touchevent.cancelable === undefined) {
           throw new SyntaxError("[object TouchEvent](function): Must call 'this.initTouchEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -4856,10 +4599,8 @@ Object.defineProperty(doodle, 'LineJoin', {
       }
     } else {
       //standard instantiation
-      touchevent.initTouchEvent(type, bubbles, cancelable, view, detail,
-                                screenX, screenY, clientX, clientY,
-                                ctrlKey, altKey, shiftKey, metaKey,
-                                touches, targetTouches, changedTouches, scale, rotation);
+      touchevent.initTouchEvent(type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
+                                ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation);
     }
     
     return touchevent;
@@ -4880,49 +4621,32 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   };
 
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a TouchEvent.
-   * @name isTouchEvent
-   * @param {doodle.events.TouchEvent} event
-   * @return {boolean}
-   * @static
-   */
-  isTouchEvent = doodle.events.TouchEvent.isTouchEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object TouchEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_touchevent_type
-   * @param {doodle.events.TouchEvent} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_touchevent_type = doodle.utils.types.check_touchevent_type = function (event, caller, params) {
-    if (isTouchEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_touchevent_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must be an TouchEvent.");
-    }
-  };
-  /*END_DEBUG*/
-
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a TouchEvent.
+ * @name isTouchEvent
+ * @param {doodle.events.TouchEvent} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.TouchEvent.isTouchEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object TouchEvent]' || (evt.constructor && evt.constructor.name === 'TouchEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};
 /*globals doodle*/
 
 /* DOM 3 Event: TextEvent:UIEvent
@@ -4930,12 +4654,8 @@ Object.defineProperty(doodle, 'LineJoin', {
  */
 (function () {
   var textevent_static_properties,
-      isTextEvent,
       /*DEBUG*/
-      check_textevent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -4991,9 +4711,8 @@ Object.defineProperty(doodle, 'LineJoin', {
       cancelable = (cancelable === undefined) ? false : cancelable;
       view = (view === undefined) ? null : view;
       /*DEBUG*/
-      check_string_type(type, '[object TextEvent]', '*type*, bubbles, cancelable, view, data, inputMode');
-      check_boolean_type(bubbles, '[object TextEvent]', 'type, *bubbles*, cancelable, view, data, inputMode');
-      check_boolean_type(cancelable, '[object TextEvent]', 'type, bubbles, *cancelable*, view, data, inputMode');
+      type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', data,'*', inputMode,'*',
+                 {label:'TextEvent', id:this.id, params:['type','bubbles','cancelable','view','data','inputMode']});
       /*END_DEBUG*/
       textevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
@@ -5011,7 +4730,7 @@ Object.defineProperty(doodle, 'LineJoin', {
        */
       copy_textevent_properties = function (evt) {
         /*DEBUG*/
-        check_textevent_type(evt, 'copy_textevent_properties', '*event*');
+        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", this.id, evt);
         /*END_DEBUG*/
         if (evt.data !== undefined) { evt_data = evt.data; }
         if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }
@@ -5059,15 +4778,11 @@ Object.defineProperty(doodle, 'LineJoin', {
             dataArg = (dataArg === undefined) ? '' : dataArg;
             inputModeArg = (inputModeArg === undefined) ? doodle.events.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initTextEvent', '*type*, bubbles, cancelable, view, data, inputMode');
-            check_boolean_type(canBubbleArg, this+'.initTextEvent', 'type, *bubbles*, cancelable, view, data, inputMode');
-            check_boolean_type(cancelableArg, this+'.initTextEvent', 'type, bubbles, *cancelable*, view, data, inputMode');
-            check_string_type(dataArg, this+'.initTextEvent', 'type, bubbles, cancelable, view, *data*, inputMode');
-            check_number_type(inputModeArg, this+'.initTextEvent', 'type, bubbles, cancelable, view, data, *inputMode*');
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', dataArg,'string', inputModeArg,'number',
+                       {label:'TextEvent.initTextEvent', id:this.id, params:['typeArg','canBubbleArg','cancelableArg','viewArg','dataArg','inputModeArg']});
             /*END_DEBUG*/
             evt_data = dataArg;
             evt_inputMode = inputModeArg;
-            
             this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
             return this;
           }
@@ -5090,13 +4805,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_textevent_type(evt, this+'.__copyTextEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyTextEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyTextEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent", this.id);
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_textevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);
@@ -5112,8 +4823,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         /*DEBUG*/
         //make sure we've checked our dummy type string
         if (textevent.type === undefined || textevent.type === '' ||
-            textevent.bubbles === undefined ||
-            textevent.cancelable === undefined) {
+            textevent.bubbles === undefined || textevent.cancelable === undefined) {
           throw new SyntaxError("[object TextEvent](function): Must call 'this.initTextEvent(type, bubbles, cancelable, view, data, inputMode)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -5143,64 +4853,42 @@ Object.defineProperty(doodle, 'LineJoin', {
       value: function () { return "[object TextEvent]"; }
     }
   };
-
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a TextEvent.
-   * @name isTextEvent
-   * @param {doodle.events.TextEvent} event
-   * @return {boolean}
-   * @static
-   */
-  isTextEvent = doodle.events.TextEvent.isTextEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object TextEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_textevent_type
-   * @param {doodle.events.TextEvent} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_textevent_type = doodle.utils.types.check_textevent_type = function (event, caller, params) {
-    if (isTextEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_textevent_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must be an TextEvent.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a TextEvent.
+ * @name isTextEvent
+ * @param {doodle.events.TextEvent} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.TextEvent.isTextEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object TextEvent]' || (evt.constructor && evt.constructor.name === 'TextEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};
 /*globals doodle*/
 
 /* DOM 3 Event: KeyboardEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
  */
-
 (function () {
   var keyboardevent_static_properties,
-      isKeyboardEvent,
       /*DEBUG*/
-      check_keyboardevent_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       isEvent = doodle.events.Event.isEvent;
   
@@ -5220,8 +4908,7 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view,
-                                          keyIdentifier, keyLocation, modifiersList, repeat) {
+  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat) {
     var keyboardevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -5259,9 +4946,8 @@ Object.defineProperty(doodle, 'LineJoin', {
       cancelable = (cancelable === undefined) ? false : cancelable;
       view = (view === undefined) ? null : view;
       /*DEBUG*/
-      check_string_type(type, '[object KeyboardEvent]', '*type*, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-      check_boolean_type(bubbles, '[object KeyboardEvent]', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-      check_boolean_type(cancelable, '[object KeyboardEvent]', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
+      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', keyIdentifier, '*', keyLocation, '*', modifiersList, '*', repeat, '*',
+                 {label:'KeyboardEvent', params:['type','bubbles','cancelable','view','keyIdentifier','keyLocation','modifiersList','repeat'], id:this.id});
       /*END_DEBUG*/
       keyboardevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
@@ -5286,7 +4972,7 @@ Object.defineProperty(doodle, 'LineJoin', {
        */
       copy_keyboardevent_properties = function (evt) {
         /*DEBUG*/
-        check_keyboardevent_type(evt, 'copy_keyboardevent_properties', '*event*');
+        console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent");
         /*END_DEBUG*/
         if (evt.keyIdentifier !== undefined) { evt_keyIdentifier = evt.keyIdentifier; }
         if (evt.keyLocation !== undefined) { evt_keyLocation = evt.keyLocation; }
@@ -5401,8 +5087,7 @@ Object.defineProperty(doodle, 'LineJoin', {
          * @throws {TypeError}
          */
         'initKeyboardEvent': {
-          value: function (typeArg, canBubbleArg, cancelableArg, viewArg,
-                           keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
+          value: function (typeArg, canBubbleArg, cancelableArg, viewArg, keyIdentifierArg, keyLocationArg, modifiersListArg, repeatArg) {
             //parameter defaults
             canBubbleArg = (canBubbleArg === undefined) ? false : canBubbleArg;
             cancelableArg = (cancelableArg === undefined) ? false : cancelableArg;
@@ -5412,18 +5097,12 @@ Object.defineProperty(doodle, 'LineJoin', {
             modifiersListArg = (modifiersListArg === undefined) ? "" : modifiersListArg;
             repeatArg = (repeatArg === undefined) ? false : repeatArg;
             /*DEBUG*/
-            check_string_type(typeArg, this+'.initKeyboardEvent', '*type*, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-            check_boolean_type(canBubbleArg, this+'.initKeyboardEvent', 'type, *bubbles*, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat');
-            check_boolean_type(cancelableArg, this+'.initKeyboardEvent', 'type, bubbles, *cancelable*, view, keyIdentifier, keyLocation, modifiersList, repeat');
-            check_string_type(keyIdentifierArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, *keyIdentifier*, keyLocation, modifiersList, repeat');
-            check_number_type(keyLocationArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, *keyLocation*, modifiersList, repeat');
-            check_string_type(modifiersListArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, keyLocation, *modifiersList*, repeat');
-            check_boolean_type(repeatArg, this+'.initKeyboardEvent', 'type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, *repeat*');
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', keyIdentifierArg,'string', keyLocationArg,'number', modifiersListArg,'string', repeatArg,'boolean',
+                       {label:'KeyboardEvent.initKeyboardEvent', id:this.id, params:['typeArg','canBubbleArg','cancelableArg','viewArg','keyIdentifierArg','keyLocationArg','modifiersListArg','repeatArg']});
             /*END_DEBUG*/
             evt_keyIdentifier = keyIdentifierArg;
             evt_keyLocation = keyLocationArg;
             evt_repeat = repeatArg;
-            
             //parse string of white-space separated list of modifier key identifiers
             modifiersListArg.split(" ").forEach(function (modifier) {
               switch (modifier) {
@@ -5441,7 +5120,6 @@ Object.defineProperty(doodle, 'LineJoin', {
                 break;
               }
             });
-            
             this.initUIEvent(typeArg, canBubbleArg, cancelableArg, viewArg);
             return this;
           }
@@ -5457,7 +5135,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         'getModifierState': {
           value: function (key) {
             /*DEBUG*/
-            check_string_type(key, this+'.getModifierState', '*key*');
+            type_check(key,'string', {label:'KeyboardEvent.getModifierState', params:'key', id:this.id});
             /*END_DEBUG*/
             switch (key) {
             case 'Alt':
@@ -5492,13 +5170,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            check_keyboardevent_type(evt, this+'.__copyKeyboardEventProperties', '*event*, target, type');
-            if (resetTarget !== false && resetTarget !== null) {
-              check_node_type(evt, this+'.__copyKeyboardEventProperties', 'event, *target*, type');
-            }
-            if (resetType !== false) {
-              check_string_type(resetType, this+'.__copyKeyboardEventProperties', 'event, target, *type*');
-            }
+            console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent");
+            console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
+            console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/
             copy_keyboardevent_properties(evt);
             return this.__copyUIEventProperties(evt, resetTarget, resetType);
@@ -5514,8 +5188,7 @@ Object.defineProperty(doodle, 'LineJoin', {
         /*DEBUG*/
         //make sure we've checked our dummy type string
         if (keyboardevent.type === undefined || keyboardevent.type === '' ||
-            keyboardevent.bubbles === undefined ||
-            keyboardevent.cancelable === undefined) {
+            keyboardevent.bubbles === undefined || keyboardevent.cancelable === undefined) {
           throw new SyntaxError("[object KeyboardEvent](function): Must call 'this.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat)' within the function argument.");
         }
         /*END_DEBUG*/
@@ -5525,8 +5198,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       }
     } else {
       //standard instantiation
-      keyboardevent.initKeyboardEvent(type, bubbles, cancelable, view,
-                                      keyIdentifier, keyLocation, modifiersList, repeat);
+      keyboardevent.initKeyboardEvent(type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat);
     }
     
     return keyboardevent;
@@ -5547,49 +5219,32 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   };
 
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a keyboard event.
-   * @name isKeyboardEvent
-   * @param {doodle.events.Event} event
-   * @return {boolean}
-   * @static
-   */
-  isKeyboardEvent = doodle.events.KeyboardEvent.isKeyboardEvent = function (event) {
-    if (!event || typeof event !== 'object' || typeof event.toString !== 'function') {
-      return false;
-    } else {
-      event = event.toString();
-    }
-    return (event === '[object KeyboardEvent]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_keyboardevent_type
-   * @param {doodle.events.Event} event
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_keyboardevent_type = doodle.utils.types.check_keyboardevent_type = function (event, caller, param) {
-    if (isKeyboardEvent(event)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_keyboardevent_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an KeyboardEvent.");
-    }
-  };
-  /*END_DEBUG*/
-
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a keyboard event.
+ * @name isKeyboardEvent
+ * @param {doodle.events.Event} event
+ * @return {boolean}
+ * @static
+ */
+doodle.events.KeyboardEvent.isKeyboardEvent = function (evt) {
+  if (typeof evt === 'object') {
+    while (evt) {
+      //for DOM events we need to check it's constructor name
+      if (evt.toString() === '[object KeyboardEvent]' || (evt.constructor && evt.constructor.name === 'KeyboardEvent')) {
+        return true;
+      } else {
+        evt = Object.getPrototypeOf(evt);
+      }
+    }
+  }
+  return false;
+};
 
 /*
  * EVENT
@@ -6292,19 +5947,16 @@ Object.defineProperties(doodle.events.TextEvent, {
   }  
 });
 /*globals doodle*/
-
 (function () {
   var point_static_properties,
       distance,
-      isPoint,
       temp_array = new Array(2),
       temp_point = {x:0, y:0},
       /*DEBUG*/
-      check_point_type,
-      check_number_type = doodle.utils.types.check_number_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       //lookup help
-      doodle_Point,
       cos = Math.cos,
       sin = Math.sin,
       sqrt = Math.sqrt;
@@ -6319,7 +5971,7 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle_Point = doodle.geom.Point = function (x, y) {
+  doodle.geom.Point = function Point (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -6345,7 +5997,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return x; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.x');
+            type_check(n,'number', {label:'Point.x', id:this.id});
+            range_check(isFinite(n), {label:'Point.x', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             x = n;
           }
@@ -6364,7 +6017,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return y; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.y');
+            type_check(n,'number', {label:'Point.y', id:this.id});
+            range_check(isFinite(n), {label:'Point.y', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             y = n;
           }
@@ -6381,12 +6035,30 @@ Object.defineProperties(doodle.events.TextEvent, {
           writable: false,
           configurable: false,
           value: function () {
-            var pt = $temp_array;
-            pt[0] = x;
-            pt[1] = y;
-            return pt;
+            $temp_array[0] = x;
+            $temp_array[1] = y;
+            return $temp_array;
           }
-        }
+        },
+
+        /**
+         * @name id
+         * @return {string}
+         */
+        'id': (function () {
+          var id = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () { return (id === null) ? this.toString() : id; },
+            set: function (idArg) {
+              /*DEBUG*/
+              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              /*END_DEBUG*/
+              id = idArg;
+            }
+          };
+        }())
       };
     }()));//end defineProperties
 
@@ -6415,7 +6087,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         point.compose.apply(point, init_obj);
       } else {
         /*DEBUG*/
-        check_point_type(init_obj, '[object Point](point)');
+        type_check(init_obj,'Point', {label: 'doodle.geom.Point', id:this.id, message:"Unable to initialize from point object."});
         /*END_DEBUG*/
         point.compose(init_obj.x, init_obj.y);
       }
@@ -6432,17 +6104,15 @@ Object.defineProperties(doodle.events.TextEvent, {
   
   point_static_properties = {
     /**
-     * The length of the line segment from (0,0) to this point.
-     * @name length
-     * @return {number}
-     * @property
+     * Returns a string that contains the values of the x and y coordinates.
+     * @name toString
+     * @return {string}
      */
-    'length': {
+    'toString': {
       enumerable: true,
+      writable: false,
       configurable: false,
-      get: function () {
-        return distance(temp_point, this);
-      }
+      value: function () { return "(x=" + this.x + ",y=" + this.y + ")"; }
     },
 
     /**
@@ -6454,23 +6124,19 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return this.__toArray().concat();
-      }
+      value: function () { return this.__toArray().concat(); }
     },
-    
+
     /**
-     * Returns a string that contains the values of the x and y coordinates.
-     * @name toString
-     * @return {string}
+     * The length of the line segment from (0,0) to this point.
+     * @name length
+     * @return {number}
+     * @property
      */
-    'toString': {
+    'length': {
       enumerable: true,
-      writable: false,
       configurable: false,
-      value: function () {
-        return "(x=" + this.x + ", y=" + this.y + ")";
-      }
+      get: function () { return distance(temp_point, this); }
     },
 
     /**
@@ -6487,8 +6153,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (x, y) {
         /*DEBUG*/
-        check_number_type(x, this+'.compose', '*x*, y');
-        check_number_type(y, this+'.compose', 'x, *y*');
+        type_check(x,'number', y,'number', {label:'Point.compose', params:['x','y'], id:this.id});
+        range_check(isFinite(x), isFinite(y), {label:'Point.compose', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -6505,9 +6171,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return doodle_Point(this.x, this.y);
-      }
+      value: function () { return Point(this.x, this.y); }
     },
 
     /**
@@ -6523,12 +6187,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.equals', '*point*');
+        type_check(pt, 'Point', {label:'Point.equals', params:'point', id:this.id});
         /*END_DEBUG*/
-        return ((this && pt &&
-                 this.x === pt.x &&
-                 this.y === pt.y) ||
-                (!this && !pt));
+        return (this.x === pt.x && this.y === pt.y);
       }
     },
 
@@ -6546,9 +6207,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.add', '*point*');
+        type_check(pt,'Point', {label:'Point.add', params:'point', id:this.id});
         /*END_DEBUG*/
-        return doodle_Point(this.x + pt.x, this.y + pt.y);
+        return Point(this.x + pt.x, this.y + pt.y);
       }
     },
 
@@ -6566,9 +6227,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.subtract', '*point*');
+        type_check(pt,'Point', {label:'Point.subtract', params:'point', id:this.id});
         /*END_DEBUG*/
-        return doodle_Point(this.x - pt.x, this.y - pt.y);
+        return Point(this.x - pt.x, this.y - pt.y);
       }
     },
 
@@ -6584,8 +6245,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.offset', '*dx*, dy');
-        check_number_type(dy, this+'.offset', 'dx, *dy*');
+        type_check(dx,'number', dy,'number', {label:'Point.offset', id:this.id, params:['dx','dy']});
+        range_check(isFinite(dx), isFinite(dy), {label:'Point.offset', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -6607,7 +6268,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (thickness) {
         /*DEBUG*/
-        check_number_type(thickness, this+'.normalize', '*thickness*');
+        type_check(thickness,'number', {label:'Point.normalize', id:this.id, params:'thickness'});
+        range_check(isFinite(thickness), {label:'Point.normalize', params:'thickness', id:this.id});
         /*END_DEBUG*/
         this.x = (this.x / this.length) * thickness;
         this.y = (this.y / this.length) * thickness;
@@ -6635,13 +6297,10 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt1, pt2, t) {
         /*DEBUG*/
-        check_point_type(pt1, this+'.interpolate', '*pt1*, pt2, t');
-        check_point_type(pt2, this+'.interpolate', 'pt1, *pt2*, t');
-        check_number_type(t, this+'.interpolate', 'pt1, pt2, *t*');
+        type_check(pt1,'Point', pt2,'Point', t,'number', {label:'Point.interpolate', id:this.id, params:['point','point','time']});
+        range_check(isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
         /*END_DEBUG*/
-        return doodle_Point(pt1.x + (pt2.x - pt1.x) * t,
-                            pt1.y + (pt2.y - pt1.y) * t);
-
+        return Point(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
         /* correct version?
            var nx = pt2.x - pt1.x;
            var ny = pt2.y - pt1.y;
@@ -6668,10 +6327,10 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (len, angle) {
         /*DEBUG*/
-        check_number_type(len, this+'.polar', '*len*, angle');
-        check_number_type(angle, this+'.polar', 'len, *angle*');
+        type_check(len,'number', angle,'number', {label:'Point.polar', id:this.id, params:['len','angle']});
+        range_check(isFinite(len), isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        return doodle_Point(len*cos(angle), len*sin(angle));
+        return Point(len*cos(angle), len*sin(angle));
       }
     }
     
@@ -6692,65 +6351,38 @@ Object.defineProperties(doodle.events.TextEvent, {
    */
   distance = doodle.geom.Point.distance = function (pt1, pt2) {
     /*DEBUG*/
-    check_point_type(pt1, this+'.distance', '*pt1*, pt2');
-    check_point_type(pt2, this+'.distance', 'pt1, *pt2*');
+    type_check(pt1,'Point', pt2,'Point', {label:'Point.distance', params:['point','point']});
     /*END_DEBUG*/
     var dx = pt2.x - pt1.x,
         dy = pt2.y - pt1.y;
     return sqrt(dx*dx + dy*dy);
   };
-
-  /**
-   * Check if a given object contains a numeric x and y property.
-   * Does not check if a point is actually a doodle.geom.point.
-   * @name isPoint
-   * @param {Point} pt
-   * @return {boolean}
-   * @static
-   */
-  isPoint = doodle.geom.Point.isPoint = function (pt) {
-    return (pt && typeof pt.x === 'number' && typeof pt.y === 'number');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_point_type
-   * @param {Object} pt
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_point_type = doodle.utils.types.check_point_type = function (pt, caller, param) {
-    if (!isPoint(pt)) {
-      caller = (caller === undefined) ? "check_point_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a point.");
-    } else {
-      return true;
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
-/*globals doodle*/
 
+/**
+ * Check if a given object contains a numeric x and y property.
+ * Does not check if a point is actually a doodle.geom.point.
+ * @name isPoint
+ * @param {Point} pt
+ * @return {boolean}
+ * @static
+ */
+doodle.geom.Point.isPoint = function (pt) {
+  return (typeof pt === 'object' && typeof pt.x === 'number' && typeof pt.y === 'number');
+};
+/*globals doodle*/
 (function () {
   var matrix_static_properties,
-      isMatrix,
       //recycle object for internal calculations
       temp_array = new Array(6),
       temp_point = {x: null, y: null},
       temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       /*DEBUG*/
-      check_matrix_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       //lookup help
-      doodle_Matrix,
       doodle_Point = doodle.geom.Point,
       sin = Math.sin,
       cos = Math.cos,
@@ -6771,7 +6403,7 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle_Matrix = doodle.geom.Matrix = function (a, b, c, d, tx, ty) {
+  doodle.geom.Matrix = function Matrix (a, b, c, d, tx, ty) {
     var matrix = {},
         arg_len = arguments.length,
         init_obj;
@@ -6788,7 +6420,6 @@ Object.defineProperties(doodle.events.TextEvent, {
           $temp_array = temp_array;
       
       return {
-
         /**
          * The value that affects the positioning of pixels along the x axis
          * when scaling or rotating an image.
@@ -6803,7 +6434,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return a; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.a');
+            type_check(n,'number', {label:'Matrix.a', id:this.id});
+            range_check(isFinite(n), {label:'Matrix.a', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             a = n;
           }
@@ -6823,7 +6455,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return b; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.b');
+            type_check(n,'number', {label:'Matrix.b', id:this.id});
+            range_check(isFinite(n), {label:'Matrix.b', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             b = n;
           }
@@ -6843,7 +6476,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return c; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.c');
+            type_check(n,'number', {label:'Matrix.c', id:this.id});
+            range_check(isFinite(n), {label:'Matrix.c', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             c = n;
           }
@@ -6863,7 +6497,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return d; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.d');
+            type_check(n,'number', {label:'Matrix.d', id:this.id});
+            range_check(isFinite(n), {label:'Matrix.d', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             d = n;
           }
@@ -6882,7 +6517,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return tx; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.tx');
+            type_check(n,'number', {label:'Matrix.tx', id:this.id});
+            range_check(isFinite(n), {label:'Matrix.tx', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             tx = n;
           }
@@ -6901,7 +6537,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return ty; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.ty');
+            type_check(n,'number', {label:'Matrix.ty', id:this.id});
+            range_check(isFinite(n), {label:'Matrix.ty', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             ty = n;
           }
@@ -6917,22 +6554,41 @@ Object.defineProperties(doodle.events.TextEvent, {
           writable: false,
           configurable: false,
           value: function () {
-            var matrix = $temp_array;
-            matrix[0] = a;
-            matrix[1] = b;
-            matrix[2] = c;
-            matrix[3] = d;
-            matrix[4] = tx;
-            matrix[5] = ty;
-            return matrix;
+            $temp_array[0] = a;
+            $temp_array[1] = b;
+            $temp_array[2] = c;
+            $temp_array[3] = d;
+            $temp_array[4] = tx;
+            $temp_array[5] = ty;
+            return $temp_array;
           }
-        }
+        },
+
+        /**
+         * @name id
+         * @return {string}
+         */
+        'id': (function () {
+          var id = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () { return (id === null) ? this.toString() : id; },
+            set: function (idArg) {
+              /*DEBUG*/
+              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              /*END_DEBUG*/
+              id = idArg;
+            }
+          };
+        }())
         
       };
     }()));//end defineProperties
     
 
-    //initialize matrix
+    /* initialize matrix
+     */
     switch (arg_len) {
     case 0:
       //defaults to 1,0,0,1,0,0
@@ -6957,7 +6613,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         matrix.compose.apply(matrix, init_obj);
       } else {
         /*DEBUG*/
-        check_matrix_type(init_obj, '[object Matrix](matrix)');
+        type_check(init_obj, 'Matrix', {label:'doodle.geom.Matrix', id:this.id, params:'matrix', message:"Invalid initialization object."});
         /*END_DEBUG*/
         matrix.compose(init_obj.a, init_obj.b, init_obj.c, init_obj.d, init_obj.tx, init_obj.ty);
       }
@@ -6991,12 +6647,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (a, b, c, d, tx, ty) {
         /*DEBUG*/
-        check_number_type(a, this+'.compose', '*a*, b, c, d, tx, ty');
-        check_number_type(b, this+'.compose', 'a, *b*, c, d, tx, ty');
-        check_number_type(c, this+'.compose', 'a, b, *c*, d, tx, ty');
-        check_number_type(d, this+'.compose', 'a, b, c, *d*, tx, ty');
-        check_number_type(tx, this+'.compose', 'a, b, c, d, *tx*, ty');
-        check_number_type(ty, this+'.compose', 'a, b, c, d, tx, *ty*');
+        type_check(a,'number', b,'number', c,'number', d,'number', tx,'number', ty,'number', {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty']});
+        range_check(isFinite(a), isFinite(b), isFinite(c), isFinite(d), isFinite(tx), isFinite(ty), {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.a  = a;
         this.b  = b;
@@ -7017,9 +6669,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return this.__toArray().concat();
-      }
+      value: function () { return this.__toArray().concat(); }
     },
     
     /**
@@ -7032,8 +6682,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       writable: false,
       configurable: false,
       value: function () {
-        return ("(a="+ this.a +", b="+ this.b +", c="+ this.c +
-                ", d="+ this.d +", tx="+ this.tx +", ty="+ this.ty +")");
+        return ("(a="+ this.a +",b="+ this.b +",c="+ this.c +",d="+ this.d +",tx="+ this.tx +",ty="+ this.ty +")");
       }
     },
 
@@ -7050,16 +6699,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (m) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.equals', '*matrix*');
+        type_check(m,'Matrix', {label:'Matrix.equals', id:this.id, params:'matrix'});
         /*END_DEBUG*/
-        return ((this && m && 
-                 this.a  === m.a &&
-                 this.b  === m.b &&
-                 this.c  === m.c &&
-                 this.d  === m.d &&
-                 this.tx === m.tx &&
-                 this.ty === m.ty) || 
-                (!this && !m));
+        return (this.a  === m.a && this.b  === m.b && this.c  === m.c && this.d  === m.d && this.tx === m.tx && this.ty === m.ty);
       }
     },
 
@@ -7093,9 +6735,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return doodle_Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty);
-      }
+      value: function () { return Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty); }
     },
 
     /**
@@ -7112,7 +6752,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (m) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.multiply', '*matrix*');
+        type_check(m,'Matrix', {label:'Matrix.multiply', id:this.id, params:'matrix'});
         /*END_DEBUG*/
         var a  = this.a * m.a  + this.c * m.b,
             b  = this.b * m.a  + this.d * m.b,
@@ -7120,7 +6760,6 @@ Object.defineProperties(doodle.events.TextEvent, {
             d  = this.b * m.c  + this.d * m.d,
             tx = this.a * m.tx + this.c * m.ty + this.tx,
             ty = this.b * m.tx + this.d * m.ty + this.ty;
-        
         return this.compose(a, b, c, d, tx, ty);
       }
     },
@@ -7136,12 +6775,13 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (radians) {
+      value: function (r) {
         /*DEBUG*/
-        check_number_type(radians, this+'.rotate', '*radians*');
+        type_check(r,'number', {label:'Matrix.rotate', id:this.id, params:'radians'});
+        range_check(isFinite(r), {label:'Matrix.rotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
-        var c = cos(radians),
-            s = sin(radians),
+        var c = cos(r),
+            s = sin(r),
             m = temp_matrix;
         m.a = c;
         m.b = s;
@@ -7149,7 +6789,6 @@ Object.defineProperties(doodle.events.TextEvent, {
         m.d = c;
         m.tx = 0;
         m.ty = 0;
-        
         return this.multiply(m);
       }
     },
@@ -7165,13 +6804,14 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (radians) {
+      value: function (r) {
         /*DEBUG*/
-        check_number_type(radians, this+'.deltaRotate', '*radians*');
+        type_check(r,'number', {label:'Matrix.deltaRotate', id:this.id, params:'radians'});
+        range_check(isFinite(r), {label:'Matrix.deltaRotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
-        this.rotate(radians);
+        this.rotate(r);
         this.tx = x;
         this.ty = y;
         return this;
@@ -7188,15 +6828,14 @@ Object.defineProperties(doodle.events.TextEvent, {
     'rotation': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return atan2(this.b, this.a);
-      },
-      set: function (radians) {
+      get: function () { return atan2(this.b, this.a); },
+      set: function (r) {
         /*DEBUG*/
-        check_number_type(radians, this+'.rotation', '*radians*');
+        type_check(r,'number', {label:'Matrix.rotation', id:this.id, message:"Parameter must be a number in radians."});
+        range_check(isFinite(r), {label:'Matrix.rotation', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
-        var c = cos(radians),
-            s = sin(radians);
+        var c = cos(r),
+            s = sin(r);
         this.compose(c, s, -s, c, this.tx, this.ty);
       }
     },
@@ -7215,18 +6854,16 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (sx, sy) {
         /*DEBUG*/
-        check_number_type(sx, this+'.scale', '*sx*, sy');
-        check_number_type(sy, this+'.scale', 'sx, *sy*');
+        type_check(sx,'number', sy,'number', {label:'Matrix.scale', id:this.id, params:['sx','sy']});
+        range_check(isFinite(sx), isFinite(sy), {label:'Matrix.scale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        var m = temp_matrix;
-        m.a = sx;
-        m.b = 0;
-        m.c = 0;
-        m.d = sy;
-        m.tx = 0;
-        m.ty = 0;
-        
-        return this.multiply(m);
+        temp_matrix.a = sx;
+        temp_matrix.b = 0;
+        temp_matrix.c = 0;
+        temp_matrix.d = sy;
+        temp_matrix.tx = 0;
+        temp_matrix.ty = 0;
+        return this.multiply(temp_matrix);
       }
     },
 
@@ -7244,8 +6881,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (sx, sy) {
         /*DEBUG*/
-        check_number_type(sx, this+'.deltaScale', '*sx*, sy');
-        check_number_type(sy, this+'.deltaScale', 'sx, *sy*');
+        type_check(sx,'number', sy,'number', {label:'Matrix.deltaScale', id:this.id, params:['sx','sy']});
+        range_check(isFinite(sx), isFinite(sy), {label:'Matrix.deltaScale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -7270,8 +6907,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.translate', '*dx*, dy');
-        check_number_type(dy, this+'.translate', 'dx, *dy*');
+        type_check(dx,'number', dy,'number', {label:'Matrix.translate', id:this.id, params:['dx','dy']});
+        range_check(isFinite(dx), isFinite(dy), {label:'Matrix.translate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.tx += dx;
         this.ty += dy;
@@ -7292,8 +6929,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (skewX, skewY) {
         /*DEBUG*/
-        check_number_type(skewX, this+'.skew', '*skewX*, skewY');
-        check_number_type(skewY, this+'.skew', 'skewX, *skewY*');
+        type_check(skewX, 'number', skewY, 'number', {label:'Matrix.skew', id:this.id, params:['skewX','skewY']});
+        range_check(isFinite(skewX), isFinite(skewY), {label:'Matrix.skew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var sx = tan(skewX),
             sy = tan(skewY),
@@ -7304,7 +6941,6 @@ Object.defineProperties(doodle.events.TextEvent, {
         m.d = 1;
         m.tx = 0;
         m.ty = 0;
-        
         return this.multiply(m);
       }
     },
@@ -7323,8 +6959,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (skewX, skewY) {
         /*DEBUG*/
-        check_number_type(skewX, this+'.deltaSkew', '*skewX*, skewY');
-        check_number_type(skewY, this+'.deltaSkew', 'skewX, *skewY*');
+        type_check(skewX,'number', skewY,'number', {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY']});
+        range_check(isFinite(skewX), isFinite(skewY), {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -7348,7 +6984,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (m) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.add', '*matrix*');
+        type_check(m,'Matrix', {label:'Matrix.add', id:this.id, params:'matrix'});
         /*END_DEBUG*/
         this.a  += m.a;
         this.b  += m.b;
@@ -7395,10 +7031,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.transformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.transformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx,
-                            this.b * pt.x + this.d * pt.y + this.ty);
+        return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx, this.b * pt.x + this.d * pt.y + this.ty);
       }
     },
 
@@ -7412,15 +7047,15 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.__transformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.__transformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        var x = point.x,
-            y = point.y;
-        point.x = this.a * x + this.c * y + this.tx;
-        point.y = this.b * x + this.d * y + this.ty;
-        return point;
+        var x = pt.x,
+            y = pt.y;
+        pt.x = this.a * x + this.c * y + this.tx;
+        pt.y = this.b * x + this.d * y + this.ty;
+        return pt;
       }
     },
 
@@ -7439,10 +7074,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.deltaTransformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.deltaTransformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y,
-                            this.b * pt.x + this.d * pt.y);
+        return doodle_Point(this.a * pt.x + this.c * pt.y, this.b * pt.x + this.d * pt.y);
       }
     },
 
@@ -7456,15 +7090,15 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.__deltaTransformPoint', '*point*');
+        type_check(pt, 'Point', {label:'Matrix.__deltaTransformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        var x = point.x,
-            y = point.y;
-        point.x = this.a * x + this.c * y;
-        point.y = this.b * x + this.d * y;
-        return point;
+        var x = pt.x,
+            y = pt.y;
+        pt.x = this.a * x + this.c * y;
+        pt.y = this.b * x + this.d * y;
+        return pt;
       }
     },
 
@@ -7476,13 +7110,13 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (pt, radians) {
+      value: function (pt, r) {
         /*DEBUG*/
-        check_point_type(pt, this+'.rotateAroundExternalPoint', '*point*, radians');
-        check_number_type(radians, this+'.rotateAroundExternalPoint', 'point, *radians*');
+        type_check(pt,'Point', r,'number', {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians']});
+        range_check(isFinite(r), {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        var c = cos(radians),
-            s = sin(radians),
+        var c = cos(r),
+            s = sin(r),
             m = temp_matrix,
             reg_pt = temp_point; //new registration point
         //parent rotation matrix, global space
@@ -7513,16 +7147,15 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (point, radians) {
+      value: function (point, r) {
         /*DEBUG*/
-        check_point_type(point, this+'.rotateAroundInternalPoint', '*point*, radians');
-        check_number_type(radians, this+'.rotateAroundInternalPoint', 'point, *radians*');
+        type_check(point,'Point', r,'number', {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians']});
+        range_check(isFinite(r), {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var pt = temp_point;
         pt.x = this.a * point.x + this.c * point.y + this.tx;
         pt.y = this.b * point.x + this.d * point.y + this.ty;
-        
-        return this.rotateAroundExternalPoint(pt, radians);
+        return this.rotateAroundExternalPoint(pt, r);
       }
     },
 
@@ -7536,14 +7169,12 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt_int, pt_ext) {
         /*DEBUG*/
-        check_point_type(pt_int, this+'.matchInternalPointWithExternal', '*pt_int*, pt_ext');
-        check_point_type(pt_ext, this+'.matchInternalPointWithExternal', 'pt_int, *pt_ext*');
+        type_check(pt_int,'Point', pt_ext,'Point', {label:'Matrix.matchInternalPointWithExternal', id:this.id, params:['point','point']});
         /*END_DEBUG*/
         var pt = temp_point;
         //transform point
         pt.x = this.a * pt_int.x + this.c * pt_int.y + this.tx;
         pt.y = this.b * pt_int.x + this.d * pt_int.y + this.ty;
-        
         return this.translate(pt_ext.x - pt.x, pt_ext.y - pt.y);
       }
     },
@@ -7561,8 +7192,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (m, t) {
         /*DEBUG*/
-        check_matrix_type(m, this+'.interpolate', '*matrix*, t');
-        check_number_type(t, this+'.interpolate', 'matrix, *t*');
+        type_check(m,'Matrix', t,'number', {label:'Matrix.interpolate', id:this.id, params:['matrix','time']});
+        range_check(isFinite(t), {label:'Matrix.interpolate', id:this.id, params:['matrix','*time*'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.a  = this.a  + (m.a  - this.a)  * t;
         this.b  = this.b  + (m.b  - this.b)  * t;
@@ -7574,63 +7205,35 @@ Object.defineProperties(doodle.events.TextEvent, {
       }
     }
   };//end matrix_static_properties defintion
-
-  
-  /*
-   * CLASS FUNCTIONS
-   */
-  
-  /**
-   * Check if a given object contains a numeric matrix properties.
-   * Does not check if a matrix is actually a doodle.geom.matrix.
-   * @name isMatrix
-   * @param {Object} m
-   * @return {boolean}
-   * @static
-   */
-  isMatrix = doodle.geom.Matrix.isMatrix = function (m) {
-    return (m !== undefined && m !== null &&
-            typeof m.a  === 'number' && typeof m.b  === 'number' &&
-            typeof m.c  === 'number' && typeof m.d  === 'number' &&
-            typeof m.tx === 'number' && typeof m.ty === 'number');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_matrix_type
-   * @param {Object} obj
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_matrix_type = doodle.utils.types.check_matrix_type = function (obj, caller, param) {
-    if (isMatrix(obj)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_matrix_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Matrix.");
-    }
-  };
-  /*END_DEBUG*/
-  
 }());//end class closure
-/*globals doodle*/
 
+/*
+ * CLASS FUNCTIONS
+ */
+
+/**
+ * Check if a given object contains a numeric matrix properties.
+ * Does not check if a matrix is actually a doodle.geom.matrix.
+ * @name isMatrix
+ * @param {Object} m
+ * @return {boolean}
+ * @static
+ */
+doodle.geom.Matrix.isMatrix = function (m) {
+  return (typeof m === 'object' &&
+          typeof m.a  === 'number' && typeof m.b  === 'number' &&
+          typeof m.c  === 'number' && typeof m.d  === 'number' &&
+          typeof m.tx === 'number' && typeof m.ty === 'number');
+};
+/*globals doodle*/
 (function () {
   var rect_static_properties,
-      isRect,
       temp_array = new Array(4),
       /*DEBUG*/
-      check_rect_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       //lookup help
-      doodle_Rectangle,
       max = Math.max,
       min = Math.min;
   
@@ -7646,7 +7249,7 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle_Rectangle = doodle.geom.Rectangle = function (x, y, width, height) {
+  doodle.geom.Rectangle = function Rectangle (x, y, width, height) {
     var rect = {},
         arg_len = arguments.length,
         init_obj;
@@ -7673,7 +7276,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return x; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.x');
+            type_check(n,'number', {label:'Rectangle.x', id:this.id});
+            range_check(isFinite(n), {label:'Rectangle.x', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             x = n;
           }
@@ -7691,7 +7295,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return y; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.y');
+            type_check(n,'number', {label: 'Rectangle.y', id:this.id});
+            range_check(isFinite(n), {label:'Rectangle.y', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             y = n;
           }
@@ -7709,7 +7314,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return width; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n, 'number', {label: 'Rectangle.width', id:this.id});
+            range_check(isFinite(n), {label:'Rectangle.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             width = n;
           }
@@ -7727,7 +7333,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return height; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n,'number', {label:'Rectangle.height', id:this.id});
+            range_check(isFinite(n), {label:'Rectangle.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             height = n;
           }
@@ -7744,14 +7351,32 @@ Object.defineProperties(doodle.events.TextEvent, {
           writable: false,
           configurable: false,
           value: function () {
-            var rect = $temp_array;
-            rect[0] = x;
-            rect[1] = y;
-            rect[2] = width;
-            rect[3] = height;
-            return rect;
+            $temp_array[0] = x;
+            $temp_array[1] = y;
+            $temp_array[2] = width;
+            $temp_array[3] = height;
+            return $temp_array;
           }
-        }
+        },
+
+        /**
+         * @name id
+         * @return {string}
+         */
+        'id': (function () {
+          var id = null;
+          return {
+            enumerable: true,
+            configurable: false,
+            get: function () { return (id === null) ? this.toString() : id; },
+            set: function (idArg) {
+              /*DEBUG*/
+              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              /*END_DEBUG*/
+              id = idArg;
+            }
+          };
+        }())
         
       };
     }()));//end defineProperties
@@ -7781,7 +7406,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         rect.compose.apply(rect, init_obj);
       } else {
         /*DEBUG*/
-        check_rect_type(init_obj, '[object Rectangle](rect)');
+        type_check(init_obj,'Rectangle', {label:'Rectangle', id:this.id, params:'rectangle', message:"Unable to initialize with Rectangle object."});
         /*END_DEBUG*/
         rect.compose(init_obj.x, init_obj.y, init_obj.width, init_obj.height);
       }
@@ -7806,12 +7431,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'top': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.y;
-      },
+      get: function () { return this.y; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.top');
+        type_check(n,'number', {label:'Rectangle.top', id:this.id});
+        range_check(isFinite(n), {label:'Rectangle.top', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.y = n;
         this.height -= n;
@@ -7827,12 +7451,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'right': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.x + this.width;
-      },
+      get: function () { return this.x + this.width; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.right');
+        type_check(n,'number', {label:'Rectangle.right', id:this.id});
+        range_check(isFinite(n), {label:'Rectangle.right', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.width = n - this.x;
       }
@@ -7847,12 +7470,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'bottom': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.y + this.height;
-      },
+      get: function () { return this.y + this.height; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.bottom');
+        type_check(n,'number', {label:'Rectangle.bottom', id:this.id});
+        range_check(isFinite(n), {label:'Rectangle.bottom', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.height = n - this.y;
       }
@@ -7867,12 +7489,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'left': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.x;
-      },
+      get: function () { return this.x; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.left');
+        type_check(n,'number', {label:'Rectangle.left', id:this.id});
+        range_check(isFinite(n), {label:'Rectangle.left', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.x = n;
         this.width -= n;
@@ -7888,7 +7509,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       writable: false,
       configurable: false,
       value: function () {
-        return "(x="+ this.x +", y="+ this.y +", w="+ this.width +", h="+ this.height +")";
+        return "(x="+ this.x +",y="+ this.y +",w="+ this.width +",h="+ this.height +")";
       }
     },
 
@@ -7900,9 +7521,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return this.__toArray().concat();
-      }
+      value: function () { return this.__toArray().concat(); }
     },
     
     /**
@@ -7910,8 +7529,8 @@ Object.defineProperties(doodle.events.TextEvent, {
      * @name compose
      * @param {number} x
      * @param {number} y
-     * @param {number} width
-     * @param {number} height
+     * @param {number} w
+     * @param {number} h
      * @return {Rectangle}
      * @throws {TypeError}
      */
@@ -7919,17 +7538,15 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (x, y, width, height) {
+      value: function (x, y, w, h) {
         /*DEBUG*/
-        check_number_type(x, this+'.compose', '*x*, y, width, height');
-        check_number_type(y, this+'.compose', 'x, *y*, width, height');
-        check_number_type(width, this+'.compose', 'x, y, *width*, height');
-        check_number_type(height, this+'.compose', 'x, y, width, *height*');
+        type_check(x,'number', y,'number', w,'number', h,'number', {label: 'Rectangle.compose', params:['x','y','width','height'], id:this.id});
+        range_check(isFinite(x), isFinite(y), isFinite(w), isFinite(h), {label:'Rectangle.compose', id:this.id, params:['x','y','width','height'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
+        this.width = w;
+        this.height = h;
         return this;
       }
     },
@@ -7948,7 +7565,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.__compose', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.__compose', params:'rectangle', id:this.id});
         /*END_DEBUG*/
         this.compose.apply(this, rect.__toArray());
         return this;
@@ -7963,9 +7580,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return doodle_Rectangle(this.x, this.y, this.width, this.height);
-      }
+      value: function () { return Rectangle(this.x, this.y, this.width, this.height); }
     },
 
     /**
@@ -7983,8 +7598,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.offset', '*dx*, dy');
-        check_number_type(dy, this+'.offset', 'dx, *dy*');
+        type_check(dx,'number', dy,'number', {label:'Rectangle.offset', params:['dx','dy'], id:this.id});
+        range_check(isFinite(dx), isFinite(dy), {label:'Rectangle.offset', id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -8009,8 +7624,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (dx, dy) {
         /*DEBUG*/
-        check_number_type(dx, this+'.inflate', '*dx*, dy');
-        check_number_type(dy, this+'.inflate', 'dx, *dy*');
+        type_check(dx,'number', dy,'number', {label:'Rectangle.inflate', params:['dx','dy'], id:this.id});
+        range_check(isFinite(dx), isFinite(dy), {label:'Rectangle.inflate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x -= dx;
         this.width += 2 * dx;
@@ -8033,10 +7648,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.equals', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.equals', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        return (this.x === rect.x && this.y === rect.y &&
-                this.width === rect.width && this.height === rect.height);
+        return (this.x === rect.x && this.y === rect.y && this.width === rect.width && this.height === rect.height);
       }
     },
 
@@ -8049,9 +7663,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return (this.width >= 0 || this.height >= 0);
-      }
+      value: function () { return (this.width >= 0 || this.height >= 0); }
     },
 
     /**
@@ -8069,11 +7681,10 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (x, y) {
         /*DEBUG*/
-        check_number_type(x, this+'.contains', '*x*, y');
-        check_number_type(y, this+'.contains', 'x, *y*');
+        type_check(x,'number', y,'number', {label:'Rectangle.contains', params:['x','y'], id:this.id});
+        range_check(isFinite(x), isFinite(y), {label:'Rectangle.contains', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        return (x >= this.left && x <= this.right &&
-                y >= this.top && y <= this.bottom);
+        return (x >= this.left && x <= this.right && y >= this.top && y <= this.bottom);
       }
     },
 
@@ -8091,7 +7702,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (pt) {
         /*DEBUG*/
-        check_point_type(pt, this+'.containsPoint', '*point*');
+        type_check(pt,'Point', {label:'Rectangle.containsPoint', params:'point', id:this.id});
         /*END_DEBUG*/
         return this.contains(pt.x, pt.y);
       }
@@ -8110,13 +7721,12 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.containsRect', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.containsRect', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        //check each corner
-        return (this.contains(rect.x, rect.y) &&           //top-left
-                this.contains(rect.right, rect.y) &&       //top-right
-                this.contains(rect.right, rect.bottom) &&  //bot-right
-                this.contains(rect.x, rect.bottom));       //bot-left
+        var right = rect.x + rect.width,
+            bot = rect.y + rect.height;
+        //check corners: tl, tr, br, bl
+        return (this.contains(rect.x, rect.y) && this.contains(right, rect.y) && this.contains(right, bot) && this.contains(rect.x, bot));
       }
     },
 
@@ -8133,13 +7743,12 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.intersects', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.intersects', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        //check each corner
-        return (this.contains(rect.x, rect.y) ||           //top-left
-                this.contains(rect.right, rect.y) ||       //top-right
-                this.contains(rect.right, rect.bottom) ||  //bot-right
-                this.contains(rect.x, rect.bottom));       //bot-left
+        var right = rect.x + rect.width,
+            bot = rect.y + rect.height;
+        //check corners: tl, tr, br, bl
+        return (this.contains(rect.x, rect.y) || this.contains(right, rect.y) || this.contains(right, bot) || this.contains(rect.x, rect.bot));
       }
     },
 
@@ -8159,14 +7768,14 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.intersection', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.intersection', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        var r = doodle_Rectangle(0, 0, 0, 0);
+        var r = Rectangle(0, 0, 0, 0);
         if (this.intersects(rect)) {
-          r.left = max(this.left, rect.left);
-          r.top = max(this.top, rect.top);
-          r.right = min(this.right, rect.right);
-          r.bottom = min(this.bottom, rect.bottom);
+          r.left = max(this.left, rect.x);
+          r.top = max(this.top, rect.y);
+          r.right = min(this.right, rect.x + rect.width);
+          r.bottom = min(this.bottom, rect.y + rect.height);
         }
         return r;
       }
@@ -8186,13 +7795,13 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.intersection', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.__intersection', params:'rectangle', id:this.id});
         /*END_DEBUG*/
         if (this.intersects(rect)) {
-          this.left = max(this.left, rect.left);
-          this.top = max(this.top, rect.top);
-          this.right = min(this.right, rect.right);
-          this.bottom = min(this.bottom, rect.bottom);
+          this.left = max(this.left, rect.x);
+          this.top = max(this.top, rect.y);
+          this.right = min(this.right, rect.x + rect.width);
+          this.bottom = min(this.bottom, rect.y + rect.height);
         }
         return this;
       }
@@ -8212,13 +7821,13 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.union', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.union', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        var r = doodle_Rectangle(0, 0, 0, 0);
-        r.left = min(this.left, rect.left);
-        r.top = min(this.top, rect.top);
-        r.right = max(this.right, rect.right);
-        r.bottom = max(this.bottom, rect.bottom);
+        var r = Rectangle(0, 0, 0, 0);
+        r.left = min(this.left, rect.x);
+        r.top = min(this.top, rect.y);
+        r.right = max(this.right, rect.x + rect.width);
+        r.bottom = max(this.bottom, rect.y + rect.height);
         return r;
       }
     },
@@ -8237,79 +7846,47 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (rect) {
         /*DEBUG*/
-        check_rect_type(rect, this+'.__union', '*rect*');
+        type_check(rect,'Rectangle', {label:'Rectangle.__union', params:'rectangle', id:this.id});
         /*END_DEBUG*/
         //a bit tricky, if applied directly it doesn't work
-        var l = min(this.left, rect.left),
-            t = min(this.top, rect.top),
-            r = max(this.right, rect.right),
-            b = max(this.bottom, rect.bottom);
+        var l = min(this.left, rect.x),
+            t = min(this.top, rect.y),
+            r = max(this.right, rect.x + rect.width),
+            b = max(this.bottom, rect.y + rect.height);
         this.left = l;
         this.top = t;
         this.right = r;
         this.bottom = b;
-        
         return this;
       }
     }
     
   };//end rect_static_properties definition
-
-  /*
-   * CLASS FUNCTIONS
-   */
-
-  /**
-   * Check if a given object contains a numeric rectangle properties including
-   * x, y, width, height, top, bottom, right, left.
-   * Does not check if a rectangle is actually a doodle.geom.rectangle.
-   * @name isRect
-   * @param {Rectangle} rect Object with numeric rectangle parameters.
-   * @return {boolean}
-   * @static
-   */
-  isRect = doodle.geom.Rectangle.isRect = function (rect) {
-    return (typeof rect.x     === "number" && typeof rect.y      === "number" &&
-            typeof rect.width === "number" && typeof rect.height === "number" &&
-            typeof rect.top   === "number" && typeof rect.bottom === "number" &&
-            typeof rect.left  === "number" && typeof rect.right  === "number");
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_rect_type
-   * @param {Rectangle} rect
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_rect_type = doodle.utils.types.check_rect_type = function (rect, caller, param) {
-    if (isRect(rect)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_rect_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Rectangle.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
-/*globals doodle*/
 
+/*
+ * CLASS FUNCTIONS
+ */
+
+/**
+ * Check if a given object contains a numeric rectangle properties including
+ * x, y, width, height, top, bottom, right, left.
+ * Does not check if a rectangle is actually a doodle.geom.rectangle.
+ * @name isRect
+ * @param {Rectangle} rect Object with numeric rectangle parameters.
+ * @return {boolean}
+ * @static
+ */
+doodle.geom.Rectangle.isRectangle = function (rect) {
+  return (typeof rect === 'object' && typeof rect.x === "number" && typeof rect.y === "number" && typeof rect.width === "number" && typeof rect.height === "number");
+};
+/*globals doodle*/
 (function () {
   var evtDisp_static_properties,
       dispatcher_queue,
-      isEventDispatcher,
-      inheritsEventDispatcher,
       /*DEBUG*/
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_function_type = doodle.utils.types.check_function_type,
-      check_event_type = doodle.utils.types.check_event_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       //lookup help
       CAPTURING_PHASE = doodle.events.Event.CAPTURING_PHASE,
@@ -8340,6 +7917,21 @@ Object.defineProperties(doodle.events.TextEvent, {
     Object.defineProperties(evt_disp, evtDisp_static_properties);
     //properties that require privacy
     Object.defineProperties(evt_disp, {
+      'id': (function () {
+        var id = null;
+        return {
+          enumerable: true,
+          configurable: false,
+          get: function () { return (id === null) ? this.toString() : id; },
+          set: function (idVar) {
+            /*DEBUG*/
+            idVar === null || type_check(idVar,'string', {label:'EventDispatcher.id', message:"Property must be a string or null.", id:this.id});
+            /*END_DEBUG*/
+            id = idVar;
+          }
+        };
+      }()),
+      
       'eventListeners': (function () {
         var event_listeners = {};
         return {
@@ -8369,29 +7961,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object EventDispatcher]";
-      }
-    },
-
-    /**
-     * Call function passing object as 'this'.
-     * @name modify
-     * @param {Function} fn
-     * @return {Object}
-     * @throws {TypeError}
-     */
-    'modify': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (fn) {
-        /*DEBUG*/
-        check_function_type(fn, this+'.modify', '*function*');
-        /*END_DEBUG*/
-        fn.call(this);
-        return this;
-      }
+      value: function () { return "[object EventDispatcher]"; }
     },
 
     /**
@@ -8410,9 +7980,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        check_string_type(type, this+'.addEventListener', '*type*, listener, useCapture');
-        check_function_type(listener, this+'.addEventListener', 'type, *listener*, useCapture');
-        check_boolean_type(useCapture, this+'.addEventListener', 'type, listener, *useCapture*');
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'EventDispatcher.addEventListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
         var eventListeners = this.eventListeners;
         
@@ -8444,9 +8012,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        check_string_type(type, this+'.removeEventListener', '*type*, listener, useCapture');
-        check_function_type(listener, this+'.removeEventListener', 'type, *listener*, useCapture');
-        check_boolean_type(useCapture, this+'.removeEventListener', 'type, listener, *useCapture*');
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'EventDispatcher.removeEventListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
         var eventListeners = this.eventListeners,
             handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
@@ -8487,7 +8053,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (event) {
         /*DEBUG*/
-        check_event_type(event, this+'.handleEvent');
+        type_check(event, 'Event', {label:'EventDispatcher.handleEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
         
         //check for listeners that match event type
@@ -8507,7 +8073,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           count = listeners.length;
           for (i = 0; i < count; i += 1) {
             /*DEBUG*/
-            check_function_type(listeners[i], this+'.handleEvent::listeners['+i+']');
+            console.assert(typeof listeners[i] === 'function', "listener is a function", listeners[i]);
             /*END_DEBUG*/
             //pass event to handler
             rv = listeners[i].call(this, event);
@@ -8560,7 +8126,7 @@ Object.defineProperties(doodle.events.TextEvent, {
             i; //counter
 
         /*DEBUG*/
-        check_event_type(event, this+'.dispatchEvent', '*event*');
+        type_check(event, 'Event', {label:'EventDispatcher.dispatchEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         //can't dispatch an event that's already stopped
@@ -8651,7 +8217,7 @@ Object.defineProperties(doodle.events.TextEvent, {
             dq_count = disp_queue.length;
         
         /*DEBUG*/
-        check_event_type(event, this+'.broadcastEvent', '*event*');
+        type_check(event, 'Event', {label:'EventDispatcher.broadcastEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         if (event.__cancel) {
@@ -8693,7 +8259,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        check_string_type(type, this+'.hasEventListener', '*type*');
+        type_check(type,'string', {label:'EventDispatcher.hasEventListener', params:'type', id:this.id});
         /*END_DEBUG*/
         return this.eventListeners.hasOwnProperty(type);
       }
@@ -8717,7 +8283,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        check_string_type(type, this+'.willTrigger', '*type*');
+        type_check(type,'string', {label:'EventDispatcher.willTrigger', params:'type', id:this.id});
         /*END_DEBUG*/
         if (this.eventListeners.hasOwnProperty(type)) {
           //hasEventListener
@@ -8744,81 +8310,42 @@ Object.defineProperties(doodle.events.TextEvent, {
   
   //holds all objects with event listeners
   dispatcher_queue = doodle.EventDispatcher.dispatcher_queue = [];
+  
+}());//end class closure
 
-  /**
-   * Test if an object is an event dispatcher.
-   * @name isEventDispatcher
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isEventDispatcher = doodle.EventDispatcher.isEventDispatcher = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object EventDispatcher]');
-  };
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Check if object inherits from event dispatcher.
-   * @name inheritsEventDispatcher
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsEventDispatcher = doodle.EventDispatcher.inheritsEventDispatcher = function (obj) {
+/**
+ * Test if an object is an event dispatcher.
+ * @name isEventDispatcher
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.EventDispatcher.isEventDispatcher = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isEventDispatcher(obj)) {
+      if (obj.toString() === '[object EventDispatcher]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_eventdispatcher_type
-   * @param {EventDispatcher} obj
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_eventdispatcher_type = function (obj, caller, param) {
-    if (inheritsEventDispatcher(obj)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_eventdispatcher_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an EventDispatcher.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};
 /*jslint nomen: false, plusplus: false*/
-/*globals doodle, check_display_type*/
+/*globals doodle*/
 
 (function () {
   var node_count = 0,
       node_static_properties,
-      isNode,
-      inheritsNode,
       /*DEBUG*/
-      check_node_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_matrix_type = doodle.utils.types.check_matrix_type,
-      check_point_type = doodle.utils.types.check_point_type,
-      check_context_type = doodle.utils.types.check_context_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       //recycled events
       evt_addedEvent = doodle.events.Event(doodle.events.Event.ADDED, true),
@@ -8892,7 +8419,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return node_id; },
           set: function (idArg) {
             /*DEBUG*/
-            check_string_type(idArg, this+'.id');
+            type_check(idArg, 'string', {label:'Node.id', id:this.id});
             /*END_DEBUG*/
             node_id = idArg;
           }
@@ -8912,10 +8439,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return root; },
           set: function (node) {
             /*DEBUG*/
-            if (node !== null) {
-              //no lookup help since it's not defined until display.js
-              doodle.utils.types.check_display_type(node, this+'.root');
-            }
+            node === null || type_check(node, 'Display', {label:'Node.root', id:this.id, inherits:true});
             /*END_DEBUG*/
             root = node;
           }
@@ -8935,9 +8459,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return parent; },
           set: function (node) {
             /*DEBUG*/
-            if (node !== null) {
-              check_node_type(node, this+'.parent');
-            }
+            node === null || type_check(node, 'Node', {label:'Node.parent', id:this.id, inherits:true});
             /*END_DEBUG*/
             parent = node;
           }
@@ -8954,9 +8476,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         return {
           enumerable: true,
           configurable: false,
-          get: function () {
-            return children;
-          }
+          get: function () { return children; }
         };
       }()),
 
@@ -8973,7 +8493,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return transform; },
           set: function (matrix) {
             /*DEBUG*/
-            check_matrix_type(matrix, this+'.transform');
+            type_check(matrix, 'Matrix', {label:'Node.transform', id:this.id});
             /*END_DEBUG*/
             transform = matrix;
           }
@@ -8993,7 +8513,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return visible; },
           set: function (isVisible) {
             /*DEBUG*/
-            check_boolean_type(isVisible, node+'.visible');
+            type_check(isVisible, 'boolean', {label:'Node.visible', id:this.id});
             /*END_DEBUG*/
             visible = isVisible;
           }
@@ -9013,7 +8533,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return alpha; },
           set: function (alphaArg) {
             /*DEBUG*/
-            check_number_type(alphaArg, node+'.alpha');
+            type_check(alphaArg, 'number', {label:'Node.alpha', id:this.id});
+            range_check(isFinite(alphaArg), {label:'Node.alpha', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha = (alphaArg > 1) ? 1 : ((alphaArg < 0) ? 0 : alphaArg);
           }
@@ -9032,7 +8553,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (targetCoordSpace) {
           /*DEBUG*/
-          check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
+          type_check(targetCoordSpace, 'Node', {label:'Node.getBounds', params:'targetCoordSpace', id:this.id, inherits:true});
           /*END_DEBUG*/
           return this.__getBounds(targetCoordSpace).clone();
         }
@@ -9050,10 +8571,9 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: (function () {
           var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
-          
           return function (targetCoordSpace) {
             /*DEBUG*/
-            check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+            type_check(targetCoordSpace, 'Node', {label:'Node.__getBounds', params:'targetCoordSpace', id:this.id, inherits:true});
             /*END_DEBUG*/
             var bounding_box = null,
                 child_bounds,
@@ -9098,12 +8618,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'x': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.tx;
-      },
+      get: function () { return this.transform.tx; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.x');
+        type_check(n, 'number', {label:'Node.x', id:this.id});
+        range_check(isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.tx = n;
       }
@@ -9117,12 +8636,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'y': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.ty;
-      },
+      get: function () { return this.transform.ty; },
       set: function (n) {
         /*DEBUG*/
-        check_number_type(n, this+'.y');
+        type_check(n, 'number', {label:'Node.y', id:this.id});
+        range_check(isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.ty = n;
       }
@@ -9158,7 +8676,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (deg) {
         /*DEBUG*/
-        check_number_type(deg, this+'.rotate', '*degrees*');
+        type_check(deg, 'number', {label:'Node.rotate', id:this.id, params:'degrees', message:"Parameter must be a number in degrees."});
+        range_check(isFinite(deg), {label:'Node.rotate', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotate(deg * PI / 180);
       }
@@ -9172,12 +8691,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'rotation': {
       enumerable: true,
       configurable: true,
-      get: function () {
-        return this.transform.rotation * 180 / PI;
-      },
+      get: function () { return this.transform.rotation * 180 / PI; },
       set: function (deg) {
         /*DEBUG*/
-        check_number_type(deg, this+'.rotation', '*degrees*');
+        type_check(deg, 'number', {label:'Node.rotation', id:this.id, message:"Parameter must be a number in degrees."});
+        range_check(isFinite(deg), {label:'Node.rotation', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotation = deg * PI / 180;
       }
@@ -9191,12 +8709,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'scaleX': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.a;
-      },
+      get: function () { return this.transform.a; },
       set: function (sx) {
         /*DEBUG*/
-        check_number_type(sx, this+'.scaleX');
+        type_check(sx, 'number', {label:'Node.scaleX', id:this.id});
+        range_check(isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.a = sx;
       }
@@ -9210,12 +8727,11 @@ Object.defineProperties(doodle.events.TextEvent, {
     'scaleY': {
       enumerable: true,
       configurable: false,
-      get: function () {
-        return this.transform.d;
-      },
+      get: function () { return this.transform.d; },
       set: function (sy) {
         /*DEBUG*/
-        check_number_type(sy, this+'.scaleY');
+        type_check(sy, 'number', {label:'Node.scaleY', id:this.id});
+        range_check(isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.d = sy;
       }
@@ -9236,7 +8752,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         while (node) {
           if (node.context) {
             /*DEBUG*/
-            check_context_type(node.context, this+'.context (traversal)');
+            type_check(node.context, 'context', {label:'Node.context', id:this.id});
             /*END_DEBUG*/
             return node.context;
           }
@@ -9298,17 +8814,15 @@ Object.defineProperties(doodle.events.TextEvent, {
             display = this.root,
             node_parent = node.parent,
             i;
-
         /*DEBUG*/
-        check_node_type(node, this+'.addChildAt', '*node*, index');
-        check_number_type(index, this+'.addChildAt', 'node, *index*');
+        type_check(node, 'Node', index, 'number', {label:'Node.addChildAt', params:['node', 'index'], inherits:true, id:this.id});
+        range_check(index >= -children.length, index <= children.length, {label:'Node.addChildAt', params:['node', '*index*'], id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
         
         //if already a child then ignore
         if (children.indexOf(node) !== -1) {
           return false;
         }
-
         //if it had another parent, remove from their children
         if (node_parent !== null && node_parent !== this) {
           node.parent.removeChild(node);
@@ -9347,7 +8861,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (node) {
         /*DEBUG*/
-        check_node_type(node, this+'.addChild', '*node*');
+        type_check(node,'Node', {label:'Node.addChild', id:this.id, params:'node', inherits:true});
         /*END_DEBUG*/
         //add to end of children array
         return this.addChildAt(node, this.children.length);
@@ -9357,6 +8871,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     /**
      * @name removeChildAt
      * @param {number} index
+     * @return {Node} Removed child node.
      * @throws {TypeError}
      * @throws {RangeError}
      */
@@ -9366,42 +8881,36 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (index) {
         /*DEBUG*/
-        check_number_type(index, this+'.removeChildAt', '*index*');
-        if (index < 0 || index >= this.children.length) {
-          throw new RangeError(this+".removeChildAt(*index*): Index out of range.");
-        }
+        type_check(index,'number', {label:'Node.removeChildAt', id:this.id, params:'index'});
+        range_check(index >= -this.children.length, index < this.children.length, {label:'Node.removeChildAt', params:'*index*', id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
-        var children = this.children,
-            child = children[index],
-            display = this.root,
-            child_descendants = create_scene_path(child, []), //includes child
+        var child = this.children.splice(index, 1)[0],    //unadopt
+            child_descendants = create_scene_path(child), //includes child
             i = child_descendants.length,
             j = i;
-        
         //event dispatching depends on an intact scene graph
-        if (display) {
+        if (this.root) {
           while (i--) {
             child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
           }
+          while (j--) {
+            child_descendants[j].root = null;
+          }
         }
-        //un-adopt child
-        children.splice(index, 1);
-        
         //reset child and descendants
         child.parent = null;
-        while (j--) {
-          child_descendants[j].root = null;
-        }
         //reorder this display's scene path
-        if (display) {
-          display.__sortAllChildren();
+        if (this.root) {
+          this.root.__sortAllChildren();
         }
+        return child;
       }
     },
 
     /**
      * @name removeChild
      * @param {Node} node
+     * @return {Node} Removed child node.
      * @throws {TypeError}
      * @throws {ReferenceError}
      */
@@ -9411,18 +8920,18 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (node) {
         /*DEBUG*/
-        check_node_type(node, this+'.removeChild', '*node*');
-        if (node.parent !== this) {
-          throw new ReferenceError(this+".removeChild: "+ node.id +" is not a child of this node.");
-        }
+        type_check(node,'Node', {label:'Node.removeChild', id:this.id, params:'node', inherits:true});
+        reference_check(node.parent === this, {label:'Node.removeChild', params:'*node*', id:this.id, message:"Can not remove a Node that is not a child."});
+				console.assert(this.children.indexOf(node) !== -1, "Node found in children", node);
         /*END_DEBUG*/
-        this.removeChildAt(this.children.indexOf(node));
+        return this.removeChildAt(this.children.indexOf(node));
       }
     },
 
     /**
      * @name removeChildById
      * @param {string} id
+     * @return {Node} Removed child node.
      * @throws {TypeError}
      */
     'removeChildById': {
@@ -9431,9 +8940,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (id) {
         /*DEBUG*/
-        check_string_type(id, this+'.removeChildById', '*id*');
+        type_check(id, 'string', {label:'Node.removeChildById', id:this.id, params:'id'});
         /*END_DEBUG*/
-        this.removeChild(this.getChildById(id));
+        return this.removeChild(this.getChildById(id));
       }
     },
 
@@ -9446,9 +8955,36 @@ Object.defineProperties(doodle.events.TextEvent, {
       writable: false,
       configurable: false,
       value: function () {
-        var i = this.children.length;
-        while (i--) {
-          this.removeChildAt(i);
+        var children = this.children,
+            display = this.root,
+            child_descendants = create_scene_path(this, []),
+            n = children.length,
+            i, j;
+        /*DEBUG*/
+        console.assert(child_descendants[child_descendants.length-1] === this, "Last item in array is this Node.");
+        /*END_DEBUG*/
+        child_descendants.pop(); //remove this node
+        i = j = child_descendants.length;
+        
+        //event dispatching depends on an intact scene graph
+        if (display) {
+          while (i--) {
+            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
+          }
+        }
+        //reset root of all descendants
+        while (j--) {
+          child_descendants[j].root = null;
+        }
+        //reset parent of children
+        while (n--) {
+          children[n].parent = null;
+        }
+        //un-adopt children
+        children.length = 0;
+        //reorder this display's scene path
+        if (display) {
+          display.__sortAllChildren();
         }
       }
     },
@@ -9456,7 +8992,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     /**
      * @name getChildById
      * @param {string} id
-     * @return {Node|null}
+     * @return {Node|undefined}
      * @throws {TypeError}
      */
     'getChildById': {
@@ -9465,7 +9001,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (id) {
         /*DEBUG*/
-        check_string_type(id, this+'.getChildById', '*id*');
+        type_check(id, 'string', {label:'Node.getChildById', params:'id', id:this.id});
         /*END_DEBUG*/
         var children = this.children,
             len = children.length,
@@ -9475,7 +9011,7 @@ Object.defineProperties(doodle.events.TextEvent, {
             return children[i];
           }
         }
-        return null;
+        return undefined;
       }
     },
 
@@ -9492,30 +9028,24 @@ Object.defineProperties(doodle.events.TextEvent, {
       writable: false,
       configurable: false,
       value: function (child, index) {
-        /*DEBUG*/
-        check_node_type(child, this+'.setChildIndex', '*child*, index');
-        check_number_type(index, this+'.setChildIndex', 'child, *index*');
-        if (child.parent !== this) {
-          throw new ReferenceError(this+".setChildIndex: "+ child.id +" is not a child of this node.");
-        }
-        /*END_DEBUG*/
         var children = this.children,
             len = children.length,
             pos = children.indexOf(child);
         /*DEBUG*/
-        if (pos === -1) {
-          throw new ReferenceError(this+'.setChildIndex(*child*, index): ' + child + ' does not exist on child list.');
-        }
-        if (index > len || index < -len) {
-          throw new RangeError(this+'.setChildIndex(child, *index*): ' + index + ' does not exist on child list.');
-        }
+        type_check(child,'Node', index,'number', {label:'Node.setChildIndex', params:['child', 'index'], id:this.id, inherits:true});
+        range_check(index >= -children.length, index < children.length, {label:'Node.setChildIndex', params:['child', '*index*'], id:this.id, message:"Index out of range."});
+        reference_check(child.parent === this, {label:'Node.setChildIndex', params:['*child*','index'], id:this.id, message:"Can not set the index of a Node that is not a child."});
+        console.assert(pos !== -1, "Found child node, should be able to detect range with index.", this);
         /*END_DEBUG*/
-        children.splice(pos, 1); //remove child
+        children.splice(pos, 1);          //remove child
         children.splice(index, 0, child); //place child at new position
-        //reorder this display's scene path
         if (this.root) {
+          //reorder this display's scene path
           this.root.__sortAllChildren();
         }
+        /*DEBUG*/
+        console.assert(len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -9533,26 +9063,31 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (index1, index2) {
         var children = this.children,
-            node;
+            temp_node;
         /*DEBUG*/
-        check_number_type(index1, this+'.swapChildrenAt', '*index1*, index2');
-        check_number_type(index2, this+'.swapChildrenAt', 'index1, *index2*');
-        if (index1 > children.length - 1 || index1 < -children.length) {
-          throw new RangeError(this+'.swapChildrenAt(*index1*, index2): Index position out of range.');
-        }
-        if (index2 > children.length - 1 || index2 < -children.length) {
-          throw new RangeError(this+'.swapChildrenAt(index1, *index2*): Index position out of range.');
-        }
+        var test_len = children.length;
+        type_check(index1,'number', index2,'number', {label:'Node.swapChildrenAt', params:['index1', 'index2'], id:this.id});
+        range_check(index1 >= -test_len, index1 < test_len, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
+        range_check(index2 >= -test_len, index2 < test_len, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
+        //asserts
+        console.assert(doodle.Node.isNode(children[index1]), "Child is a Node.", children[index1]);
+        console.assert(doodle.Node.isNode(children[index2]), "Child is a Node.", children[index2]);
+        console.assert(children[index1].parent === this, "Child's parent is this Node.", children[index1]);
+        console.assert(children[index2].parent === this, "Child's parent is this Node.", children[index2]);
         /*END_DEBUG*/
-        //need to get a little fancy so we can refer to negative indexes
-        node = children.splice(index1, 1, undefined)[0];
-        children.splice(index1, 1, children.splice(index2, 1, undefined)[0]);
-        children[children.indexOf(undefined)] = node;
         
-        //reorder this display's scene path
+        //need to get a little fancy so we can refer to negative indexes
+        temp_node = children.splice(index1, 1, undefined)[0];
+        children.splice(index1, 1, children.splice(index2, 1, undefined)[0]);
+        children[children.indexOf(undefined)] = temp_node;
+        
         if (this.root) {
+          //reorder this display's scene path
           this.root.__sortAllChildren();
         }
+        /*DEBUG*/
+        console.assert(test_len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -9567,18 +9102,18 @@ Object.defineProperties(doodle.events.TextEvent, {
       writable: false,
       configurable: false,
       value: function (node1, node2) {
-        /*DEBUG*/
-        check_node_type(node1, this+'.swapChildren', '*node1*, node2');
-        check_node_type(node2, this+'.swapChildren', 'node1, *node2*');
-        if (node1.parent !== this) {
-          throw new ReferenceError(this+".swapChildren: "+ node1.id +" is not a child of this node.");
-        }
-        if (node2.parent !== this) {
-          throw new ReferenceError(this+".swapChildren: "+ node2.id +" is not a child of this node.");
-        }
-        /*END_DEBUG*/
         var children = this.children;
+        /*DEBUG*/
+        var test_len = children.length;
+        type_check(node1, 'Node', node2, 'Node', {label:'Node.swapChildren', id:this.id, params:['node1', 'node2'], inherits:true});
+        reference_check(node1.parent === this, node2.parent === this, {label:'Node.swapChildren', params:['child1','child2'], id:this.id, message:"Can not swap a Node that is not a child."});
+        /*END_DEBUG*/
+
         this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
+        
+        /*DEBUG*/
+        console.assert(test_len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -9596,15 +9131,21 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function I(node) {
         var parent = this.parent,
             children;
+        
         /*DEBUG*/
-        check_node_type(node, this+'.swapDepths', '*node*');
-        check_node_type(parent, this+'.swapDepths(node): No parent node found.');
-        if (node.parent !== parent) {
-          throw new ReferenceError(this+".swapDepths(node): "+ this.id +" node and "+ node.id + " node do not share a parent.");
-        }
+        type_check(node, 'Node', {label:'Node.swapDepths', params:'node', id:this.id, inherits:true});
+        reference_check(parent !== null, node.parent === parent, {label:'Node.swapDepths', params:'*node*', id:this.id, message:"Can not swap positions with a Node that has a different parent."});
+        //asserts
+        console.assert(doodle.Node.isNode(parent), "parent is a Node", parent);
+        var test_len = parent.children.length;
         /*END_DEBUG*/
+        
         children = parent.children;
         parent.swapChildrenAt(children.indexOf(this), children.indexOf(node));
+        
+        /*DEBUG*/
+        console.assert(test_len === children.length, "Children array length is still the same.");
+        /*END_DEBUG*/
       }
     },
 
@@ -9622,13 +9163,19 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (index) {
         var parent = this.parent;
         /*DEBUG*/
-        check_number_type(index, this+'.swapDepthAt', '*index*');
-        check_node_type(parent, this+'.swapDepthAt::parent: No parent node found.');
-        if (index >= parent.children.length || index < -parent.children.length) {
-          throw new RangeError(this+'.swapDepthAt(*index*): Index position out of range.');
-        }
+        type_check(index, 'number', {label:'Node.swapDepthAt', params:'index', id:this.id});
+        reference_check(parent !== null, {label:'Node.swapDepthAt', params:'*index*', id:this.id, message:"Node does not have a parent."});
+        
+        console.assert(doodle.Node.isNode(parent), "Node has parent Node.");
+        var test_len = parent.children.length;
+        range_check(index >= -test_len, index1 < test_len, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
+
         parent.swapChildrenAt(parent.children.indexOf(this), index);
+
+        /*DEBUG*/
+        console.assert(test_len-1 === children.length, "Children array length is one less than before.");
+        /*END_DEBUG*/
       }
     },
     
@@ -9645,7 +9192,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       configurable: false,
       value: function (node) {
         /*DEBUG*/
-        check_node_type(node, this+'.contains', '*node*');
+        type_check(node, 'Node', {label:'Node.contains', params:'node', id:this.id, inherits:true});
         /*END_DEBUG*/
         return (create_scene_path(this, []).indexOf(node) !== -1) ? true : false;
       }
@@ -9653,7 +9200,7 @@ Object.defineProperties(doodle.events.TextEvent, {
 
     /**
      * @name localToGlobal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      */
@@ -9661,25 +9208,28 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.localToGlobal', '*point*');
+        type_check(pt, 'Point', {label:'Node.localToGlobal', params:'point', id:this.id});
         /*END_DEBUG*/
         var node = this.parent;
         //apply each transformation from this node up to root
-        point = this.transform.transformPoint(point); //new point
+        pt = this.transform.transformPoint(pt); //new point
         while (node) {
-          node.transform.__transformPoint(point); //modify point
+          /*DEBUG*/
+          console.assert(doodle.Node.isNode(node), "node is a Node", node);
+          /*END_DEBUG*/
+          node.transform.__transformPoint(pt); //modify point
           node = node.parent;
         }
-        return point;
+        return pt;
       }
     },
 
     /**
      * Same as localToGlobal, but modifies a point in place.
      * @name __localToGlobal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      * @private
@@ -9688,23 +9238,26 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.localToGlobal', '*point*');
+        type_check(pt, 'Point', {label:'Node.__localToGlobal', params:'point', id:this.id});
         /*END_DEBUG*/
         var node = this;
         //apply each transformation from this node up to root
         while (node) {
-          node.transform.__transformPoint(point); //modify point
+          /*DEBUG*/
+          console.assert(doodle.Node.isNode(node), "node is a Node", node);
+          /*END_DEBUG*/
+          node.transform.__transformPoint(pt); //modify point
           node = node.parent;
         }
-        return point;
+        return pt;
       }
     },
 
     /**
      * @name globalToLocal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      */
@@ -9712,20 +9265,20 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.globalToLocal', '*point*');
+        type_check(pt, 'Point', {label:'Node.globalToLocal', id:this.id, params:'point'});
         /*END_DEBUG*/
         var global_pt = {x:0, y:0};
         this.__localToGlobal(global_pt);
-        return doodle_Point(point.x - global_pt.x, point.y - global_pt.y);
+        return doodle_Point(pt.x - global_pt.x, pt.y - global_pt.y);
       }
     },
 
     /**
      * Same as globalToLocal, but modifies a point in place.
      * @name __globalToLocal
-     * @param {Point} point
+     * @param {Point} pt
      * @return {Point}
      * @throws {TypeError}
      * @private
@@ -9734,97 +9287,50 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (point) {
+      value: function (pt) {
         /*DEBUG*/
-        check_point_type(point, this+'.globalToLocal', '*point*');
+        type_check(pt, 'Point', {label:'Node.__globalToLocal', id:this.id, params:'point'});
         /*END_DEBUG*/
-        var global_pt = {x:0, y:0};
+        var global_pt = {x:0, y:0}; //use temp point instead?
         this.__localToGlobal(global_pt);
-        point.x = point.x - global_pt.x;
-        point.y = point.y - global_pt.y;
-        return point;
+        pt.x = pt.x - global_pt.x;
+        pt.y = pt.y - global_pt.y;
+        return pt;
       }
     }
   };//end node_static_properties
+}());//end class closure
 
-  
-  /*
-   * CLASS METHODS
-   */
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Test if an object is an node.
-   * @name isNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isNode = doodle.Node.isNode = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Node]');
-  };
-
-  /**
-   * Check if object inherits from node.
-   * @name inheritsNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsNode = doodle.Node.inheritsNode = function (obj) {
+/**
+ * Test if an object inherits from Node.
+ * @name isNode
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.Node.isNode = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isNode(obj)) {
+      if (obj.toString() === '[object Node]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_node_type
-   * @param {Node} node
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_node_type = doodle.utils.types.check_node_type = function (node, caller, param) {
-    if (inheritsNode(node)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_node_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Node.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};
 /*globals doodle*/
-
 (function () {
   var sprite_static_properties,
-      isSprite,
-      inheritsSprite,
       /*DEBUG*/
-      check_sprite_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_function_type = doodle.utils.types.check_function_type,
-      check_point_type = doodle.utils.types.check_point_type,
-      check_node_type = doodle.utils.types.check_node_type,
-      check_context_type = doodle.utils.types.check_context_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      //lookup help
       doodle_Rectangle = doodle.geom.Rectangle;
 
   /**
@@ -9880,7 +9386,8 @@ Object.defineProperties(doodle.events.TextEvent, {
             get: function () { return width; },
             set: function (n) {
               /*DEBUG*/
-              check_number_type(n, this+'.width');
+              type_check(n, 'number', {label:'Sprite.width', id:this.id});
+              range_check(isFinite(n), {label:'Sprite.width', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               width = n;
             }
@@ -9902,7 +9409,8 @@ Object.defineProperties(doodle.events.TextEvent, {
             get: function () { return height; },
             set: function (n) {
               /*DEBUG*/
-              check_number_type(n, this+'.height');
+              type_check(n, 'number', {label:'Sprite.height', id:this.id});
+              range_check(isFinite(n), {label:'Sprite.height', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               height = n;
             }
@@ -9922,7 +9430,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           configurable: false,
           value: function (targetCoordSpace) {
             /*DEBUG*/
-            check_node_type(targetCoordSpace, this+'.getBounds', '*targetCoordSpace*');
+            type_check(targetCoordSpace, 'Node', {label:'Sprite.getBounds', id:this.id, params:'targetCoordSpace', inherits:true});
             /*END_DEBUG*/
             return this.__getBounds(targetCoordSpace).clone();
           }
@@ -9940,10 +9448,9 @@ Object.defineProperties(doodle.events.TextEvent, {
           configurable: false,
           value: (function () {
             var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
-
             return function (targetCoordSpace) {
               /*DEBUG*/
-              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              type_check(targetCoordSpace, 'Node', {label:'Sprite.__getBounds', id:this.id, params:'targetCoordSpace', inherits:true});
               /*END_DEBUG*/
               var children = this.children,
                   len = children.length,
@@ -10027,7 +9534,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           configurable: false,
           value: function (node) {
             /*DEBUG*/
-            check_node_type(node, this+'.hitTestObject', '*sprite*');
+            type_check(node, 'Node', {label:'Sprite.hitTestObject', id:this.id, params:'node', inherits:true});
             /*END_DEBUG*/
             return this.getBounds(this).intersects(node.getBounds(this));
           }
@@ -10045,7 +9552,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           configurable: false,
           value: function (pt) {
             /*DEBUG*/
-            check_point_type(pt, this+'.hitTestPoint', '*point*');
+            type_check(pt, 'Point', {label:'Sprite.hitTestPoint', id:this.id, params:'point'});
             /*END_DEBUG*/
             return this.getBounds(this).containsPoint(this.globalToLocal(pt));
           }
@@ -10064,11 +9571,11 @@ Object.defineProperties(doodle.events.TextEvent, {
           configurable: false,
           value: function (ctx) {
             /*DEBUG*/
-            check_context_type(ctx, this+'.__draw', '*context*');
+            type_check(ctx, 'context', {label:'Sprite.__draw', id:this.id, params:'context'});
             /*END_DEBUG*/
             for (var i=0, len=draw_commands.length; i < len; i++) {
               /*DEBUG*/
-              check_function_type(draw_commands[i], sprite+'.__draw: [draw_commands]::', '*command*');
+              console.assert(typeof draw_commands[i] === 'function', "draw command is a function", draw_commands[i]);
               /*END_DEBUG*/
               draw_commands[i].call(sprite, ctx);
             }
@@ -10099,12 +9606,11 @@ Object.defineProperties(doodle.events.TextEvent, {
       return {
         enumerable: true,
         configurable: false,
-        get: function () {
-          return this.transform.rotation * to_degrees;
-        },
+        get: function () { return this.transform.rotation * to_degrees; },
         set: function (deg) {
           /*DEBUG*/
-          check_number_type(deg, this+'.rotation', '*degrees*');
+          type_check(deg, 'number', {label:'Sprite.rotation', id:this.id, message:"Property must be a number specified in degrees."});
+          range_check(isFinite(deg), {label:'Sprite.rotation', id:this.id, message:"Parameter must be a finite number."});
           /*END_DEBUG*/
           this.transform.rotation = deg * to_radians;
         }
@@ -10121,9 +9627,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Sprite]";
-      }
+      value: function () { return "[object Sprite]"; }
     },
 
     /**
@@ -10131,8 +9635,8 @@ Object.defineProperties(doodle.events.TextEvent, {
      * @name compose
      * @param {number} x
      * @param {number} y
-     * @param {number} width
-     * @param {number} height
+     * @param {number} w
+     * @param {number} h
      * @return {Sprite}
      * @throws {TypeError}
      */
@@ -10140,94 +9644,51 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function (x, y, width, height) {
+      value: function (x, y, w, h) {
         /*DEBUG*/
-        check_number_type(x, this+'.compose', '*x*, y, width, height');
-        check_number_type(y, this+'.compose', 'x, *y*, width, height');
-        check_number_type(width, this+'.compose', 'x, y, *width*, height');
-        check_number_type(height, this+'.compose', 'x, y, width, *height*');
+        type_check(x, 'number', y, 'number', w, 'number', h, 'number', {label:'Sprite.compose', id:this.id, params:['x', 'y', 'width', 'height']});
+        range_check(isFinite(x), isFinite(y), isFinite(w), isFinite(h), {label:'Sprite.compose', id:this.id, message:"Parameters must all be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
+        this.width = w;
+        this.height = h;
         return this;
       }
     }
   };//end sprite_static_properties
-  
-  
-  /*
-   * CLASS METHODS
-   */
+}());//end class closure
 
-  /**
-   * @name isSprite
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isSprite = doodle.Sprite.isSprite = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Sprite]');
-  };
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Check if object inherits from Sprite.
-   * If it doesn't return false.
-   * @name inheritsSprite
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsSprite = doodle.Sprite.inheritsSprite = function (obj) {
+/**
+ * Test if an object is a Sprite or inherits from one.
+ * @name isSprite
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.Sprite.isSprite = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isSprite(obj)) {
+      if (obj.toLocaleString() === '[object Sprite]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_sprite_type
-   * @param {Sprite} sprite
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  check_sprite_type = doodle.utils.types.check_sprite_type = function (sprite, caller, params) {
-    if (inheritsSprite(sprite)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_sprite_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must inherit from Sprite.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};
 /*globals doodle, Image*/
 (function () {
   var graphics_static_properties,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_function_type = doodle.utils.types.check_function_type,
-      check_array_type = doodle.utils.types.check_array_type,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
@@ -10374,7 +9835,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (fn) {
           /*DEBUG*/
-          check_function_type(fn, gfx_node+'.graphics.draw', '*function*');
+          type_check(fn,'function', {label:'Graphics.draw', id:gfx_node.id});
           /*END_DEBUG*/
           draw_commands.push(fn);
         }
@@ -10414,10 +9875,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (x, y, width, height) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.rect', '*x*, y, width, height');
-          check_number_type(y, gfx_node+'.graphics.rect', 'x, *y*, width, height');
-          check_number_type(width, gfx_node+'.graphics.rect', 'x, y, *width*, height');
-          check_number_type(height, gfx_node+'.graphics.rect', 'x, y, width, *height*');
+          type_check(x,'number', y,'number', width,'number', height,'number', {label:'Graphics.rect', params:['x','y','width','height'], id:gfx_node.id});
           /*END_DEBUG*/
 
           //update extremas
@@ -10452,9 +9910,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (x, y, radius) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.circle', '*x*, y, radius');
-          check_number_type(y, gfx_node+'.graphics.circle', 'x, *y*, radius');
-          check_number_type(radius, gfx_node+'.graphics.circle', 'x, y, *radius*');
+          type_check(x,'number', y,'number', radius,'number', {label:'Graphics.circle', params:['x','y','radius'], id:gfx_node.id});
           /*END_DEBUG*/
 
           //update extremas
@@ -10491,10 +9947,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         value: function (x, y, width, height) {
           height = (height === undefined) ? width : height; //default to circle
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.ellipse', '*x*, y, width, height');
-          check_number_type(y, gfx_node+'.graphics.ellipse', 'x, *y*, width, height');
-          check_number_type(width, gfx_node+'.graphics.ellipse', 'x, y, *width*, height');
-          check_number_type(height, gfx_node+'.graphics.ellipse', 'x, y, width, *height*');
+          type_check(x,'number', y,'number', width,'number', height,'number', {label:'Graphics.ellipse', params:['x','y','width','height'], id:gfx_node.id});
           /*END_DEBUG*/
           var rx = width / 2,
               ry = height / 2,
@@ -10542,12 +9995,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           rx = (rx === undefined) ? 0 : rx; //default to rectangle
           ry = (ry === undefined) ? 0 : ry;
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.roundRect', '*x*, y, width, height, rx, ry');
-          check_number_type(y, gfx_node+'.graphics.roundRect', 'x, *y*, width, height, rx, ry');
-          check_number_type(width, gfx_node+'.graphics.roundRect', 'x, y, *width*, height, rx, ry');
-          check_number_type(height, gfx_node+'.graphics.roundRect', 'x, y, width, *height*, rx, ry');
-          check_number_type(rx, gfx_node+'.graphics.roundRect', 'x, y, width, height, *rx*, ry');
-          check_number_type(ry, gfx_node+'.graphics.roundRect', 'x, y, width, height, rx, *ry*');
+          type_check(x,'number', y,'number', width,'number', height,'number', rx,'number', ry,'number', {label:'Graphics.roundRect', params:['x','y','width','height','rx','ry'], id:gfx_node.id});
           /*END_DEBUG*/
           var x3 = x + width,
               x2 = x3 - rx,
@@ -10598,12 +10046,9 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (x, y) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.moveTo', '*x*, y');
-          check_number_type(y, gfx_node+'.graphics.moveTo', 'x, *y*');
+          type_check(x,'number', y,'number', {label:'Graphics.moveTo', params:['x','y'], id:gfx_node.id});
           /*END_DEBUG*/
-          draw_commands.push(function (ctx) {
-            ctx.moveTo(x, y);
-          });
+          draw_commands.push(function (ctx) { ctx.moveTo(x, y); });
           //update cursor
           cursor_x = x;
           cursor_y = y;
@@ -10623,8 +10068,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (x, y) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.lineTo', '*x*, y');
-          check_number_type(y, gfx_node+'.graphics.lineTo', 'x, *y*');
+          type_check(x,'number', y,'number', {label:'Graphics.lineTo', params:['x','y'], id:gfx_node.id});
           /*END_DEBUG*/
 
           //update extremas
@@ -10661,8 +10105,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (pt1, pt2) {
           /*DEBUG*/
-          check_point_type(pt1, gfx_node+'.graphics.curveTo', '*ctl_point*, point');
-          check_point_type(pt2, gfx_node+'.graphics.curveTo', 'ctl_point, *point*');
+          type_check(pt1,'Point', pt2,'Point', {label:'Graphics.curveTo', params:['ctrl_point','point'], id:gfx_node.id});
           /*END_DEBUG*/
           var x0 = cursor_x,
               y0 = cursor_y,
@@ -10680,12 +10123,10 @@ Object.defineProperties(doodle.events.TextEvent, {
           if (0 <= t && t <= 1) {
             cx = (1-t) * (1-t) * x0 + 2 * (1-t) * t * x1 + t * t * x2;
           }
-
           t = (y0 - y1) / (y0 - 2 * y1 + y2);
           if (0 <= t && t <= 1) {
             cy = (1-t) * (1-t) * y0 + 2 * (1-t) * t * y1 + t * t * y2;
           }
-          
           //update extremas
           this.__minX = Math.min(0, x0, cx, x2, this.__minX);
           this.__minY = Math.min(0, y0, cy, y2, this.__minY);
@@ -10721,9 +10162,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (pt1, pt2, pt3) {
           /*DEBUG*/
-          check_point_type(pt1, gfx_node+'.graphics.bezierCurveTo', '*ctl_point1*, ctl_point2, point');
-          check_point_type(pt2, gfx_node+'.graphics.bezierCurveTo', 'ctl_point1, *ctl_point2*, point');
-          check_point_type(pt3, gfx_node+'.graphics.bezierCurveTo', 'ctl_point1, ctl_point2, *point*');
+          type_check(pt1,'Point', pt2,'Point', pt3,'Point', {label:'Graphics.bezierCurveTo', params:['ctrl_point1','ctrl_point2','point'], id:gfx_node.id});
           /*END_DEBUG*/
           var pow = Math.pow,
               max = Math.max,
@@ -10761,7 +10200,6 @@ Object.defineProperties(doodle.events.TextEvent, {
             if (yt > cy_max) { cy_max = yt; }
             if (yt < cy_min) { cy_min = yt; }
           }
-
           //update extremas
           this.__minX = min(0, x0, cx_min, x3, this.__minX);
           this.__minY = min(0, y0, cy_min, y3, this.__minY);
@@ -10775,7 +10213,6 @@ Object.defineProperties(doodle.events.TextEvent, {
           draw_commands.push(function (ctx) {
             ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
           });
-
           //update cursor
           cursor_x = x3;
           cursor_y = y3;
@@ -10798,7 +10235,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         value: function (color, alpha) {
           alpha = (alpha === undefined) ? 1 : alpha;
           /*DEBUG*/
-          check_number_type(alpha, gfx_node+'.graphics.beginFill', 'color, *alpha*');
+          type_check(color,'*', alpha,'number', {label:'Graphics.beginFill', params:['color','alpha'], id:gfx_node.id});
           /*END_DEBUG*/
           draw_commands.push(function (ctx) {
             ctx.fillStyle = hex_to_rgb_str(color, alpha);
@@ -10811,7 +10248,7 @@ Object.defineProperties(doodle.events.TextEvent, {
        * @param {GradientType} type
        * @param {Point} pt1
        * @param {Point} pt2
-       * @param {number} ratios
+       * @param {Array} ratios Array of numbers.
        * @param {Array} colors
        * @param {Array} alphas
        * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createlineargradient">context.createLinearGradient</a> [Canvas API]
@@ -10826,12 +10263,8 @@ Object.defineProperties(doodle.events.TextEvent, {
         configurable: false,
         value: function (type, pt1, pt2, ratios, colors, alphas) {
           /*DEBUG*/
-          check_point_type(pt1, gfx_node+'.graphics.beginGradientFill', 'type, *point1*, point2, ratios, colors, alphas');
-          check_point_type(pt2, gfx_node+'.graphics.beginGradientFill', 'type, point1, *point2*, ratios, colors, alphas');
-          check_array_type(ratios, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-          check_number_type(ratios, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-          check_array_type(colors, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, ratios, *colors*, alphas');
-          check_array_type(alphas, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, ratios, colors, *alphas*');
+          type_check(type,'string', pt1,'Point', pt2,'Point', ratios,'array', colors,'array', alphas,'array',
+                     {label:'Graphics.beginGradientFill', params:['gradient_type','point','point','ratios','colors','alphas'], id:gfx_node.id});
           /*END_DEBUG*/
           
           draw_commands.push(function (ctx) {
@@ -10846,13 +10279,11 @@ Object.defineProperties(doodle.events.TextEvent, {
               
             } else if (type === RADIAL) {
               /*DEBUG*/
-              check_number_type(pt1.radius, gfx_node+'.graphics.beginGradientFill', 'type, *circle1.radius*, circle2, ratios, colors, alphas');
-              check_number_type(pt2.radius, gfx_node+'.graphics.beginGradientFill', 'type, circle1, *circle2.radius*, ratios, colors, alphas');
+              type_check(pt1.radius,'number', pt2.radius,'number', {label:'Graphics.beginGradientFill', id:gfx_node.id, message:"No radius for radial type."});
               /*END_DEBUG*/
-              gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
-                                                  pt2.x, pt2.y, pt2.radius);
+              gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius, pt2.x, pt2.y, pt2.radius);
             } else {
-              throw new TypeError(gfx_node+'.graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.');
+              throw new TypeError(gfx_node.id + " Graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.");
             }
             //add color ratios to our gradient
             for (; i < len; i+=1) {
@@ -10882,11 +10313,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           
           repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
           /*DEBUG*/
-          check_string_type(repeat, gfx_node+'.graphics.beginPatternFill', 'image, *repeat*');
-          if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
-              repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
-            throw new SyntaxError(gfx_node+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
-          }
+          type_check(image,'*', repeat,'string', {label:'Graphics.beginPatternFill', params:['image','repeat'], id:gfx_node.id});
+          reference_check(repeat === Pattern.REPEAT || repeat === Pattern.NO_REPEAT || repeat === Pattern.REPEAT_X || repeat !== Pattern.REPEAT_Y, {label:'Graphics.beginPatternFill', id:gfx_node.id, message:"Invalid Pattern type."});
           /*END_DEBUG*/
           
           if (typeof image === 'string') {
@@ -10904,9 +10332,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           }
           
           /*DEBUG*/
-          if (image && image.tagName !== 'IMG') {
-            throw new TypeError(gfx_node+'.graphics.beginPatternFill(*image*, repeat): Parameter must be an src url, image object, or element id.');
-          }
+          reference_check(image && image.tagName === 'IMG', {label:'Graphics.beginPatternFill', id:gfx_node.id, message:"Parameter must be an src url, image object, or element id."});
           /*END_DEBUG*/
 
           //check if image has already been loaded
@@ -10919,7 +10345,7 @@ Object.defineProperties(doodle.events.TextEvent, {
               gfx_node.dispatchEvent(doodle_Event(doodle_Event.LOAD));
             };
             on_image_error = function () {
-              throw new URIError(gfx_node+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + image.src);
+              throw new URIError(gfx_node.id + "Graphics.beginPatternFill(*image*,repeat): Unable to load " + image.src);
             };
             image.onerror = on_image_error;
             image.onabort = on_image_error;
@@ -10963,26 +10389,15 @@ Object.defineProperties(doodle.events.TextEvent, {
           joints = (joints === undefined) ? doodle.LineJoin.MITER : joints;
           miterLimit = (miterLimit === undefined) ? 10 : miterLimit;
           /*DEBUG*/
-          check_number_type(thickness, gfx_node+'.graphics.lineStyle', '*thickness*, color, alpha, caps, joints, miterLimit');
-          check_number_type(alpha, gfx_node+'.graphics.lineStyle', 'thickness, color, *alpha*, caps, joints, miterLimit');
-          check_string_type(caps, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, *caps*, joints, miterLimit');
-          check_string_type(joints, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, caps, *joints*, miterLimit');
-          check_number_type(miterLimit, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, caps, joints, *miterLimit*');
+          type_check(thickness,'number', color,'*', alpha,'number', caps,'string', joints,'string', miterLimit,'number',
+                     {label:'Graphics.lineStyle', params:['thickness','color','alpha','caps','joints','miterLimit'], id:gfx_node.id});
           //check values
-          if (thickness <= 0 || isNaN(thickness) || !isFinite(thickness)) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(*thickness*, color, alpha, caps, joints, miterLimit): Value must be a positive number.');
-          }
-          if (caps !== doodle.LineCap.BUTT && caps !== doodle.LineCap.ROUND &&
-              caps !== doodle.LineCap.SQUARE) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, *caps*, joints, miterLimit): Invalid LineCap value.');
-          }
-          if (joints !== doodle.LineJoin.BEVEL && joints !== doodle.LineJoin.MITER &&
-              joints !== doodle.LineJoin.ROUND) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, caps, *joints*, miterLimit): Invalid LineJoin value.');
-          }
-          if (miterLimit <= 0 || isNaN(miterLimit) || !isFinite(miterLimit)) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, caps, joints, *miterLimit*): Value must be a positive number.');
-          }
+          range_check(isFinite(thickness), thickness >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"thickness must have a positive number."});
+          reference_check(caps === doodle.LineCap.BUTT || caps === doodle.LineCap.ROUND || caps === doodle.LineCap.SQUARE,
+                          {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineCap: " + caps});
+          reference_check(joints === doodle.LineJoin.BEVEL || joints === doodle.LineJoin.MITER || joints === doodle.LineJoin.ROUND,
+                          {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineJoin: " + joints});
+          range_check(isFinite(miterLimit), miterLimit >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"miterLimit must have a positive number."});
           /*END_DEBUG*/
           line_width = thickness;
           line_join = joints;
@@ -10993,9 +10408,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           if (typeof color === 'string' || typeof color === 'number') {
             color = hex_to_rgb_str(color, alpha);
           } else {
-            throw new TypeError(gfx_node+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
+            throw new TypeError(gfx_node + " Graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.");
           }
-
           draw_commands.push(function (ctx) {
             ctx.lineWidth = line_width;
             ctx.strokeStyle = color;
@@ -11003,7 +10417,6 @@ Object.defineProperties(doodle.events.TextEvent, {
             ctx.lineJoin = line_join;
             ctx.miterLimit = line_miter;
           });
-          
         }
       },
 
@@ -11054,9 +10467,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         writable: false,
         configurable: false,
         value: function () {
-          draw_commands.push(function (ctx) {
-            ctx.fill();
-          });
+          draw_commands.push(function (ctx) { ctx.fill(); });
         }
       },
       
@@ -11106,13 +10517,9 @@ Object.defineProperties(doodle.events.TextEvent, {
 (function () {
   var node_static_properties,
       url_regexp = new RegExp("^url\\((.*)\\)"),
-      isElementNode,
-      inheritsElementNode,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_node_type = doodle.utils.types.check_node_type,
+      type_check = doodle.utils.debug.type_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       //lookup help
       doodle_Rectangle = doodle.geom.Rectangle,
@@ -11234,11 +10641,11 @@ Object.defineProperties(doodle.events.TextEvent, {
           enumerable: true,
           configurable: true,
           get: function () { return node_id; },
-          set: function (name) {
+          set: function (idVar) {
             /*DEBUG*/
-            check_string_type(name, this+'.id');
+            type_check(idVar,'string', {label:'ElementNode.id', id:this.id});
             /*END_DEBUG*/
-            node_id = set_element_property(this.element, 'id', name, 'html');
+            node_id = set_element_property(this.element, 'id', idVar, 'html');
           }
         },
 
@@ -11255,7 +10662,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return width; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n,'number', {label:'ElementNode.width', id:this.id});
             /*END_DEBUG*/
             set_element_property(this.element, 'width', n+"px");
             width = n;
@@ -11275,7 +10682,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return height; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n,'number', {label:'ElementNode.height', id:this.id});
             /*END_DEBUG*/
             set_element_property(this.element, 'height', n+"px");
             height = n;
@@ -11326,7 +10733,7 @@ Object.defineProperties(doodle.events.TextEvent, {
               image = image.src;
             }
             /*DEBUG*/
-            check_string_type(image, this+'.backgroundImage');
+            type_check(image,'string', {label:'ElementNode.backgroundImage', id:this.id});
             /*END_DEBUG*/
             //url path at this point, make sure it's in the proper format
             if (!url_regexp.test(image)) {
@@ -11349,17 +10756,9 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return bg_repeat; },
           set: function (repeat) {
             /*DEBUG*/
-            check_string_type(repeat, this+'.backgroundRepeat');
-            switch (repeat) {
-            case 'repeat':
-            case 'repeat-x':
-            case 'repeat-y':
-            case 'no-repeat':
-            case 'inherit':
-              break;
-            default:
-              throw new SyntaxError(this+'.backgroundRepeat: Invalid CSS value.');
-            }
+            type_check(repeat,'string', {label:'ElementNode.backgroundRepeat', id:this.id});
+            reference_check(repeat === 'repeat' || repeat === 'repeat-x' || repeat === 'repeat-y' || repeat === 'no-repeat' || repeat === 'inherit',
+                            {label:'ElementNode.backgroundRepeat', id:this.id, message:"Invalid CSS value."});
             /*END_DEBUG*/
             bg_repeat = set_element_property(this.element, 'backgroundRepeat', repeat);
           }
@@ -11378,7 +10777,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return alpha; },
           set: function (alpha) {
             /*DEBUG*/
-            check_number_type(alpha, this+'.alpha');
+            type_check(alpha,'number', {label:'ElementNode.alpha', id:this.id});
             alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
             /*END_DEBUG*/
             alpha = set_element_property(this.element, 'opacity', alpha);
@@ -11398,7 +10797,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return visible; },
           set: function (isVisible) {
             /*DEBUG*/
-            check_boolean_type(isVisible, this+'.visible');
+            type_check(isVisible,'boolean', {label:'ElementNode.visible', id:this.id});
             /*END_DEBUG*/
             if (isVisible) {
               set_element_property(this.element, 'visibility', 'visible');
@@ -11443,7 +10842,7 @@ Object.defineProperties(doodle.events.TextEvent, {
             var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
             return function (targetCoordSpace) {
               /*DEBUG*/
-              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              console.assert(doodle.Node.isNode(targetCoordSpace), "targetCoordSpace is a Node", targetCoordSpace);
               /*END_DEBUG*/
               var children = this.children,
                   len = children.length,
@@ -11530,84 +10929,43 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object ElementNode]";
-      }
+      value: function () { return "[object ElementNode]"; }
     }
   };//end node_static_properties
+  
+}());//end class closure
 
-  /*
-   * CLASS METHODS
-   */
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Test if an object is an ElementNode.
-   * @name isElementNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isElementNode = doodle.ElementNode.isElementNode = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object ElementNode]');
-  };
-
-  /**
-   * Check if object inherits from ElementNode.
-   * @name inheritsNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsElementNode = doodle.ElementNode.inheritsElementNode = function (obj) {
+/**
+ * Test if an object is an ElementNode.
+ * @name isElementNode
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.ElementNode.isElementNode = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isElementNode(obj)) {
+      if (obj.toString() === '[object ElementNode]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_elementnode_type
-   * @param {Node} node
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_elementnode_type = function (node, caller, param) {
-    if (inheritsElementNode(node)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_elementnode_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an ElementNode.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};
 /*globals doodle, document*/
 
 (function () {
   var layer_static_properties,
       layer_count = 0,
-      isLayer,
-      inheritsLayer,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_canvas_type = doodle.utils.types.check_canvas_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       set_element_property = doodle.utils.set_element_property;
   
@@ -11647,7 +11005,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return width; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n,'number', {label:'Layer.width', id:this.id});
+            range_check(isFinite(n), {label:'Layer.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             width = set_element_property(this.element, 'width', n, 'html');
           }
@@ -11667,7 +11026,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           get: function () { return height; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n,'number', {label:'Layer.height', id:this.id});
+            range_check(isFinite(n), {label:'Layer.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             height = set_element_property(this.element, 'height', n, 'html');
           }
@@ -11700,7 +11060,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           writable: false,
           value: function (elementArg) {
             /*DEBUG*/
-            check_canvas_type(elementArg, this+'.element');
+            console.assert(typeof elementArg === 'object' && elementArg.toString() === '[object HTMLCanvasElement]', "elementArg is a canvas", elementArg);
             /*END_DEBUG*/
             //need to stack canvas elements inside div
             set_element_property(elementArg, 'position', 'absolute');
@@ -11725,9 +11085,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         '__removeDomElement': {
           enumerable: false,
           writable: false,
-          value: function (elementArg) {
-            context = null;
-          }
+          value: function (elementArg) { context = null; }
         }
         
       };
@@ -11745,7 +11103,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       break;
     case 2:
       /*DEBUG*/
-      check_canvas_type(element, '[object Layer]', 'id, *element*');
+      type_check(element,'canvas', {label:'Layer', id:this.id, message:"Invalid initialization."});
       /*END_DEBUG*/
       layer.element = element;
       break;
@@ -11774,9 +11132,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Layer]";
-      }
+      value: function () { return "[object Layer]"; }
     },
 
     /**
@@ -11797,76 +11153,38 @@ Object.defineProperties(doodle.events.TextEvent, {
       }())
     }
   };//end layer_static_properties
+  
+}());//end class closure
 
-  /*
-   * CLASS METHODS
-   */
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Test if an object is a Layer.
-   * @name isLayer
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isLayer = doodle.Layer.isLayer = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Layer]');
-  };
-
-  /**
-   * Check if object inherits from layer.
-   * @name inheritsLayer
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsLayer = doodle.Layer.inheritsLayer = function (obj) {
+/**
+ * Test if an object is a Layer.
+ * @name isLayer
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.Layer.isLayer = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isLayer(obj)) {
+      if (obj.toString() === '[object Layer]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_layer_type
-   * @param {Layer} layer
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_layer_type = function (layer, caller, param) {
-    if (inheritsLayer(layer)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_layer_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be a Layer.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};
 /*jslint nomen: false, plusplus: false*/
 /*globals doodle, document, setInterval, clearInterval, Stats*/
 
 (function () {
   var display_static_properties,
       display_count = 0,
-      isDisplay,
       create_frame,
       clear_scene_graph,
       draw_scene_graph,
@@ -11876,12 +11194,8 @@ Object.defineProperties(doodle.events.TextEvent, {
       dispatch_mouseleave_event,
       dispatch_keyboard_event,
       /*DEBUG*/
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_layer_type = doodle.utils.types.check_layer_type,
-      check_block_element = doodle.utils.types.check_block_element,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
       create_scene_path = doodle.utils.create_scene_path,
       isLayer = doodle.Layer.isLayer,
@@ -11921,7 +11235,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     if (element && typeof element !== 'function') {
       element = get_element(element);
       /*DEBUG*/
-      check_block_element(element, '[object Display](element)');
+      type_check(element,'block', {label:'Display', id:this.id, message:"Invalid element."});
       /*END_DEBUG*/
       id = get_element_property(element, 'id');
     }
@@ -11959,9 +11273,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       /* @param {doodle.events.MouseEvent} evt
        */
       function on_mouse_event (evt) {
-        $dispatch_mouse_event(evt, $evt_mouseEvent,
-                              display_scene_path, display_scene_path.length,
-                              mouseX, mouseY, $display);
+        $dispatch_mouse_event(evt, $evt_mouseEvent, display_scene_path, display_scene_path.length, mouseX, mouseY, $display);
       }
 
       /* @param {doodle.events.MouseEvent} evt
@@ -11971,9 +11283,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         mouseX = x = evt_offset_p ? evt.offsetX : evt.clientX - dom_element.offsetLeft;
         mouseY = y = evt_offset_p ? evt.offsetY : evt.clientY - dom_element.offsetTop;
         
-        $dispatch_mousemove_event(evt, $evt_mouseEvent,
-                                  display_scene_path, display_scene_path.length,
-                                  x, y, $display);
+        $dispatch_mousemove_event(evt, $evt_mouseEvent, display_scene_path, display_scene_path.length, x, y, $display);
       }
 
       /* @param {doodle.events.MouseEvent} evt
@@ -11999,8 +11309,10 @@ Object.defineProperties(doodle.events.TextEvent, {
       
       //Add display handlers
       //Redraw scene graph when children are added and removed.
-      $display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
-      $display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
+			//**when objects removed in event loop, causing it to re-run before its finished
+      //$display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
+      //$display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
+			
       //Add keyboard listeners to document.
       document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
       document.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
@@ -12058,7 +11370,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             var i = layers.length;
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n,'number', {label:'Display.width', id:this.id});
+            range_check(isFinite(n), {label:'Display.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'width', n+"px");
             width = n;
@@ -12083,7 +11396,8 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             var i = layers.length;
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n,'number', {label:'Display.height', id:this.id});
+            range_check(isFinite(n), {label:'Display.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'height', n+"px");
             height = n;
@@ -12109,7 +11423,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           writable: false,
           value: function (elementArg) {
             /*DEBUG*/
-            check_block_element(elementArg, this+'.element');
+            type_check(elementArg,'block', {label:'Display.__addDomElement', params:'elementArg', id:this.id});
             /*END_DEBUG*/
             //need to stack the canvas elements on top of each other
             set_element_property(elementArg, 'position', 'relative');
@@ -12154,6 +11468,9 @@ Object.defineProperties(doodle.events.TextEvent, {
           enumerable: false,
           writable: false,
           value: function (elementArg) {
+            /*DEBUG*/
+            //make sure it exists here
+            /*END_DEBUG*/
             //remove event handlers
             //MouseEvents
             elementArg.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, on_mouse_move, false);
@@ -12201,7 +11518,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           value: function () {
             create_scene_path(this, display_scene_path, true).reverse();
             /*DEBUG*/
-            doodle.utils.type_check(display_scene_path[0], 'Display');
+            type_check(display_scene_path[0],'Display', {label:'Display.__sortAllChildren', id:this.id});
             /*END_DEBUG*/
           }
         },
@@ -12218,7 +11535,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           configurable: false,
           value: function (point) {
             /*DEBUG*/
-            check_point_type(point, this+'.getNodesUnderPoint', '*point*');
+            type_check(point,'Point', {label:'Display.getNodesUnderPoint', params:'point', id:this.id});
             /*END_DEBUG*/
             var nodes = [],
                 scene_path = display_scene_path,
@@ -12253,8 +11570,7 @@ Object.defineProperties(doodle.events.TextEvent, {
             var super_addChildAt = $display.addChildAt;
             return function (layer, index) {
               /*DEBUG*/
-              check_layer_type(layer, this+'.addChildAt', '*layer*, index');
-              check_number_type(index, this+'.addChildAt', 'layer, *index*');
+              type_check(layer,'Layer', index,'number', {label:'Display.addChildAt', params:['layer','index'], id:this.id});
               /*END_DEBUG*/
               //inherit display dimensions
               layer.width = this.width;
@@ -12281,7 +11597,7 @@ Object.defineProperties(doodle.events.TextEvent, {
             var super_removeChildAt = $display.removeChildAt;
             return function (index) {
               /*DEBUG*/
-              check_number_type(index, this+'.removeChildAt', '*index*');
+              type_check(index,'number', {label:'Display.removeChildAt', params:'index', id:this.id});
               /*END_DEBUG*/
               //remove from dom
               this.element.removeChild(layers[index].element);
@@ -12306,8 +11622,7 @@ Object.defineProperties(doodle.events.TextEvent, {
             var super_swapChildrenAt = $display.swapChildrenAt;
             return function (idx1, idx2) {
               /*DEBUG*/
-              check_number_type(idx1, this+'.swapChildrenAt', '*index1*, index2');
-              check_number_type(idx2, this+'.swapChildrenAt', 'index1, *index2*');
+              type_check(idx1,'number', idx2,'number', {label:'Display.swapChildrenAt', params:['index1','index2'], id:this.id});
               /*END_DEBUG*/
               //swap dom elements
               if (idx1 > idx2) {
@@ -12366,7 +11681,7 @@ Object.defineProperties(doodle.events.TextEvent, {
                 get: function () { return debug_stats; },
                 set: function (useStats) {
                   /*DEBUG*/
-                  check_boolean_type(useStats, $display+'.debug.stats');
+                  type_check(useStats,'boolean', {label:'Display.debug.stats', params:'useStats', id:this.id});
                   /*END_DEBUG*/
                   if (useStats && !debug_stats) {
                     debug_stats = new Stats();
@@ -12401,10 +11716,8 @@ Object.defineProperties(doodle.events.TextEvent, {
             set: function (fps) {
               /*DEBUG*/
               if (fps !== false && fps !== 0) {
-                check_number_type(fps, this+'.frameRate');
-                if (fps < 0 || !isFinite(1000/fps)) {
-                  throw new RangeError(this+'.frameRate: Invalid framerate.');
-                }
+                type_check(fps,'number', {label:'Display.frameRate', params:'fps', id:this.id});
+                range_check(fps >= 0, isFinite(1000/fps), {label:'Display.frameRate', params:'fps', id:this.id, message:"Invalid frame rate."});
               }
               /*END_DEBUG*/
               if (fps === 0 || fps === false) {
@@ -12442,7 +11755,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       } else {
         //passed element
         /*DEBUG*/
-        check_block_element(element, '[object Display](element)');
+        type_check(element,'block', {label:'Display', id:this.id, message:"Invalid initialization."});
         /*END_DEBUG*/
         display.element = element;
       }
@@ -12453,7 +11766,7 @@ Object.defineProperties(doodle.events.TextEvent, {
 
     /*DEBUG*/
     //can't proceed with initialization without an element to work with
-    check_block_element(display.element, '[object Display].element');
+    type_check(display.element,'block', {label:'Display.element', id:this.id, message:"Invalid initialization."});
     /*END_DEBUG*/
     
     //draw at least 1 frame
@@ -12507,9 +11820,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     'addLayer': {
       value: function (id) {
         /*DEBUG*/
-        if (id !== undefined) {
-          check_string_type(id, this+'.addLayer', '*id*');
-        }
+        id === undefined || type_check(id,'string', {label:'Display.addLayer', params:'id', id:this.id});
         /*END_DEBUG*/
         return this.addChild(doodle_Layer(id));
       }
@@ -12524,7 +11835,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     'removeLayer': {
       value: function (id) {
         /*DEBUG*/
-        check_string_type(id, this+'.removeLayer', '*id*');
+        type_check(id,'string', {label:'Display.removeLayer', params:'id', id:this.id});
         /*END_DEBUG*/
         return this.removeChildById(id);
       }
@@ -12633,6 +11944,9 @@ Object.defineProperties(doodle.events.TextEvent, {
         }
       }
 
+			/*DEBUG*/
+			//console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
+			/*END_DEBUG*/
       draw_scene_graph(scene_path, path_count);
       
       /*DEBUG_STATS*/
@@ -12667,20 +11981,25 @@ Object.defineProperties(doodle.events.TextEvent, {
   /*
    *
    */
-  draw_scene_graph = function (scene_path, count) {
-    /*DEBUG*/
-    doodle.utils.type_check(scene_path, 'array', count, 'number');
-    /*END_DEBUG*/
+  draw_scene_graph = function (scene_path) {
     var node,
-        display,
+				count = scene_path.length,
+        display = scene_path[0],
         ctx,
         bounds,
-        i = 0;
+        i = 1; //ignore display
 
     for (; i < count; i++) {
     //while (count--) {
       node = scene_path[i];
-      display = node.root;
+			/*DEBUG*/
+			console.assert(Array.isArray(scene_path), "scene_path is an array", scene_path);
+			console.assert(scene_path.length === count, "scene_path.length === count", count, scene_path.length);
+			console.assert(doodle.Node.isNode(node), "node is a Node", node, i, scene_path);
+			console.assert(doodle.Display.isDisplay(display), "display is a Display", display);
+			console.assert(node.context && node.context.toString() === '[object CanvasRenderingContext2D]', "node.context is a context", node.context, node.id);
+			/*END_DEBUG*/
+      //display = node.root;
       ctx = node.context;
       
       if (ctx && node.visible) {
@@ -12741,7 +12060,13 @@ Object.defineProperties(doodle.events.TextEvent, {
    */
   dispatch_mouse_event = function (evt, mouseEvent, path, count, x, y, display) {
     /*DEBUG*/
-    doodle.utils.type_check(evt, 'MouseEvent', mouseEvent, 'MouseEvent', path, 'array', count, 'number', x, 'number', y, 'number', display, 'Display');
+    console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is a MouseEvent", evt);
+    console.assert(doodle.events.MouseEvent.isMouseEvent(mouseEvent), "mouseEvent is a MouseEvent", mouseEvent);
+    console.assert(Array.isArray(path), "path is an array", path);
+    console.assert(typeof count === 'number', "count is a number", count);
+    console.assert(typeof x === 'number', "x is a number", x);
+    console.assert(typeof y === 'number', "y is a number", y);
+    console.assert(doodle.Display.isDisplay(display), "display is a Display object", display);
     /*END_DEBUG*/
     while (count--) {
       if (path[count].__getBounds(display).contains(x, y)) {
@@ -12984,48 +12309,32 @@ Object.defineProperties(doodle.events.TextEvent, {
     display.broadcastEvent(keyboardEvent.__copyKeyboardEventProperties(evt, null));
     return true;
   };
-
-  /*
-   * CLASS METHODS
-   */
-
-  /**
-   * Test if an object is a Display.
-   * @name isDisplay
-   * @param {Object} obj
-   * @return {boolean} True if object is a Doodle Display.
-   * @static
-   */
-  isDisplay = doodle.Display.isDisplay = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object Display]');
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_display_type
-   * @param {Display} display
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_display_type = function (display, caller, params) {
-    if (isDisplay(display)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_display_type" : caller;
-      params = (params === undefined) ? "" : '('+params+')';
-      throw new TypeError(caller + params +": Parameter must be a Display.");
-    }
-  };
-  /*END_DEBUG*/
   
 }());//end class closure
+
+/*
+ * CLASS METHODS
+ */
+
+/**
+ * Test if an object is a Display.
+ * @name isDisplay
+ * @param {Object} obj
+ * @return {boolean} True if object is a Doodle Display.
+ * @static
+ */
+doodle.Display.isDisplay = function (obj) {
+  if (typeof obj === 'object') {
+    while (obj) {
+      if (obj.toString() === '[object Display]') {
+        return true;
+      } else {
+        obj = Object.getPrototypeOf(obj);
+      }
+    }
+  }
+  return false;
+};
 /**
  * @name doodle.FontStyle
  * @class
@@ -13373,8 +12682,9 @@ Object.defineProperty(doodle, 'TextBaseline', {
 (function () {
   var text_sprite_static_properties,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
@@ -13526,7 +12836,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return $text; },
           set: function (textVar) {
             /*DEBUG*/
-            check_string_type(textVar, this+'.text');
+            type_check(textVar, 'string', {label:'Text.text', id:this.id});
             /*END_DEBUG*/
             $text = textVar;
             redraw();
@@ -13545,13 +12855,12 @@ Object.defineProperty(doodle, 'TextBaseline', {
           enumerable: true,
           configurable: false,
           get: function () {
-            return (font_style +' '+ font_variant +' '+ font_weight +' '+
-                    font_size+"px" +' '+ font_family);
+            return (font_style +' '+ font_variant +' '+ font_weight +' '+ font_size+"px" +' '+ font_family);
           },
           set: function (fontVars) {
             var len;
             /*DEBUG*/
-            check_string_type(fontVars, this+'.font');
+            type_check(fontVars, 'string', {label:'Text.font', id:this.id});
             /*END_DEBUG*/
             //parse elements from string
             fontVars = fontVars.split(' ');
@@ -13594,7 +12903,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return font_family; },
           set: function (fontFamilyVar) {
             /*DEBUG*/
-            check_string_type(fontFamilyVar, this+'.fontFamily');
+            type_check(fontFamilyVar, 'string', {label:'Text.fontFamily', id:this.id});
             /*END_DEBUG*/
             font_family = fontFamilyVar;
             redraw();
@@ -13616,7 +12925,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
               fontSizeVar = parseInt(fontSizeVar, 10);
             }
             /*DEBUG*/
-            check_number_type(fontSizeVar, this+'.fontSize');
+            type_check(fontSizeVar,'number', {label:'Text.fontSize', id:this.id});
             /*END_DEBUG*/
             font_size = fontSizeVar;
             redraw();
@@ -13636,15 +12945,9 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return font_style; },
           set: function (fontStyleVar) {
             /*DEBUG*/
-            check_string_type(fontStyleVar, this+'.fontStyle');
-            switch (fontStyleVar) {
-            case FontStyle.NORMAL:
-            case FontStyle.ITALIC:
-            case FontStyle.OBLIQUE:
-              break;
-            default:
-              throw new SyntaxError(this+".fontStyle: Invalid FontStyle property.");
-            }
+            type_check(fontStyleVar,'string', {label:'Text.fontStyle', id:this.id});
+            reference_check(fontStyleVar === FontStyle.NORMAL || fontStyleVar === FontStyle.ITALIC || fontStyleVar === FontStyle.OBLIQUE,
+                            {label:'Text.fontStyle', id:this.id, message:"Invalid FontStyle property"});
             /*END_DEBUG*/
             font_style = fontStyleVar;
             redraw();
@@ -13664,14 +12967,9 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return font_variant; },
           set: function (fontVariantVar) {
             /*DEBUG*/
-            check_string_type(fontVariantVar, this+'.fontVariant');
-            switch (fontVariantVar) {
-            case FontVariant.NORMAL:
-            case FontVariant.SMALL_CAPS:
-              break;
-            default:
-              throw new SyntaxError(this+".fontVariant: Invalid FontVariant property.");
-            }
+            type_check(fontVariantVar,'string', {label:'Text.fontVariant', id:this.id});
+            reference_check(fontVariantVar === FontVariant.NORMAL || fontVariantVar === FontVariant.SMALL_CAPS,
+                            {label:'Text.fontVariant', id:this.id, message:"Invalid FontVariant property"});
             /*END_DEBUG*/
             font_variant = fontVariantVar;
             redraw();
@@ -13692,31 +12990,16 @@ Object.defineProperty(doodle, 'TextBaseline', {
           set: function (fontWeightVar) {
             /*DEBUG*/
             if (typeof fontWeightVar === 'string') {
-              switch (fontWeightVar) {
-              case FontWeight.NORMAL:
-              case FontWeight.BOLD:
-              case FontWeight.BOLDER:
-              case FontWeight.LIGHTER:
-                break;
-              default:
-                throw new SyntaxError(this+".fontWeight: Invalid FontWeight property.");
-              }
+              reference_check(fontWeightVar === FontWeight.NORMAL || fontWeightVar === FontVariant.BOLD || fontWeightVar === FontVariant.BOLDER || fontWeightVar === FontVariant.LIGHTER,
+                              {label:'Text.fontWeight', id:this.id, message:"Invalid FontWeight property"});
+            } else if (typeof fontWeightVar === 'number') {
+              range_check(fontWeightVar === 100 || fontWeightVar === 200 ||
+                          fontWeightVar === 300 || fontWeightVar === 400 ||
+                          fontWeightVar === 500 || fontWeightVar === 600 ||
+                          fontWeightVar === 700 || fontWeightVar === 800 ||
+                          fontWeightVar === 900, {label:'Text.fontWeight', id:this.id, message:"Invalid font weight."});
             } else {
-              check_number_type(fontWeightVar, this+'.fontWeight');
-              switch (fontWeightVar) {
-              case 100:
-              case 200:
-              case 300:
-              case 400:
-              case 500:
-              case 600:
-              case 700:
-              case 800:
-              case 900:
-                break;
-              default:
-                throw new SyntaxError(this+".fontWeight: Invalid font weight.");
-              }
+              throw new RangeError(this.id + " Text.fontWeight(weight): Invalid font weight.");
             }
             /*END_DEBUG*/
             font_weight = fontWeightVar;
@@ -13737,17 +13020,9 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return text_align; },
           set: function (alignVar) {
             /*DEBUG*/
-            check_string_type(alignVar, this+'.textAlign');
-            switch (alignVar) {
-            case TextAlign.START:
-            case TextAlign.END:
-            case TextAlign.LEFT:
-            case TextAlign.RIGHT:
-            case TextAlign.CENTER:
-              break;
-            default:
-              throw new SyntaxError(this+".textAlign: Invalid TextAlign property.");
-            }
+            type_check(alignVar,'string', {label:'Text.align', id:this.id});
+            reference_check(alignVar === TextAlign.START || alignVar === TextAlign.END || alignVar === TextAlign.LEFT || alignVar === TextAlign.RIGHT || alignVar === TextAlign.CENTER,
+                            {label:'Text.align', id:this.id, message:"Invalid TextAlign property."});
             /*END_DEBUG*/
             text_align = alignVar;
             redraw();
@@ -13767,18 +13042,9 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return text_baseline; },
           set: function (baselineVar) {
             /*DEBUG*/
-            check_string_type(baselineVar, this+'.textBaseline');
-            switch (baselineVar) {
-            case TextBaseline.TOP:
-            case TextBaseline.MIDDLE:
-            case TextBaseline.BOTTOM:
-            case TextBaseline.HANGING:
-            case TextBaseline.ALPHABETIC:
-            case TextBaseline.IDEOGRAPHIC:
-              break;
-            default:
-              throw new SyntaxError(this+".textBaseline: Invalid TextBaseline property.");
-            }
+            type_check(baselineVar,'string', {label:'Text.baseline', id:this.id});
+            reference_check(baselineVar === TextBaseline.TOP || baselineVar === TextBaseline.MIDDLE || baselineVar === TextBaseline.BOTTOM || baselineVar === TextBaseline.HANGING || baselineVar === TextBaseline.ALPHABETIC || baselineVar === TextBaseline.IDEOGRAPHIC,
+                            {label:'Text.baseline', id:this.id, message:"Invalid TextBaseline property."});
             /*END_DEBUG*/
             text_baseline = baselineVar;
             redraw();
@@ -13798,10 +13064,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return text_strokewidth; },
           set: function (widthVar) {
             /*DEBUG*/
-            check_number_type(widthVar, this+'.strokeWidth');
-            if (widthVar <= 0) {
-              throw new RangeError(this+".strokeWidth: Value must be greater than zero.");
-            }
+            type_check(widthVar,'number', {label:'Text.strokeWidth', id:this.id});
+            range_check(widthVar > 0, {label:'Text.strokeWidth', id:this.id, message:"Stroke width must be greater than zero."});
             /*END_DEBUG*/
             text_strokewidth = widthVar;
           }
@@ -13823,7 +13087,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
             }
             /*DEBUG*/
             if (color !== null && color !== false) {
-              check_string_type(color, this+'.color');
+              type_check(color,'string', {label:'Text.color', id:this.id});
             }
             /*END_DEBUG*/
             text_color = color;
@@ -13846,7 +13110,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
             }
             /*DEBUG*/
             if (color !== null && color !== false) {
-              check_string_type(color, this+'.strokeColor');
+              type_check(color,'string', {label:'Text.strokeColor', id:this.id});
             }
             /*END_DEBUG*/
             text_strokecolor = color;
@@ -13869,7 +13133,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
             }
             /*DEBUG*/
             if (color !== null && color !== false) {
-              check_string_type(color, this+'.backgroundColor');
+              type_check(color,'string', {label:'Text.backgroundColor', id:this.id});
             }
             /*END_DEBUG*/
             text_bgcolor = color;
@@ -13889,7 +13153,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
         text = undefined;
       } else {
         /*DEBUG*/
-        check_string_type(text, '[object Text]', '*text*');
+        type_check(text,'string', {label:'Text', id:this.id, message:"Invalid initialization."});
         /*END_DEBUG*/
         text_sprite.text = text;
       }
@@ -13915,9 +13179,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Text]";
-      }
+      value: function () { return "[object Text]"; }
     }
   };
 
@@ -13927,7 +13189,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
 (function () {
   var image_sprite_static_properties,
       /*DEBUG*/
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       get_element = doodle.utils.get_element,
       doodle_Event = doodle.events.Event,
@@ -13956,7 +13218,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
         img_element = img;
         if (img_element.id !== '') {
           /*DEBUG*/
-          check_string_type(img_element.id, this+'::add_image_element::img_element.id');
+          console.assert(typeof img_element.id === 'string', "img_element.id is a string", img_element.id);
           /*END_DEBUG*/
           image_sprite.id = img_element.id;
         }
@@ -14042,7 +13304,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
               remove_image_element();
             } else {
               /*DEBUG*/
-              check_string_type(srcVar, this+'.src');
+              type_check(srcVar, 'string', {label:'Image.id', id:this.id});
               /*END_DEBUG*/
               var image = new Image();
               image.src = encodeURI(srcVar);

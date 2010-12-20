@@ -3,13 +3,9 @@
 (function () {
   var node_static_properties,
       url_regexp = new RegExp("^url\\((.*)\\)"),
-      isElementNode,
-      inheritsElementNode,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_boolean_type = doodle.utils.types.check_boolean_type,
-      check_node_type = doodle.utils.types.check_node_type,
+      type_check = doodle.utils.debug.type_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       //lookup help
       doodle_Rectangle = doodle.geom.Rectangle,
@@ -131,11 +127,11 @@
           enumerable: true,
           configurable: true,
           get: function () { return node_id; },
-          set: function (name) {
+          set: function (idVar) {
             /*DEBUG*/
-            check_string_type(name, this+'.id');
+            type_check(idVar,'string', {label:'ElementNode.id', id:this.id});
             /*END_DEBUG*/
-            node_id = set_element_property(this.element, 'id', name, 'html');
+            node_id = set_element_property(this.element, 'id', idVar, 'html');
           }
         },
 
@@ -152,7 +148,7 @@
           get: function () { return width; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.width');
+            type_check(n,'number', {label:'ElementNode.width', id:this.id});
             /*END_DEBUG*/
             set_element_property(this.element, 'width', n+"px");
             width = n;
@@ -172,7 +168,7 @@
           get: function () { return height; },
           set: function (n) {
             /*DEBUG*/
-            check_number_type(n, this+'.height');
+            type_check(n,'number', {label:'ElementNode.height', id:this.id});
             /*END_DEBUG*/
             set_element_property(this.element, 'height', n+"px");
             height = n;
@@ -223,7 +219,7 @@
               image = image.src;
             }
             /*DEBUG*/
-            check_string_type(image, this+'.backgroundImage');
+            type_check(image,'string', {label:'ElementNode.backgroundImage', id:this.id});
             /*END_DEBUG*/
             //url path at this point, make sure it's in the proper format
             if (!url_regexp.test(image)) {
@@ -246,17 +242,9 @@
           get: function () { return bg_repeat; },
           set: function (repeat) {
             /*DEBUG*/
-            check_string_type(repeat, this+'.backgroundRepeat');
-            switch (repeat) {
-            case 'repeat':
-            case 'repeat-x':
-            case 'repeat-y':
-            case 'no-repeat':
-            case 'inherit':
-              break;
-            default:
-              throw new SyntaxError(this+'.backgroundRepeat: Invalid CSS value.');
-            }
+            type_check(repeat,'string', {label:'ElementNode.backgroundRepeat', id:this.id});
+            reference_check(repeat === 'repeat' || repeat === 'repeat-x' || repeat === 'repeat-y' || repeat === 'no-repeat' || repeat === 'inherit',
+                            {label:'ElementNode.backgroundRepeat', id:this.id, message:"Invalid CSS value."});
             /*END_DEBUG*/
             bg_repeat = set_element_property(this.element, 'backgroundRepeat', repeat);
           }
@@ -275,7 +263,7 @@
           get: function () { return alpha; },
           set: function (alpha) {
             /*DEBUG*/
-            check_number_type(alpha, this+'.alpha');
+            type_check(alpha,'number', {label:'ElementNode.alpha', id:this.id});
             alpha = (alpha < 0) ? 0 : ((alpha > 1) ? 1 : alpha);
             /*END_DEBUG*/
             alpha = set_element_property(this.element, 'opacity', alpha);
@@ -295,7 +283,7 @@
           get: function () { return visible; },
           set: function (isVisible) {
             /*DEBUG*/
-            check_boolean_type(isVisible, this+'.visible');
+            type_check(isVisible,'boolean', {label:'ElementNode.visible', id:this.id});
             /*END_DEBUG*/
             if (isVisible) {
               set_element_property(this.element, 'visibility', 'visible');
@@ -340,7 +328,7 @@
             var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
             return function (targetCoordSpace) {
               /*DEBUG*/
-              check_node_type(targetCoordSpace, this+'.__getBounds', '*targetCoordSpace*');
+              console.assert(doodle.Node.isNode(targetCoordSpace), "targetCoordSpace is a Node", targetCoordSpace);
               /*END_DEBUG*/
               var children = this.children,
                   len = children.length,
@@ -427,71 +415,32 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object ElementNode]";
-      }
+      value: function () { return "[object ElementNode]"; }
     }
   };//end node_static_properties
+  
+}());//end class closure
 
-  /*
-   * CLASS METHODS
-   */
+/*
+ * CLASS METHODS
+ */
 
-  /**
-   * Test if an object is an ElementNode.
-   * @name isElementNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  isElementNode = doodle.ElementNode.isElementNode = function (obj) {
-    if (!obj || typeof obj !== 'object' || typeof obj.toString !== 'function') {
-      return false;
-    }
-    return (obj.toString() === '[object ElementNode]');
-  };
-
-  /**
-   * Check if object inherits from ElementNode.
-   * @name inheritsNode
-   * @param {Object} obj
-   * @return {boolean}
-   * @static
-   */
-  inheritsElementNode = doodle.ElementNode.inheritsElementNode = function (obj) {
+/**
+ * Test if an object is an ElementNode.
+ * @name isElementNode
+ * @param {Object} obj
+ * @return {boolean}
+ * @static
+ */
+doodle.ElementNode.isElementNode = function (obj) {
+  if (typeof obj === 'object') {
     while (obj) {
-      if (isElementNode(obj)) {
+      if (obj.toString() === '[object ElementNode]') {
         return true;
       } else {
-        if (typeof obj !== 'object') {
-          return false;
-        }
         obj = Object.getPrototypeOf(obj);
       }
     }
-    return false;
-  };
-
-  /*DEBUG*/
-  /**
-   * @name check_elementnode_type
-   * @param {Node} node
-   * @param {string} caller
-   * @param {string} params
-   * @return {boolean}
-   * @throws {TypeError}
-   * @memberOf utils.types
-   * @static
-   */
-  doodle.utils.types.check_elementnode_type = function (node, caller, param) {
-    if (inheritsElementNode(node)) {
-      return true;
-    } else {
-      caller = (caller === undefined) ? "check_elementnode_type" : caller;
-      param = (param === undefined) ? "" : '('+param+')';
-      throw new TypeError(caller + param +": Parameter must be an ElementNode.");
-    }
-  };
-  /*END_DEBUG*/
-  
-}());//end class closure
+  }
+  return false;
+};

@@ -3,8 +3,9 @@
 (function () {
   var text_sprite_static_properties,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
@@ -156,7 +157,7 @@
           get: function () { return $text; },
           set: function (textVar) {
             /*DEBUG*/
-            check_string_type(textVar, this+'.text');
+            type_check(textVar, 'string', {label:'Text.text', id:this.id});
             /*END_DEBUG*/
             $text = textVar;
             redraw();
@@ -175,13 +176,12 @@
           enumerable: true,
           configurable: false,
           get: function () {
-            return (font_style +' '+ font_variant +' '+ font_weight +' '+
-                    font_size+"px" +' '+ font_family);
+            return (font_style +' '+ font_variant +' '+ font_weight +' '+ font_size+"px" +' '+ font_family);
           },
           set: function (fontVars) {
             var len;
             /*DEBUG*/
-            check_string_type(fontVars, this+'.font');
+            type_check(fontVars, 'string', {label:'Text.font', id:this.id});
             /*END_DEBUG*/
             //parse elements from string
             fontVars = fontVars.split(' ');
@@ -224,7 +224,7 @@
           get: function () { return font_family; },
           set: function (fontFamilyVar) {
             /*DEBUG*/
-            check_string_type(fontFamilyVar, this+'.fontFamily');
+            type_check(fontFamilyVar, 'string', {label:'Text.fontFamily', id:this.id});
             /*END_DEBUG*/
             font_family = fontFamilyVar;
             redraw();
@@ -246,7 +246,7 @@
               fontSizeVar = parseInt(fontSizeVar, 10);
             }
             /*DEBUG*/
-            check_number_type(fontSizeVar, this+'.fontSize');
+            type_check(fontSizeVar,'number', {label:'Text.fontSize', id:this.id});
             /*END_DEBUG*/
             font_size = fontSizeVar;
             redraw();
@@ -266,15 +266,9 @@
           get: function () { return font_style; },
           set: function (fontStyleVar) {
             /*DEBUG*/
-            check_string_type(fontStyleVar, this+'.fontStyle');
-            switch (fontStyleVar) {
-            case FontStyle.NORMAL:
-            case FontStyle.ITALIC:
-            case FontStyle.OBLIQUE:
-              break;
-            default:
-              throw new SyntaxError(this+".fontStyle: Invalid FontStyle property.");
-            }
+            type_check(fontStyleVar,'string', {label:'Text.fontStyle', id:this.id});
+            reference_check(fontStyleVar === FontStyle.NORMAL || fontStyleVar === FontStyle.ITALIC || fontStyleVar === FontStyle.OBLIQUE,
+                            {label:'Text.fontStyle', id:this.id, message:"Invalid FontStyle property"});
             /*END_DEBUG*/
             font_style = fontStyleVar;
             redraw();
@@ -294,14 +288,9 @@
           get: function () { return font_variant; },
           set: function (fontVariantVar) {
             /*DEBUG*/
-            check_string_type(fontVariantVar, this+'.fontVariant');
-            switch (fontVariantVar) {
-            case FontVariant.NORMAL:
-            case FontVariant.SMALL_CAPS:
-              break;
-            default:
-              throw new SyntaxError(this+".fontVariant: Invalid FontVariant property.");
-            }
+            type_check(fontVariantVar,'string', {label:'Text.fontVariant', id:this.id});
+            reference_check(fontVariantVar === FontVariant.NORMAL || fontVariantVar === FontVariant.SMALL_CAPS,
+                            {label:'Text.fontVariant', id:this.id, message:"Invalid FontVariant property"});
             /*END_DEBUG*/
             font_variant = fontVariantVar;
             redraw();
@@ -322,31 +311,16 @@
           set: function (fontWeightVar) {
             /*DEBUG*/
             if (typeof fontWeightVar === 'string') {
-              switch (fontWeightVar) {
-              case FontWeight.NORMAL:
-              case FontWeight.BOLD:
-              case FontWeight.BOLDER:
-              case FontWeight.LIGHTER:
-                break;
-              default:
-                throw new SyntaxError(this+".fontWeight: Invalid FontWeight property.");
-              }
+              reference_check(fontWeightVar === FontWeight.NORMAL || fontWeightVar === FontVariant.BOLD || fontWeightVar === FontVariant.BOLDER || fontWeightVar === FontVariant.LIGHTER,
+                              {label:'Text.fontWeight', id:this.id, message:"Invalid FontWeight property"});
+            } else if (typeof fontWeightVar === 'number') {
+              range_check(fontWeightVar === 100 || fontWeightVar === 200 ||
+                          fontWeightVar === 300 || fontWeightVar === 400 ||
+                          fontWeightVar === 500 || fontWeightVar === 600 ||
+                          fontWeightVar === 700 || fontWeightVar === 800 ||
+                          fontWeightVar === 900, {label:'Text.fontWeight', id:this.id, message:"Invalid font weight."});
             } else {
-              check_number_type(fontWeightVar, this+'.fontWeight');
-              switch (fontWeightVar) {
-              case 100:
-              case 200:
-              case 300:
-              case 400:
-              case 500:
-              case 600:
-              case 700:
-              case 800:
-              case 900:
-                break;
-              default:
-                throw new SyntaxError(this+".fontWeight: Invalid font weight.");
-              }
+              throw new RangeError(this.id + " Text.fontWeight(weight): Invalid font weight.");
             }
             /*END_DEBUG*/
             font_weight = fontWeightVar;
@@ -367,17 +341,9 @@
           get: function () { return text_align; },
           set: function (alignVar) {
             /*DEBUG*/
-            check_string_type(alignVar, this+'.textAlign');
-            switch (alignVar) {
-            case TextAlign.START:
-            case TextAlign.END:
-            case TextAlign.LEFT:
-            case TextAlign.RIGHT:
-            case TextAlign.CENTER:
-              break;
-            default:
-              throw new SyntaxError(this+".textAlign: Invalid TextAlign property.");
-            }
+            type_check(alignVar,'string', {label:'Text.align', id:this.id});
+            reference_check(alignVar === TextAlign.START || alignVar === TextAlign.END || alignVar === TextAlign.LEFT || alignVar === TextAlign.RIGHT || alignVar === TextAlign.CENTER,
+                            {label:'Text.align', id:this.id, message:"Invalid TextAlign property."});
             /*END_DEBUG*/
             text_align = alignVar;
             redraw();
@@ -397,18 +363,9 @@
           get: function () { return text_baseline; },
           set: function (baselineVar) {
             /*DEBUG*/
-            check_string_type(baselineVar, this+'.textBaseline');
-            switch (baselineVar) {
-            case TextBaseline.TOP:
-            case TextBaseline.MIDDLE:
-            case TextBaseline.BOTTOM:
-            case TextBaseline.HANGING:
-            case TextBaseline.ALPHABETIC:
-            case TextBaseline.IDEOGRAPHIC:
-              break;
-            default:
-              throw new SyntaxError(this+".textBaseline: Invalid TextBaseline property.");
-            }
+            type_check(baselineVar,'string', {label:'Text.baseline', id:this.id});
+            reference_check(baselineVar === TextBaseline.TOP || baselineVar === TextBaseline.MIDDLE || baselineVar === TextBaseline.BOTTOM || baselineVar === TextBaseline.HANGING || baselineVar === TextBaseline.ALPHABETIC || baselineVar === TextBaseline.IDEOGRAPHIC,
+                            {label:'Text.baseline', id:this.id, message:"Invalid TextBaseline property."});
             /*END_DEBUG*/
             text_baseline = baselineVar;
             redraw();
@@ -428,10 +385,8 @@
           get: function () { return text_strokewidth; },
           set: function (widthVar) {
             /*DEBUG*/
-            check_number_type(widthVar, this+'.strokeWidth');
-            if (widthVar <= 0) {
-              throw new RangeError(this+".strokeWidth: Value must be greater than zero.");
-            }
+            type_check(widthVar,'number', {label:'Text.strokeWidth', id:this.id});
+            range_check(widthVar > 0, {label:'Text.strokeWidth', id:this.id, message:"Stroke width must be greater than zero."});
             /*END_DEBUG*/
             text_strokewidth = widthVar;
           }
@@ -453,7 +408,7 @@
             }
             /*DEBUG*/
             if (color !== null && color !== false) {
-              check_string_type(color, this+'.color');
+              type_check(color,'string', {label:'Text.color', id:this.id});
             }
             /*END_DEBUG*/
             text_color = color;
@@ -476,7 +431,7 @@
             }
             /*DEBUG*/
             if (color !== null && color !== false) {
-              check_string_type(color, this+'.strokeColor');
+              type_check(color,'string', {label:'Text.strokeColor', id:this.id});
             }
             /*END_DEBUG*/
             text_strokecolor = color;
@@ -499,7 +454,7 @@
             }
             /*DEBUG*/
             if (color !== null && color !== false) {
-              check_string_type(color, this+'.backgroundColor');
+              type_check(color,'string', {label:'Text.backgroundColor', id:this.id});
             }
             /*END_DEBUG*/
             text_bgcolor = color;
@@ -519,7 +474,7 @@
         text = undefined;
       } else {
         /*DEBUG*/
-        check_string_type(text, '[object Text]', '*text*');
+        type_check(text,'string', {label:'Text', id:this.id, message:"Invalid initialization."});
         /*END_DEBUG*/
         text_sprite.text = text;
       }
@@ -545,9 +500,7 @@
       enumerable: false,
       writable: false,
       configurable: false,
-      value: function () {
-        return "[object Text]";
-      }
+      value: function () { return "[object Text]"; }
     }
   };
 

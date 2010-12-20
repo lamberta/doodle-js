@@ -2,11 +2,9 @@
 (function () {
   var graphics_static_properties,
       /*DEBUG*/
-      check_number_type = doodle.utils.types.check_number_type,
-      check_string_type = doodle.utils.types.check_string_type,
-      check_function_type = doodle.utils.types.check_function_type,
-      check_array_type = doodle.utils.types.check_array_type,
-      check_point_type = doodle.utils.types.check_point_type,
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
+      reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
@@ -153,7 +151,7 @@
         configurable: false,
         value: function (fn) {
           /*DEBUG*/
-          check_function_type(fn, gfx_node+'.graphics.draw', '*function*');
+          type_check(fn,'function', {label:'Graphics.draw', id:gfx_node.id});
           /*END_DEBUG*/
           draw_commands.push(fn);
         }
@@ -193,10 +191,7 @@
         configurable: false,
         value: function (x, y, width, height) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.rect', '*x*, y, width, height');
-          check_number_type(y, gfx_node+'.graphics.rect', 'x, *y*, width, height');
-          check_number_type(width, gfx_node+'.graphics.rect', 'x, y, *width*, height');
-          check_number_type(height, gfx_node+'.graphics.rect', 'x, y, width, *height*');
+          type_check(x,'number', y,'number', width,'number', height,'number', {label:'Graphics.rect', params:['x','y','width','height'], id:gfx_node.id});
           /*END_DEBUG*/
 
           //update extremas
@@ -231,9 +226,7 @@
         configurable: false,
         value: function (x, y, radius) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.circle', '*x*, y, radius');
-          check_number_type(y, gfx_node+'.graphics.circle', 'x, *y*, radius');
-          check_number_type(radius, gfx_node+'.graphics.circle', 'x, y, *radius*');
+          type_check(x,'number', y,'number', radius,'number', {label:'Graphics.circle', params:['x','y','radius'], id:gfx_node.id});
           /*END_DEBUG*/
 
           //update extremas
@@ -270,10 +263,7 @@
         value: function (x, y, width, height) {
           height = (height === undefined) ? width : height; //default to circle
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.ellipse', '*x*, y, width, height');
-          check_number_type(y, gfx_node+'.graphics.ellipse', 'x, *y*, width, height');
-          check_number_type(width, gfx_node+'.graphics.ellipse', 'x, y, *width*, height');
-          check_number_type(height, gfx_node+'.graphics.ellipse', 'x, y, width, *height*');
+          type_check(x,'number', y,'number', width,'number', height,'number', {label:'Graphics.ellipse', params:['x','y','width','height'], id:gfx_node.id});
           /*END_DEBUG*/
           var rx = width / 2,
               ry = height / 2,
@@ -321,12 +311,7 @@
           rx = (rx === undefined) ? 0 : rx; //default to rectangle
           ry = (ry === undefined) ? 0 : ry;
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.roundRect', '*x*, y, width, height, rx, ry');
-          check_number_type(y, gfx_node+'.graphics.roundRect', 'x, *y*, width, height, rx, ry');
-          check_number_type(width, gfx_node+'.graphics.roundRect', 'x, y, *width*, height, rx, ry');
-          check_number_type(height, gfx_node+'.graphics.roundRect', 'x, y, width, *height*, rx, ry');
-          check_number_type(rx, gfx_node+'.graphics.roundRect', 'x, y, width, height, *rx*, ry');
-          check_number_type(ry, gfx_node+'.graphics.roundRect', 'x, y, width, height, rx, *ry*');
+          type_check(x,'number', y,'number', width,'number', height,'number', rx,'number', ry,'number', {label:'Graphics.roundRect', params:['x','y','width','height','rx','ry'], id:gfx_node.id});
           /*END_DEBUG*/
           var x3 = x + width,
               x2 = x3 - rx,
@@ -377,12 +362,9 @@
         configurable: false,
         value: function (x, y) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.moveTo', '*x*, y');
-          check_number_type(y, gfx_node+'.graphics.moveTo', 'x, *y*');
+          type_check(x,'number', y,'number', {label:'Graphics.moveTo', params:['x','y'], id:gfx_node.id});
           /*END_DEBUG*/
-          draw_commands.push(function (ctx) {
-            ctx.moveTo(x, y);
-          });
+          draw_commands.push(function (ctx) { ctx.moveTo(x, y); });
           //update cursor
           cursor_x = x;
           cursor_y = y;
@@ -402,8 +384,7 @@
         configurable: false,
         value: function (x, y) {
           /*DEBUG*/
-          check_number_type(x, gfx_node+'.graphics.lineTo', '*x*, y');
-          check_number_type(y, gfx_node+'.graphics.lineTo', 'x, *y*');
+          type_check(x,'number', y,'number', {label:'Graphics.lineTo', params:['x','y'], id:gfx_node.id});
           /*END_DEBUG*/
 
           //update extremas
@@ -440,8 +421,7 @@
         configurable: false,
         value: function (pt1, pt2) {
           /*DEBUG*/
-          check_point_type(pt1, gfx_node+'.graphics.curveTo', '*ctl_point*, point');
-          check_point_type(pt2, gfx_node+'.graphics.curveTo', 'ctl_point, *point*');
+          type_check(pt1,'Point', pt2,'Point', {label:'Graphics.curveTo', params:['ctrl_point','point'], id:gfx_node.id});
           /*END_DEBUG*/
           var x0 = cursor_x,
               y0 = cursor_y,
@@ -459,12 +439,10 @@
           if (0 <= t && t <= 1) {
             cx = (1-t) * (1-t) * x0 + 2 * (1-t) * t * x1 + t * t * x2;
           }
-
           t = (y0 - y1) / (y0 - 2 * y1 + y2);
           if (0 <= t && t <= 1) {
             cy = (1-t) * (1-t) * y0 + 2 * (1-t) * t * y1 + t * t * y2;
           }
-          
           //update extremas
           this.__minX = Math.min(0, x0, cx, x2, this.__minX);
           this.__minY = Math.min(0, y0, cy, y2, this.__minY);
@@ -500,9 +478,7 @@
         configurable: false,
         value: function (pt1, pt2, pt3) {
           /*DEBUG*/
-          check_point_type(pt1, gfx_node+'.graphics.bezierCurveTo', '*ctl_point1*, ctl_point2, point');
-          check_point_type(pt2, gfx_node+'.graphics.bezierCurveTo', 'ctl_point1, *ctl_point2*, point');
-          check_point_type(pt3, gfx_node+'.graphics.bezierCurveTo', 'ctl_point1, ctl_point2, *point*');
+          type_check(pt1,'Point', pt2,'Point', pt3,'Point', {label:'Graphics.bezierCurveTo', params:['ctrl_point1','ctrl_point2','point'], id:gfx_node.id});
           /*END_DEBUG*/
           var pow = Math.pow,
               max = Math.max,
@@ -540,7 +516,6 @@
             if (yt > cy_max) { cy_max = yt; }
             if (yt < cy_min) { cy_min = yt; }
           }
-
           //update extremas
           this.__minX = min(0, x0, cx_min, x3, this.__minX);
           this.__minY = min(0, y0, cy_min, y3, this.__minY);
@@ -554,7 +529,6 @@
           draw_commands.push(function (ctx) {
             ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
           });
-
           //update cursor
           cursor_x = x3;
           cursor_y = y3;
@@ -577,7 +551,7 @@
         value: function (color, alpha) {
           alpha = (alpha === undefined) ? 1 : alpha;
           /*DEBUG*/
-          check_number_type(alpha, gfx_node+'.graphics.beginFill', 'color, *alpha*');
+          type_check(color,'*', alpha,'number', {label:'Graphics.beginFill', params:['color','alpha'], id:gfx_node.id});
           /*END_DEBUG*/
           draw_commands.push(function (ctx) {
             ctx.fillStyle = hex_to_rgb_str(color, alpha);
@@ -590,7 +564,7 @@
        * @param {GradientType} type
        * @param {Point} pt1
        * @param {Point} pt2
-       * @param {number} ratios
+       * @param {Array} ratios Array of numbers.
        * @param {Array} colors
        * @param {Array} alphas
        * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createlineargradient">context.createLinearGradient</a> [Canvas API]
@@ -605,12 +579,8 @@
         configurable: false,
         value: function (type, pt1, pt2, ratios, colors, alphas) {
           /*DEBUG*/
-          check_point_type(pt1, gfx_node+'.graphics.beginGradientFill', 'type, *point1*, point2, ratios, colors, alphas');
-          check_point_type(pt2, gfx_node+'.graphics.beginGradientFill', 'type, point1, *point2*, ratios, colors, alphas');
-          check_array_type(ratios, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-          check_number_type(ratios, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, *ratios*, colors, alphas');
-          check_array_type(colors, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, ratios, *colors*, alphas');
-          check_array_type(alphas, gfx_node+'.graphics.beginGradientFill', 'type, point1, point2, ratios, colors, *alphas*');
+          type_check(type,'string', pt1,'Point', pt2,'Point', ratios,'array', colors,'array', alphas,'array',
+                     {label:'Graphics.beginGradientFill', params:['gradient_type','point','point','ratios','colors','alphas'], id:gfx_node.id});
           /*END_DEBUG*/
           
           draw_commands.push(function (ctx) {
@@ -625,13 +595,11 @@
               
             } else if (type === RADIAL) {
               /*DEBUG*/
-              check_number_type(pt1.radius, gfx_node+'.graphics.beginGradientFill', 'type, *circle1.radius*, circle2, ratios, colors, alphas');
-              check_number_type(pt2.radius, gfx_node+'.graphics.beginGradientFill', 'type, circle1, *circle2.radius*, ratios, colors, alphas');
+              type_check(pt1.radius,'number', pt2.radius,'number', {label:'Graphics.beginGradientFill', id:gfx_node.id, message:"No radius for radial type."});
               /*END_DEBUG*/
-              gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius,
-                                                  pt2.x, pt2.y, pt2.radius);
+              gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius, pt2.x, pt2.y, pt2.radius);
             } else {
-              throw new TypeError(gfx_node+'.graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.');
+              throw new TypeError(gfx_node.id + " Graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.");
             }
             //add color ratios to our gradient
             for (; i < len; i+=1) {
@@ -661,11 +629,8 @@
           
           repeat = (repeat === undefined) ? Pattern.REPEAT : repeat;
           /*DEBUG*/
-          check_string_type(repeat, gfx_node+'.graphics.beginPatternFill', 'image, *repeat*');
-          if (repeat !== Pattern.REPEAT && repeat !== Pattern.NO_REPEAT &&
-              repeat !== Pattern.REPEAT_X && repeat !== Pattern.REPEAT_Y) {
-            throw new SyntaxError(gfx_node+'.graphics.beginPatternFill(image, *repeat*): Invalid pattern repeat type.');
-          }
+          type_check(image,'*', repeat,'string', {label:'Graphics.beginPatternFill', params:['image','repeat'], id:gfx_node.id});
+          reference_check(repeat === Pattern.REPEAT || repeat === Pattern.NO_REPEAT || repeat === Pattern.REPEAT_X || repeat !== Pattern.REPEAT_Y, {label:'Graphics.beginPatternFill', id:gfx_node.id, message:"Invalid Pattern type."});
           /*END_DEBUG*/
           
           if (typeof image === 'string') {
@@ -683,9 +648,7 @@
           }
           
           /*DEBUG*/
-          if (image && image.tagName !== 'IMG') {
-            throw new TypeError(gfx_node+'.graphics.beginPatternFill(*image*, repeat): Parameter must be an src url, image object, or element id.');
-          }
+          reference_check(image && image.tagName === 'IMG', {label:'Graphics.beginPatternFill', id:gfx_node.id, message:"Parameter must be an src url, image object, or element id."});
           /*END_DEBUG*/
 
           //check if image has already been loaded
@@ -698,7 +661,7 @@
               gfx_node.dispatchEvent(doodle_Event(doodle_Event.LOAD));
             };
             on_image_error = function () {
-              throw new URIError(gfx_node+'.graphics.beginPatternFill(*image*,repeat): Unable to load ' + image.src);
+              throw new URIError(gfx_node.id + "Graphics.beginPatternFill(*image*,repeat): Unable to load " + image.src);
             };
             image.onerror = on_image_error;
             image.onabort = on_image_error;
@@ -742,26 +705,15 @@
           joints = (joints === undefined) ? doodle.LineJoin.MITER : joints;
           miterLimit = (miterLimit === undefined) ? 10 : miterLimit;
           /*DEBUG*/
-          check_number_type(thickness, gfx_node+'.graphics.lineStyle', '*thickness*, color, alpha, caps, joints, miterLimit');
-          check_number_type(alpha, gfx_node+'.graphics.lineStyle', 'thickness, color, *alpha*, caps, joints, miterLimit');
-          check_string_type(caps, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, *caps*, joints, miterLimit');
-          check_string_type(joints, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, caps, *joints*, miterLimit');
-          check_number_type(miterLimit, gfx_node+'.graphics.lineStyle', 'thickness, color, alpha, caps, joints, *miterLimit*');
+          type_check(thickness,'number', color,'*', alpha,'number', caps,'string', joints,'string', miterLimit,'number',
+                     {label:'Graphics.lineStyle', params:['thickness','color','alpha','caps','joints','miterLimit'], id:gfx_node.id});
           //check values
-          if (thickness <= 0 || isNaN(thickness) || !isFinite(thickness)) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(*thickness*, color, alpha, caps, joints, miterLimit): Value must be a positive number.');
-          }
-          if (caps !== doodle.LineCap.BUTT && caps !== doodle.LineCap.ROUND &&
-              caps !== doodle.LineCap.SQUARE) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, *caps*, joints, miterLimit): Invalid LineCap value.');
-          }
-          if (joints !== doodle.LineJoin.BEVEL && joints !== doodle.LineJoin.MITER &&
-              joints !== doodle.LineJoin.ROUND) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, caps, *joints*, miterLimit): Invalid LineJoin value.');
-          }
-          if (miterLimit <= 0 || isNaN(miterLimit) || !isFinite(miterLimit)) {
-            throw new SyntaxError(gfx_node+'.graphics.lineStyle(thickness, color, alpha, caps, joints, *miterLimit*): Value must be a positive number.');
-          }
+          range_check(isFinite(thickness), thickness >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"thickness must have a positive number."});
+          reference_check(caps === doodle.LineCap.BUTT || caps === doodle.LineCap.ROUND || caps === doodle.LineCap.SQUARE,
+                          {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineCap: " + caps});
+          reference_check(joints === doodle.LineJoin.BEVEL || joints === doodle.LineJoin.MITER || joints === doodle.LineJoin.ROUND,
+                          {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineJoin: " + joints});
+          range_check(isFinite(miterLimit), miterLimit >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"miterLimit must have a positive number."});
           /*END_DEBUG*/
           line_width = thickness;
           line_join = joints;
@@ -772,9 +724,8 @@
           if (typeof color === 'string' || typeof color === 'number') {
             color = hex_to_rgb_str(color, alpha);
           } else {
-            throw new TypeError(gfx_node+'.graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.');
+            throw new TypeError(gfx_node + " Graphics.lineStyle(thickness,*color*,alpha,caps,joints,miterLimit): Color must be a hex value.");
           }
-
           draw_commands.push(function (ctx) {
             ctx.lineWidth = line_width;
             ctx.strokeStyle = color;
@@ -782,7 +733,6 @@
             ctx.lineJoin = line_join;
             ctx.miterLimit = line_miter;
           });
-          
         }
       },
 
@@ -833,9 +783,7 @@
         writable: false,
         configurable: false,
         value: function () {
-          draw_commands.push(function (ctx) {
-            ctx.fill();
-          });
+          draw_commands.push(function (ctx) { ctx.fill(); });
         }
       },
       

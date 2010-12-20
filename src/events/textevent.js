@@ -62,8 +62,8 @@
       cancelable = (cancelable === undefined) ? false : cancelable;
       view = (view === undefined) ? null : view;
       /*DEBUG*/
-      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', data, '*', inputMode, '*',
-                 {label:'TextEvent', id:this.toString()+"[type="+this.type+"]", params:['type','bubbles','cancelable','view','data','inputMode']});
+      type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', data,'*', inputMode,'*',
+                 {label:'TextEvent', id:this.id, params:['type','bubbles','cancelable','view','data','inputMode']});
       /*END_DEBUG*/
       textevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
     }
@@ -81,7 +81,7 @@
        */
       copy_textevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", this.toString()+"[type="+this.type+"]", evt);
+        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", this.id, evt);
         /*END_DEBUG*/
         if (evt.data !== undefined) { evt_data = evt.data; }
         if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }
@@ -129,8 +129,8 @@
             dataArg = (dataArg === undefined) ? '' : dataArg;
             inputModeArg = (inputModeArg === undefined) ? doodle.events.TextEvent.INPUT_METHOD_UNKNOWN : inputModeArg;
             /*DEBUG*/
-            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', viewArg, '*', dataArg, 'string', inputModeArg, 'number',
-                       {label:'TextEvent.initTextEvent', id:this.toString()+"[type="+this.type+"]", params:['typeArg','canBubbleArg','cancelableArg','viewArg','dataArg','inputModeArg']});
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', dataArg,'string', inputModeArg,'number',
+                       {label:'TextEvent.initTextEvent', id:this.id, params:['typeArg','canBubbleArg','cancelableArg','viewArg','dataArg','inputModeArg']});
             /*END_DEBUG*/
             evt_data = dataArg;
             evt_inputMode = inputModeArg;
@@ -156,7 +156,7 @@
             resetTarget = (resetTarget === undefined) ? false : resetTarget;
             resetType = (resetType === undefined) ? false : resetType;
             /*DEBUG*/
-            console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent");
+            console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent", this.id);
             console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is a Node, null, or false.");
             console.assert(resetType === false || typeof resetType === 'string', "resetType is a string or false.");
             /*END_DEBUG*/

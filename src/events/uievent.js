@@ -60,8 +60,8 @@
       bubbles = (bubbles === undefined) ? false : bubbles;
       cancelable = (cancelable === undefined) ? false : cancelable;
       /*DEBUG*/
-      type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', detail, '*',
-                 {label:'UIEvent', params:['type','bubbles','cancelable','view','detail'], id:this.toString()+"[type="+this.type+"]"});
+      type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'*',
+                 {label:'UIEvent', params:['type','bubbles','cancelable','view','detail'], id:this.id});
       /*END_DEBUG*/
       uievent = Object.create(doodle.events.Event(type, bubbles, cancelable));
     }
@@ -87,7 +87,7 @@
        */
       copy_uievent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", this.toString()+"[type="+this.type+"]", evt);
+        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", this.id, evt);
         /*END_DEBUG*/
         if (evt.view !== undefined) { evt_view = evt.view; }
         if (evt.detail !== undefined) { evt_detail = evt.detail; }
@@ -217,7 +217,7 @@
             viewArg = (viewArg === undefined) ? null : viewArg;
             detailArg = (detailArg === undefined) ? 0 : detailArg;
             /*DEBUG*/
-            type_check(typeArg, 'string', canBubbleArg, 'boolean', cancelableArg, 'boolean', viewArg, '*', detailArg, 'number', {label:'UIEvent.initUIEvent', params:['type','canBubble','cancelable','view','detail'], id:this.toString()+"[type="+this.type+"]"});
+            type_check(typeArg,'string', canBubbleArg,'boolean', cancelableArg,'boolean', viewArg,'*', detailArg,'number', {label:'UIEvent.initUIEvent', params:['type','canBubble','cancelable','view','detail'], id:this.id});
             /*END_DEBUG*/
             evt_view = viewArg;
             evt_detail = detailArg;
