@@ -10,7 +10,7 @@ Some of the features:
   * If you're coming from ActionScript 3, you'll feel right at home!
 
 Basic build instructions:
-  git clone git://github.com/biilly/doodle-js.git
+  git clone git://github.com/billyist/doodle-js.git
   git submodule init
   git submodule update
   ./build/make-doodle => ./build/doodle.js
@@ -20,8 +20,8 @@ Debugging version (some useful error messages):
 
 For more options: ./build/make-doodle -h
 
-Reference docs: http://biilly.github.com/doodle-js/doc/api/
+Reference docs: http://billyist.github.com/doodle-js/doc/api/
 
-Some examples: http://biilly.github.com/doodle-js/doc/demos/
+Some examples: http://billyist.github.com/doodle-js/doc/demos/
 
 Questions? http://groups.google.com/group/doodlejs
