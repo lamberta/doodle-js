@@ -19,7 +19,7 @@ doodle.events = {};
             i = 0;
         if (len > 0) {
           for (; i < len; i++) {
-            queue[i]();
+            queue[i](doodle); //pass the global object to alias the namespace
           }
           queue.length = 0;
         }
@@ -27,6 +27,7 @@ doodle.events = {};
 
   /**
    * Pushes a function on the waiting list, will execute when the DOM is ready.
+   * Alias the doodle namespace by passing an argument to the function.
    * @param {function} fn
    */
   doodle.ready = function (fn) {
