@@ -604,8 +604,13 @@
                  display.allChildren, display.allChildren.length,
                  display);
 
-    //frame rate passed in constructor with options object
-    if (options && typeof options.frameRate !== 'undefined') { display.frameRate = options.frameRate; }
+    //parse options object
+    if (options) {
+      if (options.width !== undefined) { display.width = options.width; }
+      if (options.height !== undefined) { display.height = options.height; }
+      if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
+      if (options.frameRate !== undefined) { display.frameRate = options.frameRate; }
+    }
     
     return display;
   };//end doodle.Display
