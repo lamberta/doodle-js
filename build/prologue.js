@@ -13,7 +13,7 @@ doodle.events = {};
 
 (function () {
   var ready_queue = [],
-      on_dom_loaded = function () {
+      dom_loaded = function () {
         var queue = ready_queue,
             len = queue.length,
             i = 0;
@@ -23,6 +23,10 @@ doodle.events = {};
           }
           queue.length = 0;
         }
+      },
+      on_dom_loaded = function () {
+        dom_loaded();
+        document.removeEventListener('DOMContentLoaded', on_dom_loaded, false);
       };
 
   /**
@@ -39,13 +43,16 @@ doodle.events = {};
     ready_queue.push(fn);
     //already loaded
     if (document.readyState === "complete") {
-      on_dom_loaded();
+      dom_loaded();
     }
   };
 
-  if (document.addEventListener) {
-    document.addEventListener("DOMContentLoaded", on_dom_loaded, false);
-  } else {
-    console.error("document.addEventListener not supported.");
+  //if we missed the event, no need to listen for it
+  if (document.readyState !== "complete") {
+    if (document.addEventListener) {
+      document.addEventListener('DOMContentLoaded', on_dom_loaded, false);
+    } else {
+      console.error("document.addEventListener not supported.");
+    }
   }
 }());
