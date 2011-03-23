@@ -35,6 +35,7 @@
    * @class
    * @augments doodle.ElementNode
    * @param {HTMLElement=} element
+   * @param {object=} options
    * @return {doodle.Display}
    * @throws {TypeError} Must be a block style element.
    * @throws {SyntaxError}
@@ -46,10 +47,11 @@
    *   &nbsp; this.width = 400;<br/>
    *   });
    */
-  doodle.Display = function (element) {
+  doodle.Display = function (element /*, options*/) {
     var display,
-        id;
-
+        id,
+        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : false;
+    
     //extract id from element
     if (element && typeof element !== 'function') {
       element = get_element(element);
@@ -63,6 +65,12 @@
     //won't assign element until after display properties are set up
     display = Object.create(doodle.ElementNode(undefined, id));
 
+    /*DEBUG*/
+    //check options object
+    if (options !== false) {
+      type_check(options,'object', {label:'Display', id:this.id, message:"Invalid options object."});
+    }
+    /*END_DEBUG*/
     
     Object.defineProperties(display, display_static_properties);
     //properties that require privacy
@@ -128,10 +136,10 @@
       
       //Add display handlers
       //Redraw scene graph when children are added and removed.
-			//**when objects removed in event loop, causing it to re-run before its finished
+      //**when objects removed in event loop, causing it to re-run before its finished
       //$display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
       //$display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
-			
+      
       //Add keyboard listeners to document.
       document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
       document.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
@@ -595,6 +603,9 @@
                  evt_enterFrame,
                  display.allChildren, display.allChildren.length,
                  display);
+
+    //frame rate passed in constructor with options object
+    if (options && typeof options.frameRate !== 'undefined') { display.frameRate = options.frameRate; }
     
     return display;
   };//end doodle.Display
@@ -763,9 +774,9 @@
         }
       }
 
-			/*DEBUG*/
-			//console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
-			/*END_DEBUG*/
+      /*DEBUG*/
+      //console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
+      /*END_DEBUG*/
       draw_scene_graph(scene_path, path_count);
       
       /*DEBUG_STATS*/
@@ -802,7 +813,7 @@
    */
   draw_scene_graph = function (scene_path) {
     var node,
-				count = scene_path.length,
+        count = scene_path.length,
         display = scene_path[0],
         ctx,
         bounds,
@@ -811,13 +822,13 @@
     for (; i < count; i++) {
     //while (count--) {
       node = scene_path[i];
-			/*DEBUG*/
-			console.assert(Array.isArray(scene_path), "scene_path is an array", scene_path);
-			console.assert(scene_path.length === count, "scene_path.length === count", count, scene_path.length);
-			console.assert(doodle.Node.isNode(node), "node is a Node", node, i, scene_path);
-			console.assert(doodle.Display.isDisplay(display), "display is a Display", display);
-			console.assert(node.context && node.context.toString() === '[object CanvasRenderingContext2D]', "node.context is a context", node.context, node.id);
-			/*END_DEBUG*/
+      /*DEBUG*/
+      console.assert(Array.isArray(scene_path), "scene_path is an array", scene_path);
+      console.assert(scene_path.length === count, "scene_path.length === count", count, scene_path.length);
+      console.assert(doodle.Node.isNode(node), "node is a Node", node, i, scene_path);
+      console.assert(doodle.Display.isDisplay(display), "display is a Display", display);
+      console.assert(node.context && node.context.toString() === '[object CanvasRenderingContext2D]', "node.context is a context", node.context, node.id);
+      /*END_DEBUG*/
       //display = node.root;
       ctx = node.context;
       
