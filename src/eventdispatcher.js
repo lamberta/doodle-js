@@ -115,6 +115,26 @@
     },
 
     /**
+     * Adds an event listener on an EventDispatcher object.
+     * This is convenience alias for EventDispatcher.addEventListener(type, listener, useCapture=false).
+     * @name on
+     * @param {string} type
+     * @param {Function} listener
+     * @throws {TypeError}
+     */
+    'on': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (type, listener) {
+        /*DEBUG*/
+        type_check(type,'string', listener,'function', {label:'EventDispatcher.on', params:['type','listener'], id:this.id});
+        /*END_DEBUG*/
+        this.addEventListener(type, listener, false);
+      }
+    },
+
+    /**
      * Removes a listener from the EventDispatcher object.
      * @name removeEventListener
      * @param {string} type
