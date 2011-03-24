@@ -13,20 +13,25 @@ doodle.events = {};
 
 (function () {
   var ready_queue = [],
-      on_dom_loaded = function () {
+      dom_loaded = function () {
         var queue = ready_queue,
             len = queue.length,
             i = 0;
         if (len > 0) {
           for (; i < len; i++) {
-            queue[i]();
+            queue[i](doodle); //pass the global object to alias the namespace
           }
           queue.length = 0;
         }
+      },
+      on_dom_loaded = function () {
+        dom_loaded();
+        document.removeEventListener('DOMContentLoaded', on_dom_loaded, false);
       };
 
   /**
    * Pushes a function on the waiting list, will execute when the DOM is ready.
+   * Alias the doodle namespace by passing an argument to the function.
    * @param {function} fn
    */
   doodle.ready = function (fn) {
@@ -38,14 +43,17 @@ doodle.events = {};
     ready_queue.push(fn);
     //already loaded
     if (document.readyState === "complete") {
-      on_dom_loaded();
+      dom_loaded();
     }
   };
 
-  if (document.addEventListener) {
-    document.addEventListener("DOMContentLoaded", on_dom_loaded, false);
-  } else {
-    console.error("document.addEventListener not supported.");
+  //if we missed the event, no need to listen for it
+  if (document.readyState !== "complete") {
+    if (document.addEventListener) {
+      document.addEventListener('DOMContentLoaded', on_dom_loaded, false);
+    } else {
+      console.error("document.addEventListener not supported.");
+    }
   }
 }());
 
@@ -8036,6 +8044,26 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     },
 
     /**
+     * Adds an event listener on an EventDispatcher object.
+     * This is convenience alias for EventDispatcher.addEventListener(type, listener, useCapture=false).
+     * @name on
+     * @param {string} type
+     * @param {Function} listener
+     * @throws {TypeError}
+     */
+    'on': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (type, listener) {
+        /*DEBUG*/
+        type_check(type,'string', listener,'function', {label:'EventDispatcher.on', params:['type','listener'], id:this.id});
+        /*END_DEBUG*/
+        this.addEventListener(type, listener, false);
+      }
+    },
+
+    /**
      * Removes a listener from the EventDispatcher object.
      * @name removeEventListener
      * @param {string} type
@@ -10591,7 +10619,8 @@ doodle.Sprite.isSprite = function (obj) {
           height = 0,
           bg_color = null,
           bg_image = null,
-          bg_repeat = 'repeat';
+          bg_repeat = 'repeat',
+          clear_bitmap = true;
       
       return {
         /**
@@ -10843,6 +10872,24 @@ doodle.Sprite.isSprite = function (obj) {
               set_element_property(this.element, 'visibility', 'hidden');
             }
             visible =  isVisible;
+          }
+        },
+
+        /**
+         * @name clearBitmap
+         * @return {boolean}
+         * @throws {TypeError}
+         * @property
+         */
+        'clearBitmap': {
+          enumerable: false,
+          configurable: true,
+          get: function () { return clear_bitmap; },
+          set: function (isClear) {
+            /*DEBUG*/
+            type_check(isClear,'boolean', {label:'ElementNode.clearBitmap', id:this.id});
+            /*END_DEBUG*/
+            clear_bitmap = isClear;
           }
         },
 
@@ -11254,6 +11301,7 @@ doodle.Layer.isLayer = function (obj) {
    * @class
    * @augments doodle.ElementNode
    * @param {HTMLElement=} element
+   * @param {object=} options
    * @return {doodle.Display}
    * @throws {TypeError} Must be a block style element.
    * @throws {SyntaxError}
@@ -11265,10 +11313,11 @@ doodle.Layer.isLayer = function (obj) {
    *   &nbsp; this.width = 400;<br/>
    *   });
    */
-  doodle.Display = function (element) {
+  doodle.Display = function (element /*, options*/) {
     var display,
-        id;
-
+        id,
+        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : false;
+    
     //extract id from element
     if (element && typeof element !== 'function') {
       element = get_element(element);
@@ -11282,6 +11331,12 @@ doodle.Layer.isLayer = function (obj) {
     //won't assign element until after display properties are set up
     display = Object.create(doodle.ElementNode(undefined, id));
 
+    /*DEBUG*/
+    //check options object
+    if (options !== false) {
+      type_check(options,'object', {label:'Display', id:this.id, message:"Invalid options object."});
+    }
+    /*END_DEBUG*/
     
     Object.defineProperties(display, display_static_properties);
     //properties that require privacy
@@ -11347,10 +11402,10 @@ doodle.Layer.isLayer = function (obj) {
       
       //Add display handlers
       //Redraw scene graph when children are added and removed.
-			//**when objects removed in event loop, causing it to re-run before its finished
+      //**when objects removed in event loop, causing it to re-run before its finished
       //$display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
       //$display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
-			
+      
       //Add keyboard listeners to document.
       document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
       document.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, on_keyboard_event, false);
@@ -11814,6 +11869,14 @@ doodle.Layer.isLayer = function (obj) {
                  evt_enterFrame,
                  display.allChildren, display.allChildren.length,
                  display);
+
+    //parse options object
+    if (options) {
+      if (options.width !== undefined) { display.width = options.width; }
+      if (options.height !== undefined) { display.height = options.height; }
+      if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
+      if (options.frameRate !== undefined) { display.frameRate = options.frameRate; }
+    }
     
     return display;
   };//end doodle.Display
@@ -11974,7 +12037,11 @@ doodle.Layer.isLayer = function (obj) {
       ****/
 
       /*** old way ***/
-      clear_scene_graph(layers, layer_count);
+
+      //TODO: optimize - this is basically an extra function call every frame
+      if (display.clearBitmap === true) {
+        clear_scene_graph(layers, layer_count);
+      }
       
       while (recv_count--) {
         if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
@@ -11982,9 +12049,9 @@ doodle.Layer.isLayer = function (obj) {
         }
       }
 
-			/*DEBUG*/
-			//console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
-			/*END_DEBUG*/
+      /*DEBUG*/
+      //console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
+      /*END_DEBUG*/
       draw_scene_graph(scene_path, path_count);
       
       /*DEBUG_STATS*/
@@ -12006,13 +12073,17 @@ doodle.Layer.isLayer = function (obj) {
   clear_scene_graph = function (layers, count) {
     /* Brute way, clear entire layer in big rect.
      */
-    var ctx;
+    var layer,
+        ctx;
     while (count--) {
-      ctx = layers[count].context;
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
-      ctx.clearRect(0, 0, layers[count].width, layers[count].height);
-      ctx.restore();
+      layer = layers[count];
+      if (layer.clearBitmap === true) {
+        ctx = layer.context;
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
+        ctx.clearRect(0, 0, layer.width, layer.height);
+        ctx.restore();
+      }
     }
   };
 
@@ -12021,7 +12092,7 @@ doodle.Layer.isLayer = function (obj) {
    */
   draw_scene_graph = function (scene_path) {
     var node,
-				count = scene_path.length,
+        count = scene_path.length,
         display = scene_path[0],
         ctx,
         bounds,
@@ -12030,13 +12101,13 @@ doodle.Layer.isLayer = function (obj) {
     for (; i < count; i++) {
     //while (count--) {
       node = scene_path[i];
-			/*DEBUG*/
-			console.assert(Array.isArray(scene_path), "scene_path is an array", scene_path);
-			console.assert(scene_path.length === count, "scene_path.length === count", count, scene_path.length);
-			console.assert(doodle.Node.isNode(node), "node is a Node", node, i, scene_path);
-			console.assert(doodle.Display.isDisplay(display), "display is a Display", display);
-			console.assert(node.context && node.context.toString() === '[object CanvasRenderingContext2D]', "node.context is a context", node.context, node.id);
-			/*END_DEBUG*/
+      /*DEBUG*/
+      console.assert(Array.isArray(scene_path), "scene_path is an array", scene_path);
+      console.assert(scene_path.length === count, "scene_path.length === count", count, scene_path.length);
+      console.assert(doodle.Node.isNode(node), "node is a Node", node, i, scene_path);
+      console.assert(doodle.Display.isDisplay(display), "display is a Display", display);
+      console.assert(node.context && node.context.toString() === '[object CanvasRenderingContext2D]', "node.context is a context", node.context, node.id);
+      /*END_DEBUG*/
       //display = node.root;
       ctx = node.context;
       
