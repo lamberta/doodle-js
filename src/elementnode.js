@@ -39,7 +39,8 @@
           height = 0,
           bg_color = null,
           bg_image = null,
-          bg_repeat = 'repeat';
+          bg_repeat = 'repeat',
+          clear_bitmap = true;
       
       return {
         /**
@@ -291,6 +292,24 @@
               set_element_property(this.element, 'visibility', 'hidden');
             }
             visible =  isVisible;
+          }
+        },
+
+        /**
+         * @name clearBitmap
+         * @return {boolean}
+         * @throws {TypeError}
+         * @property
+         */
+        'clearBitmap': {
+          enumerable: false,
+          configurable: true,
+          get: function () { return clear_bitmap; },
+          set: function (isClear) {
+            /*DEBUG*/
+            type_check(isClear,'boolean', {label:'ElementNode.clearBitmap', id:this.id});
+            /*END_DEBUG*/
+            clear_bitmap = isClear;
           }
         },
 

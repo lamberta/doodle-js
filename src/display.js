@@ -771,7 +771,11 @@
       ****/
 
       /*** old way ***/
-      clear_scene_graph(layers, layer_count);
+
+      //TODO: optimize - this is basically an extra function call every frame
+      if (display.clearBitmap === true) {
+        clear_scene_graph(layers, layer_count);
+      }
       
       while (recv_count--) {
         if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
@@ -803,13 +807,17 @@
   clear_scene_graph = function (layers, count) {
     /* Brute way, clear entire layer in big rect.
      */
-    var ctx;
+    var layer,
+        ctx;
     while (count--) {
-      ctx = layers[count].context;
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
-      ctx.clearRect(0, 0, layers[count].width, layers[count].height);
-      ctx.restore();
+      layer = layers[count];
+      if (layer.clearBitmap === true) {
+        ctx = layer.context;
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); //reset
+        ctx.clearRect(0, 0, layer.width, layer.height);
+        ctx.restore();
+      }
     }
   };
 
