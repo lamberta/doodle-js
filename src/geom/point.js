@@ -23,7 +23,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.geom.Point = function Point (x, y) {
+  function Point (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -105,7 +105,9 @@
             get: function () { return (id === null) ? this.toString() : id; },
             set: function (idArg) {
               /*DEBUG*/
-              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              if (idArg !== null) {
+                type_check(idArg,'string', {label:'Point.id', id:this.id});
+              }
               /*END_DEBUG*/
               id = idArg;
             }
@@ -151,8 +153,9 @@
     }
 
     return point;
-  };
+  }//end Point definition
 
+  doodle.geom.Point = Point;
   
   point_static_properties = {
     /**

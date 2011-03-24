@@ -22,7 +22,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.geom.Rectangle = function Rectangle (x, y, width, height) {
+  function Rectangle (x, y, width, height) {
     var rect = {},
         arg_len = arguments.length,
         init_obj;
@@ -144,7 +144,9 @@
             get: function () { return (id === null) ? this.toString() : id; },
             set: function (idArg) {
               /*DEBUG*/
-              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              if (idArg !== null) {
+                type_check(idArg,'string', {label:'Point.id', id:this.id});
+              }
               /*END_DEBUG*/
               id = idArg;
             }
@@ -191,8 +193,9 @@
     }
 
     return rect;
-  };
+  }//end Rectangle definition
 
+  doodle.geom.Rectangle = Rectangle;
 
   rect_static_properties = {
     /**
