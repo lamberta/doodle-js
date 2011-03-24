@@ -612,7 +612,10 @@
               throw new TypeError(gfx_node.id + " Graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.");
             }
             //add color ratios to our gradient
-            for (; i < len; i+=1) {
+            for (; i < len; i++) {
+              /*DEBUG*/
+              range_check(ratios[i] >= 0, ratios[i] <= 1, {label:'Graphics.beginGradientFill', id:gfx_node.id, message:"ratio must be between 0 and 1."});
+              /*END_DEBUG*/
               gradient.addColorStop(ratios[i], hex_to_rgb_str(colors[i], alphas[i]));
             }
             ctx.fillStyle = gradient;
