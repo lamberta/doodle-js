@@ -173,6 +173,7 @@
 
           this.__minX = this.__minY = this.__maxX = this.__maxY = 0;
           cursor_x = cursor_y = 0;
+          return this;
         }
       },
 
@@ -210,6 +211,7 @@
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -246,6 +248,7 @@
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -291,6 +294,7 @@
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -346,6 +350,7 @@
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -368,6 +373,7 @@
           //update cursor
           cursor_x = x;
           cursor_y = y;
+          return this;
         }
       },
 
@@ -404,6 +410,7 @@
           //update cursor
           cursor_x = x;
           cursor_y = y;
+          return this;
         }
       },
 
@@ -460,6 +467,7 @@
           //update cursor
           cursor_x = x2;
           cursor_y = y2;
+          return this;
         }
       },
 
@@ -532,6 +540,7 @@
           //update cursor
           cursor_x = x3;
           cursor_y = y3;
+          return this;
         }
       },
 
@@ -556,6 +565,7 @@
           draw_commands.push(function (ctx) {
             ctx.fillStyle = hex_to_rgb_str(color, alpha);
           });
+          return this;
         }
       },
 
@@ -607,6 +617,7 @@
             }
             ctx.fillStyle = gradient;
           });
+          return this;
         }
       },
 
@@ -675,6 +686,7 @@
               ctx.fillStyle = 'rgba(0,0,0,0)';
             }
           });
+          return this;
         }
       },
 
@@ -733,6 +745,7 @@
             ctx.lineJoin = line_join;
             ctx.miterLimit = line_miter;
           });
+          return this;
         }
       },
 
@@ -750,6 +763,7 @@
             ctx.beginPath();
             ctx.moveTo(cursor_x, cursor_y);
           });
+          return this;
         }
       },
 
@@ -770,6 +784,7 @@
           });
           cursor_x = 0;
           cursor_y = 0;
+          return this;
         }
       },
 
@@ -784,6 +799,7 @@
         configurable: false,
         value: function () {
           draw_commands.push(function (ctx) { ctx.fill(); });
+          return this;
         }
       },
       
@@ -802,6 +818,7 @@
           });
           cursor_x = 0;
           cursor_y = 0;
+          return this;
         }
       }
 
