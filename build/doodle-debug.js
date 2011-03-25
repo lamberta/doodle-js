@@ -10,6 +10,7 @@ doodle.utils = {};
 //packages
 doodle.geom = {};
 doodle.events = {};
+doodle.filters = {};
 
 (function () {
   var ready_queue = [],
@@ -202,6 +203,8 @@ doodle.utils.debug = {};
       //Doodle primitives
     case 'Image':
     case 'Text':
+      //Doodle filters
+    case 'ColorFilter':
       assert_object_type(arg, type, inheritsp);
       break;
 
@@ -5994,6 +5997,444 @@ Object.defineProperties(doodle.events.TextEvent, {
 });
 /*globals doodle*/
 (function () {
+  var filter_static_properties = {},
+      /*DEBUG*/
+      type_check = doodle.utils.debug.type_check,
+      range_check = doodle.utils.debug.range_check,
+      /*END_DEBUG*/
+      temp_array = new Array(8);
+  
+  /**
+   * @name doodle.filters.ColorFilter
+   * @class
+   * @augments Object
+   * @param {number=} x
+   * @param {number=} y
+   * @return {doodle.filters.ColorFilter}
+   * @throws {TypeError}
+   * @throws {SyntaxError}
+   */
+  function ColorFilter (redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier,
+                        redOffset, greenOffset, blueOffset, alphaOffset) {
+    var filter = {},
+        arg_len = arguments.length,
+        init_obj;
+
+    Object.defineProperties(filter, filter_static_properties);
+    //properties that require privacy
+    Object.defineProperties(filter, (function () {
+      var id = null,
+          $temp_array = temp_array, //local ref
+          red_multiplier = 1,
+          green_multiplier = 1,
+          blue_multiplier = 1,
+          alpha_multiplier = 1,
+          red_offset = 0,
+          green_offset = 0,
+          blue_offset = 0,
+          alpha_offset = 0;
+      
+      return {
+        /**
+         * @name redMultiplier
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'redMultiplier': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return red_multiplier; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.redMultiplier', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.redMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            red_multiplier = n;
+          }
+        },
+
+        /**
+         * @name greenMultiplier
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'greenMultiplier': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return green_multiplier; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.greenMultiplier', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.greenMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            green_multiplier = n;
+          }
+        },
+
+        /**
+         * @name blueMultiplier
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'blueMultiplier': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return blue_multiplier; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.blueMultiplier', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.blueMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            blue_multiplier = n;
+          }
+        },
+
+        /**
+         * @name alphaMultiplier
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'alphaMultiplier': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return alpha_multiplier; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.alphaMultiplier', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.alphaMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            alpha_multiplier = n;
+          }
+        },
+
+        /**
+         * @name redOffset
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'redOffset': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return red_offset; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.redOffset', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.redOffset', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            red_offset = n;
+          }
+        },
+
+        /**
+         * @name greenOffset
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'greenOffset': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return green_offset; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.greenOffset', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.greenOffset', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            green_offset = n;
+          }
+        },
+
+        /**
+         * @name blueOffset
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'blueOffset': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return blue_offset; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.blueOffset', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.blueOffset', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            blue_offset = n;
+          }
+        },
+
+        /**
+         * @name alphaOffset
+         * @return {number}
+         * @throws {TypeError}
+         * @throws {RangeError}
+         * @property
+         */
+        'alphaOffset': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return alpha_offset; },
+          set: function (n) {
+            /*DEBUG*/
+            type_check(n,'number', {label:'ColorFilter.alphaOffset', id:this.id});
+            range_check(isFinite(n), {label:'ColorFilter.alphaOffset', id:this.id, message:"Parameter must be a finite number."});
+            /*END_DEBUG*/
+            alpha_offset = n;
+          }
+        },
+
+        /**
+         * @name id
+         * @return {string}
+         * @throws {TypeError}
+         * @property
+         */
+        'id': {
+          enumerable: true,
+          configurable: false,
+          get: function () { return (id === null) ? this.toString() : id; },
+          set: function (idArg) {
+            /*DEBUG*/
+            if (idArg !== null) {
+              type_check(idArg,'string', {label:'ColorFilter.id', id:this.id});
+            }
+            /*END_DEBUG*/
+            id = idArg;
+          }
+        },
+
+        /**
+         * Applies filter to a specified region of a context.
+         * Called when rendering the scene.
+         * @name __applyFilter
+         * @param {CanvasRenderingContext2D} ctx
+         * @throws {TypeError}
+         * @private
+         */
+        '__applyFilter': {
+          enumerable: true,
+          configurable: false,
+          value: function (ctx, x, y, width, height) {
+            /*DEBUG*/
+            console.assert(ctx.toString() === "[object CanvasRenderingContext2D]", "ColorFilter.__applyFilter: context available.");
+            console.assert(typeof x === 'number', "ColorFilter.__applyFilter: x is a number.");
+            console.assert(typeof y === 'number', "ColorFilter.__applyFilter: y is a number.");
+            console.assert(typeof width === 'number', "ColorFilter.__applyFilter: width is a number.");
+            console.assert(typeof height === 'number', "ColorFilter.__applyFilter: height is a number.");
+            /*END_DEBUG*/
+            var img = ctx.getImageData(x, y, width, height),
+                img_data = img.data,
+                pixels = width * height,
+                p,
+                //faster lookup, but more vars
+                rm = red_multiplier,
+                ro = red_offset,
+                gm = green_multiplier,
+                go = green_offset,
+                bm = blue_multiplier,
+                bo = blue_offset,
+                am = alpha_multiplier,
+                ao = alpha_offset;
+            
+            while (--pixels) {
+              p = pixels << 2;
+              img_data[p] = img_data[p] * rm + ro;
+              img_data[p+1] = img_data[p+1] * gm + go;
+              img_data[p+2] = img_data[p+2] * bm + bo;
+              img_data[p+3] = img_data[p+3] * am + ao;
+            }
+            img.data = img_data;
+            ctx.putImageData(img, x, y);
+          }
+        },
+
+        /**
+         * Same as toArray, but reuses array object.
+         * @name __toArray
+         * @return {Point}
+         * @private
+         */
+        '__toArray': {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: function () {
+            $temp_array[0] = red_multiplier;
+            $temp_array[1] = green_multiplier;
+            $temp_array[2] = blue_multiplier;
+            $temp_array[3] = alpha_multiplier;
+            $temp_array[4] = red_offset;
+            $temp_array[5] = green_offset;
+            $temp_array[6] = blue_offset;
+            $temp_array[7] = alpha_offset;
+            return $temp_array;
+          }
+        }
+      };
+    }()));//end defineProperties
+
+    //initialize filter
+    switch (arg_len) {
+    case 0:
+      //defaults to 1,1,1,1,0,0,0,0
+      break;
+    case 8:
+      //standard instantiation
+      filter.compose(redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier, redOffset, greenOffset, blueOffset, alphaOffset);
+      break;
+    case 1:
+      //passed an initialization obj: ColorFilter, array, function
+      init_obj = arguments[0];
+      redMultiplier = undefined;
+      
+      if (typeof init_obj === 'function') {
+        init_obj.call(filter);
+      } else if (Array.isArray(init_obj)) {
+        /*DEBUG*/
+        if (init_obj.length !== 8) {
+          throw new SyntaxError("[object ColorFilter]([redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier, redOffset, greenOffset, blueOffset, alphaOffset]): Invalid array parameter.");
+        }
+        /*END_DEBUG*/
+        filter.compose.apply(filter, init_obj);
+      } else {
+        /*DEBUG*/
+        type_check(init_obj,'ColorFilter', {label: 'doodle.filters.ColorFilter', id:this.id, message:"Unable to initialize from ColorFilter object."});
+        /*END_DEBUG*/
+        filter.compose.apply(filter, init_obj.__toArray());
+      }
+      break;
+    default:
+      /*DEBUG*/
+      throw new SyntaxError("[object ColorFilter](redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier, redOffset, greenOffset, blueOffset, alphaOffset): Invalid number of parameters.");
+      /*END_DEBUG*/
+    }
+
+    return filter;
+  }//end ColorFilter definition
+
+  doodle.filters.ColorFilter = ColorFilter;
+
+  filter_static_properties = {
+    /**
+     * Returns the string representation of the specified object.
+     * @name toString
+     * @return {string}
+     */
+    'toString': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () { return "[object ColorFilter]"; }
+    },
+
+    /**
+     * Returns an array that contains the values of the color multipliers and offsets.
+     * @name toArray
+     * @return {Array}
+     */
+    'toArray': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () { return this.__toArray().concat(); }
+    },
+
+    /**
+     * Set ColorFilter values.
+     * @name compose
+     * @param {number} redMultiplier
+     * @param {number} greenMultiplier
+     * @param {number} blueMultiplier
+     * @param {number} alphaMultiplier
+     * @param {number} redOffset
+     * @param {number} blueOffset
+     * @param {number} greenOffset
+     * @param {number} alphaOffset
+     * @return {ColorFilter}
+     * @throws {TypeError}
+     * @throws {RangeError}
+     */
+    'compose': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier, redOffset, greenOffset, blueOffset, alphaOffset) {
+        /*DEBUG*/
+        type_check(redMultiplier,'number', greenMultiplier,'number', blueMultiplier,'number', alphaMultiplier,'number',
+                   redOffset,'number', blueOffset,'number', greenOffset,'number', alphaOffset,'number',
+                   {label:'ColorFilter.compose', params:['redMultiplier','greenMultiplier','blueMultiplier','alphaMultiplier','redOffset','greenOffset','blueOffset','alphaOffset'], id:this.id});
+        range_check(isFinite(redMultiplier), isFinite(greenMultiplier), isFinite(blueMultiplier), isFinite(alphaMultiplier),
+                    isFinite(redOffset), isFinite(greenOffset), isFinite(blueOffset), isFinite(alphaOffset),
+                    {label:'ColorFilter.compose', params:['redMultiplier','greenMultiplier','blueMultiplier','alphaMultiplier','redOffset','greenOffset','blueOffset','alphaOffset'], id:this.id, message:"Parameters must be finite numbers."});
+        /*END_DEBUG*/
+        this.redMultiplier = redMultiplier;
+        this.greenMultiplier = greenMultiplier;
+        this.blueMultiplier = blueMultiplier;
+        this.alphaMultiplier = alphaMultiplier;
+        this.redOffset = redOffset;
+        this.greenOffset = greenOffset;
+        this.blueOffset = blueOffset;
+        this.alphaOffset = alphaOffset;
+        return this;
+      }
+    },
+
+    /**
+     * Creates a copy of this ColorFilter object.
+     * @name clone
+     * @return {ColorFilter}
+     */
+    'clone': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () { return ColorFilter(this.__toArray()); }
+    },
+
+    /**
+     * Determines whether two ColorFilters are equal.
+     * @name equals
+     * @param {ColorFilter} filter The ColorFilter to be compared.
+     * @return {boolean}
+     * @throws {TypeError}
+     */
+    'equals': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (filter) {
+        /*DEBUG*/
+        type_check(filter,'ColorFilter', {label:'ColorFilter.equals', params:'filter', id:this.id});
+        /*END_DEBUG*/
+        return (this.redMultiplier === filter.redMultiplier &&
+                this.greenMultiplier === filter.greenMultiplier &&
+                this.blueMultiplier === filter.blueMultiplier &&
+                this.alphaMultiplier === filter.alphaMultiplier &&
+                this.redOffset === filter.redOffset &&
+                this.greenOffset === filter.greenOffset &&
+                this.blueOffset === filter.blueOffset &&
+                this.alphaOffset === filter.alphaOffset);
+      }
+    }
+    
+  };//end filter_static_properties definition
+
+}());//end class closure
+
+/*globals doodle*/
+(function () {
   var point_static_properties,
       distance,
       temp_array = new Array(2),
@@ -6017,7 +6458,7 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.geom.Point = function Point (x, y) {
+  function Point (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -6099,7 +6540,9 @@ Object.defineProperties(doodle.events.TextEvent, {
             get: function () { return (id === null) ? this.toString() : id; },
             set: function (idArg) {
               /*DEBUG*/
-              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              if (idArg !== null) {
+                type_check(idArg,'string', {label:'Point.id', id:this.id});
+              }
               /*END_DEBUG*/
               id = idArg;
             }
@@ -6145,8 +6588,9 @@ Object.defineProperties(doodle.events.TextEvent, {
     }
 
     return point;
-  };
+  }//end Point definition
 
+  doodle.geom.Point = Point;
   
   point_static_properties = {
     /**
@@ -6449,7 +6893,7 @@ doodle.geom.Point.isPoint = function (pt) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.geom.Matrix = function Matrix (a, b, c, d, tx, ty) {
+  function Matrix (a, b, c, d, tx, ty) {
     var matrix = {},
         arg_len = arguments.length,
         init_obj;
@@ -6622,7 +7066,9 @@ doodle.geom.Point.isPoint = function (pt) {
             get: function () { return (id === null) ? this.toString() : id; },
             set: function (idArg) {
               /*DEBUG*/
-              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              if (idArg !== null) {
+                type_check(idArg,'string', {label:'Point.id', id:this.id});
+              }
               /*END_DEBUG*/
               id = idArg;
             }
@@ -6671,8 +7117,9 @@ doodle.geom.Point.isPoint = function (pt) {
     }
     
     return matrix;
-  };
+  }//end Matrix defintion
 
+  doodle.geom.Matrix = Matrix;
   
   matrix_static_properties = {
     /**
@@ -7295,7 +7742,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.geom.Rectangle = function Rectangle (x, y, width, height) {
+  function Rectangle (x, y, width, height) {
     var rect = {},
         arg_len = arguments.length,
         init_obj;
@@ -7417,7 +7864,9 @@ doodle.geom.Matrix.isMatrix = function (m) {
             get: function () { return (id === null) ? this.toString() : id; },
             set: function (idArg) {
               /*DEBUG*/
-              idArg === null || type_check(idArg,'string', {label:'Point.id', id:this.id});
+              if (idArg !== null) {
+                type_check(idArg,'string', {label:'Point.id', id:this.id});
+              }
               /*END_DEBUG*/
               id = idArg;
             }
@@ -7464,8 +7913,9 @@ doodle.geom.Matrix.isMatrix = function (m) {
     }
 
     return rect;
-  };
+  }//end Rectangle definition
 
+  doodle.geom.Rectangle = Rectangle;
 
   rect_static_properties = {
     /**
@@ -9923,6 +10373,7 @@ doodle.Sprite.isSprite = function (obj) {
 
           this.__minX = this.__minY = this.__maxX = this.__maxY = 0;
           cursor_x = cursor_y = 0;
+          return this;
         }
       },
 
@@ -9960,6 +10411,7 @@ doodle.Sprite.isSprite = function (obj) {
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -9996,6 +10448,7 @@ doodle.Sprite.isSprite = function (obj) {
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -10041,6 +10494,7 @@ doodle.Sprite.isSprite = function (obj) {
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -10096,6 +10550,7 @@ doodle.Sprite.isSprite = function (obj) {
             ctx.closePath();
             ctx.stroke();
           });
+          return this;
         }
       },
 
@@ -10118,6 +10573,7 @@ doodle.Sprite.isSprite = function (obj) {
           //update cursor
           cursor_x = x;
           cursor_y = y;
+          return this;
         }
       },
 
@@ -10154,6 +10610,7 @@ doodle.Sprite.isSprite = function (obj) {
           //update cursor
           cursor_x = x;
           cursor_y = y;
+          return this;
         }
       },
 
@@ -10210,6 +10667,7 @@ doodle.Sprite.isSprite = function (obj) {
           //update cursor
           cursor_x = x2;
           cursor_y = y2;
+          return this;
         }
       },
 
@@ -10282,6 +10740,7 @@ doodle.Sprite.isSprite = function (obj) {
           //update cursor
           cursor_x = x3;
           cursor_y = y3;
+          return this;
         }
       },
 
@@ -10306,6 +10765,7 @@ doodle.Sprite.isSprite = function (obj) {
           draw_commands.push(function (ctx) {
             ctx.fillStyle = hex_to_rgb_str(color, alpha);
           });
+          return this;
         }
       },
 
@@ -10352,11 +10812,15 @@ doodle.Sprite.isSprite = function (obj) {
               throw new TypeError(gfx_node.id + " Graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.");
             }
             //add color ratios to our gradient
-            for (; i < len; i+=1) {
+            for (; i < len; i++) {
+              /*DEBUG*/
+              range_check(ratios[i] >= 0, ratios[i] <= 1, {label:'Graphics.beginGradientFill', id:gfx_node.id, message:"ratio must be between 0 and 1."});
+              /*END_DEBUG*/
               gradient.addColorStop(ratios[i], hex_to_rgb_str(colors[i], alphas[i]));
             }
             ctx.fillStyle = gradient;
           });
+          return this;
         }
       },
 
@@ -10425,6 +10889,7 @@ doodle.Sprite.isSprite = function (obj) {
               ctx.fillStyle = 'rgba(0,0,0,0)';
             }
           });
+          return this;
         }
       },
 
@@ -10483,6 +10948,7 @@ doodle.Sprite.isSprite = function (obj) {
             ctx.lineJoin = line_join;
             ctx.miterLimit = line_miter;
           });
+          return this;
         }
       },
 
@@ -10500,6 +10966,7 @@ doodle.Sprite.isSprite = function (obj) {
             ctx.beginPath();
             ctx.moveTo(cursor_x, cursor_y);
           });
+          return this;
         }
       },
 
@@ -10520,6 +10987,7 @@ doodle.Sprite.isSprite = function (obj) {
           });
           cursor_x = 0;
           cursor_y = 0;
+          return this;
         }
       },
 
@@ -10534,6 +11002,7 @@ doodle.Sprite.isSprite = function (obj) {
         configurable: false,
         value: function () {
           draw_commands.push(function (ctx) { ctx.fill(); });
+          return this;
         }
       },
       
@@ -10552,6 +11021,7 @@ doodle.Sprite.isSprite = function (obj) {
           });
           cursor_x = 0;
           cursor_y = 0;
+          return this;
         }
       }
 
@@ -11073,6 +11543,7 @@ doodle.ElementNode.isElementNode = function (obj) {
       //defaults
       var width = 0,
           height = 0,
+          filters = null,
           context = null;
       
       return {
@@ -11131,6 +11602,26 @@ doodle.ElementNode.isElementNode = function (obj) {
           get: function () { return context; }
         },
 
+        /**
+         * Collection of filters to apply to the canvas bitmap.
+         * @name filters
+         * @return {Array}
+         * @property
+         */
+        'filters': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return filters; },
+          set: function (filtersVar) {
+            /*DEBUG*/
+            if (filtersVar !== null) {
+              type_check(filtersVar,'array', {label:'Layer.filters', id:this.id});
+            }
+            /*END_DEBUG*/
+            filters = filtersVar;
+          }
+        },
+        
         /**
          * Layer specific things to setup when adding a dom element.
          * Called in ElementNode.element
@@ -12053,6 +12544,21 @@ doodle.Layer.isLayer = function (obj) {
       //console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
       /*END_DEBUG*/
       draw_scene_graph(scene_path, path_count);
+
+      //layer filters
+      var ctx, l, filters, len,
+          w = display.width,
+          h = display.height;
+      while (layer_count--) {
+        l = layers[layer_count];
+        if (l.filters) {
+          filters = l.filters;
+          len = filters.length;
+          while (len--) {
+            filters[len].__applyFilter(l.context, 0, 0, w, h);
+          }
+        }
+      }
       
       /*DEBUG_STATS*/
       if (display.debug.stats !== false) {
