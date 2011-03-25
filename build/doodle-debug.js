@@ -2786,9 +2786,9 @@ Object.defineProperty(doodle, 'LineJoin', {
         resetTarget = (resetTarget === undefined) ? false : resetTarget;
         resetType = (resetType === undefined) ? false : resetType;
         /*DEBUG*/
-        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", this.id, evt);
-        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", this.id, resetTarget);
-        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", this.id, resetType);
+        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", event.id, evt);
+        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", event.id, resetTarget);
+        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", event.id, resetType);
         /*END_DEBUG*/
         if (resetTarget !== false) {
           evt_currentTarget = resetTarget;
@@ -3547,7 +3547,7 @@ Object.defineProperty(doodle, 'LineJoin', {
        */
       copy_uievent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", this.id, evt);
+        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", uievent.id, evt);
         /*END_DEBUG*/
         if (evt.view !== undefined) { evt_view = evt.view; }
         if (evt.detail !== undefined) { evt_detail = evt.detail; }
@@ -3889,7 +3889,7 @@ doodle.events.UIEvent.isUIEvent = function (evt) {
        */
       copy_mouseevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent.", this.id, evt);
+        console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent.", mouseevent.id, evt);
         /*END_DEBUG*/
         evt_x = (evt.x !== undefined) ? evt.x : 0;
         evt_y = (evt.y !== undefined) ? evt.y : 0;
@@ -4346,7 +4346,7 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
        */
       copy_touchevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent.", this.id, evt);
+        console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent.", touchevent.id, evt);
         /*END_DEBUG*/
         if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
         if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }
@@ -4779,7 +4779,7 @@ doodle.events.TouchEvent.isTouchEvent = function (evt) {
        */
       copy_textevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", this.id, evt);
+        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", textevent.id, evt);
         /*END_DEBUG*/
         if (evt.data !== undefined) { evt_data = evt.data; }
         if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }
@@ -5021,7 +5021,7 @@ doodle.events.TextEvent.isTextEvent = function (evt) {
        */
       copy_keyboardevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent");
+        console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent", keyboardevent.id, evt);
         /*END_DEBUG*/
         if (evt.keyIdentifier !== undefined) { evt_keyIdentifier = evt.keyIdentifier; }
         if (evt.keyLocation !== undefined) { evt_keyLocation = evt.keyLocation; }
@@ -10240,6 +10240,7 @@ doodle.Sprite.isSprite = function (obj) {
        */
       '__minX': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },
@@ -10250,6 +10251,7 @@ doodle.Sprite.isSprite = function (obj) {
        */
       '__minY': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },
@@ -10260,6 +10262,7 @@ doodle.Sprite.isSprite = function (obj) {
        */
       '__maxX': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },
@@ -10270,6 +10273,7 @@ doodle.Sprite.isSprite = function (obj) {
        */
       '__maxY': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },

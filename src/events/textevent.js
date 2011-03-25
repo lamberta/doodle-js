@@ -81,7 +81,7 @@
        */
       copy_textevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", this.id, evt);
+        console.assert(doodle.events.TextEvent.isTextEvent(evt), "evt is TextEvent.", textevent.id, evt);
         /*END_DEBUG*/
         if (evt.data !== undefined) { evt_data = evt.data; }
         if (evt.inputMode !== undefined) { evt_inputMode = evt.inputMode; }

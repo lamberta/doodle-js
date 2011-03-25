@@ -106,7 +106,7 @@
        */
       copy_touchevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent.", this.id, evt);
+        console.assert(doodle.events.TouchEvent.isTouchEvent(evt), "evt is TouchEvent.", touchevent.id, evt);
         /*END_DEBUG*/
         if (evt.screenX !== undefined) { evt_screenX = evt.screenX; }
         if (evt.screenY !== undefined) { evt_screenY = evt.screenY; }

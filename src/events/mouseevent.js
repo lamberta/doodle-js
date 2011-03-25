@@ -105,7 +105,7 @@
        */
       copy_mouseevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent.", this.id, evt);
+        console.assert(doodle.events.MouseEvent.isMouseEvent(evt), "evt is MouseEvent.", mouseevent.id, evt);
         /*END_DEBUG*/
         evt_x = (evt.x !== undefined) ? evt.x : 0;
         evt_y = (evt.y !== undefined) ? evt.y : 0;

@@ -40,6 +40,7 @@
        */
       '__minX': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },
@@ -50,6 +51,7 @@
        */
       '__minY': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },
@@ -60,6 +62,7 @@
        */
       '__maxX': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },
@@ -70,6 +73,7 @@
        */
       '__maxY': {
         enumerable: false,
+        writable: true,
         configurable: false,
         value: 0
       },

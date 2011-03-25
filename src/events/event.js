@@ -66,9 +66,9 @@
         resetTarget = (resetTarget === undefined) ? false : resetTarget;
         resetType = (resetType === undefined) ? false : resetType;
         /*DEBUG*/
-        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", this.id, evt);
-        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", this.id, resetTarget);
-        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", this.id, resetType);
+        console.assert(doodle.events.Event.isEvent(evt), "evt is Event.", event.id, evt);
+        console.assert(resetTarget === false || resetTarget === null || doodle.Node.isNode(resetTarget), "resetTarget is false, null, or Node.", event.id, resetTarget);
+        console.assert(resetType === false || typeof resetType === 'string', "resetType is false or string.", event.id, resetType);
         /*END_DEBUG*/
         if (resetTarget !== false) {
           evt_currentTarget = resetTarget;

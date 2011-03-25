@@ -90,7 +90,7 @@
        */
       copy_keyboardevent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent");
+        console.assert(doodle.events.KeyboardEvent.isKeyboardEvent(evt), "evt is KeyboardEvent", keyboardevent.id, evt);
         /*END_DEBUG*/
         if (evt.keyIdentifier !== undefined) { evt_keyIdentifier = evt.keyIdentifier; }
         if (evt.keyLocation !== undefined) { evt_keyLocation = evt.keyLocation; }

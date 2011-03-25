@@ -87,7 +87,7 @@
        */
       copy_uievent_properties = function (evt) {
         /*DEBUG*/
-        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", this.id, evt);
+        console.assert(doodle.events.UIEvent.isUIEvent(evt), "evt is UIEvent.", uievent.id, evt);
         /*END_DEBUG*/
         if (evt.view !== undefined) { evt_view = evt.view; }
         if (evt.detail !== undefined) { evt_detail = evt.detail; }
