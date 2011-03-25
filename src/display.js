@@ -787,6 +787,21 @@
       //console.assert(scene_path.length === path_count, "scene_path.length === path_count", scene_path.length, path_count);
       /*END_DEBUG*/
       draw_scene_graph(scene_path, path_count);
+
+      //layer filters
+      var ctx, l, filters, len,
+          w = display.width,
+          h = display.height;
+      while (layer_count--) {
+        l = layers[layer_count];
+        if (l.filters) {
+          filters = l.filters;
+          len = filters.length;
+          while (len--) {
+            filters[len].__applyFilter(l.context, 0, 0, w, h);
+          }
+        }
+      }
       
       /*DEBUG_STATS*/
       if (display.debug.stats !== false) {

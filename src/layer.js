@@ -28,6 +28,7 @@
       //defaults
       var width = 0,
           height = 0,
+          filters = null,
           context = null;
       
       return {
@@ -86,6 +87,26 @@
           get: function () { return context; }
         },
 
+        /**
+         * Collection of filters to apply to the canvas bitmap.
+         * @name filters
+         * @return {Array}
+         * @property
+         */
+        'filters': {
+          enumerable: true,
+          configurable: true,
+          get: function () { return filters; },
+          set: function (filtersVar) {
+            /*DEBUG*/
+            if (filtersVar !== null) {
+              type_check(filtersVar,'array', {label:'Layer.filters', id:this.id});
+            }
+            /*END_DEBUG*/
+            filters = filtersVar;
+          }
+        },
+        
         /**
          * Layer specific things to setup when adding a dom element.
          * Called in ElementNode.element

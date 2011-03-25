@@ -132,6 +132,8 @@ doodle.utils.debug = {};
       //Doodle primitives
     case 'Image':
     case 'Text':
+      //Doodle filters
+    case 'ColorFilter':
       assert_object_type(arg, type, inheritsp);
       break;
 

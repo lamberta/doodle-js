@@ -58,6 +58,8 @@ function build_full {
     cat ./src/events/keyboardevent.js >> "$DEBUG_OUT_FILE"
     cat ./src/events/constants.js >> "$DEBUG_OUT_FILE"
 
+    cat ./src/filters/colorfilter.js >> "$DEBUG_OUT_FILE"
+
     cat ./src/geom/point.js >> "$DEBUG_OUT_FILE"
     cat ./src/geom/matrix.js >> "$DEBUG_OUT_FILE"
     cat ./src/geom/rectangle.js >> "$DEBUG_OUT_FILE"

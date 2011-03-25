@@ -10,6 +10,7 @@ doodle.utils = {};
 //packages
 doodle.geom = {};
 doodle.events = {};
+doodle.filters = {};
 
 (function () {
   var ready_queue = [],
