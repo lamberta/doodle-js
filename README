@@ -1,7 +1,7 @@
 Doodle-js - An Animation Library for JavaScript
 
-Testing on Chrome, marginal success on Firefox 4.
-Requires a browser with some ECMAScript 5 capabilities.
+Tested on Chrome, looking good on Firefox 4.
+Requires a browser with support for HTML5 Canvas and some ECMAScript 5 capabilities.
 
 Some of the features:
   * Use the Canvas drawing API with sprites and a scene graph.
@@ -20,8 +20,8 @@ Debugging version (some useful error messages):
 
 For more options: ./build/make-doodle -h
 
-Reference docs: http://billyist.github.com/doodle-js/doc/api/
+Reference docs: http://lamberta.org/doodle-js/doc/api/
 
-Some examples: http://billyist.github.com/doodle-js/doc/demos/
+Some examples: http://lamberta.org/doodle-js/doc/demos/making_things_move/
 
 Questions? http://groups.google.com/group/doodlejs
