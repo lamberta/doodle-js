@@ -5,9 +5,9 @@
  */
 
 //the global object
-var doodle = {};
-doodle.utils = {};
+window.doodle = {};
 //packages
+doodle.utils = {};
 doodle.geom = {};
 doodle.events = {};
 doodle.filters = {};
