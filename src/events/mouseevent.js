@@ -445,7 +445,9 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
   if (typeof evt === 'object') {
     while (evt) {
       //for DOM events we need to check it's constructor name
-      if (evt.toString() === '[object MouseEvent]' || (evt.constructor && evt.constructor.name === 'MouseEvent')) {
+      if (evt.toString() === '[object MouseEvent]' ||
+          (evt.constructor && (evt.constructor.name === 'MouseEvent' ||
+                               evt.constructor.name === 'WheelEvent'))) {
         return true;
       } else {
         evt = Object.getPrototypeOf(evt);
