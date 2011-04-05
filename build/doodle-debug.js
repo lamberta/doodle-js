@@ -4229,7 +4229,9 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
   if (typeof evt === 'object') {
     while (evt) {
       //for DOM events we need to check it's constructor name
-      if (evt.toString() === '[object MouseEvent]' || (evt.constructor && evt.constructor.name === 'MouseEvent')) {
+      if (evt.toString() === '[object MouseEvent]' ||
+          (evt.constructor && (evt.constructor.name === 'MouseEvent' ||
+                               evt.constructor.name === 'WheelEvent'))) {
         return true;
       } else {
         evt = Object.getPrototypeOf(evt);
@@ -6449,7 +6451,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       sqrt = Math.sqrt;
   
   /**
-   * @name doodle.geom.Point
+   * @name doodle.geom.createPoint
    * @class
    * @augments Object
    * @param {number=} x
@@ -6458,7 +6460,7 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function Point (x, y) {
+  doodle.geom.Point = doodle.geom.createPoint = function createPoint (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -6590,8 +6592,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     return point;
   }//end Point definition
 
-  doodle.geom.Point = Point;
-  
+
   point_static_properties = {
     /**
      * Returns a string that contains the values of the x and y coordinates.
@@ -6661,7 +6662,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return Point(this.x, this.y); }
+      value: function () { return createPoint(this.x, this.y); }
     },
 
     /**
@@ -6699,7 +6700,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.add', params:'point', id:this.id});
         /*END_DEBUG*/
-        return Point(this.x + pt.x, this.y + pt.y);
+        return createPoint(this.x + pt.x, this.y + pt.y);
       }
     },
 
@@ -6719,7 +6720,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.subtract', params:'point', id:this.id});
         /*END_DEBUG*/
-        return Point(this.x - pt.x, this.y - pt.y);
+        return createPoint(this.x - pt.x, this.y - pt.y);
       }
     },
 
@@ -6790,7 +6791,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         type_check(pt1,'Point', pt2,'Point', t,'number', {label:'Point.interpolate', id:this.id, params:['point','point','time']});
         range_check(isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
         /*END_DEBUG*/
-        return Point(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
+        return createPoint(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
         /* correct version?
            var nx = pt2.x - pt1.x;
            var ny = pt2.y - pt1.y;
@@ -6820,7 +6821,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         type_check(len,'number', angle,'number', {label:'Point.polar', id:this.id, params:['len','angle']});
         range_check(isFinite(len), isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        return Point(len*cos(angle), len*sin(angle));
+        return createPoint(len*cos(angle), len*sin(angle));
       }
     }
     
@@ -8874,13 +8875,13 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       PI = Math.PI;
   
   /**
-   * @name doodle.Node
+   * @name doodle.createNode
    * @class
    * @augments doodle.EventDispatcher
    * @param {string=} id|initializer
    * @return {doodle.Node}
    */
-  doodle.Node = function (id) {
+  doodle.createNode = doodle.Node = function (id) {
     var node = Object.create(doodle.EventDispatcher());
     
     /*DEBUG*/
@@ -9385,6 +9386,30 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
     },
 
     /**
+     * @name createNode
+     */
+    'createNode': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return this.addChild(doodle.createNode.apply(undefined, arguments));
+      }
+    },
+
+    /**
+     * @name createSprite
+     */
+    'createSprite': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return this.addChild(doodle.createSprite.apply(undefined, arguments));
+      }
+    },
+
+    /**
      * @name removeChildAt
      * @param {number} index
      * @return {Node} Removed child node.
@@ -9438,7 +9463,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
         /*DEBUG*/
         type_check(node,'Node', {label:'Node.removeChild', id:this.id, params:'node', inherits:true});
         reference_check(node.parent === this, {label:'Node.removeChild', params:'*node*', id:this.id, message:"Can not remove a Node that is not a child."});
-				console.assert(this.children.indexOf(node) !== -1, "Node found in children", node);
+        console.assert(this.children.indexOf(node) !== -1, "Node found in children", node);
         /*END_DEBUG*/
         return this.removeChildAt(this.children.indexOf(node));
       }
@@ -11517,7 +11542,7 @@ doodle.ElementNode.isElementNode = function (obj) {
   }
   return false;
 };
-/*globals doodle, document*/
+/*globals doodle, document, console*/
 
 (function () {
   var layer_static_properties,
@@ -11529,7 +11554,7 @@ doodle.ElementNode.isElementNode = function (obj) {
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @name doodle.Layer
+   * @name doodle.createLayer
    * @class
    * @augments doodle.ElementNode
    * @param {string=} id
@@ -11537,7 +11562,7 @@ doodle.ElementNode.isElementNode = function (obj) {
    * @return {doodle.Layer}
    * @throws {SyntaxError}
    */
-  doodle.Layer = function (id, element) {
+  doodle.createLayer = doodle.Layer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
         layer = Object.create(doodle.ElementNode(undefined, layer_name));
 
@@ -11782,7 +11807,7 @@ doodle.Layer.isLayer = function (obj) {
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
-      doodle_Layer = doodle.Layer,
+      createLayer = doodle.createLayer,
       //doodle_TouchEvent = doodle.events.TouchEvent,
       //recycle these event objects
       evt_enterFrame = doodle.events.Event(doodle.events.Event.ENTER_FRAME),
@@ -11792,7 +11817,7 @@ doodle.Layer.isLayer = function (obj) {
   
   /**
    * Doodle Display object.
-   * @name doodle.Display
+   * @name doodle.createDisplay
    * @class
    * @augments doodle.ElementNode
    * @param {HTMLElement=} element
@@ -11801,17 +11826,18 @@ doodle.Layer.isLayer = function (obj) {
    * @throws {TypeError} Must be a block style element.
    * @throws {SyntaxError}
    * @example
-   *   var display = doodle.Display;<br/>
+   *   var display = doodle.createDisplay;<br/>
    *   display.width = 400;
    * @example
-   *   var display = doodle.Display(function () {<br/>
+   *   var display = doodle.createDisplay(function () {<br/>
    *   &nbsp; this.width = 400;<br/>
    *   });
    */
-  doodle.Display = function (element /*, options*/) {
+  doodle.createDisplay = doodle.Display = function (element /*, options*/) {
     var display,
         id,
-        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : false;
+        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : null,
+        opt_layercount;
     
     //extract id from element
     if (element && typeof element !== 'function') {
@@ -12371,6 +12397,15 @@ doodle.Layer.isLayer = function (obj) {
       if (options.height !== undefined) { display.height = options.height; }
       if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
       if (options.frameRate !== undefined) { display.frameRate = options.frameRate; }
+      if (options.layers !== undefined) {
+        opt_layercount = options.layers;
+        /*DEBUG*/
+        type_check(opt_layercount,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
+        /*END_DEBUG*/
+        while (opt_layercount--) {
+          display.createLayer();
+        }
+      }
     }
     
     return display;
@@ -12408,17 +12443,13 @@ doodle.Layer.isLayer = function (obj) {
 
     /**
      * Add a new layer to the display's children.
-     * @name addLayer
-     * @param {string} id
+     * @name createLayer
      * @return {Layer}
      * @throws {TypeError}
      */
-    'addLayer': {
-      value: function (id) {
-        /*DEBUG*/
-        id === undefined || type_check(id,'string', {label:'Display.addLayer', params:'id', id:this.id});
-        /*END_DEBUG*/
-        return this.addChild(doodle_Layer(id));
+    'createLayer': {
+      value: function () {
+        return this.addChild(createLayer.apply(undefined, arguments));
       }
     },
 

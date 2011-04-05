@@ -1,4 +1,4 @@
-/*globals doodle, document*/
+/*globals doodle, document, console*/
 
 (function () {
   var layer_static_properties,
@@ -10,7 +10,7 @@
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @name doodle.Layer
+   * @name doodle.createLayer
    * @class
    * @augments doodle.ElementNode
    * @param {string=} id
@@ -18,7 +18,7 @@
    * @return {doodle.Layer}
    * @throws {SyntaxError}
    */
-  doodle.Layer = function (id, element) {
+  doodle.createLayer = doodle.Layer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
         layer = Object.create(doodle.ElementNode(undefined, layer_name));
 

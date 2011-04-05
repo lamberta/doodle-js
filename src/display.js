@@ -21,7 +21,7 @@
       get_element = doodle.utils.get_element,
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
-      doodle_Layer = doodle.Layer,
+      createLayer = doodle.createLayer,
       //doodle_TouchEvent = doodle.events.TouchEvent,
       //recycle these event objects
       evt_enterFrame = doodle.events.Event(doodle.events.Event.ENTER_FRAME),
@@ -31,7 +31,7 @@
   
   /**
    * Doodle Display object.
-   * @name doodle.Display
+   * @name doodle.createDisplay
    * @class
    * @augments doodle.ElementNode
    * @param {HTMLElement=} element
@@ -40,17 +40,18 @@
    * @throws {TypeError} Must be a block style element.
    * @throws {SyntaxError}
    * @example
-   *   var display = doodle.Display;<br/>
+   *   var display = doodle.createDisplay;<br/>
    *   display.width = 400;
    * @example
-   *   var display = doodle.Display(function () {<br/>
+   *   var display = doodle.createDisplay(function () {<br/>
    *   &nbsp; this.width = 400;<br/>
    *   });
    */
-  doodle.Display = function (element /*, options*/) {
+  doodle.createDisplay = doodle.Display = function (element /*, options*/) {
     var display,
         id,
-        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : false;
+        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : null,
+        opt_layercount;
     
     //extract id from element
     if (element && typeof element !== 'function') {
@@ -610,6 +611,15 @@
       if (options.height !== undefined) { display.height = options.height; }
       if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
       if (options.frameRate !== undefined) { display.frameRate = options.frameRate; }
+      if (options.layers !== undefined) {
+        opt_layercount = options.layers;
+        /*DEBUG*/
+        type_check(opt_layercount,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
+        /*END_DEBUG*/
+        while (opt_layercount--) {
+          display.createLayer();
+        }
+      }
     }
     
     return display;
@@ -647,17 +657,13 @@
 
     /**
      * Add a new layer to the display's children.
-     * @name addLayer
-     * @param {string} id
+     * @name createLayer
      * @return {Layer}
      * @throws {TypeError}
      */
-    'addLayer': {
-      value: function (id) {
-        /*DEBUG*/
-        id === undefined || type_check(id,'string', {label:'Display.addLayer', params:'id', id:this.id});
-        /*END_DEBUG*/
-        return this.addChild(doodle_Layer(id));
+    'createLayer': {
+      value: function () {
+        return this.addChild(createLayer.apply(undefined, arguments));
       }
     },
 

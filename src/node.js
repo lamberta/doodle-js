@@ -20,13 +20,13 @@
       PI = Math.PI;
   
   /**
-   * @name doodle.Node
+   * @name doodle.createNode
    * @class
    * @augments doodle.EventDispatcher
    * @param {string=} id|initializer
    * @return {doodle.Node}
    */
-  doodle.Node = function (id) {
+  doodle.createNode = doodle.Node = function (id) {
     var node = Object.create(doodle.EventDispatcher());
     
     /*DEBUG*/
@@ -531,6 +531,30 @@
     },
 
     /**
+     * @name createNode
+     */
+    'createNode': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return this.addChild(doodle.createNode.apply(undefined, arguments));
+      }
+    },
+
+    /**
+     * @name createSprite
+     */
+    'createSprite': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function () {
+        return this.addChild(doodle.createSprite.apply(undefined, arguments));
+      }
+    },
+
+    /**
      * @name removeChildAt
      * @param {number} index
      * @return {Node} Removed child node.
@@ -584,7 +608,7 @@
         /*DEBUG*/
         type_check(node,'Node', {label:'Node.removeChild', id:this.id, params:'node', inherits:true});
         reference_check(node.parent === this, {label:'Node.removeChild', params:'*node*', id:this.id, message:"Can not remove a Node that is not a child."});
-				console.assert(this.children.indexOf(node) !== -1, "Node found in children", node);
+        console.assert(this.children.indexOf(node) !== -1, "Node found in children", node);
         /*END_DEBUG*/
         return this.removeChildAt(this.children.indexOf(node));
       }

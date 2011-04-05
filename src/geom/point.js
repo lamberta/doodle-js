@@ -14,7 +14,7 @@
       sqrt = Math.sqrt;
   
   /**
-   * @name doodle.geom.Point
+   * @name doodle.geom.createPoint
    * @class
    * @augments Object
    * @param {number=} x
@@ -23,7 +23,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function Point (x, y) {
+  doodle.geom.Point = doodle.geom.createPoint = function createPoint (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -155,8 +155,7 @@
     return point;
   }//end Point definition
 
-  doodle.geom.Point = Point;
-  
+
   point_static_properties = {
     /**
      * Returns a string that contains the values of the x and y coordinates.
@@ -226,7 +225,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return Point(this.x, this.y); }
+      value: function () { return createPoint(this.x, this.y); }
     },
 
     /**
@@ -264,7 +263,7 @@
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.add', params:'point', id:this.id});
         /*END_DEBUG*/
-        return Point(this.x + pt.x, this.y + pt.y);
+        return createPoint(this.x + pt.x, this.y + pt.y);
       }
     },
 
@@ -284,7 +283,7 @@
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.subtract', params:'point', id:this.id});
         /*END_DEBUG*/
-        return Point(this.x - pt.x, this.y - pt.y);
+        return createPoint(this.x - pt.x, this.y - pt.y);
       }
     },
 
@@ -355,7 +354,7 @@
         type_check(pt1,'Point', pt2,'Point', t,'number', {label:'Point.interpolate', id:this.id, params:['point','point','time']});
         range_check(isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
         /*END_DEBUG*/
-        return Point(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
+        return createPoint(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
         /* correct version?
            var nx = pt2.x - pt1.x;
            var ny = pt2.y - pt1.y;
@@ -385,7 +384,7 @@
         type_check(len,'number', angle,'number', {label:'Point.polar', id:this.id, params:['len','angle']});
         range_check(isFinite(len), isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        return Point(len*cos(angle), len*sin(angle));
+        return createPoint(len*cos(angle), len*sin(angle));
       }
     }
     
