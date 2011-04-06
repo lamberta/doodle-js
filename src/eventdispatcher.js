@@ -1,3 +1,4 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var evtDisp_static_properties,
@@ -5,24 +6,19 @@
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
-      //lookup help
       CAPTURING_PHASE = doodle.events.Event.CAPTURING_PHASE,
       AT_TARGET = doodle.events.Event.AT_TARGET,
-      BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE,
-      //lookup help
-      Array_indexOf = Array.prototype.indexOf,
-      Array_splice = Array.prototype.splice;
+      BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE;
   
   /**
-   * @name doodle.EventDispatcher
+   * @name doodle.createEventDispatcher
    * @class
    * @augments Object
    * @return {doodle.EventDispatcher}  
    */
-  doodle.EventDispatcher = function () {
+  doodle.EventDispatcher = doodle.createEventDispatcher = function () {
     /** @type {doodle.EventDispatcher} */
     var evt_disp = {};
-
     /*DEBUG*/
     if (typeof arguments[0] !== 'function') {
       if (arguments.length > 0) {
@@ -42,7 +38,9 @@
           get: function () { return (id === null) ? this.toString() : id; },
           set: function (idVar) {
             /*DEBUG*/
-            idVar === null || type_check(idVar,'string', {label:'EventDispatcher.id', message:"Property must be a string or null.", id:this.id});
+            if (idVar !== null) {
+              type_check(idVar,'string', {label:'EventDispatcher.id', message:"Property must be a string or null.", id:this.id});
+            }
             /*END_DEBUG*/
             id = idVar;
           }
@@ -155,15 +153,12 @@
             handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
             listeners,
             //lookup help
-            disp_queue,
-            indexOf = Array_indexOf,
-            splice = Array_splice;
-        
+            disp_queue;
         //make sure event type exists
         if (handler) {
           listeners = handler[useCapture ? 'capture' : 'bubble'];
           //remove handler function
-          splice.call(listeners, indexOf.call(listeners, listener), 1);
+          listeners.splice(listeners.indexOf(listener), 1);
           //if none left, remove handler type
           if (handler.capture.length === 0 && handler.bubble.length === 0) {
             delete eventListeners[type];
@@ -171,7 +166,7 @@
           //if no more listeners, remove from object queue
           if (Object.keys(eventListeners).length === 0) {
             disp_queue = dispatcher_queue;
-            splice.call(disp_queue, indexOf.call(disp_queue, this), 1);
+            disp_queue.splice(disp_queue.indexOf(this), 1);
           }
         }
       }
@@ -231,7 +226,6 @@
             }
           }
         }
-        
         //any handlers found on this node?
         return (count > 0) ? true : false;
       }
@@ -254,9 +248,8 @@
         //capturing goes down to the child, bubbling then goes back up
         var target,
             evt_type = event.type,
-            hasOwnProperty = Object.prototype.hasOwnProperty,
             //check this node for event handler
-            evt_handler_p = hasOwnProperty.call(this.eventListeners, evt_type),
+            evt_handler_p = this.eventListeners.hasOwnProperty(evt_type),
             node,
             node_path = [],
             len, //count of nodes up to root
@@ -285,7 +278,7 @@
         while (node) {
           //only want to dispatch if there's a reason to
           if (!evt_handler_p) {
-            evt_handler_p = hasOwnProperty.call(node.eventListeners, evt_type);
+            evt_handler_p = node.eventListeners.hasOwnProperty(evt_type);
           }
           node_path.push(node);
           node = node.parent;
@@ -349,10 +342,8 @@
       configurable: false,
       value: function (event) {
         var evt_type = event.type,
-            hasOwnProperty = Object.prototype.hasOwnProperty,
             disp_queue = dispatcher_queue,
             dq_count = disp_queue.length;
-        
         /*DEBUG*/
         type_check(event, 'Event', {label:'EventDispatcher.broadcastEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
@@ -369,7 +360,7 @@
 
         while (dq_count--) {
           //hasEventListener
-          if (hasOwnProperty.call(disp_queue[dq_count].eventListeners, evt_type)) {
+          if (disp_queue[dq_count].eventListeners.hasOwnProperty(evt_type)) {
             disp_queue[dq_count].handleEvent(event);
           }
           //event cancelled in listener?

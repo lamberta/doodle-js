@@ -1,17 +1,14 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var point_static_properties,
       distance,
-      temp_array = new Array(2),
-      temp_point = {x:0, y:0},
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      //lookup help
-      cos = Math.cos,
-      sin = Math.sin,
-      sqrt = Math.sqrt;
+      temp_array = new Array(2),
+      temp_point = {x:0, y:0};
   
   /**
    * @name doodle.geom.createPoint
@@ -23,7 +20,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.geom.Point = doodle.geom.createPoint = function createPoint (x, y) {
+  doodle.geom.Point = doodle.geom.createPoint = function (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -50,7 +47,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Point.x', id:this.id});
-            range_check(isFinite(n), {label:'Point.x', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Point.x', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             x = n;
           }
@@ -70,7 +67,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Point.y', id:this.id});
-            range_check(isFinite(n), {label:'Point.y', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Point.y', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             y = n;
           }
@@ -153,7 +150,7 @@
     }
 
     return point;
-  }//end Point definition
+  };//end Point definition
 
 
   point_static_properties = {
@@ -208,7 +205,7 @@
       value: function (x, y) {
         /*DEBUG*/
         type_check(x,'number', y,'number', {label:'Point.compose', params:['x','y'], id:this.id});
-        range_check(isFinite(x), isFinite(y), {label:'Point.compose', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), {label:'Point.compose', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -225,7 +222,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return createPoint(this.x, this.y); }
+      value: function () { return doodle.geom.createPoint(this.x, this.y); }
     },
 
     /**
@@ -263,7 +260,7 @@
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.add', params:'point', id:this.id});
         /*END_DEBUG*/
-        return createPoint(this.x + pt.x, this.y + pt.y);
+        return doodle.geom.createPoint(this.x + pt.x, this.y + pt.y);
       }
     },
 
@@ -283,7 +280,7 @@
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.subtract', params:'point', id:this.id});
         /*END_DEBUG*/
-        return createPoint(this.x - pt.x, this.y - pt.y);
+        return doodle.geom.createPoint(this.x - pt.x, this.y - pt.y);
       }
     },
 
@@ -300,7 +297,7 @@
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Point.offset', id:this.id, params:['dx','dy']});
-        range_check(isFinite(dx), isFinite(dy), {label:'Point.offset', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Point.offset', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -323,7 +320,7 @@
       value: function (thickness) {
         /*DEBUG*/
         type_check(thickness,'number', {label:'Point.normalize', id:this.id, params:'thickness'});
-        range_check(isFinite(thickness), {label:'Point.normalize', params:'thickness', id:this.id});
+        range_check(window.isFinite(thickness), {label:'Point.normalize', params:'thickness', id:this.id});
         /*END_DEBUG*/
         this.x = (this.x / this.length) * thickness;
         this.y = (this.y / this.length) * thickness;
@@ -352,9 +349,9 @@
       value: function (pt1, pt2, t) {
         /*DEBUG*/
         type_check(pt1,'Point', pt2,'Point', t,'number', {label:'Point.interpolate', id:this.id, params:['point','point','time']});
-        range_check(isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
+        range_check(window.isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
         /*END_DEBUG*/
-        return createPoint(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
+        return doodle.geom.createPoint(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
         /* correct version?
            var nx = pt2.x - pt1.x;
            var ny = pt2.y - pt1.y;
@@ -382,9 +379,9 @@
       value: function (len, angle) {
         /*DEBUG*/
         type_check(len,'number', angle,'number', {label:'Point.polar', id:this.id, params:['len','angle']});
-        range_check(isFinite(len), isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(len), window.isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        return createPoint(len*cos(angle), len*sin(angle));
+        return doodle.geom.createPoint(len*Math.cos(angle), len*Math.sin(angle));
       }
     }
     
@@ -409,7 +406,7 @@
     /*END_DEBUG*/
     var dx = pt2.x - pt1.x,
         dy = pt2.y - pt1.y;
-    return sqrt(dx*dx + dy*dy);
+    return Math.sqrt(dx*dx + dy*dy);
   };
   
 }());//end class closure

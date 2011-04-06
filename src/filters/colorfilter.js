@@ -1,3 +1,4 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: false, newcap: true*/
 /*globals doodle*/
 (function () {
   var filter_static_properties = {},
@@ -8,7 +9,7 @@
       temp_array = new Array(8);
   
   /**
-   * @name doodle.filters.ColorFilter
+   * @name doodle.filters.createColorFilter
    * @class
    * @augments Object
    * @param {number=} x
@@ -17,8 +18,8 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function ColorFilter (redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier,
-                        redOffset, greenOffset, blueOffset, alphaOffset) {
+  doodle.filters.ColorFilter = doodle.filters.createColorFilter = function (redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier,
+                                                                            redOffset, greenOffset, blueOffset, alphaOffset) {
     var filter = {},
         arg_len = arguments.length,
         init_obj;
@@ -52,7 +53,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.redMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.redMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.redMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             red_multiplier = n;
           }
@@ -72,7 +73,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.greenMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.greenMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.greenMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             green_multiplier = n;
           }
@@ -92,7 +93,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.blueMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.blueMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.blueMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             blue_multiplier = n;
           }
@@ -112,7 +113,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.alphaMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.alphaMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.alphaMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha_multiplier = n;
           }
@@ -132,7 +133,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.redOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.redOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.redOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             red_offset = n;
           }
@@ -152,7 +153,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.greenOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.greenOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.greenOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             green_offset = n;
           }
@@ -172,7 +173,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.blueOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.blueOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.blueOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             blue_offset = n;
           }
@@ -192,7 +193,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.alphaOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.alphaOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.alphaOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha_offset = n;
           }
@@ -325,9 +326,8 @@
     }
 
     return filter;
-  }//end ColorFilter definition
+  };//end ColorFilter definition
 
-  doodle.filters.ColorFilter = ColorFilter;
 
   filter_static_properties = {
     /**
@@ -378,8 +378,8 @@
         type_check(redMultiplier,'number', greenMultiplier,'number', blueMultiplier,'number', alphaMultiplier,'number',
                    redOffset,'number', blueOffset,'number', greenOffset,'number', alphaOffset,'number',
                    {label:'ColorFilter.compose', params:['redMultiplier','greenMultiplier','blueMultiplier','alphaMultiplier','redOffset','greenOffset','blueOffset','alphaOffset'], id:this.id});
-        range_check(isFinite(redMultiplier), isFinite(greenMultiplier), isFinite(blueMultiplier), isFinite(alphaMultiplier),
-                    isFinite(redOffset), isFinite(greenOffset), isFinite(blueOffset), isFinite(alphaOffset),
+        range_check(window.isFinite(redMultiplier), window.isFinite(greenMultiplier), window.isFinite(blueMultiplier), window.isFinite(alphaMultiplier),
+                    window.isFinite(redOffset), window.isFinite(greenOffset), window.isFinite(blueOffset), window.isFinite(alphaOffset),
                     {label:'ColorFilter.compose', params:['redMultiplier','greenMultiplier','blueMultiplier','alphaMultiplier','redOffset','greenOffset','blueOffset','alphaOffset'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.redMultiplier = redMultiplier;
@@ -403,7 +403,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return ColorFilter(this.__toArray()); }
+      value: function () { return doodle.filters.createColorFilter(this.__toArray()); }
     },
 
     /**
@@ -435,4 +435,3 @@
   };//end filter_static_properties definition
 
 }());//end class closure
-

@@ -1,5 +1,5 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* DOM 3 Event: KeyboardEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
  */
@@ -11,7 +11,7 @@
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.KeyboardEvent
+   * @name doodle.events.createKeyboardEvent
    * @class
    * @augments doodle.events.UIEvent
    * @param {string=} type
@@ -26,7 +26,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat) {
+  doodle.events.KeyboardEvent = doodle.events.createKeyboardEvent = function (type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat) {
     var keyboardevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -47,7 +47,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      keyboardevent = Object.create(doodle.events.UIEvent(init_obj));
+      keyboardevent = Object.create(doodle.events.createUIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -57,7 +57,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      keyboardevent = Object.create(doodle.events.UIEvent(''));
+      keyboardevent = Object.create(doodle.events.createUIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -67,7 +67,7 @@
       type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', keyIdentifier, '*', keyLocation, '*', modifiersList, '*', repeat, '*',
                  {label:'KeyboardEvent', params:['type','bubbles','cancelable','view','keyIdentifier','keyLocation','modifiersList','repeat'], id:this.id});
       /*END_DEBUG*/
-      keyboardevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
+      keyboardevent = Object.create(doodle.events.createUIEvent(type, bubbles, cancelable, view));
     }
     
     Object.defineProperties(keyboardevent, keyboardevent_static_properties);

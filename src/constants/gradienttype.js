@@ -1,3 +1,5 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * The GradientType class provides values for the type parameter in the
  * beginGradientFill() and lineGradientStyle() methods of the Graphics class.

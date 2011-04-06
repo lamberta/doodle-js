@@ -1,4 +1,5 @@
-/*globals doodle, Image*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 (function () {
   var graphics_static_properties,
       /*DEBUG*/
@@ -6,21 +7,22 @@
       range_check = doodle.utils.debug.range_check,
       reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
+      createEvent = doodle.events.createEvent,
+      LOAD = doodle.events.Event.LOAD,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
-      doodle_Event = doodle.events.Event,
       LINEAR = doodle.GradientType.LINEAR,
       RADIAL = doodle.GradientType.RADIAL;
   
   /**
-   * @name doodle.Graphics
+   * @name doodle.createGraphics
    * @class
    * @augments Object
    * @param {Array} draw_commands Reference to draw commands array.
    * @return {Object}
    * @this {doodle.Sprite}
    */
-  doodle.Graphics = function (draw_commands) {
+  doodle.Graphics = doodle.createGraphics = function (draw_commands) {
     var graphics = {},
         gfx_node = this,
         cursor_x = 0,
@@ -658,8 +660,8 @@
             } else {
               //url
               (function () {
-                var img_url = encodeURI(image);
-                image = new Image();
+                var img_url = window.encodeURI(image);
+                image = new window.Image();
                 image.src = img_url;
               }());
             }
@@ -676,7 +678,7 @@
             //if not, assign load handlers
             image.onload = function () {
               img_loaded = image;
-              gfx_node.dispatchEvent(doodle_Event(doodle_Event.LOAD));
+              gfx_node.dispatchEvent(createEvent(LOAD));
             };
             on_image_error = function () {
               throw new URIError(gfx_node.id + "Graphics.beginPatternFill(*image*,repeat): Unable to load " + image.src);
@@ -727,12 +729,12 @@
           type_check(thickness,'number', color,'*', alpha,'number', caps,'string', joints,'string', miterLimit,'number',
                      {label:'Graphics.lineStyle', params:['thickness','color','alpha','caps','joints','miterLimit'], id:gfx_node.id});
           //check values
-          range_check(isFinite(thickness), thickness >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"thickness must have a positive number."});
+          range_check(window.isFinite(thickness), thickness >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"thickness must have a positive number."});
           reference_check(caps === doodle.LineCap.BUTT || caps === doodle.LineCap.ROUND || caps === doodle.LineCap.SQUARE,
                           {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineCap: " + caps});
           reference_check(joints === doodle.LineJoin.BEVEL || joints === doodle.LineJoin.MITER || joints === doodle.LineJoin.ROUND,
                           {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineJoin: " + joints});
-          range_check(isFinite(miterLimit), miterLimit >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"miterLimit must have a positive number."});
+          range_check(window.isFinite(miterLimit), miterLimit >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"miterLimit must have a positive number."});
           /*END_DEBUG*/
           line_width = thickness;
           line_join = joints;

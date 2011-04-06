@@ -1,6 +1,7 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
+
 /*DEBUG*/
-/*jslint nomen: false, plusplus: false*/
-/*globals doodle, console*/
 doodle.utils.debug = {};
 
 (function () {
@@ -263,8 +264,10 @@ doodle.utils.debug = {};
     arg = Array.prototype.slice.call(arguments);
     callback = (typeof arg[arg.length-1] === 'function') ? arg.pop() : null;
     options = (typeof arg[arg.length-1] === 'object') ? arg.pop() : {trace: true};
+    var i = 0,
+        len = arg.length;
     //iterate args taking 2 at a time
-    for (var i=0, len=arg.length; i < len; i++) {
+    for (; i < len; i++) {
       if (i % 2 === 0) {
         try {
           test_type(arg[i], arg[i+1], options.inherits);
@@ -291,8 +294,10 @@ doodle.utils.debug = {};
     test = Array.prototype.slice.call(arguments);
     callback = (typeof test[test.length-1] === 'function') ? test.pop() : null;
     options = (typeof test[test.length-1] === 'object') ? test.pop() : {trace: true};
+    var i = 0,
+        len = test.length;
     //iterate args taking 2 at a time
-    for (var i=0, len=test.length; i < len; i++) {
+    for (; i < len; i++) {
       try {
         assert_error(test[i], RangeError);
       } catch (error) {
@@ -317,8 +322,10 @@ doodle.utils.debug = {};
     test = Array.prototype.slice.call(arguments);
     callback = (typeof test[test.length-1] === 'function') ? test.pop() : null;
     options = (typeof test[test.length-1] === 'object') ? test.pop() : {trace: true};
+    var i = 0,
+        len = test.length;
     //iterate args taking 2 at a time
-    for (var i=0, len=test.length; i < len; i++) {
+    for (; i < len; i++) {
       try {
         assert_error(test[i], ReferenceError);
       } catch (error) {

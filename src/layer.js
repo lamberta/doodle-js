@@ -1,5 +1,5 @@
-/*globals doodle, document, console*/
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 (function () {
   var layer_static_properties,
       layer_count = 0,
@@ -18,9 +18,9 @@
    * @return {doodle.Layer}
    * @throws {SyntaxError}
    */
-  doodle.createLayer = doodle.Layer = function (id, element) {
+  doodle.Layer = doodle.createLayer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
-        layer = Object.create(doodle.ElementNode(undefined, layer_name));
+        layer = Object.create(doodle.createElementNode(undefined, layer_name));
 
     Object.defineProperties(layer, layer_static_properties);
     //properties that require privacy
@@ -47,7 +47,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Layer.width', id:this.id});
-            range_check(isFinite(n), {label:'Layer.width', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Layer.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             width = set_element_property(this.element, 'width', n, 'html');
           }
@@ -68,7 +68,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Layer.height', id:this.id});
-            range_check(isFinite(n), {label:'Layer.height', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Layer.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             height = set_element_property(this.element, 'height', n, 'html');
           }
@@ -207,7 +207,7 @@
       enumerable: true,
       configurable: true,
       value: (function () {
-        var rect = doodle.geom.Rectangle(0, 0, 0, 0); //recycle
+        var rect = doodle.geom.createRectangle(0, 0, 0, 0); //recycle
         return function () {
           return rect.compose(0, 0, this.width, this.height);
         };

@@ -1,5 +1,5 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* TouchEvent support is expermental.
  * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
  */
@@ -11,7 +11,7 @@
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.TouchEvent
+   * @name doodle.events.createTouchEvent
    * @class
    * @augments doodle.events.UIEvent
    * @param {string=} type
@@ -36,8 +36,8 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
-                                       ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation) {
+  doodle.events.TouchEvent = doodle.events.createTouchEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
+                                                                        ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation) {
     var touchevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -58,7 +58,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      touchevent = Object.create(doodle.events.UIEvent(init_obj));
+      touchevent = Object.create(doodle.events.createUIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -68,7 +68,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      touchevent = Object.create(doodle.events.UIEvent(''));
+      touchevent = Object.create(doodle.events.createUIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -79,7 +79,7 @@
       type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'number', screenX,'*', screenY,'*', clientX,'*', clientY,'*', ctrlKey,'*', altKey,'*', shiftKey,'*', metaKey,'*', touches,'*', targetTouches,'*', changedTouches,'*', scale,'*', rotation,'*',
                  {label:'TouchEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
       /*END_DEBUG*/
-      touchevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
+      touchevent = Object.create(doodle.events.createUIEvent(type, bubbles, cancelable, view, detail));
     }
     
     Object.defineProperties(touchevent, touchevent_static_properties);

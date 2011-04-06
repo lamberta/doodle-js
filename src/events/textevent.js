@@ -1,5 +1,5 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* DOM 3 Event: TextEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-textevents
  */
@@ -11,7 +11,7 @@
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.TextEvent
+   * @name doodle.events.createTextEvent
    * @class
    * @augments doodle.events.UIEvent
    * @param {string=} type
@@ -24,7 +24,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
+  doodle.events.TextEvent = doodle.events.createTextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
     var textevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -45,7 +45,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      textevent = Object.create(doodle.events.UIEvent(init_obj));
+      textevent = Object.create(doodle.events.createUIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -55,7 +55,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      textevent = Object.create(doodle.events.UIEvent(''));
+      textevent = Object.create(doodle.events.createUIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -65,7 +65,7 @@
       type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', data,'*', inputMode,'*',
                  {label:'TextEvent', id:this.id, params:['type','bubbles','cancelable','view','data','inputMode']});
       /*END_DEBUG*/
-      textevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
+      textevent = Object.create(doodle.events.createUIEvent(type, bubbles, cancelable, view));
     }
     
     Object.defineProperties(textevent, textevent_static_properties);

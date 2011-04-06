@@ -1,23 +1,19 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var matrix_static_properties,
-      //recycle object for internal calculations
-      temp_array = new Array(6),
-      temp_point = {x: null, y: null},
-      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
+      temp_array = new Array(6),
+      temp_point = {x: null, y: null},
+      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       //lookup help
-      doodle_Point = doodle.geom.Point,
-      sin = Math.sin,
-      cos = Math.cos,
-      atan2 = Math.atan2,
-      tan = Math.tan;
+      createPoint = doodle.geom.createPoint;
   
   /**
-   * @name doodle.geom.Matrix
+   * @name doodle.geom.createMatrix
    * @class
    * @augments Object
    * @param {number=} a
@@ -30,7 +26,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function Matrix (a, b, c, d, tx, ty) {
+  doodle.geom.Matrix = doodle.geom.createMatrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
         arg_len = arguments.length,
         init_obj;
@@ -62,7 +58,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.a', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.a', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.a', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             a = n;
           }
@@ -83,7 +79,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.b', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.b', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.b', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             b = n;
           }
@@ -104,7 +100,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.c', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.c', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.c', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             c = n;
           }
@@ -125,7 +121,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.d', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.d', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.d', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             d = n;
           }
@@ -145,7 +141,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.tx', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.tx', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.tx', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             tx = n;
           }
@@ -165,7 +161,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.ty', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.ty', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.ty', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             ty = n;
           }
@@ -254,9 +250,8 @@
     }
     
     return matrix;
-  }//end Matrix defintion
+  };//end Matrix defintion
 
-  doodle.geom.Matrix = Matrix;
   
   matrix_static_properties = {
     /**
@@ -278,7 +273,7 @@
       value: function (a, b, c, d, tx, ty) {
         /*DEBUG*/
         type_check(a,'number', b,'number', c,'number', d,'number', tx,'number', ty,'number', {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty']});
-        range_check(isFinite(a), isFinite(b), isFinite(c), isFinite(d), isFinite(tx), isFinite(ty), {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(a), window.isFinite(b), window.isFinite(c), window.isFinite(d), window.isFinite(tx), window.isFinite(ty), {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.a  = a;
         this.b  = b;
@@ -365,7 +360,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty); }
+      value: function () { return doodle.geom.createMatrix(this.a, this.b, this.c, this.d, this.tx, this.ty); }
     },
 
     /**
@@ -408,10 +403,10 @@
       value: function (r) {
         /*DEBUG*/
         type_check(r,'number', {label:'Matrix.rotate', id:this.id, params:'radians'});
-        range_check(isFinite(r), {label:'Matrix.rotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
+        range_check(window.isFinite(r), {label:'Matrix.rotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
-        var c = cos(r),
-            s = sin(r),
+        var c = Math.cos(r),
+            s = Math.sin(r),
             m = temp_matrix;
         m.a = c;
         m.b = s;
@@ -437,7 +432,7 @@
       value: function (r) {
         /*DEBUG*/
         type_check(r,'number', {label:'Matrix.deltaRotate', id:this.id, params:'radians'});
-        range_check(isFinite(r), {label:'Matrix.deltaRotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
+        range_check(window.isFinite(r), {label:'Matrix.deltaRotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -458,14 +453,14 @@
     'rotation': {
       enumerable: true,
       configurable: false,
-      get: function () { return atan2(this.b, this.a); },
+      get: function () { return Math.atan2(this.b, this.a); },
       set: function (r) {
         /*DEBUG*/
         type_check(r,'number', {label:'Matrix.rotation', id:this.id, message:"Parameter must be a number in radians."});
-        range_check(isFinite(r), {label:'Matrix.rotation', id:this.id, params:'radians', message:"Parameter must be a finite number."});
+        range_check(window.isFinite(r), {label:'Matrix.rotation', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
-        var c = cos(r),
-            s = sin(r);
+        var c = Math.cos(r),
+            s = Math.sin(r);
         this.compose(c, s, -s, c, this.tx, this.ty);
       }
     },
@@ -485,7 +480,7 @@
       value: function (sx, sy) {
         /*DEBUG*/
         type_check(sx,'number', sy,'number', {label:'Matrix.scale', id:this.id, params:['sx','sy']});
-        range_check(isFinite(sx), isFinite(sy), {label:'Matrix.scale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(sx), window.isFinite(sy), {label:'Matrix.scale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         temp_matrix.a = sx;
         temp_matrix.b = 0;
@@ -512,7 +507,7 @@
       value: function (sx, sy) {
         /*DEBUG*/
         type_check(sx,'number', sy,'number', {label:'Matrix.deltaScale', id:this.id, params:['sx','sy']});
-        range_check(isFinite(sx), isFinite(sy), {label:'Matrix.deltaScale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(sx), window.isFinite(sy), {label:'Matrix.deltaScale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -538,7 +533,7 @@
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Matrix.translate', id:this.id, params:['dx','dy']});
-        range_check(isFinite(dx), isFinite(dy), {label:'Matrix.translate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Matrix.translate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.tx += dx;
         this.ty += dy;
@@ -560,10 +555,10 @@
       value: function (skewX, skewY) {
         /*DEBUG*/
         type_check(skewX, 'number', skewY, 'number', {label:'Matrix.skew', id:this.id, params:['skewX','skewY']});
-        range_check(isFinite(skewX), isFinite(skewY), {label:'Matrix.skew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(skewX), window.isFinite(skewY), {label:'Matrix.skew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        var sx = tan(skewX),
-            sy = tan(skewY),
+        var sx = Math.tan(skewX),
+            sy = Math.tan(skewY),
             m = temp_matrix;
         m.a = 1;
         m.b = sy;
@@ -590,7 +585,7 @@
       value: function (skewX, skewY) {
         /*DEBUG*/
         type_check(skewX,'number', skewY,'number', {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY']});
-        range_check(isFinite(skewX), isFinite(skewY), {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(skewX), window.isFinite(skewY), {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -663,7 +658,7 @@
         /*DEBUG*/
         type_check(pt, 'Point', {label:'Matrix.transformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx, this.b * pt.x + this.d * pt.y + this.ty);
+        return createPoint(this.a * pt.x + this.c * pt.y + this.tx, this.b * pt.x + this.d * pt.y + this.ty);
       }
     },
 
@@ -706,7 +701,7 @@
         /*DEBUG*/
         type_check(pt, 'Point', {label:'Matrix.deltaTransformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y, this.b * pt.x + this.d * pt.y);
+        return createPoint(this.a * pt.x + this.c * pt.y, this.b * pt.x + this.d * pt.y);
       }
     },
 
@@ -743,10 +738,10 @@
       value: function (pt, r) {
         /*DEBUG*/
         type_check(pt,'Point', r,'number', {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians']});
-        range_check(isFinite(r), {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(r), {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        var c = cos(r),
-            s = sin(r),
+        var c = Math.cos(r),
+            s = Math.sin(r),
             m = temp_matrix,
             reg_pt = temp_point; //new registration point
         //parent rotation matrix, global space
@@ -780,7 +775,7 @@
       value: function (point, r) {
         /*DEBUG*/
         type_check(point,'Point', r,'number', {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians']});
-        range_check(isFinite(r), {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(r), {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var pt = temp_point;
         pt.x = this.a * point.x + this.c * point.y + this.tx;
@@ -823,7 +818,7 @@
       value: function (m, t) {
         /*DEBUG*/
         type_check(m,'Matrix', t,'number', {label:'Matrix.interpolate', id:this.id, params:['matrix','time']});
-        range_check(isFinite(t), {label:'Matrix.interpolate', id:this.id, params:['matrix','*time*'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(t), {label:'Matrix.interpolate', id:this.id, params:['matrix','*time*'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.a  = this.a  + (m.a  - this.a)  * t;
         this.b  = this.b  + (m.b  - this.b)  * t;

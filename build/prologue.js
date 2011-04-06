@@ -1,9 +1,6 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 "use strict";
-
-/* Intro
- *
- */
-
 //the global object
 window.doodle = {};
 //packages
@@ -25,14 +22,15 @@ doodle.filters = {};
           queue.length = 0;
         }
       },
-      on_dom_loaded = function () {
+      onDOMContentLoaded = function () {
         dom_loaded();
-        document.removeEventListener('DOMContentLoaded', on_dom_loaded, false);
+        document.removeEventListener('DOMContentLoaded', onDOMContentLoaded, false);
       };
 
   /**
    * Pushes a function on the waiting list, will execute when the DOM is ready.
    * Alias the doodle namespace by passing an argument to the function.
+   * @name doodle.ready
    * @param {function} fn
    */
   doodle.ready = function (fn) {
@@ -51,7 +49,7 @@ doodle.filters = {};
   //if we missed the event, no need to listen for it
   if (document.readyState !== "complete") {
     if (document.addEventListener) {
-      document.addEventListener('DOMContentLoaded', on_dom_loaded, false);
+      document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
     } else {
       console.error("document.addEventListener not supported.");
     }

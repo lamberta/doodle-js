@@ -1,5 +1,5 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 (function () {
   var text_sprite_static_properties,
       /*DEBUG*/
@@ -7,7 +7,6 @@
       range_check = doodle.utils.debug.range_check,
       reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
-      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       FontStyle = doodle.FontStyle,
       FontVariant = doodle.FontVariant,
@@ -17,7 +16,7 @@
 
   /**
    * A text sprite to display.
-   * @name doodle.Text
+   * @name doodle.createText
    * @class
    * @augments doodle.Sprite
    * @param {string=} text Text to display.
@@ -25,8 +24,8 @@
    * @throws {SyntaxError} Invalid parameters.
    * @throws {TypeError} Text argument not a string.
    */
-  doodle.Text = function (text) {
-    var text_sprite = Object.create(doodle.Sprite());
+  doodle.Text = doodle.createText = function (text) {
+    var text_sprite = Object.create(doodle.createSprite());
 
     Object.defineProperties(text_sprite, text_sprite_static_properties);
     //properties that require privacy
@@ -243,7 +242,7 @@
           get: function () { return font_size; },
           set: function (fontSizeVar) {
             if (typeof fontSizeVar === 'string') {
-              fontSizeVar = parseInt(fontSizeVar, 10);
+              fontSizeVar = window.parseInt(fontSizeVar, 10);
             }
             /*DEBUG*/
             type_check(fontSizeVar,'number', {label:'Text.fontSize', id:this.id});

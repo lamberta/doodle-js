@@ -1,13 +1,11 @@
-/*jslint nomen: false, plusplus: false*/
-/*globals doodle, document, setInterval, clearInterval, Stats*/
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle, Stats*/
 (function () {
   var display_static_properties,
       display_count = 0,
       create_frame,
       clear_scene_graph,
       draw_scene_graph,
-      draw_bounding_box,
       dispatch_mouse_event,
       dispatch_mousemove_event,
       dispatch_mouseleave_event,
@@ -22,12 +20,11 @@
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
       createLayer = doodle.createLayer,
-      //doodle_TouchEvent = doodle.events.TouchEvent,
       //recycle these event objects
-      evt_enterFrame = doodle.events.Event(doodle.events.Event.ENTER_FRAME),
-      evt_mouseEvent = doodle.events.MouseEvent(''),
-      //evt_touchEvent = doodle.events.TouchEvent(''),
-      evt_keyboardEvent = doodle.events.KeyboardEvent('');
+      evt_enterFrame = doodle.events.createEvent(doodle.events.Event.ENTER_FRAME),
+      evt_mouseEvent = doodle.events.createMouseEvent(''),
+      //evt_touchEvent = doodle.events.createTouchEvent(''),
+      evt_keyboardEvent = doodle.events.createKeyboardEvent('');
   
   /**
    * Doodle Display object.
@@ -47,7 +44,7 @@
    *   &nbsp; this.width = 400;<br/>
    *   });
    */
-  doodle.createDisplay = doodle.Display = function (element /*, options*/) {
+  doodle.Display = doodle.createDisplay = function (element /*, options*/) {
     var display,
         id,
         options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : null,
@@ -64,7 +61,7 @@
 
     id = (typeof id === 'string') ? id : "display"+ String('00'+display_count++).slice(-2);
     //won't assign element until after display properties are set up
-    display = Object.create(doodle.ElementNode(undefined, id));
+    display = Object.create(doodle.createElementNode(undefined, id));
 
     /*DEBUG*/
     //check options object
@@ -199,7 +196,7 @@
             var i = layers.length;
             /*DEBUG*/
             type_check(n,'number', {label:'Display.width', id:this.id});
-            range_check(isFinite(n), {label:'Display.width', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Display.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'width', n+"px");
             width = n;
@@ -225,7 +222,7 @@
             var i = layers.length;
             /*DEBUG*/
             type_check(n,'number', {label:'Display.height', id:this.id});
-            range_check(isFinite(n), {label:'Display.height', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Display.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'height', n+"px");
             height = n;
@@ -256,9 +253,9 @@
             //need to stack the canvas elements on top of each other
             set_element_property(elementArg, 'position', 'relative');
             
-            //computed style will return the entire window size
-            var w = get_element_property(elementArg, 'width', 'int', false) || elementArg.width,
-                h = get_element_property(elementArg, 'height', 'int', false) || elementArg.height;
+            //get computed style
+            var w = get_element_property(elementArg, 'width', 'int') || elementArg.width,
+                h = get_element_property(elementArg, 'height', 'int') || elementArg.height;
             //setting this also sets child layers
             if (typeof w === 'number') { this.width = w; }
             if (typeof h === 'number') { this.height = h; }
@@ -545,22 +542,22 @@
               /*DEBUG*/
               if (fps !== false && fps !== 0) {
                 type_check(fps,'number', {label:'Display.frameRate', params:'fps', id:this.id});
-                range_check(fps >= 0, isFinite(1000/fps), {label:'Display.frameRate', params:'fps', id:this.id, message:"Invalid frame rate."});
+                range_check(fps >= 0, window.isFinite(1000/fps), {label:'Display.frameRate', params:'fps', id:this.id, message:"Invalid frame rate."});
               }
               /*END_DEBUG*/
               if (fps === 0 || fps === false) {
                 //turn off interval
                 frame_rate = false;
                 if (framerate_interval_id !== undefined) {
-                  clearInterval(framerate_interval_id);
+                  window.clearInterval(framerate_interval_id);
                 }
               } else {
                 //non-zero number, ignore if given same value
                 if (fps !== frame_rate) {
                   if (framerate_interval_id !== undefined) {
-                    clearInterval(framerate_interval_id);
+                    window.clearInterval(framerate_interval_id);
                   }
-                  framerate_interval_id = setInterval(on_create_frame, 1000/fps);
+                  framerate_interval_id = window.setInterval(on_create_frame, 1000/fps);
                   frame_rate = fps;
                 }
               }
@@ -611,11 +608,12 @@
       if (options.height !== undefined) { display.height = options.height; }
       if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
       if (options.frameRate !== undefined) { display.frameRate = options.frameRate; }
+      if (options.clearBitmap !== undefined) { display.clearBitmap = options.clearBitmap; }
       if (options.layers !== undefined) {
-        opt_layercount = options.layers;
         /*DEBUG*/
-        type_check(opt_layercount,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
+        type_check(options.layers,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
         /*END_DEBUG*/
+        opt_layercount = options.layers;
         while (opt_layercount--) {
           display.createLayer();
         }
@@ -623,7 +621,7 @@
     }
     
     return display;
-  };//end doodle.Display
+  };//end doodle.createDisplay
 
   
   display_static_properties = {
@@ -639,6 +637,17 @@
       writable: false,
       configurable: false,
       value: null
+    },
+
+    /**
+     * Alias for display.children, since every child is a Layer.
+     * @name layers
+     * @return {array}
+     */
+    'layers': {
+      enumerable: true,
+      configurable: false,
+      get: function () { return this.children; }
     },
     
     /**
@@ -693,7 +702,7 @@
       enumerable: false,
       configurable: true,
       value: (function () {
-        var rect = doodle.geom.Rectangle(0, 0, 0, 0); //recycle
+        var rect = doodle.geom.createRectangle(0, 0, 0, 0); //recycle
         return function () {
           return rect.compose(0, 0, this.width, this.height);
         };
@@ -795,7 +804,7 @@
       draw_scene_graph(scene_path, path_count);
 
       //layer filters
-      var ctx, l, filters, len,
+      var l, filters, len,
           w = display.width,
           h = display.height;
       while (layer_count--) {

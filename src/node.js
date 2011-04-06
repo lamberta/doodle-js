@@ -1,6 +1,5 @@
-/*jslint nomen: false, plusplus: false*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 (function () {
   var node_count = 0,
       node_static_properties,
@@ -12,10 +11,9 @@
       //recycled events
       evt_addedEvent = doodle.events.Event(doodle.events.Event.ADDED, true),
       evt_removedEvent = doodle.events.Event(doodle.events.Event.REMOVED, true),
-      //lookup help
-      doodle_Point = doodle.geom.Point,
-      doodle_Matrix = doodle.geom.Matrix,
-      doodle_Rectangle = doodle.geom.Rectangle,
+      createPoint = doodle.geom.createPoint,
+      createMatrix = doodle.geom.createMatrix,
+      createRectangle = doodle.geom.createRectangle,
       create_scene_path = doodle.utils.create_scene_path,
       PI = Math.PI;
   
@@ -26,8 +24,8 @@
    * @param {string=} id|initializer
    * @return {doodle.Node}
    */
-  doodle.createNode = doodle.Node = function (id) {
-    var node = Object.create(doodle.EventDispatcher());
+  doodle.Node = doodle.createNode = function (id) {
+    var node = Object.create(doodle.createEventDispatcher());
     
     /*DEBUG*/
     if (arguments.length > 1) {
@@ -55,9 +53,7 @@
             return {
               enumerable: true,
               configurable: false,
-              get: function () {
-                return show_bounds;
-              },
+              get: function () { return show_bounds; },
               set: function (showBoundingBox) {
                 show_bounds = showBoundingBox === true;
               }
@@ -101,7 +97,9 @@
           get: function () { return root; },
           set: function (node) {
             /*DEBUG*/
-            node === null || type_check(node, 'Display', {label:'Node.root', id:this.id, inherits:true});
+            if (node !== null) {
+              type_check(node, 'Display', {label:'Node.root', id:this.id, inherits:true});
+            }
             /*END_DEBUG*/
             root = node;
           }
@@ -121,7 +119,9 @@
           get: function () { return parent; },
           set: function (node) {
             /*DEBUG*/
-            node === null || type_check(node, 'Node', {label:'Node.parent', id:this.id, inherits:true});
+            if (node !== null) {
+              type_check(node, 'Node', {label:'Node.parent', id:this.id, inherits:true});
+            }
             /*END_DEBUG*/
             parent = node;
           }
@@ -148,7 +148,7 @@
        * @property
        */
       'transform': (function () {
-        var transform = doodle_Matrix(1, 0, 0, 1, 0, 0);
+        var transform = createMatrix(1, 0, 0, 1, 0, 0);
         return {
           enumerable: true,
           configurable: false,
@@ -196,7 +196,7 @@
           set: function (alphaArg) {
             /*DEBUG*/
             type_check(alphaArg, 'number', {label:'Node.alpha', id:this.id});
-            range_check(isFinite(alphaArg), {label:'Node.alpha', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(alphaArg), {label:'Node.alpha', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha = (alphaArg > 1) ? 1 : ((alphaArg < 0) ? 0 : alphaArg);
           }
@@ -232,7 +232,7 @@
         writable: true,
         configurable: false,
         value: (function () {
-          var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
+          var rect = createRectangle(0, 0, 0, 0); //recycle
           return function (targetCoordSpace) {
             /*DEBUG*/
             type_check(targetCoordSpace, 'Node', {label:'Node.__getBounds', params:'targetCoordSpace', id:this.id, inherits:true});
@@ -245,13 +245,12 @@
             while (len--) {
               child_bounds = children[len].__getBounds(targetCoordSpace);
               
-              if (child_bounds === null) {
-                continue;
-              }
-              if (bounding_box === null) {
-                bounding_box = rect.__compose(child_bounds);
-              } else {
-                bounding_box.__union(child_bounds);
+              if (child_bounds !== null) {
+                if (bounding_box === null) {
+                  bounding_box = rect.__compose(child_bounds);
+                } else {
+                  bounding_box.__union(child_bounds);
+                }
               }
             }
             return bounding_box;
@@ -284,7 +283,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.x', id:this.id});
-        range_check(isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.tx = n;
       }
@@ -302,7 +301,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.y', id:this.id});
-        range_check(isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.ty = n;
       }
@@ -339,7 +338,7 @@
       value: function (deg) {
         /*DEBUG*/
         type_check(deg, 'number', {label:'Node.rotate', id:this.id, params:'degrees', message:"Parameter must be a number in degrees."});
-        range_check(isFinite(deg), {label:'Node.rotate', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(deg), {label:'Node.rotate', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotate(deg * PI / 180);
       }
@@ -357,7 +356,7 @@
       set: function (deg) {
         /*DEBUG*/
         type_check(deg, 'number', {label:'Node.rotation', id:this.id, message:"Parameter must be a number in degrees."});
-        range_check(isFinite(deg), {label:'Node.rotation', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(deg), {label:'Node.rotation', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotation = deg * PI / 180;
       }
@@ -375,7 +374,7 @@
       set: function (sx) {
         /*DEBUG*/
         type_check(sx, 'number', {label:'Node.scaleX', id:this.id});
-        range_check(isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.a = sx;
       }
@@ -393,7 +392,7 @@
       set: function (sy) {
         /*DEBUG*/
         type_check(sy, 'number', {label:'Node.scaleY', id:this.id});
-        range_check(isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.d = sy;
       }
@@ -432,7 +431,7 @@
       enumerable: false,
       configurable: false,
       get: (function () {
-        var transform = doodle_Matrix(1, 0, 0, 1, 0, 0);
+        var transform = createMatrix(1, 0, 0, 1, 0, 0);
         return function () {
           var $transform = transform,
               node = this.parent;
@@ -527,6 +526,24 @@
         /*END_DEBUG*/
         //add to end of children array
         return this.addChildAt(node, this.children.length);
+      }
+    },
+
+    /**
+     * Adds this node to the given node's children.
+     * @name appendTo
+     * @return {Node}
+     * @throws {TypeError}
+     */
+    'appendTo': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (node) {
+        /*DEBUG*/
+        type_check(node,'Node', {label:'Node.appendTo', id:this.id, params:'node', inherits:true});
+        /*END_DEBUG*/
+        return node.addChild(this);
       }
     },
 
@@ -715,9 +732,9 @@
       configurable: false,
       value: function (child, index) {
         var children = this.children,
-            len = children.length,
             pos = children.indexOf(child);
         /*DEBUG*/
+        window.debug_len = children.length;
         type_check(child,'Node', index,'number', {label:'Node.setChildIndex', params:['child', 'index'], id:this.id, inherits:true});
         range_check(index >= -children.length, index < children.length, {label:'Node.setChildIndex', params:['child', '*index*'], id:this.id, message:"Index out of range."});
         reference_check(child.parent === this, {label:'Node.setChildIndex', params:['*child*','index'], id:this.id, message:"Can not set the index of a Node that is not a child."});
@@ -730,7 +747,8 @@
           this.root.__sortAllChildren();
         }
         /*DEBUG*/
-        console.assert(len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -751,10 +769,10 @@
         var children = this.children,
             temp_node;
         /*DEBUG*/
-        var test_len = children.length;
+        window.debug_len = children.length;
         type_check(index1,'number', index2,'number', {label:'Node.swapChildrenAt', params:['index1', 'index2'], id:this.id});
-        range_check(index1 >= -test_len, index1 < test_len, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
-        range_check(index2 >= -test_len, index2 < test_len, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
+        range_check(index1 >= -window.debug_len, index1 < window.debug_len, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
+        range_check(index2 >= -window.debug_len, index2 < window.debug_len, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
         //asserts
         console.assert(doodle.Node.isNode(children[index1]), "Child is a Node.", children[index1]);
         console.assert(doodle.Node.isNode(children[index2]), "Child is a Node.", children[index2]);
@@ -772,7 +790,8 @@
           this.root.__sortAllChildren();
         }
         /*DEBUG*/
-        console.assert(test_len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -790,7 +809,7 @@
       value: function (node1, node2) {
         var children = this.children;
         /*DEBUG*/
-        var test_len = children.length;
+        window.debug_len = children.length;
         type_check(node1, 'Node', node2, 'Node', {label:'Node.swapChildren', id:this.id, params:['node1', 'node2'], inherits:true});
         reference_check(node1.parent === this, node2.parent === this, {label:'Node.swapChildren', params:['child1','child2'], id:this.id, message:"Can not swap a Node that is not a child."});
         /*END_DEBUG*/
@@ -798,7 +817,8 @@
         this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
         
         /*DEBUG*/
-        console.assert(test_len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -817,20 +837,20 @@
       value: function I(node) {
         var parent = this.parent,
             children;
-        
         /*DEBUG*/
         type_check(node, 'Node', {label:'Node.swapDepths', params:'node', id:this.id, inherits:true});
         reference_check(parent !== null, node.parent === parent, {label:'Node.swapDepths', params:'*node*', id:this.id, message:"Can not swap positions with a Node that has a different parent."});
         //asserts
         console.assert(doodle.Node.isNode(parent), "parent is a Node", parent);
-        var test_len = parent.children.length;
+        window.debug_len = parent.children.length;
         /*END_DEBUG*/
         
         children = parent.children;
         parent.swapChildrenAt(children.indexOf(this), children.indexOf(node));
         
         /*DEBUG*/
-        console.assert(test_len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -853,14 +873,15 @@
         reference_check(parent !== null, {label:'Node.swapDepthAt', params:'*index*', id:this.id, message:"Node does not have a parent."});
         
         console.assert(doodle.Node.isNode(parent), "Node has parent Node.");
-        var test_len = parent.children.length;
-        range_check(index >= -test_len, index1 < test_len, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
+        window.debug_len = parent.children.length;
+        range_check(index >= -window.debug_len, index < window.debug_len, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
 
         parent.swapChildrenAt(parent.children.indexOf(this), index);
 
         /*DEBUG*/
-        console.assert(test_len-1 === children.length, "Children array length is one less than before.");
+        console.assert(window.debug_len === parent.children.length, "Children array length is still the same length.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -957,7 +978,7 @@
         /*END_DEBUG*/
         var global_pt = {x:0, y:0};
         this.__localToGlobal(global_pt);
-        return doodle_Point(pt.x - global_pt.x, pt.y - global_pt.y);
+        return createPoint(pt.x - global_pt.x, pt.y - global_pt.y);
       }
     },
 

@@ -1,3 +1,4 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var sprite_static_properties,
@@ -5,20 +6,20 @@
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      doodle_Rectangle = doodle.geom.Rectangle;
+      createRectangle = doodle.geom.createRectangle;
 
   /**
    * An node to display.
-   * @name doodle.Sprite
+   * @name doodle.createSprite
    * @class
    * @augments doodle.Node
    * @param {string=} id Name or initialization function.
    * @return {doodle.Sprite} A sprite object.
    * @throws {SyntaxError} Invalid parameters.
    */
-  doodle.Sprite = function (id) {
+  doodle.Sprite = doodle.createSprite = function createSprite (id) {
     //only pass id if string, an init function will be called later
-    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
+    var sprite = Object.create(doodle.createNode((typeof id === 'string') ? id : undefined));
 
     /*DEBUG*/
     if (arguments.length > 1) {
@@ -42,7 +43,7 @@
         'graphics': {
           enumerable: false,
           configurable: false,
-          value:  Object.create(doodle.Graphics.call(sprite, draw_commands))
+          value:  Object.create(doodle.createGraphics.call(sprite, draw_commands))
         },
 
         /**
@@ -61,7 +62,7 @@
             set: function (n) {
               /*DEBUG*/
               type_check(n, 'number', {label:'Sprite.width', id:this.id});
-              range_check(isFinite(n), {label:'Sprite.width', id:this.id, message:"Parameter must be a finite number."});
+              range_check(window.isFinite(n), {label:'Sprite.width', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               width = n;
             }
@@ -84,7 +85,7 @@
             set: function (n) {
               /*DEBUG*/
               type_check(n, 'number', {label:'Sprite.height', id:this.id});
-              range_check(isFinite(n), {label:'Sprite.height', id:this.id, message:"Parameter must be a finite number."});
+              range_check(window.isFinite(n), {label:'Sprite.height', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               height = n;
             }
@@ -121,7 +122,7 @@
           writable: true,
           configurable: false,
           value: (function () {
-            var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
+            var rect = createRectangle(0, 0, 0, 0); //recycle
             return function (targetCoordSpace) {
               /*DEBUG*/
               type_check(targetCoordSpace, 'Node', {label:'Sprite.__getBounds', id:this.id, params:'targetCoordSpace', inherits:true});
@@ -244,10 +245,12 @@
           writable: false,
           configurable: false,
           value: function (ctx) {
+            var i = 0,
+                len = draw_commands.length;
             /*DEBUG*/
             type_check(ctx, 'context', {label:'Sprite.__draw', id:this.id, params:'context'});
             /*END_DEBUG*/
-            for (var i=0, len=draw_commands.length; i < len; i++) {
+            for (; i < len; i++) {
               /*DEBUG*/
               console.assert(typeof draw_commands[i] === 'function', "draw command is a function", draw_commands[i]);
               /*END_DEBUG*/
@@ -284,7 +287,7 @@
         set: function (deg) {
           /*DEBUG*/
           type_check(deg, 'number', {label:'Sprite.rotation', id:this.id, message:"Property must be a number specified in degrees."});
-          range_check(isFinite(deg), {label:'Sprite.rotation', id:this.id, message:"Parameter must be a finite number."});
+          range_check(window.isFinite(deg), {label:'Sprite.rotation', id:this.id, message:"Parameter must be a finite number."});
           /*END_DEBUG*/
           this.transform.rotation = deg * to_radians;
         }
@@ -321,7 +324,7 @@
       value: function (x, y, w, h) {
         /*DEBUG*/
         type_check(x, 'number', y, 'number', w, 'number', h, 'number', {label:'Sprite.compose', id:this.id, params:['x', 'y', 'width', 'height']});
-        range_check(isFinite(x), isFinite(y), isFinite(w), isFinite(h), {label:'Sprite.compose', id:this.id, message:"Parameters must all be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), window.isFinite(w), window.isFinite(h), {label:'Sprite.compose', id:this.id, message:"Parameters must all be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;

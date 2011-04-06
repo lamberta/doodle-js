@@ -1,5 +1,5 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 (function () {
   var node_static_properties,
       url_regexp = new RegExp("^url\\((.*)\\)"),
@@ -8,7 +8,7 @@
       reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       //lookup help
-      doodle_Rectangle = doodle.geom.Rectangle,
+      doodle_Rectangle = doodle.geom.createRectangle,
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
@@ -16,7 +16,7 @@
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @name doodle.ElementNode
+   * @name doodle.createElementNode
    * @class
    * @augments doodle.Node
    * @param {HTMLElement=} element
@@ -24,8 +24,8 @@
    * @return {doodle.ElementNode}
    * @throws {SyntaxError}
    */
-  doodle.ElementNode = function (element, id) {
-    var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
+  doodle.ElementNode = doodle.createElementNode = function (element, id) {
+    var element_node = Object.create(doodle.createNode((typeof id === 'string') ? id : undefined));
 
     Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
@@ -55,8 +55,7 @@
           set: function (elementArg) {
             var color,
                 image,
-                id,
-                w, h;
+                id;
             
             if (elementArg === null) {
               //check if removing an element
@@ -224,7 +223,7 @@
             /*END_DEBUG*/
             //url path at this point, make sure it's in the proper format
             if (!url_regexp.test(image)) {
-              image = "url("+ encodeURI(image) +")";
+              image = "url("+ window.encodeURI(image) +")";
             }
             bg_image = set_element_property(this.element, 'backgroundImage', image);
           }

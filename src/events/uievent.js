@@ -1,5 +1,5 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* DOM 2 Event: UIEvent:Event
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-Events-UIEvent
  */
@@ -11,7 +11,7 @@
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.UIEvent
+   * @name doodle.events.createUIEvent
    * @class
    * @augments doodle.events.Event
    * @param {string=} type
@@ -23,7 +23,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.UIEvent = function (type, bubbles, cancelable, view, detail) {
+  doodle.events.UIEvent = doodle.events.createUIEvent = function (type, bubbles, cancelable, view, detail) {
     var uievent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -44,7 +44,7 @@
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      uievent = Object.create(doodle.events.Event(init_obj));
+      uievent = Object.create(doodle.events.createEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -54,7 +54,7 @@
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      uievent = Object.create(doodle.events.Event(''));
+      uievent = Object.create(doodle.events.createEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -63,7 +63,7 @@
       type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'*',
                  {label:'UIEvent', params:['type','bubbles','cancelable','view','detail'], id:this.id});
       /*END_DEBUG*/
-      uievent = Object.create(doodle.events.Event(type, bubbles, cancelable));
+      uievent = Object.create(doodle.events.createEvent(type, bubbles, cancelable));
     }
     
     Object.defineProperties(uievent, uievent_static_properties);

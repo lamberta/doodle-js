@@ -1,4 +1,5 @@
-/*globals doodle, console*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 
 /* Will probably want to implement the dom event interface:
  * http://www.w3.org/TR/DOM-Level-3-Events/
@@ -13,7 +14,7 @@
       isEvent;
   
   /**
-   * @name doodle.events.Event
+   * @name doodle.events.createEvent
    * @class
    * @augments Object
    * @param {string=} type
@@ -23,7 +24,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.Event = function (type, bubbles, cancelable) {
+  doodle.events.Event = doodle.events.createEvent = function (type, bubbles, cancelable) {
     var event = Object.create(event_prototype),
         arg_len = arguments.length,
         init_obj, //function, event
@@ -109,7 +110,9 @@
             get: function () { return (id === null) ? this.toString()+"[type="+this.type+"]" : id; },
             set: function (idArg) {
               /*DEBUG*/
-              idArg === null || type_check(idArg,'string', {label:'Event.id', id:this.id});
+              if (idArg !== null) {
+                type_check(idArg,'string', {label:'Event.id', id:this.id});
+              }
               /*END_DEBUG*/
               id = idArg;
             }
@@ -284,7 +287,7 @@
           enumerable: false,
           value: function (phaseArg) {
             /*DEBUG*/
-            console.assert(isFinite(phaseArg), "phaseArg is a finite number", phaseArg);
+            console.assert(window.isFinite(phaseArg), "phaseArg is a finite number", phaseArg);
             console.assert(phaseArg >= 0, "phaseArg is greater than 0", phaseArg);
             /*END_DEBUG*/
             evt_eventPhase = phaseArg;

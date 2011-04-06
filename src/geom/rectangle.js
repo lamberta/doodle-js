@@ -1,17 +1,15 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var rect_static_properties,
-      temp_array = new Array(4),
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      //lookup help
-      max = Math.max,
-      min = Math.min;
+      temp_array = new Array(4);
   
   /**
-   * @name doodle.geom.Rectangle
+   * @name doodle.geom.createRectangle
    * @class
    * @augments Object
    * @param {number=} x
@@ -22,7 +20,7 @@
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function Rectangle (x, y, width, height) {
+  doodle.geom.Rectangle = doodle.geom.createRectangle = function (x, y, width, height) {
     var rect = {},
         arg_len = arguments.length,
         init_obj;
@@ -50,7 +48,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Rectangle.x', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.x', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.x', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             x = n;
           }
@@ -69,7 +67,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label: 'Rectangle.y', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.y', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.y', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             y = n;
           }
@@ -88,7 +86,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n, 'number', {label: 'Rectangle.width', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.width', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             width = n;
           }
@@ -107,7 +105,7 @@
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Rectangle.height', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.height', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             height = n;
           }
@@ -193,9 +191,8 @@
     }
 
     return rect;
-  }//end Rectangle definition
+  };//end Rectangle definition
 
-  doodle.geom.Rectangle = Rectangle;
 
   rect_static_properties = {
     /**
@@ -211,7 +208,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.top', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.top', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.top', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.y = n;
         this.height -= n;
@@ -231,7 +228,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.right', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.right', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.right', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.width = n - this.x;
       }
@@ -250,7 +247,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.bottom', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.bottom', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.bottom', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.height = n - this.y;
       }
@@ -269,7 +266,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.left', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.left', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.left', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.x = n;
         this.width -= n;
@@ -317,7 +314,7 @@
       value: function (x, y, w, h) {
         /*DEBUG*/
         type_check(x,'number', y,'number', w,'number', h,'number', {label: 'Rectangle.compose', params:['x','y','width','height'], id:this.id});
-        range_check(isFinite(x), isFinite(y), isFinite(w), isFinite(h), {label:'Rectangle.compose', id:this.id, params:['x','y','width','height'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), window.isFinite(w), window.isFinite(h), {label:'Rectangle.compose', id:this.id, params:['x','y','width','height'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -356,7 +353,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return Rectangle(this.x, this.y, this.width, this.height); }
+      value: function () { return doodle.geom.createRectangle(this.x, this.y, this.width, this.height); }
     },
 
     /**
@@ -375,7 +372,7 @@
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Rectangle.offset', params:['dx','dy'], id:this.id});
-        range_check(isFinite(dx), isFinite(dy), {label:'Rectangle.offset', id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Rectangle.offset', id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -401,7 +398,7 @@
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Rectangle.inflate', params:['dx','dy'], id:this.id});
-        range_check(isFinite(dx), isFinite(dy), {label:'Rectangle.inflate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Rectangle.inflate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x -= dx;
         this.width += 2 * dx;
@@ -458,7 +455,7 @@
       value: function (x, y) {
         /*DEBUG*/
         type_check(x,'number', y,'number', {label:'Rectangle.contains', params:['x','y'], id:this.id});
-        range_check(isFinite(x), isFinite(y), {label:'Rectangle.contains', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), {label:'Rectangle.contains', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         return (x >= this.left && x <= this.right && y >= this.top && y <= this.bottom);
       }
@@ -546,12 +543,12 @@
         /*DEBUG*/
         type_check(rect,'Rectangle', {label:'Rectangle.intersection', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        var r = Rectangle(0, 0, 0, 0);
+        var r = doodle.geom.createRectangle(0, 0, 0, 0);
         if (this.intersects(rect)) {
-          r.left = max(this.left, rect.x);
-          r.top = max(this.top, rect.y);
-          r.right = min(this.right, rect.x + rect.width);
-          r.bottom = min(this.bottom, rect.y + rect.height);
+          r.left = Math.max(this.left, rect.x);
+          r.top = Math.max(this.top, rect.y);
+          r.right = Math.min(this.right, rect.x + rect.width);
+          r.bottom = Math.min(this.bottom, rect.y + rect.height);
         }
         return r;
       }
@@ -574,10 +571,10 @@
         type_check(rect,'Rectangle', {label:'Rectangle.__intersection', params:'rectangle', id:this.id});
         /*END_DEBUG*/
         if (this.intersects(rect)) {
-          this.left = max(this.left, rect.x);
-          this.top = max(this.top, rect.y);
-          this.right = min(this.right, rect.x + rect.width);
-          this.bottom = min(this.bottom, rect.y + rect.height);
+          this.left = Math.max(this.left, rect.x);
+          this.top = Math.max(this.top, rect.y);
+          this.right = Math.min(this.right, rect.x + rect.width);
+          this.bottom = Math.min(this.bottom, rect.y + rect.height);
         }
         return this;
       }
@@ -599,11 +596,11 @@
         /*DEBUG*/
         type_check(rect,'Rectangle', {label:'Rectangle.union', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        var r = Rectangle(0, 0, 0, 0);
-        r.left = min(this.left, rect.x);
-        r.top = min(this.top, rect.y);
-        r.right = max(this.right, rect.x + rect.width);
-        r.bottom = max(this.bottom, rect.y + rect.height);
+        var r = doodle.geom.createRectangle(0, 0, 0, 0);
+        r.left = Math.min(this.left, rect.x);
+        r.top = Math.min(this.top, rect.y);
+        r.right = Math.max(this.right, rect.x + rect.width);
+        r.bottom = Math.max(this.bottom, rect.y + rect.height);
         return r;
       }
     },
@@ -625,10 +622,10 @@
         type_check(rect,'Rectangle', {label:'Rectangle.__union', params:'rectangle', id:this.id});
         /*END_DEBUG*/
         //a bit tricky, if applied directly it doesn't work
-        var l = min(this.left, rect.x),
-            t = min(this.top, rect.y),
-            r = max(this.right, rect.x + rect.width),
-            b = max(this.bottom, rect.y + rect.height);
+        var l = Math.min(this.left, rect.x),
+            t = Math.min(this.top, rect.y),
+            r = Math.max(this.right, rect.x + rect.width),
+            b = Math.max(this.bottom, rect.y + rect.height);
         this.left = l;
         this.top = t;
         this.right = r;

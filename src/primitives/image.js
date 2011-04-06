@@ -1,18 +1,18 @@
-/*globals doodle, Image*/
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 (function () {
   var image_sprite_static_properties,
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       get_element = doodle.utils.get_element,
-      doodle_Event = doodle.events.Event,
-      Event_LOAD = doodle.events.Event.LOAD,
-      Event_CHANGE = doodle.events.Event.CHANGE;
+      createEvent = doodle.events.createEvent,
+      LOAD = doodle.events.Event.LOAD,
+      CHANGE = doodle.events.Event.CHANGE;
 
   /**
    * A image sprite to display.
-   * @name doodle.Image
+   * @name doodle.createImage
    * @class
    * @augments doodle.Sprite
    * @param {string=} imageSrc Image element or url.
@@ -20,8 +20,8 @@
    * @throws {SyntaxError} Invalid parameters.
    * @throws {TypeError} Text argument not a string.
    */
-  doodle.Image = function (imageSrc) {
-    var image_sprite = Object.create(doodle.Sprite());
+  doodle.Image = doodle.createImage = function (imageSrc) {
+    var image_sprite = Object.create(doodle.createSprite());
 
     Object.defineProperties(image_sprite, image_sprite_static_properties);
     //properties that require privacy
@@ -41,14 +41,14 @@
         image_sprite.graphics.draw(function (ctx) {
           ctx.drawImage(img_element, 0, 0);
         });
-        image_sprite.dispatchEvent(doodle_Event(Event_LOAD));
+        image_sprite.dispatchEvent(createEvent(LOAD));
       }
 
       function remove_image_element () {
         if (img_element !== null) {
           img_element = null;
           image_sprite.graphics.clear();
-          image_sprite.dispatchEvent(doodle_Event(Event_CHANGE));
+          image_sprite.dispatchEvent(createEvent(CHANGE));
         }
       }
       
@@ -120,8 +120,8 @@
               /*DEBUG*/
               type_check(srcVar, 'string', {label:'Image.id', id:this.id});
               /*END_DEBUG*/
-              var image = new Image();
-              image.src = encodeURI(srcVar);
+              var image = new window.Image();
+              image.src = window.encodeURI(srcVar);
               load_image(image);
             }
           }

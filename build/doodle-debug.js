@@ -1,9 +1,6 @@
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 "use strict";
-
-/* Intro
- *
- */
-
 //the global object
 window.doodle = {};
 //packages
@@ -25,14 +22,15 @@ doodle.filters = {};
           queue.length = 0;
         }
       },
-      on_dom_loaded = function () {
+      onDOMContentLoaded = function () {
         dom_loaded();
-        document.removeEventListener('DOMContentLoaded', on_dom_loaded, false);
+        document.removeEventListener('DOMContentLoaded', onDOMContentLoaded, false);
       };
 
   /**
    * Pushes a function on the waiting list, will execute when the DOM is ready.
    * Alias the doodle namespace by passing an argument to the function.
+   * @name doodle.ready
    * @param {function} fn
    */
   doodle.ready = function (fn) {
@@ -51,16 +49,16 @@ doodle.filters = {};
   //if we missed the event, no need to listen for it
   if (document.readyState !== "complete") {
     if (document.addEventListener) {
-      document.addEventListener('DOMContentLoaded', on_dom_loaded, false);
+      document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
     } else {
       console.error("document.addEventListener not supported.");
     }
   }
 }());
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /* ES5 compatibility
  */
-  
 if (typeof Function.prototype.bind !== 'function') {
   Function.prototype.bind = function (thisArg /*, args...*/) {
     var fn = this;
@@ -69,9 +67,10 @@ if (typeof Function.prototype.bind !== 'function') {
     };
   };
 }
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
+
 /*DEBUG*/
-/*jslint nomen: false, plusplus: false*/
-/*globals doodle, console*/
 doodle.utils.debug = {};
 
 (function () {
@@ -334,8 +333,10 @@ doodle.utils.debug = {};
     arg = Array.prototype.slice.call(arguments);
     callback = (typeof arg[arg.length-1] === 'function') ? arg.pop() : null;
     options = (typeof arg[arg.length-1] === 'object') ? arg.pop() : {trace: true};
+    var i = 0,
+        len = arg.length;
     //iterate args taking 2 at a time
-    for (var i=0, len=arg.length; i < len; i++) {
+    for (; i < len; i++) {
       if (i % 2 === 0) {
         try {
           test_type(arg[i], arg[i+1], options.inherits);
@@ -362,8 +363,10 @@ doodle.utils.debug = {};
     test = Array.prototype.slice.call(arguments);
     callback = (typeof test[test.length-1] === 'function') ? test.pop() : null;
     options = (typeof test[test.length-1] === 'object') ? test.pop() : {trace: true};
+    var i = 0,
+        len = test.length;
     //iterate args taking 2 at a time
-    for (var i=0, len=test.length; i < len; i++) {
+    for (; i < len; i++) {
       try {
         assert_error(test[i], RangeError);
       } catch (error) {
@@ -388,8 +391,10 @@ doodle.utils.debug = {};
     test = Array.prototype.slice.call(arguments);
     callback = (typeof test[test.length-1] === 'function') ? test.pop() : null;
     options = (typeof test[test.length-1] === 'object') ? test.pop() : {trace: true};
+    var i = 0,
+        len = test.length;
     //iterate args taking 2 at a time
-    for (var i=0, len=test.length; i < len; i++) {
+    for (; i < len; i++) {
       try {
         assert_error(test[i], ReferenceError);
       } catch (error) {
@@ -409,7 +414,8 @@ doodle.utils.debug = {};
 
 }());
 /*END_DEBUG*/
-/*globals doodle, document*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: false, newcap: true*/
+/*globals doodle*/
 (function () {
   /*DEBUG*/
   var type_check = doodle.utils.debug.type_check;
@@ -442,7 +448,7 @@ doodle.utils.debug = {};
         //number in octal format or string prefixed with #
         if (typeof color === 'string') {
           color = (color[0] === '#') ? color.slice(1) : color;
-          color = parseInt(color, 16);
+          color = window.parseInt(color, 16);
         }
         /*DEBUG*/
         type_check(color,'number', {label:'hex_to_rgb', params:'color', message:"Invalid color format [0xffffff|#ffffff]."});
@@ -494,7 +500,7 @@ doodle.utils.debug = {};
         /*DEBUG*/
         console.assert(Array.isArray(rgb), "rgb is an array", rgb);
         /*END_DEBUG*/
-        return doodle_utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
+        return doodle_utils.rgb_to_hex(window.parseInt(rgb[0], 10), window.parseInt(rgb[1], 10), window.parseInt(rgb[2], 10));
       }
     },
 
@@ -521,8 +527,8 @@ doodle.utils.debug = {};
           //if it's not an array, it didn't parse correctly
           console.assert(Array.isArray(color), "color is an array", color);
           /*END_DEBUG*/
-          var rgb = [parseInt(color[1], 10), parseInt(color[2], 10), parseInt(color[3], 10)], alpha = parseFloat(color[4]);
-          if (typeof alpha === 'number' && !isNaN(alpha)) {
+          var rgb = [window.parseInt(color[1], 10), window.parseInt(color[2], 10), window.parseInt(color[3], 10)], alpha = window.parseFloat(color[4]);
+          if (typeof alpha === 'number' && !window.isNaN(alpha)) {
             rgb.push(alpha);
           }
           return rgb;
@@ -678,13 +684,13 @@ doodle.utils.debug = {};
         if (returnType !== false) {
           switch (returnType) {
           case 'int':
-            val = parseInt(val, 10);
-            val = isNaN(val) ? null : val;
+            val = window.parseInt(val, 10);
+            val = window.isNaN(val) ? null : val;
             break;
           case 'number':
           case 'float':
-            val = parseFloat(val);
-            val = isNaN(val) ? null : val;
+            val = window.parseFloat(val);
+            val = window.isNaN(val) ? null : val;
             break;
           case 'string':
             val = String(val);
@@ -1046,6 +1052,8 @@ var Stats = function () {
 
 };
 /*END_DEBUG_STATS*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.Keyboard
  * @class
@@ -2504,6 +2512,8 @@ Object.defineProperty(doodle, 'Keyboard', {
     
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * The GradientType class provides values for the type parameter in the
  * beginGradientFill() and lineGradientStyle() methods of the Graphics class.
@@ -2545,6 +2555,8 @@ Object.defineProperty(doodle, 'GradientType', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.Pattern
  * @class
@@ -2612,6 +2624,8 @@ Object.defineProperty(doodle, 'Pattern', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.LineCap
  * @class
@@ -2665,6 +2679,8 @@ Object.defineProperty(doodle, 'LineCap', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.LineJoin
  * @class
@@ -2718,7 +2734,8 @@ Object.defineProperty(doodle, 'LineJoin', {
     }
   })
 });
-/*globals doodle, console*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 
 /* Will probably want to implement the dom event interface:
  * http://www.w3.org/TR/DOM-Level-3-Events/
@@ -2733,7 +2750,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       isEvent;
   
   /**
-   * @name doodle.events.Event
+   * @name doodle.events.createEvent
    * @class
    * @augments Object
    * @param {string=} type
@@ -2743,7 +2760,7 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.Event = function (type, bubbles, cancelable) {
+  doodle.events.Event = doodle.events.createEvent = function (type, bubbles, cancelable) {
     var event = Object.create(event_prototype),
         arg_len = arguments.length,
         init_obj, //function, event
@@ -2829,7 +2846,9 @@ Object.defineProperty(doodle, 'LineJoin', {
             get: function () { return (id === null) ? this.toString()+"[type="+this.type+"]" : id; },
             set: function (idArg) {
               /*DEBUG*/
-              idArg === null || type_check(idArg,'string', {label:'Event.id', id:this.id});
+              if (idArg !== null) {
+                type_check(idArg,'string', {label:'Event.id', id:this.id});
+              }
               /*END_DEBUG*/
               id = idArg;
             }
@@ -3004,7 +3023,7 @@ Object.defineProperty(doodle, 'LineJoin', {
           enumerable: false,
           value: function (phaseArg) {
             /*DEBUG*/
-            console.assert(isFinite(phaseArg), "phaseArg is a finite number", phaseArg);
+            console.assert(window.isFinite(phaseArg), "phaseArg is a finite number", phaseArg);
             console.assert(phaseArg >= 0, "phaseArg is greater than 0", phaseArg);
             /*END_DEBUG*/
             evt_eventPhase = phaseArg;
@@ -3458,8 +3477,8 @@ Object.defineProperty(doodle, 'LineJoin', {
   };
   
 }());//end class closure
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* DOM 2 Event: UIEvent:Event
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-Events-UIEvent
  */
@@ -3471,7 +3490,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.UIEvent
+   * @name doodle.events.createUIEvent
    * @class
    * @augments doodle.events.Event
    * @param {string=} type
@@ -3483,7 +3502,7 @@ Object.defineProperty(doodle, 'LineJoin', {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.UIEvent = function (type, bubbles, cancelable, view, detail) {
+  doodle.events.UIEvent = doodle.events.createUIEvent = function (type, bubbles, cancelable, view, detail) {
     var uievent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -3504,7 +3523,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      uievent = Object.create(doodle.events.Event(init_obj));
+      uievent = Object.create(doodle.events.createEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -3514,7 +3533,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      uievent = Object.create(doodle.events.Event(''));
+      uievent = Object.create(doodle.events.createEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -3523,7 +3542,7 @@ Object.defineProperty(doodle, 'LineJoin', {
       type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'*',
                  {label:'UIEvent', params:['type','bubbles','cancelable','view','detail'], id:this.id});
       /*END_DEBUG*/
-      uievent = Object.create(doodle.events.Event(type, bubbles, cancelable));
+      uievent = Object.create(doodle.events.createEvent(type, bubbles, cancelable));
     }
     
     Object.defineProperties(uievent, uievent_static_properties);
@@ -3782,8 +3801,8 @@ doodle.events.UIEvent.isUIEvent = function (evt) {
   }
   return false;
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* DOM 2 Event: MouseEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevents
  */
@@ -3795,7 +3814,7 @@ doodle.events.UIEvent.isUIEvent = function (evt) {
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.MouseEvent
+   * @name doodle.events.createMouseEvent
    * @class
    * @augments doodle.events.UIEvent
    * @param {string=} type
@@ -3817,8 +3836,8 @@ doodle.events.UIEvent.isUIEvent = function (evt) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.MouseEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
-                                       ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
+  doodle.events.MouseEvent = doodle.events.createMouseEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
+                                                                        ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget) {
     var mouseevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -3839,7 +3858,7 @@ doodle.events.UIEvent.isUIEvent = function (evt) {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      mouseevent = Object.create(doodle.events.UIEvent(init_obj));
+      mouseevent = Object.create(doodle.events.createUIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -3849,7 +3868,7 @@ doodle.events.UIEvent.isUIEvent = function (evt) {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      mouseevent = Object.create(doodle.events.UIEvent(''));
+      mouseevent = Object.create(doodle.events.createUIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -3860,7 +3879,7 @@ doodle.events.UIEvent.isUIEvent = function (evt) {
       type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'number', screenX,'*', screenY,'*', clientX,'*', clientY,'*', ctrlKey,'*', altKey,'*', shiftKey,'*', metaKey,'*', button,'*', relatedTarget,'*',
                  {label:'MouseEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY', 'clientX','clientY','ctrlKey','altKey','shiftKey','metaKey', 'button','relatedTarget']});
       /*END_DEBUG*/
-      mouseevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
+      mouseevent = Object.create(doodle.events.createUIEvent(type, bubbles, cancelable, view, detail));
     }
     
     Object.defineProperties(mouseevent, mouseevent_static_properties);
@@ -4240,8 +4259,8 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
   }
   return false;
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* TouchEvent support is expermental.
  * http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
  */
@@ -4253,7 +4272,7 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.TouchEvent
+   * @name doodle.events.createTouchEvent
    * @class
    * @augments doodle.events.UIEvent
    * @param {string=} type
@@ -4278,8 +4297,8 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.TouchEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
-                                       ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation) {
+  doodle.events.TouchEvent = doodle.events.createTouchEvent = function (type, bubbles, cancelable, view, detail, screenX, screenY, clientX, clientY,
+                                                                        ctrlKey, altKey, shiftKey, metaKey, touches, targetTouches, changedTouches, scale, rotation) {
     var touchevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -4300,7 +4319,7 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      touchevent = Object.create(doodle.events.UIEvent(init_obj));
+      touchevent = Object.create(doodle.events.createUIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -4310,7 +4329,7 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      touchevent = Object.create(doodle.events.UIEvent(''));
+      touchevent = Object.create(doodle.events.createUIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -4321,7 +4340,7 @@ doodle.events.MouseEvent.isMouseEvent = function (evt) {
       type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', detail,'number', screenX,'*', screenY,'*', clientX,'*', clientY,'*', ctrlKey,'*', altKey,'*', shiftKey,'*', metaKey,'*', touches,'*', targetTouches,'*', changedTouches,'*', scale,'*', rotation,'*',
                  {label:'TouchEvent', id:this.id, params:['type','bubbles','cancelable','view','detail','screenX','screenY','clientX','clientY','ctrlKey','altKey','shiftKey','metaKey','touches','targetTouches','changedTouches','scale','rotation']});
       /*END_DEBUG*/
-      touchevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view, detail));
+      touchevent = Object.create(doodle.events.createUIEvent(type, bubbles, cancelable, view, detail));
     }
     
     Object.defineProperties(touchevent, touchevent_static_properties);
@@ -4698,8 +4717,8 @@ doodle.events.TouchEvent.isTouchEvent = function (evt) {
   }
   return false;
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* DOM 3 Event: TextEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-textevents
  */
@@ -4711,7 +4730,7 @@ doodle.events.TouchEvent.isTouchEvent = function (evt) {
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.TextEvent
+   * @name doodle.events.createTextEvent
    * @class
    * @augments doodle.events.UIEvent
    * @param {string=} type
@@ -4724,7 +4743,7 @@ doodle.events.TouchEvent.isTouchEvent = function (evt) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.TextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
+  doodle.events.TextEvent = doodle.events.createTextEvent = function (type, bubbles, cancelable, view, data, inputMode) {
     var textevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -4745,7 +4764,7 @@ doodle.events.TouchEvent.isTouchEvent = function (evt) {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      textevent = Object.create(doodle.events.UIEvent(init_obj));
+      textevent = Object.create(doodle.events.createUIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -4755,7 +4774,7 @@ doodle.events.TouchEvent.isTouchEvent = function (evt) {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      textevent = Object.create(doodle.events.UIEvent(''));
+      textevent = Object.create(doodle.events.createUIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -4765,7 +4784,7 @@ doodle.events.TouchEvent.isTouchEvent = function (evt) {
       type_check(type,'string', bubbles,'boolean', cancelable,'boolean', view,'*', data,'*', inputMode,'*',
                  {label:'TextEvent', id:this.id, params:['type','bubbles','cancelable','view','data','inputMode']});
       /*END_DEBUG*/
-      textevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
+      textevent = Object.create(doodle.events.createUIEvent(type, bubbles, cancelable, view));
     }
     
     Object.defineProperties(textevent, textevent_static_properties);
@@ -4931,8 +4950,8 @@ doodle.events.TextEvent.isTextEvent = function (evt) {
   }
   return false;
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 /* DOM 3 Event: KeyboardEvent:UIEvent
  * http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
  */
@@ -4944,7 +4963,7 @@ doodle.events.TextEvent.isTextEvent = function (evt) {
       isEvent = doodle.events.Event.isEvent;
   
   /**
-   * @name doodle.events.KeyboardEvent
+   * @name doodle.events.createKeyboardEvent
    * @class
    * @augments doodle.events.UIEvent
    * @param {string=} type
@@ -4959,7 +4978,7 @@ doodle.events.TextEvent.isTextEvent = function (evt) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.events.KeyboardEvent = function (type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat) {
+  doodle.events.KeyboardEvent = doodle.events.createKeyboardEvent = function (type, bubbles, cancelable, view, keyIdentifier, keyLocation, modifiersList, repeat) {
     var keyboardevent,
         arg_len = arguments.length,
         init_obj, //function, event
@@ -4980,7 +4999,7 @@ doodle.events.TextEvent.isTextEvent = function (evt) {
       /*END_DEBUG*/
       init_obj = arguments[0];
       type = undefined;
-      keyboardevent = Object.create(doodle.events.UIEvent(init_obj));
+      keyboardevent = Object.create(doodle.events.createUIEvent(init_obj));
     } else if (typeof arguments[0] === 'function') {
       /*DEBUG*/
       if (arg_len > 1) {
@@ -4990,7 +5009,7 @@ doodle.events.TextEvent.isTextEvent = function (evt) {
       init_obj = arguments[0];
       type = undefined;
       //use empty event type for now, will check after we call the init function.
-      keyboardevent = Object.create(doodle.events.UIEvent(''));
+      keyboardevent = Object.create(doodle.events.createUIEvent(''));
     } else {
       //parameter defaults
       bubbles = (bubbles === undefined) ? false : bubbles;
@@ -5000,7 +5019,7 @@ doodle.events.TextEvent.isTextEvent = function (evt) {
       type_check(type, 'string', bubbles, 'boolean', cancelable, 'boolean', view, '*', keyIdentifier, '*', keyLocation, '*', modifiersList, '*', repeat, '*',
                  {label:'KeyboardEvent', params:['type','bubbles','cancelable','view','keyIdentifier','keyLocation','modifiersList','repeat'], id:this.id});
       /*END_DEBUG*/
-      keyboardevent = Object.create(doodle.events.UIEvent(type, bubbles, cancelable, view));
+      keyboardevent = Object.create(doodle.events.createUIEvent(type, bubbles, cancelable, view));
     }
     
     Object.defineProperties(keyboardevent, keyboardevent_static_properties);
@@ -5296,7 +5315,8 @@ doodle.events.KeyboardEvent.isKeyboardEvent = function (evt) {
   }
   return false;
 };
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /*
  * EVENT
  */
@@ -5997,6 +6017,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     value: 0x09
   }  
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: false, newcap: true*/
 /*globals doodle*/
 (function () {
   var filter_static_properties = {},
@@ -6007,7 +6028,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       temp_array = new Array(8);
   
   /**
-   * @name doodle.filters.ColorFilter
+   * @name doodle.filters.createColorFilter
    * @class
    * @augments Object
    * @param {number=} x
@@ -6016,8 +6037,8 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function ColorFilter (redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier,
-                        redOffset, greenOffset, blueOffset, alphaOffset) {
+  doodle.filters.ColorFilter = doodle.filters.createColorFilter = function (redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier,
+                                                                            redOffset, greenOffset, blueOffset, alphaOffset) {
     var filter = {},
         arg_len = arguments.length,
         init_obj;
@@ -6051,7 +6072,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.redMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.redMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.redMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             red_multiplier = n;
           }
@@ -6071,7 +6092,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.greenMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.greenMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.greenMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             green_multiplier = n;
           }
@@ -6091,7 +6112,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.blueMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.blueMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.blueMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             blue_multiplier = n;
           }
@@ -6111,7 +6132,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.alphaMultiplier', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.alphaMultiplier', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.alphaMultiplier', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha_multiplier = n;
           }
@@ -6131,7 +6152,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.redOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.redOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.redOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             red_offset = n;
           }
@@ -6151,7 +6172,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.greenOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.greenOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.greenOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             green_offset = n;
           }
@@ -6171,7 +6192,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.blueOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.blueOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.blueOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             blue_offset = n;
           }
@@ -6191,7 +6212,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'ColorFilter.alphaOffset', id:this.id});
-            range_check(isFinite(n), {label:'ColorFilter.alphaOffset', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'ColorFilter.alphaOffset', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha_offset = n;
           }
@@ -6324,9 +6345,8 @@ Object.defineProperties(doodle.events.TextEvent, {
     }
 
     return filter;
-  }//end ColorFilter definition
+  };//end ColorFilter definition
 
-  doodle.filters.ColorFilter = ColorFilter;
 
   filter_static_properties = {
     /**
@@ -6377,8 +6397,8 @@ Object.defineProperties(doodle.events.TextEvent, {
         type_check(redMultiplier,'number', greenMultiplier,'number', blueMultiplier,'number', alphaMultiplier,'number',
                    redOffset,'number', blueOffset,'number', greenOffset,'number', alphaOffset,'number',
                    {label:'ColorFilter.compose', params:['redMultiplier','greenMultiplier','blueMultiplier','alphaMultiplier','redOffset','greenOffset','blueOffset','alphaOffset'], id:this.id});
-        range_check(isFinite(redMultiplier), isFinite(greenMultiplier), isFinite(blueMultiplier), isFinite(alphaMultiplier),
-                    isFinite(redOffset), isFinite(greenOffset), isFinite(blueOffset), isFinite(alphaOffset),
+        range_check(window.isFinite(redMultiplier), window.isFinite(greenMultiplier), window.isFinite(blueMultiplier), window.isFinite(alphaMultiplier),
+                    window.isFinite(redOffset), window.isFinite(greenOffset), window.isFinite(blueOffset), window.isFinite(alphaOffset),
                     {label:'ColorFilter.compose', params:['redMultiplier','greenMultiplier','blueMultiplier','alphaMultiplier','redOffset','greenOffset','blueOffset','alphaOffset'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.redMultiplier = redMultiplier;
@@ -6402,7 +6422,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return ColorFilter(this.__toArray()); }
+      value: function () { return doodle.filters.createColorFilter(this.__toArray()); }
     },
 
     /**
@@ -6434,21 +6454,17 @@ Object.defineProperties(doodle.events.TextEvent, {
   };//end filter_static_properties definition
 
 }());//end class closure
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var point_static_properties,
       distance,
-      temp_array = new Array(2),
-      temp_point = {x:0, y:0},
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      //lookup help
-      cos = Math.cos,
-      sin = Math.sin,
-      sqrt = Math.sqrt;
+      temp_array = new Array(2),
+      temp_point = {x:0, y:0};
   
   /**
    * @name doodle.geom.createPoint
@@ -6460,7 +6476,7 @@ Object.defineProperties(doodle.events.TextEvent, {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  doodle.geom.Point = doodle.geom.createPoint = function createPoint (x, y) {
+  doodle.geom.Point = doodle.geom.createPoint = function (x, y) {
     var point = {},
         arg_len = arguments.length,
         init_obj;
@@ -6487,7 +6503,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Point.x', id:this.id});
-            range_check(isFinite(n), {label:'Point.x', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Point.x', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             x = n;
           }
@@ -6507,7 +6523,7 @@ Object.defineProperties(doodle.events.TextEvent, {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Point.y', id:this.id});
-            range_check(isFinite(n), {label:'Point.y', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Point.y', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             y = n;
           }
@@ -6590,7 +6606,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     }
 
     return point;
-  }//end Point definition
+  };//end Point definition
 
 
   point_static_properties = {
@@ -6645,7 +6661,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (x, y) {
         /*DEBUG*/
         type_check(x,'number', y,'number', {label:'Point.compose', params:['x','y'], id:this.id});
-        range_check(isFinite(x), isFinite(y), {label:'Point.compose', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), {label:'Point.compose', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -6662,7 +6678,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return createPoint(this.x, this.y); }
+      value: function () { return doodle.geom.createPoint(this.x, this.y); }
     },
 
     /**
@@ -6700,7 +6716,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.add', params:'point', id:this.id});
         /*END_DEBUG*/
-        return createPoint(this.x + pt.x, this.y + pt.y);
+        return doodle.geom.createPoint(this.x + pt.x, this.y + pt.y);
       }
     },
 
@@ -6720,7 +6736,7 @@ Object.defineProperties(doodle.events.TextEvent, {
         /*DEBUG*/
         type_check(pt,'Point', {label:'Point.subtract', params:'point', id:this.id});
         /*END_DEBUG*/
-        return createPoint(this.x - pt.x, this.y - pt.y);
+        return doodle.geom.createPoint(this.x - pt.x, this.y - pt.y);
       }
     },
 
@@ -6737,7 +6753,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Point.offset', id:this.id, params:['dx','dy']});
-        range_check(isFinite(dx), isFinite(dy), {label:'Point.offset', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Point.offset', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -6760,7 +6776,7 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (thickness) {
         /*DEBUG*/
         type_check(thickness,'number', {label:'Point.normalize', id:this.id, params:'thickness'});
-        range_check(isFinite(thickness), {label:'Point.normalize', params:'thickness', id:this.id});
+        range_check(window.isFinite(thickness), {label:'Point.normalize', params:'thickness', id:this.id});
         /*END_DEBUG*/
         this.x = (this.x / this.length) * thickness;
         this.y = (this.y / this.length) * thickness;
@@ -6789,9 +6805,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (pt1, pt2, t) {
         /*DEBUG*/
         type_check(pt1,'Point', pt2,'Point', t,'number', {label:'Point.interpolate', id:this.id, params:['point','point','time']});
-        range_check(isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
+        range_check(window.isFinite(t), {label:'Point.interpolate', params:['point','point','*time*'], id:this.id});
         /*END_DEBUG*/
-        return createPoint(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
+        return doodle.geom.createPoint(pt1.x + (pt2.x - pt1.x) * t, pt1.y + (pt2.y - pt1.y) * t);
         /* correct version?
            var nx = pt2.x - pt1.x;
            var ny = pt2.y - pt1.y;
@@ -6819,9 +6835,9 @@ Object.defineProperties(doodle.events.TextEvent, {
       value: function (len, angle) {
         /*DEBUG*/
         type_check(len,'number', angle,'number', {label:'Point.polar', id:this.id, params:['len','angle']});
-        range_check(isFinite(len), isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(len), window.isFinite(angle), {label:'Point.polar', params:['len','angle'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        return createPoint(len*cos(angle), len*sin(angle));
+        return doodle.geom.createPoint(len*Math.cos(angle), len*Math.sin(angle));
       }
     }
     
@@ -6846,7 +6862,7 @@ Object.defineProperties(doodle.events.TextEvent, {
     /*END_DEBUG*/
     var dx = pt2.x - pt1.x,
         dy = pt2.y - pt1.y;
-    return sqrt(dx*dx + dy*dy);
+    return Math.sqrt(dx*dx + dy*dy);
   };
   
 }());//end class closure
@@ -6862,26 +6878,22 @@ Object.defineProperties(doodle.events.TextEvent, {
 doodle.geom.Point.isPoint = function (pt) {
   return (typeof pt === 'object' && typeof pt.x === 'number' && typeof pt.y === 'number');
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var matrix_static_properties,
-      //recycle object for internal calculations
-      temp_array = new Array(6),
-      temp_point = {x: null, y: null},
-      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
+      temp_array = new Array(6),
+      temp_point = {x: null, y: null},
+      temp_matrix = {a:null, b:null, c:null, d:null, tx:null, ty:null},
       //lookup help
-      doodle_Point = doodle.geom.Point,
-      sin = Math.sin,
-      cos = Math.cos,
-      atan2 = Math.atan2,
-      tan = Math.tan;
+      createPoint = doodle.geom.createPoint;
   
   /**
-   * @name doodle.geom.Matrix
+   * @name doodle.geom.createMatrix
    * @class
    * @augments Object
    * @param {number=} a
@@ -6894,7 +6906,7 @@ doodle.geom.Point.isPoint = function (pt) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function Matrix (a, b, c, d, tx, ty) {
+  doodle.geom.Matrix = doodle.geom.createMatrix = function (a, b, c, d, tx, ty) {
     var matrix = {},
         arg_len = arguments.length,
         init_obj;
@@ -6926,7 +6938,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.a', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.a', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.a', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             a = n;
           }
@@ -6947,7 +6959,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.b', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.b', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.b', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             b = n;
           }
@@ -6968,7 +6980,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.c', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.c', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.c', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             c = n;
           }
@@ -6989,7 +7001,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.d', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.d', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.d', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             d = n;
           }
@@ -7009,7 +7021,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.tx', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.tx', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.tx', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             tx = n;
           }
@@ -7029,7 +7041,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.ty', id:this.id});
-            range_check(isFinite(n), {label:'Matrix.ty', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Matrix.ty', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             ty = n;
           }
@@ -7118,9 +7130,8 @@ doodle.geom.Point.isPoint = function (pt) {
     }
     
     return matrix;
-  }//end Matrix defintion
+  };//end Matrix defintion
 
-  doodle.geom.Matrix = Matrix;
   
   matrix_static_properties = {
     /**
@@ -7142,7 +7153,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (a, b, c, d, tx, ty) {
         /*DEBUG*/
         type_check(a,'number', b,'number', c,'number', d,'number', tx,'number', ty,'number', {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty']});
-        range_check(isFinite(a), isFinite(b), isFinite(c), isFinite(d), isFinite(tx), isFinite(ty), {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(a), window.isFinite(b), window.isFinite(c), window.isFinite(d), window.isFinite(tx), window.isFinite(ty), {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.a  = a;
         this.b  = b;
@@ -7229,7 +7240,7 @@ doodle.geom.Point.isPoint = function (pt) {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty); }
+      value: function () { return doodle.geom.createMatrix(this.a, this.b, this.c, this.d, this.tx, this.ty); }
     },
 
     /**
@@ -7272,10 +7283,10 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (r) {
         /*DEBUG*/
         type_check(r,'number', {label:'Matrix.rotate', id:this.id, params:'radians'});
-        range_check(isFinite(r), {label:'Matrix.rotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
+        range_check(window.isFinite(r), {label:'Matrix.rotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
-        var c = cos(r),
-            s = sin(r),
+        var c = Math.cos(r),
+            s = Math.sin(r),
             m = temp_matrix;
         m.a = c;
         m.b = s;
@@ -7301,7 +7312,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (r) {
         /*DEBUG*/
         type_check(r,'number', {label:'Matrix.deltaRotate', id:this.id, params:'radians'});
-        range_check(isFinite(r), {label:'Matrix.deltaRotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
+        range_check(window.isFinite(r), {label:'Matrix.deltaRotate', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -7322,14 +7333,14 @@ doodle.geom.Point.isPoint = function (pt) {
     'rotation': {
       enumerable: true,
       configurable: false,
-      get: function () { return atan2(this.b, this.a); },
+      get: function () { return Math.atan2(this.b, this.a); },
       set: function (r) {
         /*DEBUG*/
         type_check(r,'number', {label:'Matrix.rotation', id:this.id, message:"Parameter must be a number in radians."});
-        range_check(isFinite(r), {label:'Matrix.rotation', id:this.id, params:'radians', message:"Parameter must be a finite number."});
+        range_check(window.isFinite(r), {label:'Matrix.rotation', id:this.id, params:'radians', message:"Parameter must be a finite number."});
         /*END_DEBUG*/
-        var c = cos(r),
-            s = sin(r);
+        var c = Math.cos(r),
+            s = Math.sin(r);
         this.compose(c, s, -s, c, this.tx, this.ty);
       }
     },
@@ -7349,7 +7360,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (sx, sy) {
         /*DEBUG*/
         type_check(sx,'number', sy,'number', {label:'Matrix.scale', id:this.id, params:['sx','sy']});
-        range_check(isFinite(sx), isFinite(sy), {label:'Matrix.scale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(sx), window.isFinite(sy), {label:'Matrix.scale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         temp_matrix.a = sx;
         temp_matrix.b = 0;
@@ -7376,7 +7387,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (sx, sy) {
         /*DEBUG*/
         type_check(sx,'number', sy,'number', {label:'Matrix.deltaScale', id:this.id, params:['sx','sy']});
-        range_check(isFinite(sx), isFinite(sy), {label:'Matrix.deltaScale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(sx), window.isFinite(sy), {label:'Matrix.deltaScale', id:this.id, params:['sx','sy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -7402,7 +7413,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Matrix.translate', id:this.id, params:['dx','dy']});
-        range_check(isFinite(dx), isFinite(dy), {label:'Matrix.translate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Matrix.translate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.tx += dx;
         this.ty += dy;
@@ -7424,10 +7435,10 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (skewX, skewY) {
         /*DEBUG*/
         type_check(skewX, 'number', skewY, 'number', {label:'Matrix.skew', id:this.id, params:['skewX','skewY']});
-        range_check(isFinite(skewX), isFinite(skewY), {label:'Matrix.skew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(skewX), window.isFinite(skewY), {label:'Matrix.skew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        var sx = tan(skewX),
-            sy = tan(skewY),
+        var sx = Math.tan(skewX),
+            sy = Math.tan(skewY),
             m = temp_matrix;
         m.a = 1;
         m.b = sy;
@@ -7454,7 +7465,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (skewX, skewY) {
         /*DEBUG*/
         type_check(skewX,'number', skewY,'number', {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY']});
-        range_check(isFinite(skewX), isFinite(skewY), {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(skewX), window.isFinite(skewY), {label:'Matrix.deltaSkew', id:this.id, params:['skewX','skewY'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var x = this.tx,
             y = this.ty;
@@ -7527,7 +7538,7 @@ doodle.geom.Point.isPoint = function (pt) {
         /*DEBUG*/
         type_check(pt, 'Point', {label:'Matrix.transformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y + this.tx, this.b * pt.x + this.d * pt.y + this.ty);
+        return createPoint(this.a * pt.x + this.c * pt.y + this.tx, this.b * pt.x + this.d * pt.y + this.ty);
       }
     },
 
@@ -7570,7 +7581,7 @@ doodle.geom.Point.isPoint = function (pt) {
         /*DEBUG*/
         type_check(pt, 'Point', {label:'Matrix.deltaTransformPoint', id:this.id, params:'point'});
         /*END_DEBUG*/
-        return doodle_Point(this.a * pt.x + this.c * pt.y, this.b * pt.x + this.d * pt.y);
+        return createPoint(this.a * pt.x + this.c * pt.y, this.b * pt.x + this.d * pt.y);
       }
     },
 
@@ -7607,10 +7618,10 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (pt, r) {
         /*DEBUG*/
         type_check(pt,'Point', r,'number', {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians']});
-        range_check(isFinite(r), {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(r), {label:'Matrix.rotateAroundExternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
-        var c = cos(r),
-            s = sin(r),
+        var c = Math.cos(r),
+            s = Math.sin(r),
             m = temp_matrix,
             reg_pt = temp_point; //new registration point
         //parent rotation matrix, global space
@@ -7644,7 +7655,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (point, r) {
         /*DEBUG*/
         type_check(point,'Point', r,'number', {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians']});
-        range_check(isFinite(r), {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(r), {label:'Matrix.rotateAroundInternalPoint', id:this.id, params:['point','radians'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         var pt = temp_point;
         pt.x = this.a * point.x + this.c * point.y + this.tx;
@@ -7687,7 +7698,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (m, t) {
         /*DEBUG*/
         type_check(m,'Matrix', t,'number', {label:'Matrix.interpolate', id:this.id, params:['matrix','time']});
-        range_check(isFinite(t), {label:'Matrix.interpolate', id:this.id, params:['matrix','*time*'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(t), {label:'Matrix.interpolate', id:this.id, params:['matrix','*time*'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.a  = this.a  + (m.a  - this.a)  * t;
         this.b  = this.b  + (m.b  - this.b)  * t;
@@ -7719,20 +7730,18 @@ doodle.geom.Matrix.isMatrix = function (m) {
           typeof m.c  === 'number' && typeof m.d  === 'number' &&
           typeof m.tx === 'number' && typeof m.ty === 'number');
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var rect_static_properties,
-      temp_array = new Array(4),
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      //lookup help
-      max = Math.max,
-      min = Math.min;
+      temp_array = new Array(4);
   
   /**
-   * @name doodle.geom.Rectangle
+   * @name doodle.geom.createRectangle
    * @class
    * @augments Object
    * @param {number=} x
@@ -7743,7 +7752,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
    * @throws {TypeError}
    * @throws {SyntaxError}
    */
-  function Rectangle (x, y, width, height) {
+  doodle.geom.Rectangle = doodle.geom.createRectangle = function (x, y, width, height) {
     var rect = {},
         arg_len = arguments.length,
         init_obj;
@@ -7771,7 +7780,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Rectangle.x', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.x', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.x', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             x = n;
           }
@@ -7790,7 +7799,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label: 'Rectangle.y', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.y', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.y', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             y = n;
           }
@@ -7809,7 +7818,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
           set: function (n) {
             /*DEBUG*/
             type_check(n, 'number', {label: 'Rectangle.width', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.width', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             width = n;
           }
@@ -7828,7 +7837,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Rectangle.height', id:this.id});
-            range_check(isFinite(n), {label:'Rectangle.height', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Rectangle.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             height = n;
           }
@@ -7914,9 +7923,8 @@ doodle.geom.Matrix.isMatrix = function (m) {
     }
 
     return rect;
-  }//end Rectangle definition
+  };//end Rectangle definition
 
-  doodle.geom.Rectangle = Rectangle;
 
   rect_static_properties = {
     /**
@@ -7932,7 +7940,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.top', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.top', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.top', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.y = n;
         this.height -= n;
@@ -7952,7 +7960,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.right', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.right', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.right', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.width = n - this.x;
       }
@@ -7971,7 +7979,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.bottom', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.bottom', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.bottom', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.height = n - this.y;
       }
@@ -7990,7 +7998,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       set: function (n) {
         /*DEBUG*/
         type_check(n,'number', {label:'Rectangle.left', id:this.id});
-        range_check(isFinite(n), {label:'Rectangle.left', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Rectangle.left', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.x = n;
         this.width -= n;
@@ -8038,7 +8046,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       value: function (x, y, w, h) {
         /*DEBUG*/
         type_check(x,'number', y,'number', w,'number', h,'number', {label: 'Rectangle.compose', params:['x','y','width','height'], id:this.id});
-        range_check(isFinite(x), isFinite(y), isFinite(w), isFinite(h), {label:'Rectangle.compose', id:this.id, params:['x','y','width','height'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), window.isFinite(w), window.isFinite(h), {label:'Rectangle.compose', id:this.id, params:['x','y','width','height'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -8077,7 +8085,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return Rectangle(this.x, this.y, this.width, this.height); }
+      value: function () { return doodle.geom.createRectangle(this.x, this.y, this.width, this.height); }
     },
 
     /**
@@ -8096,7 +8104,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Rectangle.offset', params:['dx','dy'], id:this.id});
-        range_check(isFinite(dx), isFinite(dy), {label:'Rectangle.offset', id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Rectangle.offset', id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x += dx;
         this.y += dy;
@@ -8122,7 +8130,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       value: function (dx, dy) {
         /*DEBUG*/
         type_check(dx,'number', dy,'number', {label:'Rectangle.inflate', params:['dx','dy'], id:this.id});
-        range_check(isFinite(dx), isFinite(dy), {label:'Rectangle.inflate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(dx), window.isFinite(dy), {label:'Rectangle.inflate', id:this.id, params:['dx','dy'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.x -= dx;
         this.width += 2 * dx;
@@ -8179,7 +8187,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
       value: function (x, y) {
         /*DEBUG*/
         type_check(x,'number', y,'number', {label:'Rectangle.contains', params:['x','y'], id:this.id});
-        range_check(isFinite(x), isFinite(y), {label:'Rectangle.contains', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), {label:'Rectangle.contains', params:['x','y'], id:this.id, message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         return (x >= this.left && x <= this.right && y >= this.top && y <= this.bottom);
       }
@@ -8267,12 +8275,12 @@ doodle.geom.Matrix.isMatrix = function (m) {
         /*DEBUG*/
         type_check(rect,'Rectangle', {label:'Rectangle.intersection', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        var r = Rectangle(0, 0, 0, 0);
+        var r = doodle.geom.createRectangle(0, 0, 0, 0);
         if (this.intersects(rect)) {
-          r.left = max(this.left, rect.x);
-          r.top = max(this.top, rect.y);
-          r.right = min(this.right, rect.x + rect.width);
-          r.bottom = min(this.bottom, rect.y + rect.height);
+          r.left = Math.max(this.left, rect.x);
+          r.top = Math.max(this.top, rect.y);
+          r.right = Math.min(this.right, rect.x + rect.width);
+          r.bottom = Math.min(this.bottom, rect.y + rect.height);
         }
         return r;
       }
@@ -8295,10 +8303,10 @@ doodle.geom.Matrix.isMatrix = function (m) {
         type_check(rect,'Rectangle', {label:'Rectangle.__intersection', params:'rectangle', id:this.id});
         /*END_DEBUG*/
         if (this.intersects(rect)) {
-          this.left = max(this.left, rect.x);
-          this.top = max(this.top, rect.y);
-          this.right = min(this.right, rect.x + rect.width);
-          this.bottom = min(this.bottom, rect.y + rect.height);
+          this.left = Math.max(this.left, rect.x);
+          this.top = Math.max(this.top, rect.y);
+          this.right = Math.min(this.right, rect.x + rect.width);
+          this.bottom = Math.min(this.bottom, rect.y + rect.height);
         }
         return this;
       }
@@ -8320,11 +8328,11 @@ doodle.geom.Matrix.isMatrix = function (m) {
         /*DEBUG*/
         type_check(rect,'Rectangle', {label:'Rectangle.union', params:'rectangle', id:this.id});
         /*END_DEBUG*/
-        var r = Rectangle(0, 0, 0, 0);
-        r.left = min(this.left, rect.x);
-        r.top = min(this.top, rect.y);
-        r.right = max(this.right, rect.x + rect.width);
-        r.bottom = max(this.bottom, rect.y + rect.height);
+        var r = doodle.geom.createRectangle(0, 0, 0, 0);
+        r.left = Math.min(this.left, rect.x);
+        r.top = Math.min(this.top, rect.y);
+        r.right = Math.max(this.right, rect.x + rect.width);
+        r.bottom = Math.max(this.bottom, rect.y + rect.height);
         return r;
       }
     },
@@ -8346,10 +8354,10 @@ doodle.geom.Matrix.isMatrix = function (m) {
         type_check(rect,'Rectangle', {label:'Rectangle.__union', params:'rectangle', id:this.id});
         /*END_DEBUG*/
         //a bit tricky, if applied directly it doesn't work
-        var l = min(this.left, rect.x),
-            t = min(this.top, rect.y),
-            r = max(this.right, rect.x + rect.width),
-            b = max(this.bottom, rect.y + rect.height);
+        var l = Math.min(this.left, rect.x),
+            t = Math.min(this.top, rect.y),
+            r = Math.max(this.right, rect.x + rect.width),
+            b = Math.max(this.bottom, rect.y + rect.height);
         this.left = l;
         this.top = t;
         this.right = r;
@@ -8378,6 +8386,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
 doodle.geom.Rectangle.isRectangle = function (rect) {
   return (typeof rect === 'object' && typeof rect.x === "number" && typeof rect.y === "number" && typeof rect.width === "number" && typeof rect.height === "number");
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var evtDisp_static_properties,
@@ -8385,24 +8394,19 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
-      //lookup help
       CAPTURING_PHASE = doodle.events.Event.CAPTURING_PHASE,
       AT_TARGET = doodle.events.Event.AT_TARGET,
-      BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE,
-      //lookup help
-      Array_indexOf = Array.prototype.indexOf,
-      Array_splice = Array.prototype.splice;
+      BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE;
   
   /**
-   * @name doodle.EventDispatcher
+   * @name doodle.createEventDispatcher
    * @class
    * @augments Object
    * @return {doodle.EventDispatcher}  
    */
-  doodle.EventDispatcher = function () {
+  doodle.EventDispatcher = doodle.createEventDispatcher = function () {
     /** @type {doodle.EventDispatcher} */
     var evt_disp = {};
-
     /*DEBUG*/
     if (typeof arguments[0] !== 'function') {
       if (arguments.length > 0) {
@@ -8422,7 +8426,9 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
           get: function () { return (id === null) ? this.toString() : id; },
           set: function (idVar) {
             /*DEBUG*/
-            idVar === null || type_check(idVar,'string', {label:'EventDispatcher.id', message:"Property must be a string or null.", id:this.id});
+            if (idVar !== null) {
+              type_check(idVar,'string', {label:'EventDispatcher.id', message:"Property must be a string or null.", id:this.id});
+            }
             /*END_DEBUG*/
             id = idVar;
           }
@@ -8535,15 +8541,12 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
             handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
             listeners,
             //lookup help
-            disp_queue,
-            indexOf = Array_indexOf,
-            splice = Array_splice;
-        
+            disp_queue;
         //make sure event type exists
         if (handler) {
           listeners = handler[useCapture ? 'capture' : 'bubble'];
           //remove handler function
-          splice.call(listeners, indexOf.call(listeners, listener), 1);
+          listeners.splice(listeners.indexOf(listener), 1);
           //if none left, remove handler type
           if (handler.capture.length === 0 && handler.bubble.length === 0) {
             delete eventListeners[type];
@@ -8551,7 +8554,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
           //if no more listeners, remove from object queue
           if (Object.keys(eventListeners).length === 0) {
             disp_queue = dispatcher_queue;
-            splice.call(disp_queue, indexOf.call(disp_queue, this), 1);
+            disp_queue.splice(disp_queue.indexOf(this), 1);
           }
         }
       }
@@ -8611,7 +8614,6 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
             }
           }
         }
-        
         //any handlers found on this node?
         return (count > 0) ? true : false;
       }
@@ -8634,9 +8636,8 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         //capturing goes down to the child, bubbling then goes back up
         var target,
             evt_type = event.type,
-            hasOwnProperty = Object.prototype.hasOwnProperty,
             //check this node for event handler
-            evt_handler_p = hasOwnProperty.call(this.eventListeners, evt_type),
+            evt_handler_p = this.eventListeners.hasOwnProperty(evt_type),
             node,
             node_path = [],
             len, //count of nodes up to root
@@ -8665,7 +8666,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         while (node) {
           //only want to dispatch if there's a reason to
           if (!evt_handler_p) {
-            evt_handler_p = hasOwnProperty.call(node.eventListeners, evt_type);
+            evt_handler_p = node.eventListeners.hasOwnProperty(evt_type);
           }
           node_path.push(node);
           node = node.parent;
@@ -8729,10 +8730,8 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
       configurable: false,
       value: function (event) {
         var evt_type = event.type,
-            hasOwnProperty = Object.prototype.hasOwnProperty,
             disp_queue = dispatcher_queue,
             dq_count = disp_queue.length;
-        
         /*DEBUG*/
         type_check(event, 'Event', {label:'EventDispatcher.broadcastEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
@@ -8749,7 +8748,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
 
         while (dq_count--) {
           //hasEventListener
-          if (hasOwnProperty.call(disp_queue[dq_count].eventListeners, evt_type)) {
+          if (disp_queue[dq_count].eventListeners.hasOwnProperty(evt_type)) {
             disp_queue[dq_count].handleEvent(event);
           }
           //event cancelled in listener?
@@ -8853,9 +8852,8 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
   }
   return false;
 };
-/*jslint nomen: false, plusplus: false*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 (function () {
   var node_count = 0,
       node_static_properties,
@@ -8867,10 +8865,9 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       //recycled events
       evt_addedEvent = doodle.events.Event(doodle.events.Event.ADDED, true),
       evt_removedEvent = doodle.events.Event(doodle.events.Event.REMOVED, true),
-      //lookup help
-      doodle_Point = doodle.geom.Point,
-      doodle_Matrix = doodle.geom.Matrix,
-      doodle_Rectangle = doodle.geom.Rectangle,
+      createPoint = doodle.geom.createPoint,
+      createMatrix = doodle.geom.createMatrix,
+      createRectangle = doodle.geom.createRectangle,
       create_scene_path = doodle.utils.create_scene_path,
       PI = Math.PI;
   
@@ -8881,8 +8878,8 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
    * @param {string=} id|initializer
    * @return {doodle.Node}
    */
-  doodle.createNode = doodle.Node = function (id) {
-    var node = Object.create(doodle.EventDispatcher());
+  doodle.Node = doodle.createNode = function (id) {
+    var node = Object.create(doodle.createEventDispatcher());
     
     /*DEBUG*/
     if (arguments.length > 1) {
@@ -8910,9 +8907,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
             return {
               enumerable: true,
               configurable: false,
-              get: function () {
-                return show_bounds;
-              },
+              get: function () { return show_bounds; },
               set: function (showBoundingBox) {
                 show_bounds = showBoundingBox === true;
               }
@@ -8956,7 +8951,9 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
           get: function () { return root; },
           set: function (node) {
             /*DEBUG*/
-            node === null || type_check(node, 'Display', {label:'Node.root', id:this.id, inherits:true});
+            if (node !== null) {
+              type_check(node, 'Display', {label:'Node.root', id:this.id, inherits:true});
+            }
             /*END_DEBUG*/
             root = node;
           }
@@ -8976,7 +8973,9 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
           get: function () { return parent; },
           set: function (node) {
             /*DEBUG*/
-            node === null || type_check(node, 'Node', {label:'Node.parent', id:this.id, inherits:true});
+            if (node !== null) {
+              type_check(node, 'Node', {label:'Node.parent', id:this.id, inherits:true});
+            }
             /*END_DEBUG*/
             parent = node;
           }
@@ -9003,7 +9002,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
        * @property
        */
       'transform': (function () {
-        var transform = doodle_Matrix(1, 0, 0, 1, 0, 0);
+        var transform = createMatrix(1, 0, 0, 1, 0, 0);
         return {
           enumerable: true,
           configurable: false,
@@ -9051,7 +9050,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
           set: function (alphaArg) {
             /*DEBUG*/
             type_check(alphaArg, 'number', {label:'Node.alpha', id:this.id});
-            range_check(isFinite(alphaArg), {label:'Node.alpha', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(alphaArg), {label:'Node.alpha', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             alpha = (alphaArg > 1) ? 1 : ((alphaArg < 0) ? 0 : alphaArg);
           }
@@ -9087,7 +9086,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
         writable: true,
         configurable: false,
         value: (function () {
-          var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
+          var rect = createRectangle(0, 0, 0, 0); //recycle
           return function (targetCoordSpace) {
             /*DEBUG*/
             type_check(targetCoordSpace, 'Node', {label:'Node.__getBounds', params:'targetCoordSpace', id:this.id, inherits:true});
@@ -9100,13 +9099,12 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
             while (len--) {
               child_bounds = children[len].__getBounds(targetCoordSpace);
               
-              if (child_bounds === null) {
-                continue;
-              }
-              if (bounding_box === null) {
-                bounding_box = rect.__compose(child_bounds);
-              } else {
-                bounding_box.__union(child_bounds);
+              if (child_bounds !== null) {
+                if (bounding_box === null) {
+                  bounding_box = rect.__compose(child_bounds);
+                } else {
+                  bounding_box.__union(child_bounds);
+                }
               }
             }
             return bounding_box;
@@ -9139,7 +9137,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.x', id:this.id});
-        range_check(isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.tx = n;
       }
@@ -9157,7 +9155,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.y', id:this.id});
-        range_check(isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.ty = n;
       }
@@ -9194,7 +9192,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       value: function (deg) {
         /*DEBUG*/
         type_check(deg, 'number', {label:'Node.rotate', id:this.id, params:'degrees', message:"Parameter must be a number in degrees."});
-        range_check(isFinite(deg), {label:'Node.rotate', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(deg), {label:'Node.rotate', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotate(deg * PI / 180);
       }
@@ -9212,7 +9210,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       set: function (deg) {
         /*DEBUG*/
         type_check(deg, 'number', {label:'Node.rotation', id:this.id, message:"Parameter must be a number in degrees."});
-        range_check(isFinite(deg), {label:'Node.rotation', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(deg), {label:'Node.rotation', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.rotation = deg * PI / 180;
       }
@@ -9230,7 +9228,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       set: function (sx) {
         /*DEBUG*/
         type_check(sx, 'number', {label:'Node.scaleX', id:this.id});
-        range_check(isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.a = sx;
       }
@@ -9248,7 +9246,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       set: function (sy) {
         /*DEBUG*/
         type_check(sy, 'number', {label:'Node.scaleY', id:this.id});
-        range_check(isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
+        range_check(window.isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.d = sy;
       }
@@ -9287,7 +9285,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       enumerable: false,
       configurable: false,
       get: (function () {
-        var transform = doodle_Matrix(1, 0, 0, 1, 0, 0);
+        var transform = createMatrix(1, 0, 0, 1, 0, 0);
         return function () {
           var $transform = transform,
               node = this.parent;
@@ -9382,6 +9380,24 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
         /*END_DEBUG*/
         //add to end of children array
         return this.addChildAt(node, this.children.length);
+      }
+    },
+
+    /**
+     * Adds this node to the given node's children.
+     * @name appendTo
+     * @return {Node}
+     * @throws {TypeError}
+     */
+    'appendTo': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (node) {
+        /*DEBUG*/
+        type_check(node,'Node', {label:'Node.appendTo', id:this.id, params:'node', inherits:true});
+        /*END_DEBUG*/
+        return node.addChild(this);
       }
     },
 
@@ -9570,9 +9586,9 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       configurable: false,
       value: function (child, index) {
         var children = this.children,
-            len = children.length,
             pos = children.indexOf(child);
         /*DEBUG*/
+        window.debug_len = children.length;
         type_check(child,'Node', index,'number', {label:'Node.setChildIndex', params:['child', 'index'], id:this.id, inherits:true});
         range_check(index >= -children.length, index < children.length, {label:'Node.setChildIndex', params:['child', '*index*'], id:this.id, message:"Index out of range."});
         reference_check(child.parent === this, {label:'Node.setChildIndex', params:['*child*','index'], id:this.id, message:"Can not set the index of a Node that is not a child."});
@@ -9585,7 +9601,8 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
           this.root.__sortAllChildren();
         }
         /*DEBUG*/
-        console.assert(len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -9606,10 +9623,10 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
         var children = this.children,
             temp_node;
         /*DEBUG*/
-        var test_len = children.length;
+        window.debug_len = children.length;
         type_check(index1,'number', index2,'number', {label:'Node.swapChildrenAt', params:['index1', 'index2'], id:this.id});
-        range_check(index1 >= -test_len, index1 < test_len, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
-        range_check(index2 >= -test_len, index2 < test_len, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
+        range_check(index1 >= -window.debug_len, index1 < window.debug_len, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
+        range_check(index2 >= -window.debug_len, index2 < window.debug_len, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
         //asserts
         console.assert(doodle.Node.isNode(children[index1]), "Child is a Node.", children[index1]);
         console.assert(doodle.Node.isNode(children[index2]), "Child is a Node.", children[index2]);
@@ -9627,7 +9644,8 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
           this.root.__sortAllChildren();
         }
         /*DEBUG*/
-        console.assert(test_len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -9645,7 +9663,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       value: function (node1, node2) {
         var children = this.children;
         /*DEBUG*/
-        var test_len = children.length;
+        window.debug_len = children.length;
         type_check(node1, 'Node', node2, 'Node', {label:'Node.swapChildren', id:this.id, params:['node1', 'node2'], inherits:true});
         reference_check(node1.parent === this, node2.parent === this, {label:'Node.swapChildren', params:['child1','child2'], id:this.id, message:"Can not swap a Node that is not a child."});
         /*END_DEBUG*/
@@ -9653,7 +9671,8 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
         this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
         
         /*DEBUG*/
-        console.assert(test_len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -9672,20 +9691,20 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
       value: function I(node) {
         var parent = this.parent,
             children;
-        
         /*DEBUG*/
         type_check(node, 'Node', {label:'Node.swapDepths', params:'node', id:this.id, inherits:true});
         reference_check(parent !== null, node.parent === parent, {label:'Node.swapDepths', params:'*node*', id:this.id, message:"Can not swap positions with a Node that has a different parent."});
         //asserts
         console.assert(doodle.Node.isNode(parent), "parent is a Node", parent);
-        var test_len = parent.children.length;
+        window.debug_len = parent.children.length;
         /*END_DEBUG*/
         
         children = parent.children;
         parent.swapChildrenAt(children.indexOf(this), children.indexOf(node));
         
         /*DEBUG*/
-        console.assert(test_len === children.length, "Children array length is still the same.");
+        console.assert(window.debug_len === children.length, "Children array length is still the same.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -9708,14 +9727,15 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
         reference_check(parent !== null, {label:'Node.swapDepthAt', params:'*index*', id:this.id, message:"Node does not have a parent."});
         
         console.assert(doodle.Node.isNode(parent), "Node has parent Node.");
-        var test_len = parent.children.length;
-        range_check(index >= -test_len, index1 < test_len, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
+        window.debug_len = parent.children.length;
+        range_check(index >= -window.debug_len, index < window.debug_len, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
 
         parent.swapChildrenAt(parent.children.indexOf(this), index);
 
         /*DEBUG*/
-        console.assert(test_len-1 === children.length, "Children array length is one less than before.");
+        console.assert(window.debug_len === parent.children.length, "Children array length is still the same length.");
+        delete window.debug_len;
         /*END_DEBUG*/
       }
     },
@@ -9812,7 +9832,7 @@ doodle.EventDispatcher.isEventDispatcher = function (obj) {
         /*END_DEBUG*/
         var global_pt = {x:0, y:0};
         this.__localToGlobal(global_pt);
-        return doodle_Point(pt.x - global_pt.x, pt.y - global_pt.y);
+        return createPoint(pt.x - global_pt.x, pt.y - global_pt.y);
       }
     },
 
@@ -9865,6 +9885,7 @@ doodle.Node.isNode = function (obj) {
   }
   return false;
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
   var sprite_static_properties,
@@ -9872,20 +9893,20 @@ doodle.Node.isNode = function (obj) {
       type_check = doodle.utils.debug.type_check,
       range_check = doodle.utils.debug.range_check,
       /*END_DEBUG*/
-      doodle_Rectangle = doodle.geom.Rectangle;
+      createRectangle = doodle.geom.createRectangle;
 
   /**
    * An node to display.
-   * @name doodle.Sprite
+   * @name doodle.createSprite
    * @class
    * @augments doodle.Node
    * @param {string=} id Name or initialization function.
    * @return {doodle.Sprite} A sprite object.
    * @throws {SyntaxError} Invalid parameters.
    */
-  doodle.Sprite = function (id) {
+  doodle.Sprite = doodle.createSprite = function createSprite (id) {
     //only pass id if string, an init function will be called later
-    var sprite = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
+    var sprite = Object.create(doodle.createNode((typeof id === 'string') ? id : undefined));
 
     /*DEBUG*/
     if (arguments.length > 1) {
@@ -9909,7 +9930,7 @@ doodle.Node.isNode = function (obj) {
         'graphics': {
           enumerable: false,
           configurable: false,
-          value:  Object.create(doodle.Graphics.call(sprite, draw_commands))
+          value:  Object.create(doodle.createGraphics.call(sprite, draw_commands))
         },
 
         /**
@@ -9928,7 +9949,7 @@ doodle.Node.isNode = function (obj) {
             set: function (n) {
               /*DEBUG*/
               type_check(n, 'number', {label:'Sprite.width', id:this.id});
-              range_check(isFinite(n), {label:'Sprite.width', id:this.id, message:"Parameter must be a finite number."});
+              range_check(window.isFinite(n), {label:'Sprite.width', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               width = n;
             }
@@ -9951,7 +9972,7 @@ doodle.Node.isNode = function (obj) {
             set: function (n) {
               /*DEBUG*/
               type_check(n, 'number', {label:'Sprite.height', id:this.id});
-              range_check(isFinite(n), {label:'Sprite.height', id:this.id, message:"Parameter must be a finite number."});
+              range_check(window.isFinite(n), {label:'Sprite.height', id:this.id, message:"Parameter must be a finite number."});
               /*END_DEBUG*/
               height = n;
             }
@@ -9988,7 +10009,7 @@ doodle.Node.isNode = function (obj) {
           writable: true,
           configurable: false,
           value: (function () {
-            var rect = doodle_Rectangle(0, 0, 0, 0); //recycle
+            var rect = createRectangle(0, 0, 0, 0); //recycle
             return function (targetCoordSpace) {
               /*DEBUG*/
               type_check(targetCoordSpace, 'Node', {label:'Sprite.__getBounds', id:this.id, params:'targetCoordSpace', inherits:true});
@@ -10111,10 +10132,12 @@ doodle.Node.isNode = function (obj) {
           writable: false,
           configurable: false,
           value: function (ctx) {
+            var i = 0,
+                len = draw_commands.length;
             /*DEBUG*/
             type_check(ctx, 'context', {label:'Sprite.__draw', id:this.id, params:'context'});
             /*END_DEBUG*/
-            for (var i=0, len=draw_commands.length; i < len; i++) {
+            for (; i < len; i++) {
               /*DEBUG*/
               console.assert(typeof draw_commands[i] === 'function', "draw command is a function", draw_commands[i]);
               /*END_DEBUG*/
@@ -10151,7 +10174,7 @@ doodle.Node.isNode = function (obj) {
         set: function (deg) {
           /*DEBUG*/
           type_check(deg, 'number', {label:'Sprite.rotation', id:this.id, message:"Property must be a number specified in degrees."});
-          range_check(isFinite(deg), {label:'Sprite.rotation', id:this.id, message:"Parameter must be a finite number."});
+          range_check(window.isFinite(deg), {label:'Sprite.rotation', id:this.id, message:"Parameter must be a finite number."});
           /*END_DEBUG*/
           this.transform.rotation = deg * to_radians;
         }
@@ -10188,7 +10211,7 @@ doodle.Node.isNode = function (obj) {
       value: function (x, y, w, h) {
         /*DEBUG*/
         type_check(x, 'number', y, 'number', w, 'number', h, 'number', {label:'Sprite.compose', id:this.id, params:['x', 'y', 'width', 'height']});
-        range_check(isFinite(x), isFinite(y), isFinite(w), isFinite(h), {label:'Sprite.compose', id:this.id, message:"Parameters must all be finite numbers."});
+        range_check(window.isFinite(x), window.isFinite(y), window.isFinite(w), window.isFinite(h), {label:'Sprite.compose', id:this.id, message:"Parameters must all be finite numbers."});
         /*END_DEBUG*/
         this.x = x;
         this.y = y;
@@ -10223,7 +10246,8 @@ doodle.Sprite.isSprite = function (obj) {
   }
   return false;
 };
-/*globals doodle, Image*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 (function () {
   var graphics_static_properties,
       /*DEBUG*/
@@ -10231,21 +10255,22 @@ doodle.Sprite.isSprite = function (obj) {
       range_check = doodle.utils.debug.range_check,
       reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
+      createEvent = doodle.events.createEvent,
+      LOAD = doodle.events.Event.LOAD,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
-      doodle_Event = doodle.events.Event,
       LINEAR = doodle.GradientType.LINEAR,
       RADIAL = doodle.GradientType.RADIAL;
   
   /**
-   * @name doodle.Graphics
+   * @name doodle.createGraphics
    * @class
    * @augments Object
    * @param {Array} draw_commands Reference to draw commands array.
    * @return {Object}
    * @this {doodle.Sprite}
    */
-  doodle.Graphics = function (draw_commands) {
+  doodle.Graphics = doodle.createGraphics = function (draw_commands) {
     var graphics = {},
         gfx_node = this,
         cursor_x = 0,
@@ -10883,8 +10908,8 @@ doodle.Sprite.isSprite = function (obj) {
             } else {
               //url
               (function () {
-                var img_url = encodeURI(image);
-                image = new Image();
+                var img_url = window.encodeURI(image);
+                image = new window.Image();
                 image.src = img_url;
               }());
             }
@@ -10901,7 +10926,7 @@ doodle.Sprite.isSprite = function (obj) {
             //if not, assign load handlers
             image.onload = function () {
               img_loaded = image;
-              gfx_node.dispatchEvent(doodle_Event(doodle_Event.LOAD));
+              gfx_node.dispatchEvent(createEvent(LOAD));
             };
             on_image_error = function () {
               throw new URIError(gfx_node.id + "Graphics.beginPatternFill(*image*,repeat): Unable to load " + image.src);
@@ -10952,12 +10977,12 @@ doodle.Sprite.isSprite = function (obj) {
           type_check(thickness,'number', color,'*', alpha,'number', caps,'string', joints,'string', miterLimit,'number',
                      {label:'Graphics.lineStyle', params:['thickness','color','alpha','caps','joints','miterLimit'], id:gfx_node.id});
           //check values
-          range_check(isFinite(thickness), thickness >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"thickness must have a positive number."});
+          range_check(window.isFinite(thickness), thickness >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"thickness must have a positive number."});
           reference_check(caps === doodle.LineCap.BUTT || caps === doodle.LineCap.ROUND || caps === doodle.LineCap.SQUARE,
                           {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineCap: " + caps});
           reference_check(joints === doodle.LineJoin.BEVEL || joints === doodle.LineJoin.MITER || joints === doodle.LineJoin.ROUND,
                           {label:'Graphics.lineStyle', id:gfx_node.id, message:"Invalid LineJoin: " + joints});
-          range_check(isFinite(miterLimit), miterLimit >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"miterLimit must have a positive number."});
+          range_check(window.isFinite(miterLimit), miterLimit >= 0, {label:'Graphics.lineStyle', id:gfx_node.id, message:"miterLimit must have a positive number."});
           /*END_DEBUG*/
           line_width = thickness;
           line_join = joints;
@@ -11077,8 +11102,8 @@ doodle.Sprite.isSprite = function (obj) {
   };
 
 }());//end class closure
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 (function () {
   var node_static_properties,
       url_regexp = new RegExp("^url\\((.*)\\)"),
@@ -11087,7 +11112,7 @@ doodle.Sprite.isSprite = function (obj) {
       reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
       //lookup help
-      doodle_Rectangle = doodle.geom.Rectangle,
+      doodle_Rectangle = doodle.geom.createRectangle,
       rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       get_element = doodle.utils.get_element,
@@ -11095,7 +11120,7 @@ doodle.Sprite.isSprite = function (obj) {
       set_element_property = doodle.utils.set_element_property;
   
   /**
-   * @name doodle.ElementNode
+   * @name doodle.createElementNode
    * @class
    * @augments doodle.Node
    * @param {HTMLElement=} element
@@ -11103,8 +11128,8 @@ doodle.Sprite.isSprite = function (obj) {
    * @return {doodle.ElementNode}
    * @throws {SyntaxError}
    */
-  doodle.ElementNode = function (element, id) {
-    var element_node = Object.create(doodle.Node((typeof id === 'string') ? id : undefined));
+  doodle.ElementNode = doodle.createElementNode = function (element, id) {
+    var element_node = Object.create(doodle.createNode((typeof id === 'string') ? id : undefined));
 
     Object.defineProperties(element_node, node_static_properties);
     //properties that require privacy
@@ -11134,8 +11159,7 @@ doodle.Sprite.isSprite = function (obj) {
           set: function (elementArg) {
             var color,
                 image,
-                id,
-                w, h;
+                id;
             
             if (elementArg === null) {
               //check if removing an element
@@ -11303,7 +11327,7 @@ doodle.Sprite.isSprite = function (obj) {
             /*END_DEBUG*/
             //url path at this point, make sure it's in the proper format
             if (!url_regexp.test(image)) {
-              image = "url("+ encodeURI(image) +")";
+              image = "url("+ window.encodeURI(image) +")";
             }
             bg_image = set_element_property(this.element, 'backgroundImage', image);
           }
@@ -11542,8 +11566,8 @@ doodle.ElementNode.isElementNode = function (obj) {
   }
   return false;
 };
-/*globals doodle, document, console*/
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 (function () {
   var layer_static_properties,
       layer_count = 0,
@@ -11562,9 +11586,9 @@ doodle.ElementNode.isElementNode = function (obj) {
    * @return {doodle.Layer}
    * @throws {SyntaxError}
    */
-  doodle.createLayer = doodle.Layer = function (id, element) {
+  doodle.Layer = doodle.createLayer = function (id, element) {
     var layer_name = (typeof id === 'string') ? id : "layer"+ String('00'+layer_count).slice(-2),
-        layer = Object.create(doodle.ElementNode(undefined, layer_name));
+        layer = Object.create(doodle.createElementNode(undefined, layer_name));
 
     Object.defineProperties(layer, layer_static_properties);
     //properties that require privacy
@@ -11591,7 +11615,7 @@ doodle.ElementNode.isElementNode = function (obj) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Layer.width', id:this.id});
-            range_check(isFinite(n), {label:'Layer.width', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Layer.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             width = set_element_property(this.element, 'width', n, 'html');
           }
@@ -11612,7 +11636,7 @@ doodle.ElementNode.isElementNode = function (obj) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Layer.height', id:this.id});
-            range_check(isFinite(n), {label:'Layer.height', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Layer.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             height = set_element_property(this.element, 'height', n, 'html');
           }
@@ -11751,7 +11775,7 @@ doodle.ElementNode.isElementNode = function (obj) {
       enumerable: true,
       configurable: true,
       value: (function () {
-        var rect = doodle.geom.Rectangle(0, 0, 0, 0); //recycle
+        var rect = doodle.geom.createRectangle(0, 0, 0, 0); //recycle
         return function () {
           return rect.compose(0, 0, this.width, this.height);
         };
@@ -11784,16 +11808,14 @@ doodle.Layer.isLayer = function (obj) {
   }
   return false;
 };
-/*jslint nomen: false, plusplus: false*/
-/*globals doodle, document, setInterval, clearInterval, Stats*/
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle, Stats*/
 (function () {
   var display_static_properties,
       display_count = 0,
       create_frame,
       clear_scene_graph,
       draw_scene_graph,
-      draw_bounding_box,
       dispatch_mouse_event,
       dispatch_mousemove_event,
       dispatch_mouseleave_event,
@@ -11808,12 +11830,11 @@ doodle.Layer.isLayer = function (obj) {
       get_element_property = doodle.utils.get_element_property,
       set_element_property = doodle.utils.set_element_property,
       createLayer = doodle.createLayer,
-      //doodle_TouchEvent = doodle.events.TouchEvent,
       //recycle these event objects
-      evt_enterFrame = doodle.events.Event(doodle.events.Event.ENTER_FRAME),
-      evt_mouseEvent = doodle.events.MouseEvent(''),
-      //evt_touchEvent = doodle.events.TouchEvent(''),
-      evt_keyboardEvent = doodle.events.KeyboardEvent('');
+      evt_enterFrame = doodle.events.createEvent(doodle.events.Event.ENTER_FRAME),
+      evt_mouseEvent = doodle.events.createMouseEvent(''),
+      //evt_touchEvent = doodle.events.createTouchEvent(''),
+      evt_keyboardEvent = doodle.events.createKeyboardEvent('');
   
   /**
    * Doodle Display object.
@@ -11833,7 +11854,7 @@ doodle.Layer.isLayer = function (obj) {
    *   &nbsp; this.width = 400;<br/>
    *   });
    */
-  doodle.createDisplay = doodle.Display = function (element /*, options*/) {
+  doodle.Display = doodle.createDisplay = function (element /*, options*/) {
     var display,
         id,
         options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : null,
@@ -11850,7 +11871,7 @@ doodle.Layer.isLayer = function (obj) {
 
     id = (typeof id === 'string') ? id : "display"+ String('00'+display_count++).slice(-2);
     //won't assign element until after display properties are set up
-    display = Object.create(doodle.ElementNode(undefined, id));
+    display = Object.create(doodle.createElementNode(undefined, id));
 
     /*DEBUG*/
     //check options object
@@ -11985,7 +12006,7 @@ doodle.Layer.isLayer = function (obj) {
             var i = layers.length;
             /*DEBUG*/
             type_check(n,'number', {label:'Display.width', id:this.id});
-            range_check(isFinite(n), {label:'Display.width', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Display.width', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'width', n+"px");
             width = n;
@@ -12011,7 +12032,7 @@ doodle.Layer.isLayer = function (obj) {
             var i = layers.length;
             /*DEBUG*/
             type_check(n,'number', {label:'Display.height', id:this.id});
-            range_check(isFinite(n), {label:'Display.height', id:this.id, message:"Parameter must be a finite number."});
+            range_check(window.isFinite(n), {label:'Display.height', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             set_element_property(this.element, 'height', n+"px");
             height = n;
@@ -12042,9 +12063,9 @@ doodle.Layer.isLayer = function (obj) {
             //need to stack the canvas elements on top of each other
             set_element_property(elementArg, 'position', 'relative');
             
-            //computed style will return the entire window size
-            var w = get_element_property(elementArg, 'width', 'int', false) || elementArg.width,
-                h = get_element_property(elementArg, 'height', 'int', false) || elementArg.height;
+            //get computed style
+            var w = get_element_property(elementArg, 'width', 'int') || elementArg.width,
+                h = get_element_property(elementArg, 'height', 'int') || elementArg.height;
             //setting this also sets child layers
             if (typeof w === 'number') { this.width = w; }
             if (typeof h === 'number') { this.height = h; }
@@ -12331,22 +12352,22 @@ doodle.Layer.isLayer = function (obj) {
               /*DEBUG*/
               if (fps !== false && fps !== 0) {
                 type_check(fps,'number', {label:'Display.frameRate', params:'fps', id:this.id});
-                range_check(fps >= 0, isFinite(1000/fps), {label:'Display.frameRate', params:'fps', id:this.id, message:"Invalid frame rate."});
+                range_check(fps >= 0, window.isFinite(1000/fps), {label:'Display.frameRate', params:'fps', id:this.id, message:"Invalid frame rate."});
               }
               /*END_DEBUG*/
               if (fps === 0 || fps === false) {
                 //turn off interval
                 frame_rate = false;
                 if (framerate_interval_id !== undefined) {
-                  clearInterval(framerate_interval_id);
+                  window.clearInterval(framerate_interval_id);
                 }
               } else {
                 //non-zero number, ignore if given same value
                 if (fps !== frame_rate) {
                   if (framerate_interval_id !== undefined) {
-                    clearInterval(framerate_interval_id);
+                    window.clearInterval(framerate_interval_id);
                   }
-                  framerate_interval_id = setInterval(on_create_frame, 1000/fps);
+                  framerate_interval_id = window.setInterval(on_create_frame, 1000/fps);
                   frame_rate = fps;
                 }
               }
@@ -12397,11 +12418,12 @@ doodle.Layer.isLayer = function (obj) {
       if (options.height !== undefined) { display.height = options.height; }
       if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
       if (options.frameRate !== undefined) { display.frameRate = options.frameRate; }
+      if (options.clearBitmap !== undefined) { display.clearBitmap = options.clearBitmap; }
       if (options.layers !== undefined) {
-        opt_layercount = options.layers;
         /*DEBUG*/
-        type_check(opt_layercount,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
+        type_check(options.layers,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
         /*END_DEBUG*/
+        opt_layercount = options.layers;
         while (opt_layercount--) {
           display.createLayer();
         }
@@ -12409,7 +12431,7 @@ doodle.Layer.isLayer = function (obj) {
     }
     
     return display;
-  };//end doodle.Display
+  };//end doodle.createDisplay
 
   
   display_static_properties = {
@@ -12425,6 +12447,17 @@ doodle.Layer.isLayer = function (obj) {
       writable: false,
       configurable: false,
       value: null
+    },
+
+    /**
+     * Alias for display.children, since every child is a Layer.
+     * @name layers
+     * @return {array}
+     */
+    'layers': {
+      enumerable: true,
+      configurable: false,
+      get: function () { return this.children; }
     },
     
     /**
@@ -12479,7 +12512,7 @@ doodle.Layer.isLayer = function (obj) {
       enumerable: false,
       configurable: true,
       value: (function () {
-        var rect = doodle.geom.Rectangle(0, 0, 0, 0); //recycle
+        var rect = doodle.geom.createRectangle(0, 0, 0, 0); //recycle
         return function () {
           return rect.compose(0, 0, this.width, this.height);
         };
@@ -12581,7 +12614,7 @@ doodle.Layer.isLayer = function (obj) {
       draw_scene_graph(scene_path, path_count);
 
       //layer filters
-      var ctx, l, filters, len,
+      var l, filters, len,
           w = display.width,
           h = display.height;
       while (layer_count--) {
@@ -12985,6 +13018,8 @@ doodle.Display.isDisplay = function (obj) {
   }
   return false;
 };
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.FontStyle
  * @class
@@ -13038,6 +13073,8 @@ Object.defineProperty(doodle, 'FontStyle', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.FontVariant
  * @class
@@ -13077,6 +13114,8 @@ Object.defineProperty(doodle, 'FontVariant', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.FontWeight
  * @class
@@ -13144,6 +13183,8 @@ Object.defineProperty(doodle, 'FontWeight', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.TextAlign
  * @class
@@ -13225,6 +13266,8 @@ Object.defineProperty(doodle, 'TextAlign', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /**
  * @name doodle.TextBaseline
  * @class
@@ -13327,8 +13370,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
     }
   })
 });
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
-
 (function () {
   var text_sprite_static_properties,
       /*DEBUG*/
@@ -13336,7 +13379,6 @@ Object.defineProperty(doodle, 'TextBaseline', {
       range_check = doodle.utils.debug.range_check,
       reference_check = doodle.utils.debug.reference_check,
       /*END_DEBUG*/
-      rgb_str_to_hex = doodle.utils.rgb_str_to_hex,
       hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
       FontStyle = doodle.FontStyle,
       FontVariant = doodle.FontVariant,
@@ -13346,7 +13388,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
 
   /**
    * A text sprite to display.
-   * @name doodle.Text
+   * @name doodle.createText
    * @class
    * @augments doodle.Sprite
    * @param {string=} text Text to display.
@@ -13354,8 +13396,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
    * @throws {SyntaxError} Invalid parameters.
    * @throws {TypeError} Text argument not a string.
    */
-  doodle.Text = function (text) {
-    var text_sprite = Object.create(doodle.Sprite());
+  doodle.Text = doodle.createText = function (text) {
+    var text_sprite = Object.create(doodle.createSprite());
 
     Object.defineProperties(text_sprite, text_sprite_static_properties);
     //properties that require privacy
@@ -13572,7 +13614,7 @@ Object.defineProperty(doodle, 'TextBaseline', {
           get: function () { return font_size; },
           set: function (fontSizeVar) {
             if (typeof fontSizeVar === 'string') {
-              fontSizeVar = parseInt(fontSizeVar, 10);
+              fontSizeVar = window.parseInt(fontSizeVar, 10);
             }
             /*DEBUG*/
             type_check(fontSizeVar,'number', {label:'Text.fontSize', id:this.id});
@@ -13834,21 +13876,21 @@ Object.defineProperty(doodle, 'TextBaseline', {
   };
 
 }());//end class closure
-/*globals doodle, Image*/
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 (function () {
   var image_sprite_static_properties,
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
       get_element = doodle.utils.get_element,
-      doodle_Event = doodle.events.Event,
-      Event_LOAD = doodle.events.Event.LOAD,
-      Event_CHANGE = doodle.events.Event.CHANGE;
+      createEvent = doodle.events.createEvent,
+      LOAD = doodle.events.Event.LOAD,
+      CHANGE = doodle.events.Event.CHANGE;
 
   /**
    * A image sprite to display.
-   * @name doodle.Image
+   * @name doodle.createImage
    * @class
    * @augments doodle.Sprite
    * @param {string=} imageSrc Image element or url.
@@ -13856,8 +13898,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
    * @throws {SyntaxError} Invalid parameters.
    * @throws {TypeError} Text argument not a string.
    */
-  doodle.Image = function (imageSrc) {
-    var image_sprite = Object.create(doodle.Sprite());
+  doodle.Image = doodle.createImage = function (imageSrc) {
+    var image_sprite = Object.create(doodle.createSprite());
 
     Object.defineProperties(image_sprite, image_sprite_static_properties);
     //properties that require privacy
@@ -13877,14 +13919,14 @@ Object.defineProperty(doodle, 'TextBaseline', {
         image_sprite.graphics.draw(function (ctx) {
           ctx.drawImage(img_element, 0, 0);
         });
-        image_sprite.dispatchEvent(doodle_Event(Event_LOAD));
+        image_sprite.dispatchEvent(createEvent(LOAD));
       }
 
       function remove_image_element () {
         if (img_element !== null) {
           img_element = null;
           image_sprite.graphics.clear();
-          image_sprite.dispatchEvent(doodle_Event(Event_CHANGE));
+          image_sprite.dispatchEvent(createEvent(CHANGE));
         }
       }
       
@@ -13956,8 +13998,8 @@ Object.defineProperty(doodle, 'TextBaseline', {
               /*DEBUG*/
               type_check(srcVar, 'string', {label:'Image.id', id:this.id});
               /*END_DEBUG*/
-              var image = new Image();
-              image.src = encodeURI(srcVar);
+              var image = new window.Image();
+              image.src = window.encodeURI(srcVar);
               load_image(image);
             }
           }

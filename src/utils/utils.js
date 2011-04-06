@@ -1,4 +1,5 @@
-/*globals doodle, document*/
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: false, newcap: true*/
+/*globals doodle*/
 (function () {
   /*DEBUG*/
   var type_check = doodle.utils.debug.type_check;
@@ -31,7 +32,7 @@
         //number in octal format or string prefixed with #
         if (typeof color === 'string') {
           color = (color[0] === '#') ? color.slice(1) : color;
-          color = parseInt(color, 16);
+          color = window.parseInt(color, 16);
         }
         /*DEBUG*/
         type_check(color,'number', {label:'hex_to_rgb', params:'color', message:"Invalid color format [0xffffff|#ffffff]."});
@@ -83,7 +84,7 @@
         /*DEBUG*/
         console.assert(Array.isArray(rgb), "rgb is an array", rgb);
         /*END_DEBUG*/
-        return doodle_utils.rgb_to_hex(parseInt(rgb[0], 10), parseInt(rgb[1], 10), parseInt(rgb[2], 10));
+        return doodle_utils.rgb_to_hex(window.parseInt(rgb[0], 10), window.parseInt(rgb[1], 10), window.parseInt(rgb[2], 10));
       }
     },
 
@@ -110,8 +111,8 @@
           //if it's not an array, it didn't parse correctly
           console.assert(Array.isArray(color), "color is an array", color);
           /*END_DEBUG*/
-          var rgb = [parseInt(color[1], 10), parseInt(color[2], 10), parseInt(color[3], 10)], alpha = parseFloat(color[4]);
-          if (typeof alpha === 'number' && !isNaN(alpha)) {
+          var rgb = [window.parseInt(color[1], 10), window.parseInt(color[2], 10), window.parseInt(color[3], 10)], alpha = window.parseFloat(color[4]);
+          if (typeof alpha === 'number' && !window.isNaN(alpha)) {
             rgb.push(alpha);
           }
           return rgb;
@@ -267,13 +268,13 @@
         if (returnType !== false) {
           switch (returnType) {
           case 'int':
-            val = parseInt(val, 10);
-            val = isNaN(val) ? null : val;
+            val = window.parseInt(val, 10);
+            val = window.isNaN(val) ? null : val;
             break;
           case 'number':
           case 'float':
-            val = parseFloat(val);
-            val = isNaN(val) ? null : val;
+            val = window.parseFloat(val);
+            val = window.isNaN(val) ? null : val;
             break;
           case 'string':
             val = String(val);

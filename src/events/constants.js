@@ -1,4 +1,5 @@
-
+/*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
+/*globals doodle*/
 /*
  * EVENT
  */
