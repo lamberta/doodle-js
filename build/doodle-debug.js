@@ -2968,7 +2968,8 @@ Object.defineProperty(doodle, 'LineJoin', {
           enumerable: false,
           value: function (targetArg) {
             /*DEBUG*/
-            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            //was using isNode, but that fails on plain eventdispatchers
+            console.assert(targetArg === null || doodle.EventDispatcher.isEventDispatcher(targetArg), "targetArg is null or an EventDispatcher.");
             /*END_DEBUG*/
             evt_currentTarget = targetArg;
             return this;
@@ -2995,7 +2996,7 @@ Object.defineProperty(doodle, 'LineJoin', {
           enumerable: false,
           value: function (targetArg) {
             /*DEBUG*/
-            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            console.assert(targetArg === null || doodle.EventDispatcher.isEventDispatcher(targetArg), "targetArg is null or an EventDispatcher.");
             /*END_DEBUG*/
             evt_target = targetArg;
             return this;
@@ -8521,6 +8522,30 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     },
 
     /**
+     * Adds a one time listener for the event. The listener is invoked only
+     * the first time the event is fired, after which it is removed.
+     * @name once
+     * @param {string} type
+     * @param {Function} listener
+     * @throws {TypeError}
+     */
+    'once': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (type, listener) {
+        /*DEBUG*/
+        type_check(type,'string', listener,'function', {label:'EventDispatcher.once', params:['type','listener'], id:this.id});
+        /*END_DEBUG*/
+        var callback = (function () {
+          listener();
+          this.removeEventListener(type, callback, false);
+        }).bind(this);
+        this.addEventListener(type, callback, false);
+      }
+    },
+
+    /**
      * Removes a listener from the EventDispatcher object.
      * @name removeEventListener
      * @param {string} type
@@ -8540,22 +8565,83 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         var eventListeners = this.eventListeners,
             handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
             listeners,
-            //lookup help
-            disp_queue;
+            i;
         //make sure event type exists
+        /*DEBUG*/
+        if (!handler) {
+          console.warn("[id="+this.id+"] EventDispatcher.removeEventListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
+          console.trace();
+        }
+        /*END_DEBUG*/
         if (handler) {
-          listeners = handler[useCapture ? 'capture' : 'bubble'];
-          //remove handler function
-          listeners.splice(listeners.indexOf(listener), 1);
+          listeners = handler[useCapture ? 'capture' : 'bubble']; //array of functions
+          i = listeners.indexOf(listener);
+          /*DEBUG*/
+          if (i === -1) {
+            console.warn("[id="+this.id+"] EventDispatcher.removeEventListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
+            console.trace();
+          }
+          /*END_DEBUG*/
+          if (i !== -1) {
+            //remove handler function
+            listeners.splice(i, 1);
+          }
           //if none left, remove handler type
           if (handler.capture.length === 0 && handler.bubble.length === 0) {
             delete eventListeners[type];
           }
           //if no more listeners, remove from object queue
           if (Object.keys(eventListeners).length === 0) {
-            disp_queue = dispatcher_queue;
-            disp_queue.splice(disp_queue.indexOf(this), 1);
+            dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
           }
+        }
+      }
+    },
+
+    /**
+     * Removes all listeners from the EventDispatcher for the specified event.
+     * @name removeAllListeners
+     * @param {string} type
+     * @param {=boolean} useCapture If undefined, remove all handlers of any type.
+     * @throws {TypeError}
+     */
+    'removeAllListeners': {
+      enumerable: true,
+      writable: false,
+      configurable: false,
+      value: function (type, useCapture) {
+        useCapture = (useCapture === undefined) ? null : useCapture;
+        var listeners = this.eventListeners;
+        /*DEBUG*/
+        type_check(type,'string', {label:'EventDispatcher.removeAllListeners', params:'type', id:this.id});
+        if (useCapture !== null) {
+          type_check(useCapture,'boolean', {label:'EventDispatcher.removeAllListeners', params:'useCapture', id:this.id, message:"If provided, useCapture must be a boolean."});
+        }
+        //do we have the type?
+        if (!listeners.hasOwnProperty(type)) {
+            console.warn("[id="+this.id+"] EventDispatcher.removeAllListeners(*type*, useCapture): No event listener for type: '"+type+"'.");
+            console.trace();
+        }
+        /*END_DEBUG*/
+        if (useCapture === null) {
+          //remove all
+          delete listeners[type];
+        } else {
+          /*DEBUG*/
+          if (listeners[type][useCapture ? 'capture' : 'bubble'].length === 0) {
+            console.warn("[id="+this.id+"] EventDispatcher.removeAllListeners(type, *useCapture*): No event listeners for type: '"+type+"'.");
+            console.trace();
+          }
+          /*END_DEBUG*/
+          listeners[type][useCapture ? 'capture' : 'bubble'].length = 0; //empty array
+          //if none left, remove handler type
+          if (listeners[type].capture.length === 0 && listeners[type].bubble.length === 0) {
+            delete listeners[type];
+          }
+        }
+        //if no more listeners, remove from object queue
+        if (Object.keys(listeners).length === 0) {
+          dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
         }
       }
     },

@@ -232,7 +232,8 @@
           enumerable: false,
           value: function (targetArg) {
             /*DEBUG*/
-            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            //was using isNode, but that fails on plain eventdispatchers
+            console.assert(targetArg === null || doodle.EventDispatcher.isEventDispatcher(targetArg), "targetArg is null or an EventDispatcher.");
             /*END_DEBUG*/
             evt_currentTarget = targetArg;
             return this;
@@ -259,7 +260,7 @@
           enumerable: false,
           value: function (targetArg) {
             /*DEBUG*/
-            console.assert(targetArg === null || doodle.Node.isNode(targetArg), "targetArg is null or a Node.");
+            console.assert(targetArg === null || doodle.EventDispatcher.isEventDispatcher(targetArg), "targetArg is null or an EventDispatcher.");
             /*END_DEBUG*/
             evt_target = targetArg;
             return this;
