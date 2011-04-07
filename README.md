@@ -1,7 +1,7 @@
 # Doodle-js
 ## A JavaScript Animation Library for HTML5 Canvas.
 
-Tested on Chrome/WebKit, looking good on Firefox 4.
+Tested on Chrome/WebKit, looking good on Firefox 4.  
 Requires a browser with support for HTML5 Canvas and some ECMAScript 5 capabilities.
 
 Some of the features:
@@ -25,11 +25,11 @@ Debugging version (type-checking and some useful error messages):
 
 For more options: `./build/make-doodle -h`
 
-Reference: http://lamberta.org/doodle-js/doc/api/
+Reference: http://lamberta.org/doodle-js/doc/api/  
 Examples: http://lamberta.org/doodle-js/doc/demos/making\_things\_move/
 
 Questions?
-Mailing list: http://groups.google.com/group/doodlejs
+Mailing list: http://groups.google.com/group/doodlejs  
 Or, ask me on Twitter: http://twitter.com/billyist
 
 `hello-world.html`:
@@ -44,11 +44,7 @@ Or, ask me on Twitter: http://twitter.com/billyist
         <script src="./build/doodle.js"></script>
         <script>
           doodle.ready(function () {
-            var display = doodle.createDisplay('#display', {
-                  width: 400,
-                  height: 400,
-                  frameRate: 20
-                }),
+            var display = doodle.createDisplay('#display', {width:400, height:400, frameRate:20}),
                 layer = display.createLayer(),
                 text = doodle.createText("Hello, World!").appendTo(layer);
             //center text
