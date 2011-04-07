@@ -26,8 +26,8 @@ PROJECT_HOME="$PWD"
 DEBUG_OUT_FILE="$PROJECT_HOME/build/doodle-debug.js"
 MIN_OUT_FILE="$PROJECT_HOME/build/doodle.js"
 CLOSURE_COMPILER="$PROJECT_HOME/build/compiler.jar"
-#submodules
-STATS_FILE="$PROJECT_HOME/lib/stats/src/Stats.js"
+#dependencies
+STATS_FILE="$PROJECT_HOME/lib/Stats.js"
 #compiler options
 COMPILATION_LEVEL=1 #whitespace, [simple], advanced
 WARNING_LEVEL=1 #quiet, [default], verbose
@@ -208,14 +208,6 @@ while getopts "hcJ:dDPSTW:C:A" option; do
         \?) print_help_and_exit;;
     esac
 done
-
-#check for submodules
-if [ ! -f "$STATS_FILE" ]; then
-    echo "Please update the required submodule(s)."
-    echo "  > git submodule init"
-    echo "  > git submodule update"
-    exit 1;
-fi
 
 parse_compiler_options
 
