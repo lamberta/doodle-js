@@ -826,12 +826,10 @@ var Stats = function () {
 	};
 
 	_container = document.createElement( 'div' );
-	_container.style.fontFamily = 'Helvetica, Arial, sans-serif';
-	_container.style.textAlign = 'left';
-	_container.style.fontSize = '9px';
-	_container.style.opacity = '0.9';
-	_container.style.width = '80px';
 	_container.style.cursor = 'pointer';
+	_container.style.width = '80px';
+	_container.style.opacity = '0.9';
+	_container.style.zIndex = '10001';
 	_container.addEventListener( 'click', swapMode, false );
 
 	// fps
@@ -842,9 +840,12 @@ var Stats = function () {
 	_container.appendChild( _fpsDiv );
 
 	_fpsText = document.createElement( 'div' );
-	_fpsText.innerHTML = '<strong>FPS</strong>';
+	_fpsText.style.fontFamily = 'Helvetica, Arial, sans-serif';
+	_fpsText.style.textAlign = 'left';
+	_fpsText.style.fontSize = '9px';
 	_fpsText.style.color = 'rgb(' + _colors.fps.fg.r + ',' + _colors.fps.fg.g + ',' + _colors.fps.fg.b + ')';
 	_fpsText.style.margin = '0px 0px 1px 3px';
+	_fpsText.innerHTML = '<span style="font-weight:bold">FPS</span>';
 	_fpsDiv.appendChild( _fpsText );
 
 	_fpsCanvas = document.createElement( 'canvas' );
@@ -869,9 +870,12 @@ var Stats = function () {
 	_container.appendChild( _msDiv );
 
 	_msText = document.createElement( 'div' );
-	_msText.innerHTML = '<strong>MS</strong>';
+	_msText.style.fontFamily = 'Helvetica, Arial, sans-serif';
+	_msText.style.textAlign = 'left';
+	_msText.style.fontSize = '9px';
 	_msText.style.color = 'rgb(' + _colors.ms.fg.r + ',' + _colors.ms.fg.g + ',' + _colors.ms.fg.b + ')';
 	_msText.style.margin = '0px 0px 1px 3px';
+	_msText.innerHTML = '<span style="font-weight:bold">MS</span>';
 	_msDiv.appendChild( _msText );
 
 	_msCanvas = document.createElement( 'canvas' );
@@ -891,7 +895,7 @@ var Stats = function () {
 
 	try { 
 
-		if ( webkitPerformance && webkitPerformance.memory.totalJSHeapSize ) {
+		if ( performance && performance.memory && performance.memory.totalJSHeapSize ) {
 
 			_modesCount = 3;
 
@@ -906,9 +910,12 @@ var Stats = function () {
 	_container.appendChild( _memDiv );
 
 	_memText = document.createElement( 'div' );
-	_memText.innerHTML = '<strong>MEM</strong>';
+	_memText.style.fontFamily = 'Helvetica, Arial, sans-serif';
+	_memText.style.textAlign = 'left';
+	_memText.style.fontSize = '9px';
 	_memText.style.color = 'rgb(' + _colors.mem.fg.r + ',' + _colors.mem.fg.g + ',' + _colors.mem.fg.b + ')';
 	_memText.style.margin = '0px 0px 1px 3px';
+	_memText.innerHTML = '<span style="font-weight:bold">MEM</span>';
 	_memDiv.appendChild( _memText );
 
 	_memCanvas = document.createElement( 'canvas' );
@@ -1012,7 +1019,7 @@ var Stats = function () {
 
 			updateGraph( _msImageData.data, Math.min( 30, 30 - ( _ms / 200 ) * 30 ), 'ms' );
 
-			_msText.innerHTML = '<strong>' + _ms + ' MS</strong> (' + _msMin + '-' + _msMax + ')';
+			_msText.innerHTML = '<span style="font-weight:bold">' + _ms + ' MS</span> (' + _msMin + '-' + _msMax + ')';
 			_msContext.putImageData( _msImageData, 0, 0 );
 
 			_timeLastFrame = _time;
@@ -1025,18 +1032,18 @@ var Stats = function () {
 
 				updateGraph( _fpsImageData.data, Math.min( 30, 30 - ( _fps / 100 ) * 30 ), 'fps' );
 
-				_fpsText.innerHTML = '<strong>' + _fps + ' FPS</strong> (' + _fpsMin + '-' + _fpsMax + ')';
+				_fpsText.innerHTML = '<span style="font-weight:bold">' + _fps + ' FPS</span> (' + _fpsMin + '-' + _fpsMax + ')';
 				_fpsContext.putImageData( _fpsImageData, 0, 0 );
 
 				if ( _modesCount == 3 ) {
 
-					_mem = webkitPerformance.memory.usedJSHeapSize * 0.000000954;
+					_mem = performance.memory.usedJSHeapSize * 0.000000954;
 					_memMin = Math.min( _memMin, _mem );
 					_memMax = Math.max( _memMax, _mem );
 
 					updateGraph( _memImageData.data, Math.min( 30, 30 - ( _mem / 2 ) ), 'mem' );
 
-					_memText.innerHTML = '<strong>' + Math.round( _mem ) + ' MEM</strong> (' + Math.round( _memMin ) + '-' + Math.round( _memMax ) + ')';
+					_memText.innerHTML = '<span style="font-weight:bold">' + Math.round( _mem ) + ' MEM</span> (' + Math.round( _memMin ) + '-' + Math.round( _memMax ) + ')';
 					_memContext.putImageData( _memImageData, 0, 0 );
 
 				}
