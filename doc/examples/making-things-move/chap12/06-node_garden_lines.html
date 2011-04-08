@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.12, p.317: Nodes with Connections</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var particles = [],
+      numParticles = 15,
+      minDist = 100,
+      springAmount = 0.001;
+  
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 20;
+
+  var layer0 = display.createLayer();
+
+  for (var i=0; i < numParticles; i++) {
+    var particle = createBall(5, 0xffffff);
+    particle.x = Math.random() * display.width;
+    particle.y = Math.random() * display.height;
+    particle.vx = Math.random() * 6 - 3;
+    particle.vy = Math.random() * 6 - 3;
+    layer0.addChild(particle);
+    particles.push(particle);
+  }
+
+  var line = doodle.createSprite();
+  layer0.addChild(line);
+
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  
+  function onEnterFrame (event) {
+    var particle, partA, partB;
+
+    line.graphics.clear();
+    
+    for (var i=0; i < numParticles; i++) {
+      particle = particles[i];
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+
+      if (particle.x > display.width) {
+        particle.x = 0;
+      } else if (particle.x < 0) {
+        particle.x = display.width;
+      }
+      if (particle.y > display.height) {
+        particle.y = 0;
+      } else if (particle.y < 0) {
+        particle.y = display.height;
+      }
+    }
+    
+    for (i=0; i < numParticles; i++) {
+      partA = particles[i];
+      for (var j=i+1; j < numParticles; j++) {
+        partB = particles[j];
+        spring(partA, partB);
+      }
+    }
+  }
+
+  function spring (partA, partB) {
+    var dx = partB.x - partA.x,
+        dy = partB.y - partA.y,
+        dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < minDist) {
+      line.graphics.lineStyle(1, 0xffffff, 1 - dist / minDist);
+      line.graphics.beginPath();
+      line.graphics.moveTo(partA.x, partA.y);
+      line.graphics.lineTo(partB.x, partB.y);
+      line.graphics.stroke();
+      
+      var ax = dx * springAmount,
+          ay = dy * springAmount;
+      partA.vx += ax;
+      partA.vy += ay;
+      partB.vx -= ax;
+      partB.vy -= ay;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #000000; width: 800px; height:600px;"></div>
+  </body>
+</html>

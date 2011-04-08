@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+  <title>Doodle.js -- Making Things Move: Ch.19, p.499: Biased Distribution - Multiple Iterations</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var numDots = 100,
+      maxRadis = 50,
+      iterations = 6;
+  
+  var display = doodle.createDisplay("#display", {frameRate: 15});
+
+  var layer0 = display.createLayer();
+
+  //help with property lookup times
+  var random = Math.random,
+      width = display.width,
+      height = display.height,
+      dot,
+      xpos;
+  
+  for (var i = 0; i < numDots; i++) {
+    dot = createBall(1, 0);
+    xpos = 0;
+    for (var j = 0; j < iterations; j++) {
+      xpos += random() * width;
+    }
+    dot.x = xpos / iterations;
+    dot.y = height / 2 + random() * 50 - 25;
+    layer0.addChild(dot);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
+  </body>
+</html>

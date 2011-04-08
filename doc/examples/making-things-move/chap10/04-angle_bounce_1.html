@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.10, p.259: Bouncing Off an Angle</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var gravity = 0.3,
+      bounce = -0.6;
+  
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 20;
+
+  var layer0 = display.createLayer();
+
+  var ball = createBall();
+  ball.x = 100;
+  ball.y = 100;
+  layer0.addChild(ball);
+
+  var line = doodle.createSprite();
+  line.x = 50;
+  line.y = 200;
+  line.rotation = 30;
+  line.graphics.beginPath();
+  line.graphics.lineTo(300, 0);
+  line.graphics.stroke();
+  layer0.addChild(line);
+
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  
+  function onEnterFrame (event) {
+    //normal motion code
+    ball.vy += gravity;
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    //get angle, sine, and cosine
+    var angle = line.rotation * Math.PI/180;
+    var cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    //get position of ball, relative to line
+    var x1 = ball.x - line.x;
+    var y1 = ball.y - line.y;
+    //rotate coordinates
+    var x2 = cos * x1 + sin * y1;
+    var y2 = cos * y1 - sin * x1;
+    //rotate velocity
+    var vx1 = cos * ball.vx + sin * ball.vy;
+    var vy1 = cos * ball.vy - sin * ball.vx;
+    //perform bounce with rotated values
+    if (y2 > -ball.height/2) {
+      y2 = -ball.height/2;
+      vy1 *= bounce;
+    }
+    //rotate everything back
+    x1 = cos * x2 - sin * y2;
+    y1 = cos * y2 + sin * x2;
+    ball.vx = cos * vx1 - sin * vy1;
+    ball.vy = cos * vy1 + sin * vx1;
+    ball.x = line.x + x1;
+    ball.y = line.y + y1;
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
+  </body>
+</html>

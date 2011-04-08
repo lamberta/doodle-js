@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.6, p.157: Screen Wrapping</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ship.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var vr = 0,
+      thrust = 0,
+      vx = 0,
+      vy = 0;
+  
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 20;
+  
+  var layer0 = display.createLayer();
+
+  var ship = createShip();
+  ship.x = display.width/2;
+  ship.y = display.height/2;
+  layer0.addChild(ship);
+  ship.draw(false);
+  
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyDown);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_UP, onKeyUp);
+
+  function onKeyDown (event) {
+    switch (event.keyCode) {
+    case doodle.Keyboard.LEFT:
+      vr = -5;
+      break;
+    case doodle.Keyboard.RIGHT:
+      vr = 5;
+      break;
+    case doodle.Keyboard.UP:
+      thrust = 0.2;
+      ship.draw(true);
+      break;
+    default:
+      break;
+    }
+  }
+
+  function onKeyUp (event) {
+    vr = 0;
+    thrust = 0;
+    ship.draw(false);
+  }
+  
+  function onEnterFrame (event) {
+    var angle, ax, ay,
+        left = 0,
+        right = display.width,
+        top = 0,
+        bottom = display.height,
+        ship_w = ship.width, //avoid object lookups
+        ship_h = ship.height;
+    
+    ship.rotation += vr;
+    angle = ship.rotation * Math.PI / 180;
+    ax = Math.cos(angle) * thrust;
+    ay = Math.sin(angle) * thrust;
+    vx += ax;
+    vy += ay;
+    ship.x += vx;
+    ship.y += vy;
+
+    //screen wrapping
+    if (ship.x - ship_w / 2 > right) {
+      ship.x = left - ship_w / 2;
+    } else if (ship.x + ship_w / 2 < left) {
+      ship.x = right + ship_w / 2;
+    }
+    if (ship.y - ship_h / 2 > bottom) {
+      ship.y = top - ship_h / 2;
+    } else if (ship.y < top - ship_h / 2) {
+      ship.y = bottom + ship_h / 2;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #000000; width: 800px; height:600px;"></div>
+  </body>
+</html>

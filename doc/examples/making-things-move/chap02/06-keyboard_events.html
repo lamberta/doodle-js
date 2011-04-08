@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.2, p.46: Keyboard Events</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var display = doodle.createDisplay("#display");
+
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyboardEvent);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_UP, onKeyboardEvent);
+
+  function onKeyboardEvent (event) {
+    console.log(event.type + ", " + event.keyCode);
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
+  </body>
+</html>

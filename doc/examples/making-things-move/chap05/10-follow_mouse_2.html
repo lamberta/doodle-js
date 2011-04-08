@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.5, p.139: Angular Acceleration</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Arrow.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var vx = 0,
+      vy = 0,
+      force = 0.5;
+  
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 15;
+  
+  var layer0 = display.createLayer();
+
+  var arrow = createArrow();
+  layer0.addChild(arrow);
+  
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    var dx = display.mouseX - arrow.x,
+        dy = display.mouseY - arrow.y,
+        angle = Math.atan2(dy, dx),
+        ax = Math.cos(angle) * force,
+        ay = Math.sin(angle) * force;
+
+    arrow.rotation = angle * 180 / Math.PI;
+    vx += ax;
+    vy += ay;
+    arrow.x += vx;
+    arrow.y += vy;
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
+  </body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+  <title>Doodle.js -- Making Things Move: Ch.19, p.490: Brownian (Random) Motion - Draw</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var numDots = 20,
+      friction = 0.95,
+      dots = [];
+  
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 20;
+
+  var layer0 = display.createLayer();
+
+  //help with property lookup times
+  var random = Math.random,
+      width = display.width,
+      height = display.height,
+      dot;
+  
+  for (var i = 0; i < numDots; i++) {
+    dot = createBall(1, 0);
+    dot.x = random() * width;
+    dot.y = random() * height;
+    dot.vx = 0;
+    dot.vy = 0;
+    layer0.addChild(dot);
+    dots.push(dot);
+  }
+
+  /* Conforms with book code, however this is way to slow to be usable.
+   * Doodle remembers the drawing instructions and calls per frame,
+   * this requires a persistent bitmap to draw to.
+   */
+  var lines = doodle.createSprite();
+  lines.graphics.lineStyle(1, 0, 0.5);
+  lines.graphics.beginPath();
+  layer0.addChild(lines);
+
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+
+  function onEnterFrame (event) {
+    for (var i = 0; i < numDots; i++) {
+      dot = dots[i];
+      lines.graphics.moveTo(dot.x, dot.y);
+      dot.vx += random() * 0.2 - 0.1;
+      dot.vy += random() * 0.2 - 0.1;
+      dot.x += dot.vx;
+      dot.y += dot.vy;
+      dot.vx *= friction;
+      dot.vy *= friction;
+      lines.graphics.lineTo(dot.x, dot.y);
+      lines.graphics.stroke();
+
+      if (dot.x > width) {
+        dot.x = 0;
+      } else if (dot.x < 0) {
+        dot.x = width;
+      }
+      if (dot.y > height) {
+        dot.y = 0;
+      } else if (dot.y < 0) {
+        dot.y = height;
+      }
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
+  </body>
+</html>

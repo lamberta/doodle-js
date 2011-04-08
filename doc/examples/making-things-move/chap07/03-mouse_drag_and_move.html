@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.7, p.180: Combining Dragging with Motion</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var vx = Math.random() * 10 - 5,
+      vy = -10,
+      bounce = -0.7,
+      gravity = 0.5;
+  
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 20;
+  
+  var layer0 = display.createLayer();
+
+  var ball = createBall();
+  ball.x = display.width/2;
+  ball.y = display.height/2;
+  layer0.addChild(ball);
+  
+  ball.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  
+  function onMouseDown (event) {
+    vx = vy = 0;
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.removeEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  }
+
+  function onMouseUp (event) {
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  }
+
+  function onMouseMove () {
+    ball.x = display.mouseX;
+    ball.y = display.mouseY;
+  }
+
+  function onEnterFrame (event) {
+    var left = 0,
+        right = display.width,
+        top = 0,
+        bottom = display.height,
+        ball_r = ball.radius;
+
+    vy += gravity;
+    ball.x += vx;
+    ball.y += vy;
+
+    //boundary detect and bounce
+    if (ball.x + ball_r > right) {
+      ball.x = right - ball_r;
+      vx *= bounce;
+    } else if (ball.x - ball_r < left) {
+      ball.x = left + ball_r;
+      vx *= bounce;
+    }
+    if (ball.y + ball_r > bottom) {
+      ball.y = bottom - ball_r;
+      vy *= bounce;
+    } else if (ball.y - ball_r < top) {
+      ball.y = top + ball_r;
+      vy *= bounce;
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.9, p.235: Simple Distance-Based Collision Detection - Different Radius</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Ball.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 20;
+
+  var layer0 = display.createLayer();
+
+  var ball0 = createBall(Math.random() * 100);
+  ball0.x = display.width/2;
+  ball0.y = display.height/2;
+  layer0.addChild(ball0);
+
+  var ball1 = createBall(Math.random() * 100);
+  layer0.addChild(ball1);
+
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  
+  function onEnterFrame (event) {
+    ball1.x = display.mouseX;
+    ball1.y = display.mouseY;
+    
+    var dx = ball1.x - ball0.x,
+        dy = ball1.y - ball0.y,
+        dist = Math.sqrt(dx * dx + dy * dy);
+    
+    if (dist < ball0.radius + ball1.radius) {
+      console.log("hit");
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
+  </body>
+</html>

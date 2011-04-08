@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doodle.js -- Making Things Move: Ch.15, p.399: Wrapping - With Height</title>
+    
+    <script type="application/javascript" src="../../../../build/doodle.js"></script>
+    <script type="application/javascript" src="./classes/Tree.js"></script>
+    <script type="application/javascript">
+
+/* Examples from "Foundation ActionScript 3.0 Animation: Making Things Move",
+ * written by Keith Peters, Copyright 2007.
+ * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
+ *
+ * Ported to JavaScript by Billy Lamberta using the Doodle.js library
+ * available at http://github.com/billyist/doodle-js
+ */
+
+function init_scene () {
+  var trees = [],
+      numTrees = 30,
+      fl = 250,
+      vpX,
+      vpY,
+      floor = 50,
+      ax = 0,
+      ay = 0,
+      az = 0,
+      vx = 0,
+      vy = 0,
+      vz = 0,
+      gravity = 0.3,
+      friction = 0.98;
+  
+  var display = doodle.createDisplay("#display");
+  display.frameRate = 20;
+
+  var layer0 = display.createLayer();
+
+  vpX = display.width / 2;
+  vpY = display.height / 2;
+
+  for (var i=0; i < numTrees; i++) {
+    var tree = createTree();
+    trees.push(tree);
+    tree.xpos = Math.random() * 2000 - 1000;
+    tree.ypos = floor;
+    tree.zpos = Math.random() * 10000;
+    layer0.addChild(tree);
+  }
+
+  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyDown);
+  display.addEventListener(doodle.events.KeyboardEvent.KEY_UP, onKeyUp);
+
+  function onEnterFrame (event) {
+    vx += ax;
+    vy += ay;
+    vz += az;
+    vy -= gravity;
+    
+    for (var i=0; i < numTrees; i++) {
+      var tree = trees[i];
+      move(tree);
+    }
+    
+    vx *= friction;
+    vy *= friction;
+    vz *= friction;
+    
+    sortZ();
+  }
+
+  function onKeyDown (event) {
+    switch (event.keyCode) {
+    case doodle.Keyboard.UP:
+      az = -1;
+      break;
+    case doodle.Keyboard.DOWN:
+      az = 1;
+      break;
+    case doodle.Keyboard.LEFT:
+      ax = 1;
+      break;
+    case doodle.Keyboard.RIGHT:
+      ax = -1;
+      break;
+    case doodle.Keyboard.SPACE:
+      ay = 1;
+      break;
+    default:
+      break;
+    }
+  }
+
+  function onKeyUp (event) {
+    switch (event.keyCode) {
+    case doodle.Keyboard.UP:
+    case doodle.Keyboard.DOWN:
+      az = 0;
+      break;
+    case doodle.Keyboard.LEFT:
+    case doodle.Keyboard.RIGHT:
+      ax = 0;
+      break;
+    case doodle.Keyboard.SPACE:
+      ay = 0;
+      break;
+    default:
+      break;
+    }
+  }
+
+  function move (tree) {
+    tree.xpos += vx;
+    tree.ypos += vy;
+    tree.zpos += vz;
+
+    if (tree.ypos < floor) {
+      tree.ypos = floor;
+    }
+
+    if (tree.zpos < -fl) {
+      tree.zpos += 10000;
+    }
+    if (tree.zpos > 10000 - fl) {
+      tree.zpos -= 10000;
+    }
+    
+    var scale = fl / (fl + tree.zpos);
+    tree.scaleX = tree.scaleY = scale;
+    tree.x = vpX + tree.xpos * scale;
+    tree.y = vpY + tree.ypos * scale;
+    tree.alpha = scale;
+  }
+
+  function sortZ () {
+    trees.sort(function (a, b) { return b.zpos - a.zpos; });
+    for (var i=0; i < numTrees; i++) {
+      var tree = trees[i];
+      layer0.setChildIndex(tree, i);
+    }
+  }
+}
+
+    </script>
+  </head>
+  <body style="background-color: #bbbbbb;" onload="init_scene();">
+    <div id="display" style="background-color: #000000; width: 800px; height:600px;"></div>
+  </body>
+</html>
