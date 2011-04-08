@@ -25,11 +25,11 @@ Debugging version (type-checking and some useful error messages):
 
 For more options: `./build/make-doodle -h`
 
-[Reference API](http://lamberta.org/doodle-js/doc/api/) 
+[Reference API](http://lamberta.org/doodle-js/doc/api/)  
 [Some Examples](http://lamberta.org/doodle-js/doc/demos/making_things_move/)
 
 Questions?
-Mailing list: http://groups.google.com/group/doodlejs 
+Mailing list: http://groups.google.com/group/doodlejs  
 Or, ask me on Twitter: http://twitter.com/billyist
 
 From [hello-world.html](./doodle-js/blob/master/doc/examples/hello-world.html):
