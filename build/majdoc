@@ -74,12 +74,15 @@ CLASS_CONSTANTS['KeyboardEvent']="$SRC_HOME/events/constants.js"
 CLASS_CONSTANTS['TouchEvent']="$SRC_HOME/events/constants.js"
 #static classes
 CLASS_SRC['utils']="$SRC_HOME/utils/utils.js"
-CLASS_SRC['utils.types']="$SRC_HOME/utils/types.js"
+CLASS_SRC['utils.debug']="$SRC_HOME/utils/debug.js"
 CLASS_SRC['GradientType']="$SRC_HOME/constants/gradienttype.js"
 CLASS_SRC['Keyboard']="$SRC_HOME/constants/keyboard.js"
 CLASS_SRC['LineCap']="$SRC_HOME/constants/linecap.js"
 CLASS_SRC['LineJoin']="$SRC_HOME/constants/linejoin.js"
 CLASS_SRC['Pattern']="$SRC_HOME/constants/pattern.js"
+
+CLASS_SRC['ColorFilter']="$SRC_HOME/filters/colorfilter.js"
+CLASS_INHERITS['ColorFilter']='Object'
 
 #primitives
 CLASS_SRC['FontStyle']="$SRC_HOME/primitives/constants/fontstyle.js"
@@ -236,7 +239,7 @@ function print_header {
 }
 
 function print_footer {
-    local license="<a href=\"http://github.com/biilly/doodle-js/blob/master/BSD-LICENSE.txt\">Copyright</a>"
+    local license="<a href=\"http://github.com/billyist/doodle-js/blob/master/BSD-LICENSE.txt\">Copyright</a>"
     local name="<a href=\"http://www.lamberta.org\">Billy Lamberta</a>"
     local tmp_html="</div>\n<footer>\n$license $name\n</footer>\n</body>\n</html>"
     echo -e "$tmp_html"
@@ -629,6 +632,8 @@ echo "Docs:"
 
 #only remove the generated html files
 if [ -n "$DOC_CLEAN" ]; then
+    #index isn't generated
+    mv "$DOC_HOME/index.html" "$DOC_HOME/index.html.bak"
     echo -n -e "\tRemoving docs in $DOC_HOME ... "
     files=$(ls "$DOC_HOME/"*.html 2> /dev/null | wc -l)
     if [ "$files" != "0" ]; then
@@ -637,6 +642,7 @@ if [ -n "$DOC_CLEAN" ]; then
     else
         echo "none found."
     fi
+    mv "$DOC_HOME/index.html.bak" "$DOC_HOME/index.html"
     exit 0
 fi
 

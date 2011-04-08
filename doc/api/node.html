@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Doodle.js - API: doodle.Node</title>
+<title>Doodle.js - API: doodle.createNode</title>
 <link href="./style/reset.css" rel="stylesheet" type="text/css">
 <link href="./style/main.css" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono&subset=latin" rel="stylesheet" type="text/css">
@@ -13,6 +13,7 @@
 
 <nav>
 <ul>
+<li>ColorFilter</li>
 <li>Display</li>
 <li>ElementNode</li>
 <li>Event</li>
@@ -42,10 +43,10 @@
 <li>TouchEvent</li>
 <li>UIEvent</li>
 <li>utils</li>
-<li>utils.types</li></ul>
+<li>utils.debug</li></ul>
 </nav>
 <div class="main">
-<h1>doodle.Node</h1>
+<h1>doodle.createNode</h1>
 
 <section>
 <h2>Description:</h2>
@@ -315,19 +316,62 @@
 <section>
 <h2>Methods</h2>
 <dl>
-<dt><dfn>modify</dfn> (fn:Function) :Object</dt>
+<dt><dfn>on</dfn> (type:string, listener:Function) :void</dt>
 <dd>
-<p>Call function passing object as 'this'.</p>
+<p>Adds an event listener on an EventDispatcher object. This is convenience alias for EventDispatcher.addEventListener(type, listener, useCapture=false).</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>fn:Function &#8211;  </li>
+<li>type:string &#8211;  </li>
+<li>listener:Function &#8211;  </li>
 </ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>once</dfn> (type:string, listener:Function) :void</dt>
+<dd>
+<p>Adds a one time listener for the event. The listener is invoked only the first time the event is fired, after which it is removed.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:string &#8211;  </li>
+<li>listener:Function &#8211;  </li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>appendTo</dfn> () :Node</dt>
+<dd>
+<p>Adds this node to the given node's children.</p>
+<details>
+
+
 
 <h3>Returns</h3>
 <ul>
-<li>Object &#8211; </li>
+<li>Node &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -565,7 +609,39 @@
 
 </details>
 </dd>
-<dt><dfn>getChildById</dfn> (id:string) :Node|null</dt>
+<dt><dfn>createNode</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>createSprite</dfn> () :void</dt>
+<dd>
+<p></p>
+<details>
+
+
+
+
+
+
+
+
+
+
+</details>
+</dd>
+<dt><dfn>getChildById</dfn> (id:string) :Node|undefined</dt>
 <dd>
 <p></p>
 <details>
@@ -577,7 +653,7 @@
 
 <h3>Returns</h3>
 <ul>
-<li>Node|null &#8211; </li>
+<li>Node|undefined &#8211; </li>
 </ul>
 
 <h3>Throws</h3>
@@ -590,14 +666,14 @@
 
 </details>
 </dd>
-<dt><dfn>globalToLocal</dfn> (point:Point) :Point</dt>
+<dt><dfn>globalToLocal</dfn> (pt:Point) :Point</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>point:Point &#8211;  </li>
+<li>pt:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -615,14 +691,14 @@
 
 </details>
 </dd>
-<dt><dfn>localToGlobal</dfn> (point:Point) :Point</dt>
+<dt><dfn>localToGlobal</dfn> (pt:Point) :Point</dt>
 <dd>
 <p></p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
-<li>point:Point &#8211;  </li>
+<li>pt:Point &#8211;  </li>
 </ol>
 
 <h3>Returns</h3>
@@ -659,7 +735,7 @@
 
 </details>
 </dd>
-<dt><dfn>removeChildAt</dfn> (index:number) :void</dt>
+<dt><dfn>removeChildAt</dfn> (index:number) :Node</dt>
 <dd>
 <p></p>
 <details>
@@ -669,7 +745,10 @@
 <li>index:number &#8211;  </li>
 </ol>
 
-
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; Removed child node.</li>
+</ul>
 
 <h3>Throws</h3>
 <ul>
@@ -682,7 +761,7 @@
 
 </details>
 </dd>
-<dt><dfn>removeChildById</dfn> (id:string) :void</dt>
+<dt><dfn>removeChildById</dfn> (id:string) :Node</dt>
 <dd>
 <p></p>
 <details>
@@ -692,7 +771,10 @@
 <li>id:string &#8211;  </li>
 </ol>
 
-
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; Removed child node.</li>
+</ul>
 
 <h3>Throws</h3>
 <ul>
@@ -704,7 +786,7 @@
 
 </details>
 </dd>
-<dt><dfn>removeChild</dfn> (node:Node) :void</dt>
+<dt><dfn>removeChild</dfn> (node:Node) :Node</dt>
 <dd>
 <p></p>
 <details>
@@ -714,7 +796,10 @@
 <li>node:Node &#8211;  </li>
 </ol>
 
-
+<h3>Returns</h3>
+<ul>
+<li>Node &#8211; Removed child node.</li>
+</ul>
 
 <h3>Throws</h3>
 <ul>
@@ -864,6 +949,29 @@
 
 </details>
 </dd>
+<dt><dfn>removeAllListeners</dfn> (type:string, useCapture:=boolean) :void</dt>
+<dd>
+<p>Removes all listeners from the EventDispatcher for the specified event.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:string &#8211;  </li>
+<li>useCapture:=boolean &#8211; <span class='param_annotation'>[optional]</span> If undefined, remove all handlers of any type.</li>
+</ol>
+
+
+
+<h3>Throws</h3>
+<ul>
+<li>TypeError &#8211; </li>
+</ul>
+
+
+
+
+</details>
+</dd>
 <dt><dfn>toString</dfn> () :string</dt>
 <dd>
 <p>Returns the string representation of the specified object.</p>
@@ -979,31 +1087,9 @@
 <section>
 <h2>Class Functions</h2>
 <dl>
-<dt><dfn>inheritsNode</dfn> (obj:Object) :boolean</dt>
-<dd>
-<p>Check if object inherits from node.</p>
-<details>
-
-<h3>Parameters</h3>
-<ol>
-<li>obj:Object &#8211;  </li>
-</ol>
-
-<h3>Returns</h3>
-<ul>
-<li>boolean &#8211; </li>
-</ul>
-
-
-
-
-
-
-</details>
-</dd>
 <dt><dfn>isNode</dfn> (obj:Object) :boolean</dt>
 <dd>
-<p>Test if an object is an node.</p>
+<p>Test if an object inherits from Node.</p>
 <details>
 
 <h3>Parameters</h3>
@@ -1026,7 +1112,7 @@
 </section>
 </div>
 <footer>
-<a href="http://github.com/biilly/doodle-js/blob/master/BSD-LICENSE.txt">Copyright</a> <a href="http://www.lamberta.org">Billy Lamberta</a>
+<a href="http://github.com/billyist/doodle-js/blob/master/BSD-LICENSE.txt">Copyright</a> <a href="http://www.lamberta.org">Billy Lamberta</a>
 </footer>
 </body>
 </html>
