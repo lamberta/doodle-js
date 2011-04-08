@@ -13,7 +13,7 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
@@ -23,34 +23,34 @@ function init_scene () {
       vpX,
       vpY;
   
-  var display = doodle.Display("#my_display");
+  var display = doodle.createDisplay("#display");
   display.frameRate = 20;
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
   vpX = display.width / 2;
   vpY = display.height / 2;
 
   //the letter 'E'
-  points[0]  = Point3D(-150, -250, 100);
-  points[1]  = Point3D( 150, -250, 100);
-  points[2]  = Point3D( 150, -150, 100);
-  points[3]  = Point3D( -50, -150, 100);
-  points[4]  = Point3D( -50,  -50, 100);
-  points[5]  = Point3D(  50,  -50, 100);
-  points[6]  = Point3D(  50,   50, 100);
-  points[7]  = Point3D( -50,   50, 100);
-  points[8]  = Point3D( -50,  150, 100);
-  points[9]  = Point3D( 150,  150, 100);
-  points[10] = Point3D( 150,  250, 100);
-  points[11] = Point3D(-150,  250, 100);
+  points[0]  = createPoint3D(-150, -250, 100);
+  points[1]  = createPoint3D( 150, -250, 100);
+  points[2]  = createPoint3D( 150, -150, 100);
+  points[3]  = createPoint3D( -50, -150, 100);
+  points[4]  = createPoint3D( -50,  -50, 100);
+  points[5]  = createPoint3D(  50,  -50, 100);
+  points[6]  = createPoint3D(  50,   50, 100);
+  points[7]  = createPoint3D( -50,   50, 100);
+  points[8]  = createPoint3D( -50,  150, 100);
+  points[9]  = createPoint3D( 150,  150, 100);
+  points[10] = createPoint3D( 150,  250, 100);
+  points[11] = createPoint3D(-150,  250, 100);
   
   for (var i=0; i < numPoints; i++) {
     points[i].setVanishingPoint(vpX, vpY);
     points[i].setCenter(0, 0, 200);
   }
 
-  var lines = doodle.Sprite();
+  var lines = doodle.createSprite();
   layer0.addChild(lines);
 
   display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
@@ -82,6 +82,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
   </body>
 </html>

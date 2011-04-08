@@ -15,7 +15,7 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
@@ -25,97 +25,97 @@ function init_scene () {
       vpX,
       vpY;
   
-  var display = doodle.Display("#my_display");
+  var display = doodle.createDisplay("#display");
   display.frameRate = 20;
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
   vpX = display.width / 2;
   vpY = display.height / 2;
 
   //first set
-  points[0]  = Point3D( -50, -250, -50);
-  points[1]  = Point3D(  50, -250, -50);
-  points[2]  = Point3D( 200,  250, -50);
-  points[3]  = Point3D( 100,  250, -50);
-  points[4]  = Point3D(  50,  100, -50);
-  points[5]  = Point3D( -50,  100, -50);
-  points[6]  = Point3D(-100,  250, -50);
-  points[7]  = Point3D(-200,  250, -50);
-  points[8]  = Point3D(   0, -150, -50);
-  points[9]  = Point3D(  50,    0, -50);
-  points[10] = Point3D( -50,    0, -50);
+  points[0]  = createPoint3D( -50, -250, -50);
+  points[1]  = createPoint3D(  50, -250, -50);
+  points[2]  = createPoint3D( 200,  250, -50);
+  points[3]  = createPoint3D( 100,  250, -50);
+  points[4]  = createPoint3D(  50,  100, -50);
+  points[5]  = createPoint3D( -50,  100, -50);
+  points[6]  = createPoint3D(-100,  250, -50);
+  points[7]  = createPoint3D(-200,  250, -50);
+  points[8]  = createPoint3D(   0, -150, -50);
+  points[9]  = createPoint3D(  50,    0, -50);
+  points[10] = createPoint3D( -50,    0, -50);
   //second set
-  points[11] = Point3D( -50, -250,  50);
-  points[12] = Point3D(  50, -250,  50);
-  points[13] = Point3D( 200,  250,  50);
-  points[14] = Point3D( 100,  250,  50);
-  points[15] = Point3D(  50,  100,  50);
-  points[16] = Point3D( -50,  100,  50);
-  points[17] = Point3D(-100,  250,  50);
-  points[18] = Point3D(-200,  250,  50);
-  points[19] = Point3D(   0, -150,  50);
-  points[20] = Point3D(  50,    0,  50);
-  points[21] = Point3D( -50,    0,  50);
+  points[11] = createPoint3D( -50, -250,  50);
+  points[12] = createPoint3D(  50, -250,  50);
+  points[13] = createPoint3D( 200,  250,  50);
+  points[14] = createPoint3D( 100,  250,  50);
+  points[15] = createPoint3D(  50,  100,  50);
+  points[16] = createPoint3D( -50,  100,  50);
+  points[17] = createPoint3D(-100,  250,  50);
+  points[18] = createPoint3D(-200,  250,  50);
+  points[19] = createPoint3D(   0, -150,  50);
+  points[20] = createPoint3D(  50,    0,  50);
+  points[21] = createPoint3D( -50,    0,  50);
   
   for (var i=0; i < points.length; i++) {
     points[i].setVanishingPoint(vpX, vpY);
     points[i].setCenter(0, 0, 200);
   }
 
-  triangles[0]  = Triangle(points[0],  points[1],  points[8],  0x6666cc);
-  triangles[1]  = Triangle(points[1],  points[9],  points[8],  0x6666cc);
-  triangles[2]  = Triangle(points[1],  points[2],  points[9],  0x6666cc);
-  triangles[3]  = Triangle(points[2],  points[4],  points[9],  0x6666cc);
-  triangles[4]  = Triangle(points[2],  points[3],  points[4],  0x6666cc);
-  triangles[5]  = Triangle(points[4],  points[5],  points[9],  0x6666cc);
-  triangles[6]  = Triangle(points[9],  points[5],  points[10], 0x6666cc);
-  triangles[7]  = Triangle(points[5],  points[6],  points[7],  0x6666cc);
-  triangles[8]  = Triangle(points[5],  points[7],  points[10], 0x6666cc);
-  triangles[9]  = Triangle(points[0],  points[10], points[7],  0x6666cc);
-  triangles[10] = Triangle(points[0],  points[8],  points[10], 0x6666cc);
+  triangles[0]  = createTriangle(points[0],  points[1],  points[8],  0x6666cc);
+  triangles[1]  = createTriangle(points[1],  points[9],  points[8],  0x6666cc);
+  triangles[2]  = createTriangle(points[1],  points[2],  points[9],  0x6666cc);
+  triangles[3]  = createTriangle(points[2],  points[4],  points[9],  0x6666cc);
+  triangles[4]  = createTriangle(points[2],  points[3],  points[4],  0x6666cc);
+  triangles[5]  = createTriangle(points[4],  points[5],  points[9],  0x6666cc);
+  triangles[6]  = createTriangle(points[9],  points[5],  points[10], 0x6666cc);
+  triangles[7]  = createTriangle(points[5],  points[6],  points[7],  0x6666cc);
+  triangles[8]  = createTriangle(points[5],  points[7],  points[10], 0x6666cc);
+  triangles[9]  = createTriangle(points[0],  points[10], points[7],  0x6666cc);
+  triangles[10] = createTriangle(points[0],  points[8],  points[10], 0x6666cc);
   
-  triangles[11] = Triangle(points[11], points[19], points[12], 0xcc6666);
-  triangles[12] = Triangle(points[12], points[19], points[20], 0xcc6666);
-  triangles[13] = Triangle(points[12], points[20], points[13], 0xcc6666);
-  triangles[14] = Triangle(points[13], points[20], points[15], 0xcc6666);
-  triangles[15] = Triangle(points[13], points[15], points[14], 0xcc6666);
-  triangles[16] = Triangle(points[15], points[20], points[16], 0xcc6666);
-  triangles[17] = Triangle(points[20], points[21], points[16], 0xcc6666);
-  triangles[18] = Triangle(points[16], points[18], points[17], 0xcc6666);
-  triangles[19] = Triangle(points[16], points[21], points[18], 0xcc6666);
-  triangles[20] = Triangle(points[11], points[18], points[21], 0xcc6666);
-  triangles[21] = Triangle(points[11], points[21], points[19], 0xcc6666);
+  triangles[11] = createTriangle(points[11], points[19], points[12], 0xcc6666);
+  triangles[12] = createTriangle(points[12], points[19], points[20], 0xcc6666);
+  triangles[13] = createTriangle(points[12], points[20], points[13], 0xcc6666);
+  triangles[14] = createTriangle(points[13], points[20], points[15], 0xcc6666);
+  triangles[15] = createTriangle(points[13], points[15], points[14], 0xcc6666);
+  triangles[16] = createTriangle(points[15], points[20], points[16], 0xcc6666);
+  triangles[17] = createTriangle(points[20], points[21], points[16], 0xcc6666);
+  triangles[18] = createTriangle(points[16], points[18], points[17], 0xcc6666);
+  triangles[19] = createTriangle(points[16], points[21], points[18], 0xcc6666);
+  triangles[20] = createTriangle(points[11], points[18], points[21], 0xcc6666);
+  triangles[21] = createTriangle(points[11], points[21], points[19], 0xcc6666);
   
-  triangles[22] = Triangle(points[0],  points[11], points[1],  0xcccc66);
-  triangles[23] = Triangle(points[11], points[12], points[1],  0xcccc66);
-  triangles[24] = Triangle(points[1],  points[12], points[2],  0xcccc66);
-  triangles[25] = Triangle(points[12], points[13], points[2],  0xcccc66);
-  triangles[26] = Triangle(points[3],  points[2],  points[14], 0xcccc66);
-  triangles[27] = Triangle(points[2],  points[13], points[14], 0xcccc66);
-  triangles[28] = Triangle(points[4],  points[3],  points[15], 0xcccc66);
-  triangles[29] = Triangle(points[3],  points[14], points[15], 0xcccc66);
-  triangles[30] = Triangle(points[5],  points[4],  points[16], 0xcccc66);
-  triangles[31] = Triangle(points[4],  points[15], points[16], 0xcccc66);
-  triangles[32] = Triangle(points[6],  points[5],  points[17], 0xcccc66);
-  triangles[33] = Triangle(points[5],  points[16], points[17], 0xcccc66);
-  triangles[34] = Triangle(points[7],  points[6],  points[18], 0xcccc66);
-  triangles[35] = Triangle(points[6],  points[17], points[18], 0xcccc66);
-  triangles[36] = Triangle(points[0],  points[7],  points[11], 0xcccc66);
-  triangles[37] = Triangle(points[7],  points[18], points[11], 0xcccc66);
-  triangles[38] = Triangle(points[8],  points[9],  points[19], 0xcccc66);
-  triangles[39] = Triangle(points[9],  points[20], points[19], 0xcccc66);
-  triangles[40] = Triangle(points[9],  points[10], points[20], 0xcccc66);
-  triangles[41] = Triangle(points[10], points[21], points[20], 0xcccc66);
-  triangles[42] = Triangle(points[10], points[8],  points[21], 0xcccc66);
-  triangles[43] = Triangle(points[8],  points[19], points[21], 0xcccc66);
+  triangles[22] = createTriangle(points[0],  points[11], points[1],  0xcccc66);
+  triangles[23] = createTriangle(points[11], points[12], points[1],  0xcccc66);
+  triangles[24] = createTriangle(points[1],  points[12], points[2],  0xcccc66);
+  triangles[25] = createTriangle(points[12], points[13], points[2],  0xcccc66);
+  triangles[26] = createTriangle(points[3],  points[2],  points[14], 0xcccc66);
+  triangles[27] = createTriangle(points[2],  points[13], points[14], 0xcccc66);
+  triangles[28] = createTriangle(points[4],  points[3],  points[15], 0xcccc66);
+  triangles[29] = createTriangle(points[3],  points[14], points[15], 0xcccc66);
+  triangles[30] = createTriangle(points[5],  points[4],  points[16], 0xcccc66);
+  triangles[31] = createTriangle(points[4],  points[15], points[16], 0xcccc66);
+  triangles[32] = createTriangle(points[6],  points[5],  points[17], 0xcccc66);
+  triangles[33] = createTriangle(points[5],  points[16], points[17], 0xcccc66);
+  triangles[34] = createTriangle(points[7],  points[6],  points[18], 0xcccc66);
+  triangles[35] = createTriangle(points[6],  points[17], points[18], 0xcccc66);
+  triangles[36] = createTriangle(points[0],  points[7],  points[11], 0xcccc66);
+  triangles[37] = createTriangle(points[7],  points[18], points[11], 0xcccc66);
+  triangles[38] = createTriangle(points[8],  points[9],  points[19], 0xcccc66);
+  triangles[39] = createTriangle(points[9],  points[20], points[19], 0xcccc66);
+  triangles[40] = createTriangle(points[9],  points[10], points[20], 0xcccc66);
+  triangles[41] = createTriangle(points[10], points[21], points[20], 0xcccc66);
+  triangles[42] = createTriangle(points[10], points[8],  points[21], 0xcccc66);
+  triangles[43] = createTriangle(points[8],  points[19], points[21], 0xcccc66);
 
-  var light = Light();
+  var light = createLight();
   for (i = 0; i < triangles.length; i++) {
     triangles[i].light = light;
   }
 
-  var triangle_graphics = doodle.Sprite();
+  var triangle_graphics = doodle.createSprite();
   layer0.addChild(triangle_graphics);
 
   display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
@@ -141,6 +141,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
   </body>
 </html>

@@ -12,18 +12,18 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
   var angle = 0;
   
-  var display = doodle.Display("#my_display");
+  var display = doodle.createDisplay("#display");
   display.frameRate = 20;
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
-  var box = doodle.Sprite();
+  var box = doodle.createSprite();
   box.graphics.beginFill(0xff0000);
   box.graphics.rect(-50, -50, 100, 100);
   box.graphics.endFill();
@@ -35,7 +35,7 @@ function init_scene () {
     angle += 0.05;
     var cos = Math.cos(angle),
         sin = Math.sin(angle);
-    box.transform = doodle.geom.Matrix( cos, sin,
+    box.transform = doodle.geom.createMatrix( cos, sin,
                                        -sin, cos,
                                        display.width/2, display.height/2);
   }
@@ -44,6 +44,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
   </body>
 </html>

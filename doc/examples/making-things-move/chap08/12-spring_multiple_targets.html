@@ -13,7 +13,7 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
@@ -23,16 +23,16 @@ function init_scene () {
       numHandles = 3,
       isDragging = null;
   
-  display = doodle.Display("#my_display");
+  display = doodle.createDisplay("#display");
   display.frameRate = 20;
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
-  var ball = Ball(20);
+  var ball = createBall(20);
   layer0.addChild(ball);
   
   for (var i = 0; i < numHandles; i++) {
-    var handle = Ball(10, 0x0000ff);
+    var handle = createBall(10, 0x0000ff);
     handle.id = "handle"+i;
     handle.x = Math.random() * display.width;
     handle.y = Math.random() * display.height;
@@ -41,7 +41,7 @@ function init_scene () {
     handles.push(handle);
   }
 
-  var spring_line = doodle.Sprite();
+  var spring_line = doodle.createSprite();
   layer0.addChild(spring_line);
 
   display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
@@ -91,6 +91,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
   </body>
 </html>

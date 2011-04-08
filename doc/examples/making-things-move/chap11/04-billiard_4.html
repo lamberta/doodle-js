@@ -13,18 +13,18 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
   var bounce = -1.0;
   
-  var display = doodle.Display("#my_display");
+  var display = doodle.createDisplay("#display");
   display.frameRate = 20;
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
-  var ball0 = Ball(150);
+  var ball0 = createBall(150);
   ball0.mass = 2;
   ball0.x = display.width - 200;
   ball0.y = display.height - 200;
@@ -32,7 +32,7 @@ function init_scene () {
   ball0.vy = Math.random() * 10 - 5;
   layer0.addChild(ball0);
 
-  var ball1 = Ball(90);
+  var ball1 = createBall(90);
   ball1.mass = 1;
   ball1.x = 100;
   ball1.y = 100;
@@ -142,6 +142,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
   </body>
 </html>

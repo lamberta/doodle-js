@@ -13,7 +13,7 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
@@ -21,12 +21,12 @@ function init_scene () {
       boxes = [],
       gravity = 0.2;
   
-  var display = doodle.Display("#my_display");
+  var display = doodle.createDisplay("#display");
   display.frameRate = 20;
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
-  createBox();
+  make_box();
 
   display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
@@ -36,18 +36,18 @@ function init_scene () {
 
     if (box.y + box.height / 2 > display.height) {
       box.y = display.height - box.height / 2;
-      createBox();
+      make_box();
     }
     for (var i = 0; i < boxes.length; i++) {
       if (box !== boxes[i] && box.hitTestObject(boxes[i])) {
         box.y = boxes[i].y - boxes[i].height / 2 - box.height / 2;
-        createBox();
+        make_box();
       }
     }
   }
 
-  function createBox () {
-    box = Box(Math.random() * 40 + 10, Math.random() * 40 + 10);
+  function make_box () {
+    box = createBox(Math.random() * 40 + 10, Math.random() * 40 + 10);
     box.x = Math.random() * display.width;
     layer0.addChild(box);
     boxes.push(box);
@@ -57,6 +57,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
   </body>
 </html>

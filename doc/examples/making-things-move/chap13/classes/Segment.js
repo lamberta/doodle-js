@@ -1,6 +1,6 @@
-function Segment (segmentWidth, segmentHeight, color) {
+function createSegment (segmentWidth, segmentHeight, color) {
   color = color || 0xffffff;
-  return doodle.Sprite(function () {
+  return doodle.createSprite(function () {
     this.segmentWidth = segmentWidth;
     this.segmentHeight = segmentHeight;
     this.vx = 0;

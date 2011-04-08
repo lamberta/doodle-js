@@ -13,15 +13,15 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
   var numDots = 100;
   
-  var display = doodle.Display("#my_display");
+  var display = doodle.createDisplay("#display", {frameRate: 15});
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
   //help with property lookup times
   var random = Math.random,
@@ -32,7 +32,7 @@ function init_scene () {
       x2;
   
   for (var i = 0; i < numDots; i++) {
-    dot = Ball(1, 0);
+    dot = createBall(1, 0);
     x1 = random() * width;
     x2 = random() * width;
     dot.x = (x1 + x2) / 2;
@@ -44,6 +44,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #ffffff;"></div>
+    <div id="display" style="background-color: #fff; width: 800px; height: 600px;"></div>
   </body>
 </html>

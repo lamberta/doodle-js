@@ -1,8 +1,8 @@
-function Box (width, height, color) {
+function createBox (width, height, color) {
   width = (width === undefined) ? 50 : width;
   height = (height === undefined) ? 50 : height;
   color = color || "#ff0000";
-  return doodle.Sprite(function () {
+  return doodle.createSprite(function () {
     this.vx = 0;
     this.vy = 0;
     

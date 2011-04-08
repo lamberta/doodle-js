@@ -1,5 +1,5 @@
 
-function SimpleSlider (min, max, value) {
+function createSimpleSlider (min, max, value) {
   //parameter defaults
   min = (min === undefined) ? 0 : min;
   max = (max === undefined) ? 100 : max;
@@ -25,14 +25,14 @@ function SimpleSlider (min, max, value) {
   _max = max;
   _value = Math.min(Math.max(value, min), max);
 
-  var simple_slider =  doodle.Sprite();
+  var simple_slider =  doodle.createSprite();
   init();
 
   function init () {
-    _back = doodle.Sprite();
+    _back = doodle.createSprite();
     simple_slider.addChild(_back);
 
-    _handle = doodle.Sprite();
+    _handle = doodle.createSprite();
     simple_slider.addChild(_handle);
     _handle.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
 

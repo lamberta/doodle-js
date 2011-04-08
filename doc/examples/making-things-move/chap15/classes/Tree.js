@@ -1,5 +1,5 @@
-function Tree () {
-  return doodle.Sprite(function () {
+function createTree () {
+  return doodle.createSprite(function () {
     this.xpos = 0;
     this.ypos = 0;
     this.zpos = 0;

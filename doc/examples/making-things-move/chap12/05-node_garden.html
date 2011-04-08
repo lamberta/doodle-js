@@ -13,7 +13,7 @@
  * http://www.amazon.com/gp/product/1590597915?tag=de05f-20
  *
  * Ported to JavaScript by Billy Lamberta using the Doodle.js library
- * available at http://github.com/biilly/doodle-js
+ * available at http://github.com/billyist/doodle-js
  */
 
 function init_scene () {
@@ -22,13 +22,13 @@ function init_scene () {
       minDist = 100,
       springAmount = 0.001;
   
-  var display = doodle.Display("#my_display");
+  var display = doodle.createDisplay("#display");
   display.frameRate = 20;
 
-  var layer0 = display.addLayer();
+  var layer0 = display.createLayer();
 
   for (var i=0; i < numParticles; i++) {
-    var particle = Ball(5, 0xffffff);
+    var particle = createBall(5, 0xffffff);
     particle.x = Math.random() * display.width;
     particle.y = Math.random() * display.height;
     particle.vx = Math.random() * 6 - 3;
@@ -86,6 +86,6 @@ function init_scene () {
     </script>
   </head>
   <body style="background-color: #bbbbbb;" onload="init_scene();">
-    <div id="my_display" width="800" height="600" style="background-color: #000000;"></div>
+    <div id="display" style="background-color: #000000; width: 800px; height:600px;"></div>
   </body>
 </html>

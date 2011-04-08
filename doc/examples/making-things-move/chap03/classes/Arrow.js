@@ -1,5 +1,5 @@
-function Arrow () {
-  return doodle.Sprite(function () {
+function createArrow () {
+  return doodle.createSprite(function () {
     this.graphics.lineStyle(2, "#000000", 1);
     this.graphics.beginFill("#ffff00");
     this.graphics.beginPath();

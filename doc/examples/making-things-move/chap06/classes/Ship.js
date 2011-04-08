@@ -1,5 +1,5 @@
-function Ship () {
-  return doodle.Sprite(function () {
+function createShip () {
+  return doodle.createSprite(function () {
     //method to call when key pressed
     this.draw = function (showFlame) {
       this.graphics.clear();

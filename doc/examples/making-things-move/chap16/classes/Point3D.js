@@ -1,10 +1,10 @@
-function Point3D (x, y, z) {
+function createPoint3D (x, y, z) {
   var _vpX = 0,
       _vpY = 0,
       _cX = 0,
       _cY = 0,
       _cZ = 0,
-      point3d = doodle.Sprite(function () {
+      point3d = doodle.createSprite(function () {
         this.x = (x === undefined) ? 0 : x;
         this.y = (y === undefined) ? 0 : y;
         this.z = (z === undefined) ? 0 : z;

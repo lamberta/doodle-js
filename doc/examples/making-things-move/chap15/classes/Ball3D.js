@@ -1,7 +1,7 @@
-function Ball3D (radius, color) {
+function createBall3D (radius, color) {
   radius = (radius === undefined) ? 40 : radius;
   color = (color === undefined) ? "#ff0000" : color;
-  return doodle.Sprite(function () {
+  return doodle.createSprite(function () {
     this.radius = radius;
     this.xpos = 0;
     this.ypos = 0;

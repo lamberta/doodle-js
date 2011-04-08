@@ -1,8 +1,8 @@
-function Triangle (a, b, c, color) {
+function createTriangle (a, b, c, color) {
   var pointA = a,
       pointB = b,
       pointC = c,
-      triangle = doodle.Sprite(function () {
+      triangle = doodle.createSprite(function () {
         this.color = color;
         this.light = null;
         this.draw = function (g) {

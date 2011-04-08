@@ -1,4 +1,4 @@
-function Light (x, y, z, brightness) {
+function createLight (x, y, z, brightness) {
   brightness = (brightness === undefined) ? 1 : brightness;
   
   return Object.defineProperties({
