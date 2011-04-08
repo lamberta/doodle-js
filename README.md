@@ -1,5 +1,5 @@
 # Doodle-js
-## A JavaScript Animation Library for HTML5 Canvas.
+__A JavaScript Animation Library for HTML5 Canvas.__
 
 Tested on Chrome/WebKit, looking good on Firefox 4.  
 Requires a browser with support for HTML5 Canvas and some ECMAScript 5 capabilities.
@@ -25,23 +25,26 @@ Debugging version (type-checking and some useful error messages):
 
 For more options: `./build/make-doodle -h`
 
-Reference: http://lamberta.org/doodle-js/doc/api/  
-Examples: http://lamberta.org/doodle-js/doc/demos/making\_things\_move/
+[Reference API](http://lamberta.org/doodle-js/doc/api/) 
+[Some Examples](http://lamberta.org/doodle-js/doc/demos/making_things_move/)
 
 Questions?
-Mailing list: http://groups.google.com/group/doodlejs  
+Mailing list: http://groups.google.com/group/doodlejs 
 Or, ask me on Twitter: http://twitter.com/billyist
 
-`hello-world.html`:
+[hello-world.html](./doc/examples/hello-world.html):
 
     <!doctype html>
     <html>
       <head>
-        <meta charset="utf-8"/>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hello, World!</title>
       </head>
       <body>
         <div id="display"></div>
-        <script src="./build/doodle.js"></script>
+        <script src="../../build/doodle.js"></script>
         <script>
           doodle.ready(function () {
             var display = doodle.createDisplay('#display', {width:400, height:400, frameRate:20}),
