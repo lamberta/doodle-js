@@ -32,7 +32,7 @@ Questions?
 Mailing list: http://groups.google.com/group/doodlejs 
 Or, ask me on Twitter: http://twitter.com/billyist
 
-[hello-world.html](./blob/master/doc/examples/hello-world.html):
+[hello-world.html](./doodle-js/blob/master/doc/examples/hello-world.html):
 
     <!doctype html>
     <html>
