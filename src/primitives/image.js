@@ -41,14 +41,14 @@
         image_sprite.graphics.draw(function (ctx) {
           ctx.drawImage(img_element, 0, 0);
         });
-        image_sprite.dispatchEvent(createEvent(LOAD));
+        image_sprite.emit(createEvent(LOAD));
       }
 
       function remove_image_element () {
         if (img_element !== null) {
           img_element = null;
           image_sprite.graphics.clear();
-          image_sprite.dispatchEvent(createEvent(CHANGE));
+          image_sprite.emit(createEvent(CHANGE));
         }
       }
       

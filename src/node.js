@@ -503,7 +503,7 @@
             //set new root for all descendants
             node.root = display;
             //fire Event.ADDED if now on display list
-            node.dispatchEvent(evt_addedEvent.__setTarget(null));
+            node.emit(evt_addedEvent.__setTarget(null));
           }
         }
         return node;
@@ -594,7 +594,7 @@
         //event dispatching depends on an intact scene graph
         if (this.root) {
           while (i--) {
-            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
+            child_descendants[i].emit(evt_removedEvent.__setTarget(null));
           }
           while (j--) {
             child_descendants[j].root = null;
@@ -672,7 +672,7 @@
         //event dispatching depends on an intact scene graph
         if (display) {
           while (i--) {
-            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
+            child_descendants[i].emit(evt_removedEvent.__setTarget(null));
           }
         }
         //reset root of all descendants

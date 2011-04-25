@@ -678,7 +678,7 @@
             //if not, assign load handlers
             image.onload = function () {
               img_loaded = image;
-              gfx_node.dispatchEvent(createEvent(LOAD));
+              gfx_node.emit(createEvent(LOAD));
             };
             on_image_error = function () {
               throw new URIError(gfx_node.id + "Graphics.beginPatternFill(*image*,repeat): Unable to load " + image.src);

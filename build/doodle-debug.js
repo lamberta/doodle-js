@@ -8426,31 +8426,35 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     Object.defineProperties(emitter, emitter_static_properties);
     //properties that require privacy
     Object.defineProperties(emitter, {
-      'id': (function () {
-        var id = null;
+
+      /*
+       * Attached event handlers.
+       * @return {object}
+       * @property
+       */
+      'allListeners': (function () {
+        var allListeners = {};
         return {
           enumerable: true,
           configurable: false,
-          get: function () { return (id === null) ? this.toString() : id; },
-          set: function (idVar) {
-            /*DEBUG*/
-            if (idVar !== null) {
-              type_check(idVar,'string', {label:'Emitter.id', message:"Property must be a string or null.", id:this.id});
-            }
-            /*END_DEBUG*/
-            id = idVar;
-          }
-        };
+          get: function () { return allListeners; }
+        }
       }()),
+
+      /**
+       * Returns an array of listeners for the specified event. NOT IMPLEMENTED
+       * @name listeners
+       * @param {string} type
+       * @return {array}
+       */
+      'listeners': {
+        enumerable: true,
+        configurable: false,
+        value: function (type) {
+          console.error("Emitter.listeners(type) not implemented."); 
+        }
+      }
       
-      'eventListeners': (function () {
-        var event_listeners = {};
-        return {
-          enumerable: true,
-          configurable: false,
-          get: function () { return event_listeners; }
-        };
-      }())
     });//end defineProperties
 
     //passed an initialization function
@@ -8478,28 +8482,28 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     /**
      * Registers an event listener object with an Emitter object
      * so that the listener receives notification of an event.
-     * @name addEventListener
+     * @name addListener
      * @param {string} type
      * @param {Function} listener
      * @param {boolean} useCapture
      * @throws {TypeError}
      */
-    'addEventListener': {
+    'addListener': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.addEventListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.addListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
-        var eventListeners = this.eventListeners;
+        var listeners = this.allListeners;
         
         //if new event type, create it's array to store callbacks
-        if (!eventListeners.hasOwnProperty(type)) {
-          eventListeners[type] = {capture:[], bubble:[]};
+        if (!listeners.hasOwnProperty(type)) {
+          listeners[type] = {capture:[], bubble:[]};
         }
-        eventListeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
+        listeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
         
         //object ready for events, add to receivers if not already there
         if (emitter_queue.indexOf(this) === -1) {
@@ -8510,7 +8514,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
 
     /**
      * Adds an event listener on an Emitter object.
-     * This is convenience alias for Emitter.addEventListener(type, listener, useCapture=false).
+     * This is convenience alias for Emitter.addListener(type, listener, useCapture=false).
      * @name on
      * @param {string} type
      * @param {Function} listener
@@ -8524,7 +8528,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         /*DEBUG*/
         type_check(type,'string', listener,'function', {label:'Emitter.on', params:['type','listener'], id:this.id});
         /*END_DEBUG*/
-        this.addEventListener(type, listener, false);
+        this.addListener(type, listener, false);
       }
     },
 
@@ -8546,37 +8550,37 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         /*END_DEBUG*/
         var callback = (function () {
           listener();
-          this.removeEventListener(type, callback, false);
+          this.removeListener(type, callback, false);
         }).bind(this);
-        this.addEventListener(type, callback, false);
+        this.addListener(type, callback, false);
       }
     },
 
     /**
      * Removes a listener from the Emitter object.
-     * @name removeEventListener
+     * @name removeListener
      * @param {string} type
      * @param {Function} listener
      * @param {boolean} useCapture
      * @throws {TypeError}
      */
-    'removeEventListener': {
+    'removeListener': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.removeEventListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.removeListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
-        var eventListeners = this.eventListeners,
-            handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
+        var listeners = this.allListeners,
+            handler = listeners.hasOwnProperty(type) ? listeners[type] : false,
             listeners,
             i;
         //make sure event type exists
         /*DEBUG*/
         if (!handler) {
-          console.warn("[id="+this.id+"] Emitter.removeEventListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
+          console.warn("[id="+this.id+"] Emitter.removeListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
           console.trace();
         }
         /*END_DEBUG*/
@@ -8585,7 +8589,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
           i = listeners.indexOf(listener);
           /*DEBUG*/
           if (i === -1) {
-            console.warn("[id="+this.id+"] Emitter.removeEventListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
+            console.warn("[id="+this.id+"] Emitter.removeListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
             console.trace();
           }
           /*END_DEBUG*/
@@ -8595,10 +8599,10 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
           }
           //if none left, remove handler type
           if (handler.capture.length === 0 && handler.bubble.length === 0) {
-            delete eventListeners[type];
+            delete listeners[type];
           }
           //if no more listeners, remove from object queue
-          if (Object.keys(eventListeners).length === 0) {
+          if (Object.keys(listeners).length === 0) {
             emitter_queue.splice(emitter_queue.indexOf(this), 1);
           }
         }
@@ -8618,7 +8622,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
       configurable: false,
       value: function (type, useCapture) {
         useCapture = (useCapture === undefined) ? null : useCapture;
-        var listeners = this.eventListeners;
+        var listeners = this.allListeners;
         /*DEBUG*/
         type_check(type,'string', {label:'Emitter.removeAllListeners', params:'type', id:this.id});
         if (useCapture !== null) {
@@ -8672,14 +8676,14 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         //check for listeners that match event type
         //if capture not set, using bubble listeners - like for AT_TARGET phase
         var phase = (event.eventPhase === CAPTURING_PHASE) ? 'capture' : 'bubble',
-            listeners = this.eventListeners[event.type], //obj
+            listeners = this.allListeners[event.type], //obj
             count = 0, //listener count
             rv,  //return value of handler
             i; //counter
 
         listeners = listeners && listeners[phase];
         if (listeners && listeners.length > 0) {
-          //currentTarget is the object with addEventListener
+          //currentTarget is the object with addListener
           event.__setCurrentTarget(this);
           
           //if we have any, call each handler with event object
@@ -8714,13 +8718,13 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     
     /**
      * Dispatches an event into the event flow. The event target is the
-     * Emitter object upon which the dispatchEvent() method is called.
-     * @name dispatchEvent
+     * Emitter object upon which the emit() method is called.
+     * @name emit
      * @param {doodle.events.Event} event
      * @return {boolean} true if the event was successfully dispatched.
      * @throws {TypeError}
      */
-    'dispatchEvent': {
+    'emit': {
       enumerable: true,
       writable: false,
       configurable: false,
@@ -8730,14 +8734,14 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         var target,
             evt_type = event.type,
             //check this node for event handler
-            evt_handler_p = this.eventListeners.hasOwnProperty(evt_type),
+            evt_handler_p = this.allListeners.hasOwnProperty(evt_type),
             node,
             node_path = [],
             len, //count of nodes up to root
             i; //counter
 
         /*DEBUG*/
-        type_check(event, 'Event', {label:'Emitter.dispatchEvent', params:'event', inherits:true, id:this.id});
+        type_check(event, 'Event', {label:'Emitter.emit', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         //can't dispatch an event that's already stopped
@@ -8759,7 +8763,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         while (node) {
           //only want to dispatch if there's a reason to
           if (!evt_handler_p) {
-            evt_handler_p = node.eventListeners.hasOwnProperty(evt_type);
+            evt_handler_p = node.allListeners.hasOwnProperty(evt_type);
           }
           node_path.push(node);
           node = node.parent;
@@ -8811,13 +8815,13 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     /**
      * Dispatches an event to every object with an active listener.
      * Ignores propagation path, objects come from
-     * @name broadcastEvent
+     * @name broadcast
      * @param {doodle.events.Event} event
      * @return {boolean} True if the event was successfully dispatched.
      * @throws {TypeError}
      * @throws {Error}
      */
-    'broadcastEvent': {
+    'broadcast': {
       enumerable: true,
       writable: false,
       configurable: false,
@@ -8826,11 +8830,11 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
             emitters = emitter_queue,
             dq_count = emitters.length;
         /*DEBUG*/
-        type_check(event, 'Event', {label:'Emitter.broadcastEvent', params:'event', inherits:true, id:this.id});
+        type_check(event, 'Event', {label:'Emitter.broadcast', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         if (event.__cancel) {
-          throw new Error(this+'.broadcastEvent: Can not dispatch a cancelled event.');
+          throw new Error(this+'.broadcast: Can not dispatch a cancelled event.');
         }
         
         //set target to the object that dispatched it
@@ -8840,8 +8844,8 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         }
 
         while (dq_count--) {
-          //hasEventListener
-          if (emitters[dq_count].eventListeners.hasOwnProperty(evt_type)) {
+          //hasListener
+          if (emitters[dq_count].allListeners.hasOwnProperty(evt_type)) {
             emitters[dq_count].handleEvent(event);
           }
           //event cancelled in listener?
@@ -8857,28 +8861,28 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     /**
      * Checks whether the Emitter object has any listeners
      * registered for a specific type of event.
-     * @name hasEventListener
+     * @name hasListener
      * @param {string} type
      * @return {boolean}
      * @throws {TypeError}
      */
-    'hasEventListener': {
+    'hasListener': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        type_check(type,'string', {label:'Emitter.hasEventListener', params:'type', id:this.id});
+        type_check(type,'string', {label:'Emitter.hasListener', params:'type', id:this.id});
         /*END_DEBUG*/
-        return this.eventListeners.hasOwnProperty(type);
+        return this.allListeners.hasOwnProperty(type);
       }
     },
 
     /**
      * Checks whether an event listener is registered with this Emitter object
      * or any of its ancestors for the specified event type.
-     * The difference between the hasEventListener() and the willTrigger() methods is
-     * that hasEventListener() examines only the object to which it belongs,
+     * The difference between the hasListener() and the willTrigger() methods is
+     * that hasListener() examines only the object to which it belongs,
      * whereas the willTrigger() method examines the entire event flow for the
      * event specified by the type parameter.
      * @name willTrigger
@@ -8894,8 +8898,8 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         /*DEBUG*/
         type_check(type,'string', {label:'Emitter.willTrigger', params:'type', id:this.id});
         /*END_DEBUG*/
-        if (this.eventListeners.hasOwnProperty(type)) {
-          //hasEventListener
+        if (this.allListeners.hasOwnProperty(type)) {
+          //hasListener
           return true;
         }
         var children = this.children,
@@ -9450,7 +9454,7 @@ doodle.Emitter.isEmitter = function (obj) {
             //set new root for all descendants
             node.root = display;
             //fire Event.ADDED if now on display list
-            node.dispatchEvent(evt_addedEvent.__setTarget(null));
+            node.emit(evt_addedEvent.__setTarget(null));
           }
         }
         return node;
@@ -9541,7 +9545,7 @@ doodle.Emitter.isEmitter = function (obj) {
         //event dispatching depends on an intact scene graph
         if (this.root) {
           while (i--) {
-            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
+            child_descendants[i].emit(evt_removedEvent.__setTarget(null));
           }
           while (j--) {
             child_descendants[j].root = null;
@@ -9619,7 +9623,7 @@ doodle.Emitter.isEmitter = function (obj) {
         //event dispatching depends on an intact scene graph
         if (display) {
           while (i--) {
-            child_descendants[i].dispatchEvent(evt_removedEvent.__setTarget(null));
+            child_descendants[i].emit(evt_removedEvent.__setTarget(null));
           }
         }
         //reset root of all descendants
@@ -11019,7 +11023,7 @@ doodle.Sprite.isSprite = function (obj) {
             //if not, assign load handlers
             image.onload = function () {
               img_loaded = image;
-              gfx_node.dispatchEvent(createEvent(LOAD));
+              gfx_node.emit(createEvent(LOAD));
             };
             on_image_error = function () {
               throw new URIError(gfx_node.id + "Graphics.beginPatternFill(*image*,repeat): Unable to load " + image.src);
@@ -12038,8 +12042,8 @@ doodle.Layer.isLayer = function (obj) {
       //Add display handlers
       //Redraw scene graph when children are added and removed.
       //**when objects removed in event loop, causing it to re-run before its finished
-      //$display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
-      //$display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
+      //$display.addListener(doodle.events.Event.ADDED, on_create_frame);
+      //$display.addListener(doodle.events.Event.REMOVED, on_create_frame);
       
       //Add keyboard listeners to document.
       document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
@@ -12644,7 +12648,7 @@ doodle.Layer.isLayer = function (obj) {
 
       //update position
       while (recv_count--) {
-        if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
+        if (receivers[recv_count].allListeners.hasOwnProperty('enterFrame')) {
           receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
         }
       }
@@ -12696,7 +12700,7 @@ doodle.Layer.isLayer = function (obj) {
       }
       
       while (recv_count--) {
-        if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
+        if (receivers[recv_count].allListeners.hasOwnProperty('enterFrame')) {
           receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
         }
       }
@@ -12846,7 +12850,7 @@ doodle.Layer.isLayer = function (obj) {
     /*END_DEBUG*/
     while (count--) {
       if (path[count].__getBounds(display).contains(x, y)) {
-        path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        path[count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
@@ -12865,24 +12869,24 @@ doodle.Layer.isLayer = function (obj) {
         break;
       }
       if (path[count].__getBounds(display).contains(x, y)) {
-        path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        path[count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
     //if no layers, dispatch from display
     if (layer_count === 0) {
-      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      display.emit(mouseEvent.__copyMouseEventProperties(evt, null));
       return true;
     }
     //check layers, must have handler to dispatch
     while (layer_count--) {
-      if (layers[layer_count].eventListeners.hasOwnProperty(evt_type)) {
-        layers[layer_count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      if (layers[layer_count].allListeners.hasOwnProperty(evt_type)) {
+        layers[layer_count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
     //if nothing else, top layer dispatch to display
-    layers[--count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+    layers[--count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
     return true;
   };
   }());
@@ -12914,12 +12918,12 @@ doodle.Layer.isLayer = function (obj) {
           /* @type {boolean} */
           node.__pointInBounds = true;
           //dispatch events to node and up parent chain
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
           return true;
         }
         //while in-bounds, dispatch mousemove
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       } else {
         //point not on sprite
@@ -12927,8 +12931,8 @@ doodle.Layer.isLayer = function (obj) {
           /* @type {boolean} */
           node.__pointInBounds = false;
           //dispatch events to node and up parent chain
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
           return true;
         }
       }
@@ -12954,20 +12958,20 @@ doodle.Layer.isLayer = function (obj) {
         if (!node.__pointInBounds) {
           /* @type {boolean} */
           node.__pointInBounds = true;
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
           return true;
         }
         //while in-bounds, dispatch mousemove
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       } else {
         //point not on sprite
         if (node.__pointInBounds) {
           /* @type {boolean} */
           node.__pointInBounds = false;
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
           return true;
         }
       }
@@ -12977,12 +12981,12 @@ doodle.Layer.isLayer = function (obj) {
     if (layer_count === 0) {
       if (!display.__pointInBounds) {
         display.__pointInBounds = true;
-        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+        display.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+        display.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
         return true;
       }
       //while in-bounds, dispatch mousemove
-      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      display.emit(mouseEvent.__copyMouseEventProperties(evt, null));
       return true;
     }
     
@@ -12993,20 +12997,20 @@ doodle.Layer.isLayer = function (obj) {
       if (!node.__pointInBounds) {
         /* @type {boolean} */
         node.__pointInBounds = true;
-        if (node.eventListeners.hasOwnProperty('mouseover')) {
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+        if (node.allListeners.hasOwnProperty('mouseover')) {
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
           emitter_p = true;
         }
-        if (node.eventListeners.hasOwnProperty('mouseenter')) {
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+        if (node.allListeners.hasOwnProperty('mouseenter')) {
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
           emitter_p = true;
         }
         if (emitter_p) {
           return true;
         }
       }
-      if (node.eventListeners.hasOwnProperty('mousemove')) {
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      if (node.allListeners.hasOwnProperty('mousemove')) {
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
@@ -13015,12 +13019,12 @@ doodle.Layer.isLayer = function (obj) {
     node = layers[--count];
     if (!display.__pointInBounds) {
       display.__pointInBounds = true;
-      if (display.eventListeners.hasOwnProperty('mouseover')) {
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+      if (display.allListeners.hasOwnProperty('mouseover')) {
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
         emitter_p = true;
       }
-      if (display.eventListeners.hasOwnProperty('mouseenter')) {
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+      if (display.allListeners.hasOwnProperty('mouseenter')) {
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
         emitter_p = true;
       }
       if (emitter_p) {
@@ -13028,8 +13032,8 @@ doodle.Layer.isLayer = function (obj) {
       }
     }
     //finally check mousemove
-    if (display.eventListeners.hasOwnProperty('mousemove')) {
-      node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+    if (display.allListeners.hasOwnProperty('mousemove')) {
+      node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
       return true;
     }
 
@@ -13055,8 +13059,8 @@ doodle.Layer.isLayer = function (obj) {
       //no layers so no scene path, display will dispatch
       /* @type {boolean} */
       top_node.__pointInBounds = false;
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
       return true;
     } else {
       //reusing var - this is the top layer
@@ -13069,8 +13073,8 @@ doodle.Layer.isLayer = function (obj) {
         path[layer_count].__pointInBounds = false;
       }
       //top layer dispatch
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
       return true;
     }
   };
@@ -13082,7 +13086,7 @@ doodle.Layer.isLayer = function (obj) {
    * @private
    */
   dispatch_keyboard_event = function (evt, keyboardEvent, display) {
-    display.broadcastEvent(keyboardEvent.__copyKeyboardEventProperties(evt, null));
+    display.broadcast(keyboardEvent.__copyKeyboardEventProperties(evt, null));
     return true;
   };
   
@@ -14012,14 +14016,14 @@ Object.defineProperty(doodle, 'TextBaseline', {
         image_sprite.graphics.draw(function (ctx) {
           ctx.drawImage(img_element, 0, 0);
         });
-        image_sprite.dispatchEvent(createEvent(LOAD));
+        image_sprite.emit(createEvent(LOAD));
       }
 
       function remove_image_element () {
         if (img_element !== null) {
           img_element = null;
           image_sprite.graphics.clear();
-          image_sprite.dispatchEvent(createEvent(CHANGE));
+          image_sprite.emit(createEvent(CHANGE));
         }
       }
       

@@ -30,31 +30,35 @@
     Object.defineProperties(emitter, emitter_static_properties);
     //properties that require privacy
     Object.defineProperties(emitter, {
-      'id': (function () {
-        var id = null;
+
+      /*
+       * Attached event handlers.
+       * @return {object}
+       * @property
+       */
+      'allListeners': (function () {
+        var allListeners = {};
         return {
           enumerable: true,
           configurable: false,
-          get: function () { return (id === null) ? this.toString() : id; },
-          set: function (idVar) {
-            /*DEBUG*/
-            if (idVar !== null) {
-              type_check(idVar,'string', {label:'Emitter.id', message:"Property must be a string or null.", id:this.id});
-            }
-            /*END_DEBUG*/
-            id = idVar;
-          }
-        };
+          get: function () { return allListeners; }
+        }
       }()),
+
+      /**
+       * Returns an array of listeners for the specified event. NOT IMPLEMENTED
+       * @name listeners
+       * @param {string} type
+       * @return {array}
+       */
+      'listeners': {
+        enumerable: true,
+        configurable: false,
+        value: function (type) {
+          console.error("Emitter.listeners(type) not implemented."); 
+        }
+      }
       
-      'eventListeners': (function () {
-        var event_listeners = {};
-        return {
-          enumerable: true,
-          configurable: false,
-          get: function () { return event_listeners; }
-        };
-      }())
     });//end defineProperties
 
     //passed an initialization function
@@ -82,28 +86,28 @@
     /**
      * Registers an event listener object with an Emitter object
      * so that the listener receives notification of an event.
-     * @name addEventListener
+     * @name addListener
      * @param {string} type
      * @param {Function} listener
      * @param {boolean} useCapture
      * @throws {TypeError}
      */
-    'addEventListener': {
+    'addListener': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.addEventListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.addListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
-        var eventListeners = this.eventListeners;
+        var listeners = this.allListeners;
         
         //if new event type, create it's array to store callbacks
-        if (!eventListeners.hasOwnProperty(type)) {
-          eventListeners[type] = {capture:[], bubble:[]};
+        if (!listeners.hasOwnProperty(type)) {
+          listeners[type] = {capture:[], bubble:[]};
         }
-        eventListeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
+        listeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
         
         //object ready for events, add to receivers if not already there
         if (emitter_queue.indexOf(this) === -1) {
@@ -114,7 +118,7 @@
 
     /**
      * Adds an event listener on an Emitter object.
-     * This is convenience alias for Emitter.addEventListener(type, listener, useCapture=false).
+     * This is convenience alias for Emitter.addListener(type, listener, useCapture=false).
      * @name on
      * @param {string} type
      * @param {Function} listener
@@ -128,7 +132,7 @@
         /*DEBUG*/
         type_check(type,'string', listener,'function', {label:'Emitter.on', params:['type','listener'], id:this.id});
         /*END_DEBUG*/
-        this.addEventListener(type, listener, false);
+        this.addListener(type, listener, false);
       }
     },
 
@@ -150,37 +154,37 @@
         /*END_DEBUG*/
         var callback = (function () {
           listener();
-          this.removeEventListener(type, callback, false);
+          this.removeListener(type, callback, false);
         }).bind(this);
-        this.addEventListener(type, callback, false);
+        this.addListener(type, callback, false);
       }
     },
 
     /**
      * Removes a listener from the Emitter object.
-     * @name removeEventListener
+     * @name removeListener
      * @param {string} type
      * @param {Function} listener
      * @param {boolean} useCapture
      * @throws {TypeError}
      */
-    'removeEventListener': {
+    'removeListener': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.removeEventListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.removeListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
-        var eventListeners = this.eventListeners,
-            handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
+        var listeners = this.allListeners,
+            handler = listeners.hasOwnProperty(type) ? listeners[type] : false,
             listeners,
             i;
         //make sure event type exists
         /*DEBUG*/
         if (!handler) {
-          console.warn("[id="+this.id+"] Emitter.removeEventListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
+          console.warn("[id="+this.id+"] Emitter.removeListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
           console.trace();
         }
         /*END_DEBUG*/
@@ -189,7 +193,7 @@
           i = listeners.indexOf(listener);
           /*DEBUG*/
           if (i === -1) {
-            console.warn("[id="+this.id+"] Emitter.removeEventListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
+            console.warn("[id="+this.id+"] Emitter.removeListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
             console.trace();
           }
           /*END_DEBUG*/
@@ -199,10 +203,10 @@
           }
           //if none left, remove handler type
           if (handler.capture.length === 0 && handler.bubble.length === 0) {
-            delete eventListeners[type];
+            delete listeners[type];
           }
           //if no more listeners, remove from object queue
-          if (Object.keys(eventListeners).length === 0) {
+          if (Object.keys(listeners).length === 0) {
             emitter_queue.splice(emitter_queue.indexOf(this), 1);
           }
         }
@@ -222,7 +226,7 @@
       configurable: false,
       value: function (type, useCapture) {
         useCapture = (useCapture === undefined) ? null : useCapture;
-        var listeners = this.eventListeners;
+        var listeners = this.allListeners;
         /*DEBUG*/
         type_check(type,'string', {label:'Emitter.removeAllListeners', params:'type', id:this.id});
         if (useCapture !== null) {
@@ -276,14 +280,14 @@
         //check for listeners that match event type
         //if capture not set, using bubble listeners - like for AT_TARGET phase
         var phase = (event.eventPhase === CAPTURING_PHASE) ? 'capture' : 'bubble',
-            listeners = this.eventListeners[event.type], //obj
+            listeners = this.allListeners[event.type], //obj
             count = 0, //listener count
             rv,  //return value of handler
             i; //counter
 
         listeners = listeners && listeners[phase];
         if (listeners && listeners.length > 0) {
-          //currentTarget is the object with addEventListener
+          //currentTarget is the object with addListener
           event.__setCurrentTarget(this);
           
           //if we have any, call each handler with event object
@@ -318,13 +322,13 @@
     
     /**
      * Dispatches an event into the event flow. The event target is the
-     * Emitter object upon which the dispatchEvent() method is called.
-     * @name dispatchEvent
+     * Emitter object upon which the emit() method is called.
+     * @name emit
      * @param {doodle.events.Event} event
      * @return {boolean} true if the event was successfully dispatched.
      * @throws {TypeError}
      */
-    'dispatchEvent': {
+    'emit': {
       enumerable: true,
       writable: false,
       configurable: false,
@@ -334,14 +338,14 @@
         var target,
             evt_type = event.type,
             //check this node for event handler
-            evt_handler_p = this.eventListeners.hasOwnProperty(evt_type),
+            evt_handler_p = this.allListeners.hasOwnProperty(evt_type),
             node,
             node_path = [],
             len, //count of nodes up to root
             i; //counter
 
         /*DEBUG*/
-        type_check(event, 'Event', {label:'Emitter.dispatchEvent', params:'event', inherits:true, id:this.id});
+        type_check(event, 'Event', {label:'Emitter.emit', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         //can't dispatch an event that's already stopped
@@ -363,7 +367,7 @@
         while (node) {
           //only want to dispatch if there's a reason to
           if (!evt_handler_p) {
-            evt_handler_p = node.eventListeners.hasOwnProperty(evt_type);
+            evt_handler_p = node.allListeners.hasOwnProperty(evt_type);
           }
           node_path.push(node);
           node = node.parent;
@@ -415,13 +419,13 @@
     /**
      * Dispatches an event to every object with an active listener.
      * Ignores propagation path, objects come from
-     * @name broadcastEvent
+     * @name broadcast
      * @param {doodle.events.Event} event
      * @return {boolean} True if the event was successfully dispatched.
      * @throws {TypeError}
      * @throws {Error}
      */
-    'broadcastEvent': {
+    'broadcast': {
       enumerable: true,
       writable: false,
       configurable: false,
@@ -430,11 +434,11 @@
             emitters = emitter_queue,
             dq_count = emitters.length;
         /*DEBUG*/
-        type_check(event, 'Event', {label:'Emitter.broadcastEvent', params:'event', inherits:true, id:this.id});
+        type_check(event, 'Event', {label:'Emitter.broadcast', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         if (event.__cancel) {
-          throw new Error(this+'.broadcastEvent: Can not dispatch a cancelled event.');
+          throw new Error(this+'.broadcast: Can not dispatch a cancelled event.');
         }
         
         //set target to the object that dispatched it
@@ -444,8 +448,8 @@
         }
 
         while (dq_count--) {
-          //hasEventListener
-          if (emitters[dq_count].eventListeners.hasOwnProperty(evt_type)) {
+          //hasListener
+          if (emitters[dq_count].allListeners.hasOwnProperty(evt_type)) {
             emitters[dq_count].handleEvent(event);
           }
           //event cancelled in listener?
@@ -461,28 +465,28 @@
     /**
      * Checks whether the Emitter object has any listeners
      * registered for a specific type of event.
-     * @name hasEventListener
+     * @name hasListener
      * @param {string} type
      * @return {boolean}
      * @throws {TypeError}
      */
-    'hasEventListener': {
+    'hasListener': {
       enumerable: true,
       writable: false,
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        type_check(type,'string', {label:'Emitter.hasEventListener', params:'type', id:this.id});
+        type_check(type,'string', {label:'Emitter.hasListener', params:'type', id:this.id});
         /*END_DEBUG*/
-        return this.eventListeners.hasOwnProperty(type);
+        return this.allListeners.hasOwnProperty(type);
       }
     },
 
     /**
      * Checks whether an event listener is registered with this Emitter object
      * or any of its ancestors for the specified event type.
-     * The difference between the hasEventListener() and the willTrigger() methods is
-     * that hasEventListener() examines only the object to which it belongs,
+     * The difference between the hasListener() and the willTrigger() methods is
+     * that hasListener() examines only the object to which it belongs,
      * whereas the willTrigger() method examines the entire event flow for the
      * event specified by the type parameter.
      * @name willTrigger
@@ -498,8 +502,8 @@
         /*DEBUG*/
         type_check(type,'string', {label:'Emitter.willTrigger', params:'type', id:this.id});
         /*END_DEBUG*/
-        if (this.eventListeners.hasOwnProperty(type)) {
-          //hasEventListener
+        if (this.allListeners.hasOwnProperty(type)) {
+          //hasListener
           return true;
         }
         var children = this.children,

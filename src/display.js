@@ -135,8 +135,8 @@
       //Add display handlers
       //Redraw scene graph when children are added and removed.
       //**when objects removed in event loop, causing it to re-run before its finished
-      //$display.addEventListener(doodle.events.Event.ADDED, on_create_frame);
-      //$display.addEventListener(doodle.events.Event.REMOVED, on_create_frame);
+      //$display.addListener(doodle.events.Event.ADDED, on_create_frame);
+      //$display.addListener(doodle.events.Event.REMOVED, on_create_frame);
       
       //Add keyboard listeners to document.
       document.addEventListener(doodle.events.KeyboardEvent.KEY_PRESS, on_keyboard_event, false);
@@ -741,7 +741,7 @@
 
       //update position
       while (recv_count--) {
-        if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
+        if (receivers[recv_count].allListeners.hasOwnProperty('enterFrame')) {
           receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
         }
       }
@@ -793,7 +793,7 @@
       }
       
       while (recv_count--) {
-        if (receivers[recv_count].eventListeners.hasOwnProperty('enterFrame')) {
+        if (receivers[recv_count].allListeners.hasOwnProperty('enterFrame')) {
           receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
         }
       }
@@ -943,7 +943,7 @@
     /*END_DEBUG*/
     while (count--) {
       if (path[count].__getBounds(display).contains(x, y)) {
-        path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        path[count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
@@ -962,24 +962,24 @@
         break;
       }
       if (path[count].__getBounds(display).contains(x, y)) {
-        path[count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        path[count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
     //if no layers, dispatch from display
     if (layer_count === 0) {
-      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      display.emit(mouseEvent.__copyMouseEventProperties(evt, null));
       return true;
     }
     //check layers, must have handler to dispatch
     while (layer_count--) {
-      if (layers[layer_count].eventListeners.hasOwnProperty(evt_type)) {
-        layers[layer_count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      if (layers[layer_count].allListeners.hasOwnProperty(evt_type)) {
+        layers[layer_count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
     //if nothing else, top layer dispatch to display
-    layers[--count].dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+    layers[--count].emit(mouseEvent.__copyMouseEventProperties(evt, null));
     return true;
   };
   }());
@@ -1011,12 +1011,12 @@
           /* @type {boolean} */
           node.__pointInBounds = true;
           //dispatch events to node and up parent chain
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
           return true;
         }
         //while in-bounds, dispatch mousemove
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       } else {
         //point not on sprite
@@ -1024,8 +1024,8 @@
           /* @type {boolean} */
           node.__pointInBounds = false;
           //dispatch events to node and up parent chain
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
           return true;
         }
       }
@@ -1051,20 +1051,20 @@
         if (!node.__pointInBounds) {
           /* @type {boolean} */
           node.__pointInBounds = true;
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
           return true;
         }
         //while in-bounds, dispatch mousemove
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       } else {
         //point not on sprite
         if (node.__pointInBounds) {
           /* @type {boolean} */
           node.__pointInBounds = false;
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
           return true;
         }
       }
@@ -1074,12 +1074,12 @@
     if (layer_count === 0) {
       if (!display.__pointInBounds) {
         display.__pointInBounds = true;
-        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-        display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+        display.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+        display.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
         return true;
       }
       //while in-bounds, dispatch mousemove
-      display.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      display.emit(mouseEvent.__copyMouseEventProperties(evt, null));
       return true;
     }
     
@@ -1090,20 +1090,20 @@
       if (!node.__pointInBounds) {
         /* @type {boolean} */
         node.__pointInBounds = true;
-        if (node.eventListeners.hasOwnProperty('mouseover')) {
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+        if (node.allListeners.hasOwnProperty('mouseover')) {
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
           emitter_p = true;
         }
-        if (node.eventListeners.hasOwnProperty('mouseenter')) {
-          node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+        if (node.allListeners.hasOwnProperty('mouseenter')) {
+          node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
           emitter_p = true;
         }
         if (emitter_p) {
           return true;
         }
       }
-      if (node.eventListeners.hasOwnProperty('mousemove')) {
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+      if (node.allListeners.hasOwnProperty('mousemove')) {
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
         return true;
       }
     }
@@ -1112,12 +1112,12 @@
     node = layers[--count];
     if (!display.__pointInBounds) {
       display.__pointInBounds = true;
-      if (display.eventListeners.hasOwnProperty('mouseover')) {
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
+      if (display.allListeners.hasOwnProperty('mouseover')) {
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
         emitter_p = true;
       }
-      if (display.eventListeners.hasOwnProperty('mouseenter')) {
-        node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
+      if (display.allListeners.hasOwnProperty('mouseenter')) {
+        node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
         emitter_p = true;
       }
       if (emitter_p) {
@@ -1125,8 +1125,8 @@
       }
     }
     //finally check mousemove
-    if (display.eventListeners.hasOwnProperty('mousemove')) {
-      node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null));
+    if (display.allListeners.hasOwnProperty('mousemove')) {
+      node.emit(mouseEvent.__copyMouseEventProperties(evt, null));
       return true;
     }
 
@@ -1152,8 +1152,8 @@
       //no layers so no scene path, display will dispatch
       /* @type {boolean} */
       top_node.__pointInBounds = false;
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
       return true;
     } else {
       //reusing var - this is the top layer
@@ -1166,8 +1166,8 @@
         path[layer_count].__pointInBounds = false;
       }
       //top layer dispatch
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
-      top_node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseout'));
+      top_node.emit(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseleave'));
       return true;
     }
   };
@@ -1179,7 +1179,7 @@
    * @private
    */
   dispatch_keyboard_event = function (evt, keyboardEvent, display) {
-    display.broadcastEvent(keyboardEvent.__copyKeyboardEventProperties(evt, null));
+    display.broadcast(keyboardEvent.__copyKeyboardEventProperties(evt, null));
     return true;
   };
   
