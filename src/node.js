@@ -20,12 +20,12 @@
   /**
    * @name doodle.createNode
    * @class
-   * @augments doodle.EventDispatcher
+   * @augments doodle.Emitter
    * @param {string=} id|initializer
    * @return {doodle.Node}
    */
   doodle.Node = doodle.createNode = function (id) {
-    var node = Object.create(doodle.createEventDispatcher());
+    var node = Object.create(doodle.createEmitter());
     
     /*DEBUG*/
     if (arguments.length > 1) {
@@ -824,7 +824,7 @@
     },
 
     /**
-     * Swap positions with another node in the parents child list.
+     * Swap positions with a sibling node.
      * @name swapDepths
      * @param {Node} node
      * @throws {TypeError}
@@ -834,7 +834,7 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function I(node) {
+      value: function (node) {
         var parent = this.parent,
             children;
         /*DEBUG*/

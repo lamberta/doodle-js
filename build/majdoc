@@ -1,4 +1,4 @@
-#!/bin/bash
+s#!/bin/bash
 ##
 ## More-or-less Another Javascript Doc tool
 ##
@@ -37,21 +37,21 @@ CLASS_INHERITS['Point']='Object'
 CLASS_SRC['Rectangle']="$SRC_HOME/geom/rectangle.js"
 CLASS_INHERITS['Rectangle']='Object'
 
-CLASS_SRC['EventDispatcher']="$SRC_HOME/eventdispatcher.js"
-CLASS_INHERITS['EventDispatcher']='Object'
+CLASS_SRC['Emitter']="$SRC_HOME/emitter.js"
+CLASS_INHERITS['Emitter']='Object'
 CLASS_SRC['Node']="$SRC_HOME/node.js"
-CLASS_INHERITS['Node']='EventDispatcher:Object'
+CLASS_INHERITS['Node']='Emitter:Object'
 CLASS_SRC['Sprite']="$SRC_HOME/sprite.js"
-CLASS_INHERITS['Sprite']='Node:EventDispatcher:Objectw'
+CLASS_INHERITS['Sprite']='Node:Emitter:Objectw'
 CLASS_SRC['Graphics']="$SRC_HOME/graphics.js"
 CLASS_INHERITS['Graphics']='Object'
 
 CLASS_SRC['ElementNode']="$SRC_HOME/elementnode.js"
-CLASS_INHERITS['ElementNode']='Node:EventDispatcher:Object'
+CLASS_INHERITS['ElementNode']='Node:Emitter:Object'
 CLASS_SRC['Layer']="$SRC_HOME/layer.js"
-CLASS_INHERITS['Layer']='ElementNode:Node:EventDispatcher:Object'
+CLASS_INHERITS['Layer']='ElementNode:Node:Emitter:Object'
 CLASS_SRC['Display']="$SRC_HOME/display.js"
-CLASS_INHERITS['Display']='ElementNode:Node:EventDispatcher:Object'
+CLASS_INHERITS['Display']='ElementNode:Node:Emitter:Object'
 
 CLASS_SRC['Event']="$SRC_HOME/events/event.js"
 CLASS_INHERITS['Event']='Object'
@@ -91,9 +91,9 @@ CLASS_SRC['FontWeight']="$SRC_HOME/primitives/constants/fontweight.js"
 CLASS_SRC['TextAlign']="$SRC_HOME/primitives/constants/textalign.js"
 CLASS_SRC['TextBaseline']="$SRC_HOME/primitives/constants/textbaseline.js"
 CLASS_SRC['Text']="$SRC_HOME/primitives/text.js"
-CLASS_INHERITS['Text']='Sprite:Node:EventDispatcher:Object'
+CLASS_INHERITS['Text']='Sprite:Node:Emitter:Object'
 CLASS_SRC['Image']="$SRC_HOME/primitives/image.js"
-CLASS_INHERITS['Image']='Sprite:Node:EventDispatcher:Object'
+CLASS_INHERITS['Image']='Sprite:Node:Emitter:Object'
 
 
 #parse multi-line doc comments from source file,

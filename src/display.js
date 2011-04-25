@@ -77,7 +77,7 @@
           height = 0,
           dom_element = null, //just a reference
           layers = display.children,
-          dispatcher_queue = doodle.EventDispatcher.dispatcher_queue,
+          emitter_queue = doodle.Emitter.emitter_queue,
           display_scene_path = [], //all descendants
           mouseX = 0,
           mouseY = 0,
@@ -127,7 +127,7 @@
        */
       function on_create_frame () {
         $create_frame(layers, layers.length,
-                      dispatcher_queue, dispatcher_queue.length, $evt_enterFrame,
+                      emitter_queue, emitter_queue.length, $evt_enterFrame,
                       display_scene_path, display_scene_path.length,
                       $display);
       }
@@ -596,8 +596,8 @@
     
     //draw at least 1 frame
     create_frame(display.children, display.children.length,
-                 doodle.EventDispatcher.dispatcher_queue,
-                 doodle.EventDispatcher.dispatcher_queue.length,
+                 doodle.Emitter.emitter_queue,
+                 doodle.Emitter.emitter_queue.length,
                  evt_enterFrame,
                  display.allChildren, display.allChildren.length,
                  display);
@@ -1038,7 +1038,7 @@
   var dispatch_mousemove_event_IGNORELAYER = function (evt, mouseEvent, path, count, x, y,
                                                        display, layers, layer_count) {
     var node,
-        evt_disp_p = false;
+        emitter_p = false;
     
     while (count--) {
       if (count <= layer_count) {
@@ -1092,13 +1092,13 @@
         node.__pointInBounds = true;
         if (node.eventListeners.hasOwnProperty('mouseover')) {
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
-          evt_disp_p = true;
+          emitter_p = true;
         }
         if (node.eventListeners.hasOwnProperty('mouseenter')) {
           node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
-          evt_disp_p = true;
+          emitter_p = true;
         }
-        if (evt_disp_p) {
+        if (emitter_p) {
           return true;
         }
       }
@@ -1114,13 +1114,13 @@
       display.__pointInBounds = true;
       if (display.eventListeners.hasOwnProperty('mouseover')) {
         node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseover'));
-        evt_disp_p = true;
+        emitter_p = true;
       }
       if (display.eventListeners.hasOwnProperty('mouseenter')) {
         node.dispatchEvent(mouseEvent.__copyMouseEventProperties(evt, null, 'mouseenter'));
-        evt_disp_p = true;
+        emitter_p = true;
       }
-      if (evt_disp_p) {
+      if (emitter_p) {
         return true;
       }
     }

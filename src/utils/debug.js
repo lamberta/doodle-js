@@ -8,15 +8,15 @@ doodle.utils.debug = {};
   /*
    * Throws a given error type if the test fails.
    * @param {boolean} testp
-   * @param {function} Err Error constructor.
+   * @param {function} Error_constructor Error constructor.
    * @return {boolean} True on success.
    * @throws {Error} On test being false.
    */
-  function assert_error (testp, Err) {
+  function assert_error (testp, Error_constructor) {
     if (testp === true) {
       return true;
     }
-    throw new Err();
+    throw new Error_constructor();
   }
 
   /*
@@ -123,7 +123,7 @@ doodle.utils.debug = {};
       assert_event_type(arg, type, inheritsp);
       break;
       //Doodle objects
-    case 'EventDispatcher':
+    case 'Emitter':
     case 'Node':
     case 'Sprite':
     case 'Graphics':

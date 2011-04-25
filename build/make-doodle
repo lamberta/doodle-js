@@ -64,7 +64,7 @@ function build_full {
     cat ./src/geom/matrix.js >> "$DEBUG_OUT_FILE"
     cat ./src/geom/rectangle.js >> "$DEBUG_OUT_FILE"
 
-    cat ./src/eventdispatcher.js >> "$DEBUG_OUT_FILE"
+    cat ./src/emitter.js >> "$DEBUG_OUT_FILE"
     cat ./src/node.js >> "$DEBUG_OUT_FILE"
     
     cat ./src/sprite.js >> "$DEBUG_OUT_FILE"

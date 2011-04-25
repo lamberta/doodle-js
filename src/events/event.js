@@ -232,8 +232,8 @@
           enumerable: false,
           value: function (targetArg) {
             /*DEBUG*/
-            //was using isNode, but that fails on plain eventdispatchers
-            console.assert(targetArg === null || doodle.EventDispatcher.isEventDispatcher(targetArg), "targetArg is null or an EventDispatcher.");
+            //was using isNode, but that fails on plain emitters
+            console.assert(targetArg === null || doodle.Emitter.isEmitter(targetArg), "targetArg is null or an Emitter.");
             /*END_DEBUG*/
             evt_currentTarget = targetArg;
             return this;
@@ -260,7 +260,7 @@
           enumerable: false,
           value: function (targetArg) {
             /*DEBUG*/
-            console.assert(targetArg === null || doodle.EventDispatcher.isEventDispatcher(targetArg), "targetArg is null or an EventDispatcher.");
+            console.assert(targetArg === null || doodle.Emitter.isEmitter(targetArg), "targetArg is null or an Emitter.");
             /*END_DEBUG*/
             evt_target = targetArg;
             return this;
@@ -298,7 +298,7 @@
 
         /**
          * @name srcElement
-         * @return {EventDispatcher} [read-only]
+         * @return {Emitter} [read-only]
          * @property
          */
         'srcElement': {

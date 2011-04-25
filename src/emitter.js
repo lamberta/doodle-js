@@ -1,8 +1,8 @@
 /*jslint browser: true, devel: true, onevar: true, undef: true, regexp: true, bitwise: true, newcap: true*/
 /*globals doodle*/
 (function () {
-  var evtDisp_static_properties,
-      dispatcher_queue,
+  var emitter_static_properties,
+      emitter_queue,
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
@@ -11,25 +11,25 @@
       BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE;
   
   /**
-   * @name doodle.createEventDispatcher
+   * @name doodle.createEmitter
    * @class
    * @augments Object
-   * @return {doodle.EventDispatcher}  
+   * @return {doodle.Emitter}  
    */
-  doodle.EventDispatcher = doodle.createEventDispatcher = function () {
-    /** @type {doodle.EventDispatcher} */
-    var evt_disp = {};
+  doodle.Emitter = doodle.createEmitter = function () {
+    /** @type {doodle.Emitter} */
+    var emitter = {};
     /*DEBUG*/
     if (typeof arguments[0] !== 'function') {
       if (arguments.length > 0) {
-        throw new SyntaxError("[object EventDispatcher]: Invalid number of parameters.");
+        throw new SyntaxError("[object Emitter]: Invalid number of parameters.");
       }
     }
     /*END_DEBUG*/
 
-    Object.defineProperties(evt_disp, evtDisp_static_properties);
+    Object.defineProperties(emitter, emitter_static_properties);
     //properties that require privacy
-    Object.defineProperties(evt_disp, {
+    Object.defineProperties(emitter, {
       'id': (function () {
         var id = null;
         return {
@@ -39,7 +39,7 @@
           set: function (idVar) {
             /*DEBUG*/
             if (idVar !== null) {
-              type_check(idVar,'string', {label:'EventDispatcher.id', message:"Property must be a string or null.", id:this.id});
+              type_check(idVar,'string', {label:'Emitter.id', message:"Property must be a string or null.", id:this.id});
             }
             /*END_DEBUG*/
             id = idVar;
@@ -59,14 +59,14 @@
 
     //passed an initialization function
     if (typeof arguments[0] === 'function') {
-      arguments[0].call(evt_disp);
+      arguments[0].call(emitter);
     }
     
-    return evt_disp;
+    return emitter;
   };
 
   
-  evtDisp_static_properties = {
+  emitter_static_properties = {
     /**
      * Returns the string representation of the specified object.
      * @name toString
@@ -76,11 +76,11 @@
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function () { return "[object EventDispatcher]"; }
+      value: function () { return "[object Emitter]"; }
     },
 
     /**
-     * Registers an event listener object with an EventDispatcher object
+     * Registers an event listener object with an Emitter object
      * so that the listener receives notification of an event.
      * @name addEventListener
      * @param {string} type
@@ -95,7 +95,7 @@
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'EventDispatcher.addEventListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.addEventListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
         var eventListeners = this.eventListeners;
         
@@ -106,15 +106,15 @@
         eventListeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
         
         //object ready for events, add to receivers if not already there
-        if (dispatcher_queue.indexOf(this) === -1) {
-          dispatcher_queue.push(this);
+        if (emitter_queue.indexOf(this) === -1) {
+          emitter_queue.push(this);
         }
       }
     },
 
     /**
-     * Adds an event listener on an EventDispatcher object.
-     * This is convenience alias for EventDispatcher.addEventListener(type, listener, useCapture=false).
+     * Adds an event listener on an Emitter object.
+     * This is convenience alias for Emitter.addEventListener(type, listener, useCapture=false).
      * @name on
      * @param {string} type
      * @param {Function} listener
@@ -126,7 +126,7 @@
       configurable: false,
       value: function (type, listener) {
         /*DEBUG*/
-        type_check(type,'string', listener,'function', {label:'EventDispatcher.on', params:['type','listener'], id:this.id});
+        type_check(type,'string', listener,'function', {label:'Emitter.on', params:['type','listener'], id:this.id});
         /*END_DEBUG*/
         this.addEventListener(type, listener, false);
       }
@@ -146,7 +146,7 @@
       configurable: false,
       value: function (type, listener) {
         /*DEBUG*/
-        type_check(type,'string', listener,'function', {label:'EventDispatcher.once', params:['type','listener'], id:this.id});
+        type_check(type,'string', listener,'function', {label:'Emitter.once', params:['type','listener'], id:this.id});
         /*END_DEBUG*/
         var callback = (function () {
           listener();
@@ -157,7 +157,7 @@
     },
 
     /**
-     * Removes a listener from the EventDispatcher object.
+     * Removes a listener from the Emitter object.
      * @name removeEventListener
      * @param {string} type
      * @param {Function} listener
@@ -171,7 +171,7 @@
       value: function (type, listener, useCapture) {
         useCapture = (useCapture === undefined) ? false : useCapture;
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'EventDispatcher.removeEventListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.removeEventListener', params:['type','listener','useCapture'], id:this.id});
         /*END_DEBUG*/
         var eventListeners = this.eventListeners,
             handler = eventListeners.hasOwnProperty(type) ? eventListeners[type] : false,
@@ -180,7 +180,7 @@
         //make sure event type exists
         /*DEBUG*/
         if (!handler) {
-          console.warn("[id="+this.id+"] EventDispatcher.removeEventListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
+          console.warn("[id="+this.id+"] Emitter.removeEventListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
           console.trace();
         }
         /*END_DEBUG*/
@@ -189,7 +189,7 @@
           i = listeners.indexOf(listener);
           /*DEBUG*/
           if (i === -1) {
-            console.warn("[id="+this.id+"] EventDispatcher.removeEventListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
+            console.warn("[id="+this.id+"] Emitter.removeEventListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
             console.trace();
           }
           /*END_DEBUG*/
@@ -203,14 +203,14 @@
           }
           //if no more listeners, remove from object queue
           if (Object.keys(eventListeners).length === 0) {
-            dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
+            emitter_queue.splice(emitter_queue.indexOf(this), 1);
           }
         }
       }
     },
 
     /**
-     * Removes all listeners from the EventDispatcher for the specified event.
+     * Removes all listeners from the Emitter for the specified event.
      * @name removeAllListeners
      * @param {string} type
      * @param {=boolean} useCapture If undefined, remove all handlers of any type.
@@ -224,13 +224,13 @@
         useCapture = (useCapture === undefined) ? null : useCapture;
         var listeners = this.eventListeners;
         /*DEBUG*/
-        type_check(type,'string', {label:'EventDispatcher.removeAllListeners', params:'type', id:this.id});
+        type_check(type,'string', {label:'Emitter.removeAllListeners', params:'type', id:this.id});
         if (useCapture !== null) {
-          type_check(useCapture,'boolean', {label:'EventDispatcher.removeAllListeners', params:'useCapture', id:this.id, message:"If provided, useCapture must be a boolean."});
+          type_check(useCapture,'boolean', {label:'Emitter.removeAllListeners', params:'useCapture', id:this.id, message:"If provided, useCapture must be a boolean."});
         }
         //do we have the type?
         if (!listeners.hasOwnProperty(type)) {
-            console.warn("[id="+this.id+"] EventDispatcher.removeAllListeners(*type*, useCapture): No event listener for type: '"+type+"'.");
+            console.warn("[id="+this.id+"] Emitter.removeAllListeners(*type*, useCapture): No event listener for type: '"+type+"'.");
             console.trace();
         }
         /*END_DEBUG*/
@@ -240,7 +240,7 @@
         } else {
           /*DEBUG*/
           if (listeners[type][useCapture ? 'capture' : 'bubble'].length === 0) {
-            console.warn("[id="+this.id+"] EventDispatcher.removeAllListeners(type, *useCapture*): No event listeners for type: '"+type+"'.");
+            console.warn("[id="+this.id+"] Emitter.removeAllListeners(type, *useCapture*): No event listeners for type: '"+type+"'.");
             console.trace();
           }
           /*END_DEBUG*/
@@ -252,7 +252,7 @@
         }
         //if no more listeners, remove from object queue
         if (Object.keys(listeners).length === 0) {
-          dispatcher_queue.splice(dispatcher_queue.indexOf(this), 1);
+          emitter_queue.splice(emitter_queue.indexOf(this), 1);
         }
       }
     },
@@ -270,7 +270,7 @@
       configurable: false,
       value: function (event) {
         /*DEBUG*/
-        type_check(event, 'Event', {label:'EventDispatcher.handleEvent', params:'event', inherits:true, id:this.id});
+        type_check(event, 'Event', {label:'Emitter.handleEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
         
         //check for listeners that match event type
@@ -318,7 +318,7 @@
     
     /**
      * Dispatches an event into the event flow. The event target is the
-     * EventDispatcher object upon which the dispatchEvent() method is called.
+     * Emitter object upon which the dispatchEvent() method is called.
      * @name dispatchEvent
      * @param {doodle.events.Event} event
      * @return {boolean} true if the event was successfully dispatched.
@@ -341,7 +341,7 @@
             i; //counter
 
         /*DEBUG*/
-        type_check(event, 'Event', {label:'EventDispatcher.dispatchEvent', params:'event', inherits:true, id:this.id});
+        type_check(event, 'Event', {label:'Emitter.dispatchEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         //can't dispatch an event that's already stopped
@@ -427,10 +427,10 @@
       configurable: false,
       value: function (event) {
         var evt_type = event.type,
-            disp_queue = dispatcher_queue,
-            dq_count = disp_queue.length;
+            emitters = emitter_queue,
+            dq_count = emitters.length;
         /*DEBUG*/
-        type_check(event, 'Event', {label:'EventDispatcher.broadcastEvent', params:'event', inherits:true, id:this.id});
+        type_check(event, 'Event', {label:'Emitter.broadcastEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
 
         if (event.__cancel) {
@@ -445,8 +445,8 @@
 
         while (dq_count--) {
           //hasEventListener
-          if (disp_queue[dq_count].eventListeners.hasOwnProperty(evt_type)) {
-            disp_queue[dq_count].handleEvent(event);
+          if (emitters[dq_count].eventListeners.hasOwnProperty(evt_type)) {
+            emitters[dq_count].handleEvent(event);
           }
           //event cancelled in listener?
           if (event.__cancel) {
@@ -459,7 +459,7 @@
     },
 
     /**
-     * Checks whether the EventDispatcher object has any listeners
+     * Checks whether the Emitter object has any listeners
      * registered for a specific type of event.
      * @name hasEventListener
      * @param {string} type
@@ -472,14 +472,14 @@
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        type_check(type,'string', {label:'EventDispatcher.hasEventListener', params:'type', id:this.id});
+        type_check(type,'string', {label:'Emitter.hasEventListener', params:'type', id:this.id});
         /*END_DEBUG*/
         return this.eventListeners.hasOwnProperty(type);
       }
     },
 
     /**
-     * Checks whether an event listener is registered with this EventDispatcher object
+     * Checks whether an event listener is registered with this Emitter object
      * or any of its ancestors for the specified event type.
      * The difference between the hasEventListener() and the willTrigger() methods is
      * that hasEventListener() examines only the object to which it belongs,
@@ -496,7 +496,7 @@
       configurable: false,
       value: function (type) {
         /*DEBUG*/
-        type_check(type,'string', {label:'EventDispatcher.willTrigger', params:'type', id:this.id});
+        type_check(type,'string', {label:'Emitter.willTrigger', params:'type', id:this.id});
         /*END_DEBUG*/
         if (this.eventListeners.hasOwnProperty(type)) {
           //hasEventListener
@@ -514,7 +514,7 @@
       }
     }
     
-  };//end evtDisp_static_properties definition
+  };//end emitter_static_properties definition
 
   
   /*
@@ -522,7 +522,7 @@
    */
   
   //holds all objects with event listeners
-  dispatcher_queue = doodle.EventDispatcher.dispatcher_queue = [];
+  emitter_queue = doodle.Emitter.emitter_queue = [];
   
 }());//end class closure
 
@@ -531,16 +531,16 @@
  */
 
 /**
- * Test if an object is an event dispatcher.
- * @name isEventDispatcher
+ * Test if an object is an event emitter.
+ * @name isEmitter
  * @param {Object} obj
  * @return {boolean}
  * @static
  */
-doodle.EventDispatcher.isEventDispatcher = function (obj) {
+doodle.Emitter.isEmitter = function (obj) {
   if (typeof obj === 'object') {
     while (obj) {
-      if (obj.toString() === '[object EventDispatcher]') {
+      if (obj.toString() === '[object Emitter]') {
         return true;
       } else {
         obj = Object.getPrototypeOf(obj);

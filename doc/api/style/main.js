@@ -25,7 +25,7 @@ $(document).ready(function () {
         //doodle types
         'Display': doodle_base+"display.html",
         'ElementNode': doodle_base+"elementnode.html",
-        'EventDispatcher': doodle_base+"eventdispatcher.html",
+        'Emitter': doodle_base+"emitter.html",
         'Layer': doodle_base+"layer.html",
         'Node': doodle_base+"node.html",
         'Sprite': doodle_base+"sprite.html",
