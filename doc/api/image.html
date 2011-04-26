@@ -16,8 +16,8 @@
 <li>ColorFilter</li>
 <li>Display</li>
 <li>ElementNode</li>
+<li>Emitter</li>
 <li>Event</li>
-<li>EventDispatcher</li>
 <li>FontStyle</li>
 <li>FontVariant</li>
 <li>FontWeight</li>
@@ -60,7 +60,7 @@
 <ol>
 <li>Sprite</li>
 <li>Node</li>
-<li>EventDispatcher</li>
+<li>Emitter</li>
 <li>Object</li>
 </ol>
 
@@ -455,7 +455,7 @@
 <dl>
 <dt><dfn>on</dfn> (type:string, listener:Function) :void</dt>
 <dd>
-<p>Adds an event listener on an EventDispatcher object. This is convenience alias for EventDispatcher.addEventListener(type, listener, useCapture=false).</p>
+<p>Adds an event listener on an Emitter object. This is convenience alias for Emitter.addListener(type, listener, useCapture=false).</p>
 <details>
 
 <h3>Parameters</h3>
@@ -546,7 +546,7 @@
 </dd>
 <dt><dfn>willTrigger</dfn> (type:string) :boolean</dt>
 <dd>
-<p>Checks whether an event listener is registered with this EventDispatcher object or any of its ancestors for the specified event type. The difference between the hasEventListener() and the willTrigger() methods is that hasEventListener() examines only the object to which it belongs, whereas the willTrigger() method examines the entire event flow for the event specified by the type parameter.</p>
+<p>Checks whether an event listener is registered with this Emitter object or any of its ancestors for the specified event type. The difference between the hasListener() and the willTrigger() methods is that hasListener() examines only the object to which it belongs, whereas the willTrigger() method examines the entire event flow for the event specified by the type parameter.</p>
 <details>
 
 <h3>Parameters</h3>
@@ -569,9 +569,9 @@
 
 </details>
 </dd>
-<dt><dfn>hasEventListener</dfn> (type:string) :boolean</dt>
+<dt><dfn>hasListener</dfn> (type:string) :boolean</dt>
 <dd>
-<p>Checks whether the EventDispatcher object has any listeners registered for a specific type of event.</p>
+<p>Checks whether the Emitter object has any listeners registered for a specific type of event.</p>
 <details>
 
 <h3>Parameters</h3>
@@ -619,9 +619,9 @@
 
 </details>
 </dd>
-<dt><dfn>dispatchEvent</dfn> (event:doodle.events.Event) :boolean</dt>
+<dt><dfn>emit</dfn> (event:doodle.events.Event) :boolean</dt>
 <dd>
-<p>Dispatches an event into the event flow. The event target is the EventDispatcher object upon which the dispatchEvent() method is called.</p>
+<p>Dispatches an event into the event flow. The event target is the Emitter object upon which the emit() method is called.</p>
 <details>
 
 <h3>Parameters</h3>
@@ -644,7 +644,7 @@
 
 </details>
 </dd>
-<dt><dfn>broadcastEvent</dfn> (event:doodle.events.Event) :boolean</dt>
+<dt><dfn>broadcast</dfn> (event:doodle.events.Event) :boolean</dt>
 <dd>
 <p>Dispatches an event to every object with an active listener. Ignores propagation path, objects come from</p>
 <details>
@@ -1113,16 +1113,15 @@
 
 </details>
 </dd>
-<dt><dfn>addEventListener</dfn> (type:string, listener:Function, useCapture:boolean) :void</dt>
+<dt><dfn>addListener</dfn> (type:string, listener:Function) :void</dt>
 <dd>
-<p>Registers an event listener object with an EventDispatcher object so that the listener receives notification of an event.</p>
+<p>Registers an event listener object with an Emitter object so that the listener receives notification of an event.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
 <li>type:string &#8211;  </li>
 <li>listener:Function &#8211;  </li>
-<li>useCapture:boolean &#8211;  </li>
 </ol>
 
 
@@ -1137,16 +1136,15 @@
 
 </details>
 </dd>
-<dt><dfn>removeEventListener</dfn> (type:string, listener:Function, useCapture:boolean) :void</dt>
+<dt><dfn>removeListener</dfn> (type:string, listener:Function) :void</dt>
 <dd>
-<p>Removes a listener from the EventDispatcher object.</p>
+<p>Removes a listener from the Emitter object.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
 <li>type:string &#8211;  </li>
 <li>listener:Function &#8211;  </li>
-<li>useCapture:boolean &#8211;  </li>
 </ol>
 
 
@@ -1161,15 +1159,14 @@
 
 </details>
 </dd>
-<dt><dfn>removeAllListeners</dfn> (type:string, useCapture:=boolean) :void</dt>
+<dt><dfn>removeAllListeners</dfn> (type:string) :void</dt>
 <dd>
-<p>Removes all listeners from the EventDispatcher for the specified event.</p>
+<p>Removes all listeners from the Emitter for the specified event.</p>
 <details>
 
 <h3>Parameters</h3>
 <ol>
 <li>type:string &#8211;  </li>
-<li>useCapture:=boolean &#8211; <span class='param_annotation'>[optional]</span> If undefined, remove all handlers of any type.</li>
 </ol>
 
 
@@ -1178,6 +1175,28 @@
 <ul>
 <li>TypeError &#8211; </li>
 </ul>
+
+
+
+
+</details>
+</dd>
+<dt><dfn>listeners</dfn> (type:string) :array</dt>
+<dd>
+<p>Returns an array of listeners for the specified event.</p>
+<details>
+
+<h3>Parameters</h3>
+<ol>
+<li>type:string &#8211;  </li>
+</ol>
+
+<h3>Returns</h3>
+<ul>
+<li>array &#8211; </li>
+</ul>
+
+
 
 
 
@@ -1228,7 +1247,7 @@
 </dd>
 <dt><dfn>swapDepths</dfn> (node:Node) :void</dt>
 <dd>
-<p>Swap positions with another node in the parents child list.</p>
+<p>Swap positions with a sibling node.</p>
 <details>
 
 <h3>Parameters</h3>
