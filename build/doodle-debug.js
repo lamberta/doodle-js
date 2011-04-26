@@ -8425,38 +8425,46 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
 
     Object.defineProperties(emitter, emitter_static_properties);
     //properties that require privacy
-    Object.defineProperties(emitter, {
-
-      /*
-       * Attached event handlers.
-       * @return {object}
-       * @property
-       */
-      'allListeners': (function () {
-        var allListeners = {};
-        return {
+    Object.defineProperties(emitter, (function () {
+      var allListeners = {};
+      
+      return {
+        /*
+         * Attached event handlers.
+         * @return {object}
+         * @property
+         */
+        'allListeners': {
           enumerable: true,
           configurable: false,
           get: function () { return allListeners; }
+        },
+        /**
+         * Returns an array of listeners for the specified event.
+         * @name listeners
+         * @param {string} type
+         * @return {array}
+         */
+        'listeners': {
+          enumerable: true,
+          configurable: false,
+          value: function (type) {
+            return (allListeners.hasOwnProperty(type)) ? allListeners[type] : [];
+          }
         }
-      }()),
-
-      /**
-       * Returns an array of listeners for the specified event. NOT IMPLEMENTED
-       * @name listeners
-       * @param {string} type
-       * @return {array}
-       */
-      'listeners': {
-        enumerable: true,
-        configurable: false,
-        value: function (type) {
-          console.error("Emitter.listeners(type) not implemented."); 
-        }
-      }
-      
-    });//end defineProperties
-
+      };
+    }()));//end defineProperties
+    
+    /**
+     * Adds an event listener on an Emitter object.
+     * This is convenience alias for Emitter.addListener(type, listener, useCapture=false).
+     * @name on
+     * @param {string} type
+     * @param {Function} listener
+     * @throws {TypeError}
+     */
+    emitter.on = emitter.addListener;
+    
     //passed an initialization function
     if (typeof arguments[0] === 'function') {
       arguments[0].call(emitter);
@@ -8464,7 +8472,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     
     return emitter;
   };
-
+  
   
   emitter_static_properties = {
     /**
@@ -8480,55 +8488,32 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
     },
 
     /**
-     * Registers an event listener object with an Emitter object
-     * so that the listener receives notification of an event.
+     * Registers an event listener object with an Emitter object so that the listener receives notification of an event.
      * @name addListener
      * @param {string} type
      * @param {Function} listener
-     * @param {boolean} useCapture
      * @throws {TypeError}
      */
     'addListener': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (type, listener, useCapture) {
-        useCapture = (useCapture === undefined) ? false : useCapture;
+      value: function (type, listener) {
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.addListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', {label:'Emitter.addListener', params:['type','listener'], id:this.id});
         /*END_DEBUG*/
         var listeners = this.allListeners;
         
         //if new event type, create it's array to store callbacks
         if (!listeners.hasOwnProperty(type)) {
-          listeners[type] = {capture:[], bubble:[]};
+          listeners[type] = [];
         }
-        listeners[type][useCapture ? 'capture' : 'bubble'].push(listener);
+        listeners[type].push(listener);
         
         //object ready for events, add to receivers if not already there
         if (emitter_queue.indexOf(this) === -1) {
           emitter_queue.push(this);
         }
-      }
-    },
-
-    /**
-     * Adds an event listener on an Emitter object.
-     * This is convenience alias for Emitter.addListener(type, listener, useCapture=false).
-     * @name on
-     * @param {string} type
-     * @param {Function} listener
-     * @throws {TypeError}
-     */
-    'on': {
-      enumerable: true,
-      writable: false,
-      configurable: false,
-      value: function (type, listener) {
-        /*DEBUG*/
-        type_check(type,'string', listener,'function', {label:'Emitter.on', params:['type','listener'], id:this.id});
-        /*END_DEBUG*/
-        this.addListener(type, listener, false);
       }
     },
 
@@ -8548,11 +8533,11 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
         /*DEBUG*/
         type_check(type,'string', listener,'function', {label:'Emitter.once', params:['type','listener'], id:this.id});
         /*END_DEBUG*/
-        var callback = (function () {
-          listener();
-          this.removeListener(type, callback, false);
+        var callback = (function (evt) {
+          listener(evt);
+          this.removeListener(type, callback);
         }).bind(this);
-        this.addListener(type, callback, false);
+        this.addListener(type, callback);
       }
     },
 
@@ -8561,48 +8546,43 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
      * @name removeListener
      * @param {string} type
      * @param {Function} listener
-     * @param {boolean} useCapture
      * @throws {TypeError}
      */
     'removeListener': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (type, listener, useCapture) {
-        useCapture = (useCapture === undefined) ? false : useCapture;
+      value: function (type, listener) {
         /*DEBUG*/
-        type_check(type,'string', listener,'function', useCapture,'boolean', {label:'Emitter.removeListener', params:['type','listener','useCapture'], id:this.id});
+        type_check(type,'string', listener,'function', {label:'Emitter.removeListener', params:['type','listener'], id:this.id});
         /*END_DEBUG*/
-        var listeners = this.allListeners,
-            handler = listeners.hasOwnProperty(type) ? listeners[type] : false,
-            listeners,
-            i;
-        //make sure event type exists
+        var all_listeners = this.allListeners,
+            type_listeners = this.listeners(type),
+            i = type_listeners.length;
         /*DEBUG*/
-        if (!handler) {
-          console.warn("[id="+this.id+"] Emitter.removeListener(*type*, listener, useCapture): No event listener for type: '"+type+"'.");
+        if (i === 0) {
+          console.warn("[id="+this.id+"] Emitter.removeListener(*type*, listener): No event listener for type: '"+type+"'.");
           console.trace();
         }
         /*END_DEBUG*/
-        if (handler) {
-          listeners = handler[useCapture ? 'capture' : 'bubble']; //array of functions
-          i = listeners.indexOf(listener);
+        if (i > 0) {
+          i = type_listeners.indexOf(listener);
           /*DEBUG*/
           if (i === -1) {
-            console.warn("[id="+this.id+"] Emitter.removeListener(type, *listener*, useCapture): No listener function for type: '"+type+"'.");
+            console.warn("[id="+this.id+"] Emitter.removeListener(type, *listener*): No listener function for type: '"+type+"'.");
             console.trace();
           }
           /*END_DEBUG*/
           if (i !== -1) {
             //remove handler function
-            listeners.splice(i, 1);
+            type_listeners.splice(i, 1);
           }
           //if none left, remove handler type
-          if (handler.capture.length === 0 && handler.bubble.length === 0) {
-            delete listeners[type];
+          if (type_listeners.length === 0) {
+            delete all_listeners[type];
           }
           //if no more listeners, remove from object queue
-          if (Object.keys(listeners).length === 0) {
+          if (Object.keys(all_listeners).length === 0) {
             emitter_queue.splice(emitter_queue.indexOf(this), 1);
           }
         }
@@ -8613,45 +8593,25 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
      * Removes all listeners from the Emitter for the specified event.
      * @name removeAllListeners
      * @param {string} type
-     * @param {=boolean} useCapture If undefined, remove all handlers of any type.
      * @throws {TypeError}
      */
     'removeAllListeners': {
       enumerable: true,
       writable: false,
       configurable: false,
-      value: function (type, useCapture) {
-        useCapture = (useCapture === undefined) ? null : useCapture;
-        var listeners = this.allListeners;
+      value: function (type) {
         /*DEBUG*/
         type_check(type,'string', {label:'Emitter.removeAllListeners', params:'type', id:this.id});
-        if (useCapture !== null) {
-          type_check(useCapture,'boolean', {label:'Emitter.removeAllListeners', params:'useCapture', id:this.id, message:"If provided, useCapture must be a boolean."});
-        }
-        //do we have the type?
-        if (!listeners.hasOwnProperty(type)) {
-            console.warn("[id="+this.id+"] Emitter.removeAllListeners(*type*, useCapture): No event listener for type: '"+type+"'.");
-            console.trace();
+        if (!this.hasListener(type)) {
+          console.warn("[id="+this.id+"] Emitter.removeAllListeners(type): No event listeners for type: '"+type+"'.");
+          console.trace();
         }
         /*END_DEBUG*/
-        if (useCapture === null) {
-          //remove all
-          delete listeners[type];
-        } else {
-          /*DEBUG*/
-          if (listeners[type][useCapture ? 'capture' : 'bubble'].length === 0) {
-            console.warn("[id="+this.id+"] Emitter.removeAllListeners(type, *useCapture*): No event listeners for type: '"+type+"'.");
-            console.trace();
-          }
-          /*END_DEBUG*/
-          listeners[type][useCapture ? 'capture' : 'bubble'].length = 0; //empty array
-          //if none left, remove handler type
-          if (listeners[type].capture.length === 0 && listeners[type].bubble.length === 0) {
-            delete listeners[type];
-          }
-        }
+        var all_listeners = this.allListeners;
+        delete all_listeners[type];
+
         //if no more listeners, remove from object queue
-        if (Object.keys(listeners).length === 0) {
+        if (Object.keys(all_listeners).length === 0) {
           emitter_queue.splice(emitter_queue.indexOf(this), 1);
         }
       }
@@ -8670,31 +8630,21 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
       configurable: false,
       value: function (event) {
         /*DEBUG*/
-        type_check(event, 'Event', {label:'Emitter.handleEvent', params:'event', inherits:true, id:this.id});
+        type_check(event,'Event', {label:'Emitter.handleEvent', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
-        
-        //check for listeners that match event type
-        //if capture not set, using bubble listeners - like for AT_TARGET phase
-        var phase = (event.eventPhase === CAPTURING_PHASE) ? 'capture' : 'bubble',
-            listeners = this.allListeners[event.type], //obj
-            count = 0, //listener count
-            rv,  //return value of handler
-            i; //counter
+        var listeners = this.listeners(event.type),
+            len = listeners.length,
+            rv,     //return value of handler
+            i = 0;
 
-        listeners = listeners && listeners[phase];
-        if (listeners && listeners.length > 0) {
-          //currentTarget is the object with addListener
-          event.__setCurrentTarget(this);
-          
-          //if we have any, call each handler with event object
-          count = listeners.length;
-          for (i = 0; i < count; i += 1) {
+        if (len > 0) {
+          event.__setCurrentTarget(this); //currentTarget is the object with listener
+
+          for (; i < len; i++) {
             /*DEBUG*/
             console.assert(typeof listeners[i] === 'function', "listener is a function", listeners[i]);
             /*END_DEBUG*/
-            //pass event to handler
-            rv = listeners[i].call(this, event);
-            
+            rv = listeners[i].call(this, event); //pass event to handler
             //when event.stopPropagation is called
             //cancel event for other nodes, but check other handlers on this one
             //returning false from handler does the same thing
@@ -8711,8 +8661,8 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
             }
           }
         }
-        //any handlers found on this node?
-        return (count > 0) ? true : false;
+        //any listeners on this node?
+        return (len > 0) ? true : false;
       }
     },
     
@@ -8729,83 +8679,43 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
       writable: false,
       configurable: false,
       value: function (event) {
-        //events are dispatched from the child,
-        //capturing goes down to the child, bubbling then goes back up
-        var target,
-            evt_type = event.type,
-            //check this node for event handler
-            evt_handler_p = this.allListeners.hasOwnProperty(evt_type),
-            node,
-            node_path = [],
-            len, //count of nodes up to root
-            i; //counter
-
         /*DEBUG*/
         type_check(event, 'Event', {label:'Emitter.emit', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
+        var node = this,
+            target,
+            evt_type = event.type;
 
         //can't dispatch an event that's already stopped
         if (event.__cancel) {
           return false;
         }
-        
         //set target to the object that dispatched it
         //if already set, then we're re-dispatching an event for another target
         if (!event.target) {
           event.__setTarget(this);
         }
-
         target = event.target;
-        //path starts at node parent
-        node = target.parent || null;
         
-        //create path from node's parent to top of tree
-        while (node) {
-          //only want to dispatch if there's a reason to
-          if (!evt_handler_p) {
-            evt_handler_p = node.allListeners.hasOwnProperty(evt_type);
-          }
-          node_path.push(node);
-          node = node.parent;
-        }
-
-        //if no handlers for event type, no need to dispatch
-        if (!evt_handler_p) {
-          return true;
-        }
-
-        //enter capture phase: down the tree
-        event.__setEventPhase(CAPTURING_PHASE);
-        i = len = node_path.length;
-        while (i--) {
-          node_path[i].handleEvent(event);
-          //was the event stopped inside the handler?
-          if (event.__cancel) {
-            return true;
-          }
-        }
-
-        //enter target phase
-        event.__setEventPhase(AT_TARGET);
-        target.handleEvent(event);
-        //was the event stopped inside the handler?
-        if (event.__cancel) {
-          return true;
-        }
-
-        //does event bubble, or bubbling cancelled in capture/target phase?
-        if (!event.bubbles || event.cancelBubble) {
-          return true;
-        }
-
-        //enter bubble phase: back up the tree
+        //enter bubble phase: up the tree
         event.__setEventPhase(BUBBLING_PHASE);
-        for (i = 0; i < len; i = i+1) {
-          node_path[i].handleEvent(event);
-          //was the event stopped inside the handler?
-          if (event.__cancel || event.cancelBubble) {
-            return true;
+        
+        while (node) {
+          if (node.allListeners.hasOwnProperty(evt_type)) {
+            //if at target, change event status, handle, then change back
+            if (node === target) {
+              event.__setEventPhase(AT_TARGET);
+              node.handleEvent(event);
+              event.__setEventPhase(BUBBLING_PHASE);
+            } else {
+              node.handleEvent(event);
+            }
+            //was the event stopped inside the handler?
+            if (event.__cancel || !event.bubbles || event.cancelBubble) {
+              return true;
+            }
           }
+          node = node.parent;
         }
 
         return true; //dispatched successfully
@@ -8828,7 +8738,7 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
       value: function (event) {
         var evt_type = event.type,
             emitters = emitter_queue,
-            dq_count = emitters.length;
+            i = emitters.length;
         /*DEBUG*/
         type_check(event, 'Event', {label:'Emitter.broadcast', params:'event', inherits:true, id:this.id});
         /*END_DEBUG*/
@@ -8843,10 +8753,10 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
           event.__setTarget(this);
         }
 
-        while (dq_count--) {
+        while (i--) {
           //hasListener
-          if (emitters[dq_count].allListeners.hasOwnProperty(evt_type)) {
-            emitters[dq_count].handleEvent(event);
+          if (emitters[i].allListeners.hasOwnProperty(evt_type)) {
+            emitters[i].handleEvent(event);
           }
           //event cancelled in listener?
           if (event.__cancel) {
@@ -8903,10 +8813,10 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
           return true;
         }
         var children = this.children,
-            child_count = children ? children.length : 0;
+            i = children ? children.length : 0;
 
-        while (child_count--) {
-          if (children[child_count].willTrigger(type)) {
+        while (i--) {
+          if (children[i].willTrigger(type)) {
             return true;
           }
         }
