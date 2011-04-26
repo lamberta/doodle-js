@@ -18,8 +18,8 @@
 function init_scene () {
   var display = doodle.createDisplay("#display");
 
-  display.addEventListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyboardEvent);
-  display.addEventListener(doodle.events.KeyboardEvent.KEY_UP, onKeyboardEvent);
+  display.addListener(doodle.events.KeyboardEvent.KEY_DOWN, onKeyboardEvent);
+  display.addListener(doodle.events.KeyboardEvent.KEY_UP, onKeyboardEvent);
 
   function onKeyboardEvent (event) {
     console.log(event.type + ", " + event.keyCode);

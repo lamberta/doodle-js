@@ -36,7 +36,7 @@ function init_scene () {
     handle.id = "handle"+i;
     handle.x = Math.random() * display.width;
     handle.y = Math.random() * display.height;
-    handle.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onPress);
+    handle.addListener(doodle.events.MouseEvent.MOUSE_DOWN, onPress);
     layer0.addChild(handle);
     handles.push(handle);
   }
@@ -44,17 +44,17 @@ function init_scene () {
   var spring_line = doodle.createSprite();
   layer0.addChild(spring_line);
 
-  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onPress (event) {
     isDragging = event.target;
-    display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onRelease);
-    display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addListener(doodle.events.MouseEvent.MOUSE_UP, onRelease);
+    display.addListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
   }
 
   function onRelease (event) {
-    display.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, onRelease);
-    display.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.removeListener(doodle.events.MouseEvent.MOUSE_UP, onRelease);
+    display.removeListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
     isDragging = null;
   }
 

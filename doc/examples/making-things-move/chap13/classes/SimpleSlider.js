@@ -34,7 +34,7 @@ function createSimpleSlider (min, max, value) {
 
     _handle = doodle.createSprite();
     simple_slider.addChild(_handle);
-    _handle.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
+    _handle.addListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
 
     draw();
     updatePosition();
@@ -77,8 +77,8 @@ function createSimpleSlider (min, max, value) {
 
   function onMouseDown (event) {
     var display = simple_slider.root;
-    display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
-    display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.addListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
   }
 
   function onMouseMove (event) {
@@ -92,8 +92,8 @@ function createSimpleSlider (min, max, value) {
 
   function onMouseUp (event) {
     var display = simple_slider.root;
-    display.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
-    display.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.removeListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.removeListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
   }
 
   function invalidate () {

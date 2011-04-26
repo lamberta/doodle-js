@@ -41,7 +41,7 @@ function init_scene () {
   segment.x = display.width / 2;
   segment.y = display.height / 2;
 
-  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
 
   function onEnterFrame (event) {
     moveBall();

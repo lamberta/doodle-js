@@ -36,11 +36,11 @@ function init_scene () {
    */
   boing = document.getElementById('boing_sound');
   //when sound ends, reset playhead
-  boing.addEventListener('ended', function () {
+  boing.addListener('ended', function () {
     boing.currentTime = 0;
   });
   
-  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     var left = 0,

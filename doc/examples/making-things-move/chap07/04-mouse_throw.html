@@ -34,25 +34,25 @@ function init_scene () {
   ball.y = display.height/2;
   layer0.addChild(ball);
   
-  ball.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
-  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  ball.addListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
+  display.addListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onMouseDown (event) {
     oldX = ball.x;
     oldY = ball.y;
-    display.addEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
-    display.addEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.addListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.addListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
     
-    display.removeEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
-    display.addEventListener(doodle.events.Event.ENTER_FRAME, trackVelocity);
+    display.removeListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+    display.addListener(doodle.events.Event.ENTER_FRAME, trackVelocity);
   }
 
   function onMouseUp (event) {
-    display.removeEventListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
-    display.removeEventListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
+    display.removeListener(doodle.events.MouseEvent.MOUSE_UP, onMouseUp);
+    display.removeListener(doodle.events.MouseEvent.MOUSE_MOVE, onMouseMove);
 
-    display.removeEventListener(doodle.events.Event.ENTER_FRAME, trackVelocity);
-    display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+    display.removeListener(doodle.events.Event.ENTER_FRAME, trackVelocity);
+    display.addListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   }
 
   function onMouseMove () {

@@ -37,8 +37,8 @@ function init_scene () {
   var ball = createBall3D();
   layer0.addChild(ball);
 
-  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
-  display.addEventListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
+  display.addListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addListener(doodle.events.MouseEvent.MOUSE_DOWN, onMouseDown);
 
   function onEnterFrame (event) {
     var dx = tx - ball.xpos,

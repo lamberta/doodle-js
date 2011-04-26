@@ -30,7 +30,7 @@ function init_scene () {
   var ball1 = createBall();
   layer0.addChild(ball1);
 
-  display.addEventListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
+  display.addListener(doodle.events.Event.ENTER_FRAME, onEnterFrame);
   
   function onEnterFrame (event) {
     ball1.x = display.mouseX;
