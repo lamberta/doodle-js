@@ -55,7 +55,7 @@
               configurable: false,
               get: function () { return show_bounds; },
               set: function (showBoundingBox) {
-                show_bounds = showBoundingBox === true;
+                show_bounds = (showBoundingBox === true);
               }
             };
           }())

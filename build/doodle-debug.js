@@ -8261,7 +8261,7 @@ doodle.geom.Matrix.isMatrix = function (m) {
         var right = rect.x + rect.width,
             bot = rect.y + rect.height;
         //check corners: tl, tr, br, bl
-        return (this.contains(rect.x, rect.y) || this.contains(right, rect.y) || this.contains(right, bot) || this.contains(rect.x, rect.bot));
+        return (this.contains(rect.x, rect.y) || this.contains(right, rect.y) || this.contains(right, bot) || this.contains(rect.x, bot));
       }
     },
 
@@ -8402,7 +8402,6 @@ doodle.geom.Rectangle.isRectangle = function (rect) {
       /*DEBUG*/
       type_check = doodle.utils.debug.type_check,
       /*END_DEBUG*/
-      CAPTURING_PHASE = doodle.events.Event.CAPTURING_PHASE,
       AT_TARGET = doodle.events.Event.AT_TARGET,
       BUBBLING_PHASE = doodle.events.Event.BUBBLING_PHASE;
   
@@ -8916,7 +8915,7 @@ doodle.Emitter.isEmitter = function (obj) {
               configurable: false,
               get: function () { return show_bounds; },
               set: function (showBoundingBox) {
-                show_bounds = showBoundingBox === true;
+                show_bounds = (showBoundingBox === true);
               }
             };
           }())

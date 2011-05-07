@@ -521,7 +521,7 @@
         var right = rect.x + rect.width,
             bot = rect.y + rect.height;
         //check corners: tl, tr, br, bl
-        return (this.contains(rect.x, rect.y) || this.contains(right, rect.y) || this.contains(right, bot) || this.contains(rect.x, rect.bot));
+        return (this.contains(rect.x, rect.y) || this.contains(right, rect.y) || this.contains(right, bot) || this.contains(rect.x, bot));
       }
     },
 
