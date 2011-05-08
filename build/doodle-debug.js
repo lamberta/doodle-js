@@ -9391,6 +9391,7 @@ doodle.Emitter.isEmitter = function (obj) {
 
     /**
      * Adds this node to the given node's children.
+     * If appending to a Display object, attach to it's top child.
      * @name appendTo
      * @return {Node}
      * @throws {TypeError}
@@ -9403,7 +9404,14 @@ doodle.Emitter.isEmitter = function (obj) {
         /*DEBUG*/
         type_check(node,'Node', {label:'Node.appendTo', id:this.id, params:'node', inherits:true});
         /*END_DEBUG*/
-        return node.addChild(this);
+        if (doodle.Display.isDisplay(node)) {
+          /*DEBUG*/
+          reference_check(node.children.length > 0, {label:'Node.appendTo', params:'*node*', id:this.id, message:"Display does not have any child layers to add to."});
+          /*END_DEBUG*/
+          return node.children[0].addChild(this);
+        } else {
+          return node.addChild(this);
+        }
       }
     },
 
