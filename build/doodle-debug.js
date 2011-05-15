@@ -12679,16 +12679,17 @@ doodle.Layer.isLayer = function (obj) {
    *
    */
   draw_scene_graph = function (scene_path) {
-    var node,
+    var node, obj,
         count = scene_path.length,
         display = scene_path[0],
         ctx,
         bounds,
+        alpha_total, visiblep,
         i = 1; //ignore display
 
     for (; i < count; i++) {
     //while (count--) {
-      node = scene_path[i];
+      obj = node = scene_path[i];
       /*DEBUG*/
       console.assert(Array.isArray(scene_path), "scene_path is an array", scene_path);
       console.assert(scene_path.length === count, "scene_path.length === count", count, scene_path.length);
@@ -12700,19 +12701,36 @@ doodle.Layer.isLayer = function (obj) {
       ctx = node.context;
       
       if (ctx && node.visible) {
+        //check visibility, get cumlative alpha for node and all its parents
+        visiblep = true;
+        alpha_total = 1;
+        while (obj) {
+          if (!obj.visible) {
+            visiblep = false;
+            break;
+          }
+          alpha_total *= obj.alpha;
+          obj = obj.parent;
+        }
+        if (!visiblep) {
+          continue;
+        }
+        
         ctx.save();
-        ctx.transform.apply(ctx, node.__allTransforms.__toArray());
+        ctx.globalAlpha = alpha_total;
         
         //apply alpha to node and it's children
-        if (!isLayer(node)) {
-          if (node.alpha !== 1) {
-            ctx.globalAlpha = node.alpha;
-          }
-        }
+        //if (!isLayer(node)) {
+        //  if (node.alpha !== 1) {
+        //    ctx.globalAlpha = node.alpha;
+        //  }
+        //}
+        
+        ctx.transform.apply(ctx, node.__allTransforms.__toArray());
+        
         if (typeof node.__draw === 'function') {
           node.__draw(ctx);
         }
-        
         ctx.restore();
         
         /*DEBUG*/
