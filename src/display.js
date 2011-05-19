@@ -47,8 +47,8 @@
   doodle.Display = doodle.createDisplay = function (element /*, options*/) {
     var display,
         id,
-        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : null,
-        opt_layercount;
+        options = (typeof arguments[arguments.length-1] === 'object') ? Array.prototype.pop.call(arguments) : {},
+        opt_layercount = 1;
     
     //extract id from element
     if (element && typeof element !== 'function') {
@@ -603,20 +603,27 @@
                  display);
 
     //parse options object
-    if (options) {
-      if (options.width !== undefined) { display.width = options.width; }
-      if (options.height !== undefined) { display.height = options.height; }
-      if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
-      if (options.frameRate !== undefined) { display.frameRate = options.frameRate; }
-      if (options.clearBitmap !== undefined) { display.clearBitmap = options.clearBitmap; }
-      if (options.layers !== undefined) {
-        /*DEBUG*/
-        type_check(options.layers,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
-        /*END_DEBUG*/
-        opt_layercount = options.layers;
-        while (opt_layercount--) {
-          display.createLayer();
-        }
+    if (options.width !== undefined) { display.width = options.width; }
+    if (options.height !== undefined) { display.height = options.height; }
+    if (options.backgroundColor !== undefined) { display.backgroundColor = options.backgroundColor; }
+    if (options.clearBitmap !== undefined) { display.clearBitmap = options.clearBitmap; }
+    if (options.layers !== undefined) {
+      /*DEBUG*/
+      type_check(options.layers,'number', {label:'createDisplay', id:display.id, message:"options.layers must be a number."});
+      range_check(options.layers >= 0, {label:'createDisplay', id:display.id, message:"options.layers must be 0 or greater."});
+      /*END_DEBUG*/
+      opt_layercount = options.layers;
+    }
+    if (options.frameRate !== undefined) {
+      display.frameRate = options.frameRate;
+    } else {
+      display.frameRate = 24;
+    }
+    
+    //create layers, defaults to 1
+    if (display.children.length === 0) {
+      while (opt_layercount--) {
+        display.createLayer();
       }
     }
     
