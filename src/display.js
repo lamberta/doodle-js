@@ -233,6 +233,16 @@
             return n;
           }
         },
+
+        /**
+         * Will be able to set this in the future, but for now, just return top layer.
+         * @name activeLayer
+         * @return {doodle.Layer}
+         */
+        'activeLayer': {
+          enumerable: true,
+          get: function () { return layers[0]; }
+        },
         
         /**
          * Gets size of display element and adds event handlers.
