@@ -432,16 +432,12 @@
         enumerable: false,
         writable: false,
         configurable: false,
-        value: function (pt1, pt2) {
+        value: function (x1, y1, x2, y2) {
           /*DEBUG*/
-          type_check(pt1,'Point', pt2,'Point', {label:'Graphics.curveTo', params:['ctrl_point','point'], id:gfx_node.id});
+          type_check(x1,'number', y1,'number', x2,'number', y2,'number', {label:'Graphics.curveTo', params:['x1','y1','x2','y2'], id:gfx_node.id});
           /*END_DEBUG*/
           var x0 = cursor_x,
               y0 = cursor_y,
-              x1 = pt1.x,
-              y1 = pt1.y,
-              x2 = pt2.x,
-              y2 = pt2.y,
               t,
               cx = 0,
               cy = 0;
@@ -490,21 +486,15 @@
         enumerable: false,
         writable: false,
         configurable: false,
-        value: function (pt1, pt2, pt3) {
+        value: function (x1, y1, x2, y2, x3, y3) {
           /*DEBUG*/
-          type_check(pt1,'Point', pt2,'Point', pt3,'Point', {label:'Graphics.bezierCurveTo', params:['ctrl_point1','ctrl_point2','point'], id:gfx_node.id});
+          type_check(x1,'number', y1,'number', x2,'number', y2,'number', x3,'number', y3,'number', {label:'Graphics.bezierCurveTo', params:['x1','y1','x2','y2','x3','y3'], id:gfx_node.id});
           /*END_DEBUG*/
           var pow = Math.pow,
               max = Math.max,
               min = Math.min,
               x0 = cursor_x,
               y0 = cursor_y,
-              x1 = pt1.x,
-              y1 = pt1.y,
-              x2 = pt2.x,
-              y2 = pt2.y,
-              x3 = pt3.x,
-              y3 = pt3.y,
               t,
               xt,
               yt,
@@ -576,47 +566,79 @@
       },
 
       /**
-       * @name beginGradientFill
-       * @param {GradientType} type
-       * @param {Point} pt1
-       * @param {Point} pt2
-       * @param {Array} ratios Array of numbers.
-       * @param {Array} colors
-       * @param {Array} alphas
+       * @name beginLinearGradientFill
+       * @param {number}    x1
+       * @param {number}    y1
+       * @param {number}    x2
+       * @param {number}    y2
+       * @param {Array}     ratios Array of numbers.
+       * @param {Array}     colors
+       * @param {Array}     alphas
        * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createlineargradient">context.createLinearGradient</a> [Canvas API]
        * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createradialgradient">context.createRadialGradient</a> [Canvas API]
        * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-canvasgradient-addcolorstop">context.addColorStop</a> [Canvas API]
        * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-fillstyle">context.fillStyle</a> [Canvas API]
        * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#Gradients">Gradients</a> [Canvas Tutorial]
        */
-      'beginGradientFill': {
+      'beginLinearGradientFill': {
         enumerable: true,
         writable: false,
         configurable: false,
-        value: function (type, pt1, pt2, ratios, colors, alphas) {
+        value: function (x1, y1, x2, y2, ratios, colors, alphas) {
           /*DEBUG*/
-          type_check(type,'string', pt1,'Point', pt2,'Point', ratios,'array', colors,'array', alphas,'array',
-                     {label:'Graphics.beginGradientFill', params:['gradient_type','point','point','ratios','colors','alphas'], id:gfx_node.id});
+          type_check(x1,'number', y1,'number', x2,'number', y2,'number', ratios,'array', colors,'array', alphas,'array',
+                     {label:'Graphics.beginLinearGradientFill', params:['x1','y1','x2','y2','ratios','colors','alphas'], id:gfx_node.id});
           /*END_DEBUG*/
-          
           draw_commands.push(function (ctx) {
             var hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
-                gradient,
+                //not really too keen on creating gfx_node here, but I need access to the context
+                gradient = ctx.createLinearGradient(x1, y1, x2, y2),
                 len = ratios.length,
                 i = 0;
-            
-            if (type === LINEAR) {
-              //not really too keen on creating gfx_node here, but I need access to the context
-              gradient = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
-              
-            } else if (type === RADIAL) {
+            //add color ratios to our gradient
+            for (; i < len; i++) {
               /*DEBUG*/
-              type_check(pt1.radius,'number', pt2.radius,'number', {label:'Graphics.beginGradientFill', id:gfx_node.id, message:"No radius for radial type."});
+              range_check(ratios[i] >= 0, ratios[i] <= 1, {label:'Graphics.beginLinearGradientFill', id:gfx_node.id, message:"ratio must be between 0 and 1."});
               /*END_DEBUG*/
-              gradient = ctx.createRadialGradient(pt1.x, pt1.y, pt1.radius, pt2.x, pt2.y, pt2.radius);
-            } else {
-              throw new TypeError(gfx_node.id + " Graphics.beginGradientFill(*type*, point1, point2, ratios, colors, alphas): Unknown gradient type.");
+              gradient.addColorStop(ratios[i], hex_to_rgb_str(colors[i], alphas[i]));
             }
+            ctx.fillStyle = gradient;
+          });
+          return this;
+        }
+      },
+
+      /**
+       * @name beginRadialGradientFill
+       * @param {number}    x1
+       * @param {number}    y1
+       * @param {number}    r1
+       * @param {number}    x2
+       * @param {number}    y2
+       * @param {number}    r2
+       * @param {Array}     ratios Array of numbers.
+       * @param {Array}     colors
+       * @param {Array}     alphas
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createlineargradient">context.createLinearGradient</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-createradialgradient">context.createRadialGradient</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-canvasgradient-addcolorstop">context.addColorStop</a> [Canvas API]
+       * @see <a href="http://dev.w3.org/html5/canvas-api/canvas-2d-api.html#dom-context-2d-fillstyle">context.fillStyle</a> [Canvas API]
+       * @see <a href="https://developer.mozilla.org/En/Canvas_tutorial/Applying_styles_and_colors#Gradients">Gradients</a> [Canvas Tutorial]
+       */
+      'beginRadialGradientFill': {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: function (x1, y1, r1, x2, y2, r2, ratios, colors, alphas) {
+          /*DEBUG*/
+          type_check(x1,'number', y1,'number', r1,'number', x2,'number', y2,'number', r2,'number', ratios,'array', colors,'array', alphas,'array',
+                     {label:'Graphics.beginRadialGradientFill', params:['x1','y1','r1','x2','y2','r2','ratios','colors','alphas'], id:gfx_node.id});
+          /*END_DEBUG*/
+          draw_commands.push(function (ctx) {
+            var hex_to_rgb_str = doodle.utils.hex_to_rgb_str,
+                gradient = ctx.createRadialGradient(x1, y1, r1, x2, y2, r2),
+                len = ratios.length,
+                i = 0;
             //add color ratios to our gradient
             for (; i < len; i++) {
               /*DEBUG*/

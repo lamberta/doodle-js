@@ -217,7 +217,8 @@
 
         /**
          * @name hitTestPoint
-         * @param {Point} pt
+         * @param {number} x
+         * @param {number} y
          * @return {boolean}
          * @throws {TypeError}
          */
@@ -225,11 +226,11 @@
           enumerable: true,
           writable: true,
           configurable: false,
-          value: function (pt) {
+          value: function (x, y) {
             /*DEBUG*/
-            type_check(pt, 'Point', {label:'Sprite.hitTestPoint', id:this.id, params:'point'});
+            type_check(x,'number', y,'number', {label:'Sprite.hitTestPoint', id:this.id, params:'x,y'});
             /*END_DEBUG*/
-            return this.getBounds(this).containsPoint(this.globalToLocal(pt));
+            return this.getBounds(this).containsPoint(this.globalToLocal({x: x, y: y}));
           }
         },
 
