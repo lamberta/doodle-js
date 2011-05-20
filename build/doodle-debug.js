@@ -5407,7 +5407,25 @@ Object.defineProperties(doodle.events.Event, {
   },
 
   /**
+   * @name ANIMATION_FRAME
+   * @return {string} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
+   */
+  'ANIMATION_FRAME': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "animationFrame"
+  },
+
+  /**
+   * This has been deprecated in favor of 'animationFrame' which stylistically is
+   * similar to the new browser implementation of window.requestAnimationFrame.
    * @name ENTER_FRAME
+   * @deprecated
    * @return {string} [read-only]
    * @memberOf Event
    * @property
@@ -5418,7 +5436,7 @@ Object.defineProperties(doodle.events.Event, {
     enumerable: true,
     writable: false,
     configurable: false,
-    value: "enterFrame"
+    value: "animationFrame"
   },
 
   /**
@@ -11845,7 +11863,7 @@ doodle.Layer.isLayer = function (obj) {
       set_element_property = doodle.utils.set_element_property,
       createLayer = doodle.createLayer,
       //recycle these event objects
-      evt_enterFrame = doodle.events.createEvent(doodle.events.Event.ENTER_FRAME),
+      evt_animationFrame = doodle.events.createEvent(doodle.events.Event.ANIMATION_FRAME),
       evt_mouseEvent = doodle.events.createMouseEvent(''),
       //evt_touchEvent = doodle.events.createTouchEvent(''),
       evt_keyboardEvent = doodle.events.createKeyboardEvent('');
@@ -11915,7 +11933,7 @@ doodle.Layer.isLayer = function (obj) {
           $dispatch_keyboard_event = dispatch_keyboard_event,
           $create_frame = create_frame,
           //recycled event objects
-          $evt_enterFrame = evt_enterFrame,
+          $evt_animationFrame = evt_animationFrame,
           $evt_mouseEvent = evt_mouseEvent,
           $evt_keyboardEvent = evt_keyboardEvent;
 
@@ -11951,7 +11969,7 @@ doodle.Layer.isLayer = function (obj) {
        */
       function on_create_frame () {
         $create_frame(layers, layers.length,
-                      emitter_queue, emitter_queue.length, $evt_enterFrame,
+                      emitter_queue, emitter_queue.length, $evt_animationFrame,
                       display_scene_path, display_scene_path.length,
                       $display);
       }
@@ -12347,7 +12365,7 @@ doodle.Layer.isLayer = function (obj) {
         /*END_DEBUG_STATS*/
 
         /**
-         * Determines the interval to dispatch the event type Event.ENTER_FRAME.
+         * Determines the interval to dispatch the event type Event.ANIMATION_FRAME.
          * This event is dispatched simultaneously to all display objects listenting
          * for this event. It does not go through a "capture phase" and is dispatched
          * directly to the target, whether the target is on the display list or not.
@@ -12422,7 +12440,7 @@ doodle.Layer.isLayer = function (obj) {
     create_frame(display.children, display.children.length,
                  doodle.Emitter.emitter_queue,
                  doodle.Emitter.emitter_queue.length,
-                 evt_enterFrame,
+                 evt_animationFrame,
                  display.allChildren, display.allChildren.length,
                  display);
 
@@ -12543,14 +12561,14 @@ doodle.Layer.isLayer = function (obj) {
 
   
   /* Clear, move, draw.
-   * Dispatches Event.ENTER_FRAME to all objects listening to it,
+   * Dispatches Event.ANIMATION_FRAME to all objects listening to it,
    * reguardless if it's on the scene graph or not.
    * @this {Display}
    */
   create_frame = (function () {
     var frame_count = 0;
     return function make_frame (layers, layer_count,
-                                receivers, recv_count, enterFrame,
+                                receivers, recv_count, animationFrame,
                                 scene_path, path_count,
                                 display, clearRect) {
       /*** new way
@@ -12572,8 +12590,8 @@ doodle.Layer.isLayer = function (obj) {
 
       //update position
       while (recv_count--) {
-        if (receivers[recv_count].allListeners.hasOwnProperty('enterFrame')) {
-          receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
+        if (receivers[recv_count].allListeners.hasOwnProperty('animationFrame')) {
+          receivers[recv_count].handleEvent(animationFrame.__setTarget(receivers[recv_count]));
         }
       }
 
@@ -12624,8 +12642,8 @@ doodle.Layer.isLayer = function (obj) {
       }
       
       while (recv_count--) {
-        if (receivers[recv_count].allListeners.hasOwnProperty('enterFrame')) {
-          receivers[recv_count].handleEvent(enterFrame.__setTarget(receivers[recv_count]));
+        if (receivers[recv_count].allListeners.hasOwnProperty('animationFrame')) {
+          receivers[recv_count].handleEvent(animationFrame.__setTarget(receivers[recv_count]));
         }
       }
 

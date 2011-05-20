@@ -82,7 +82,25 @@ Object.defineProperties(doodle.events.Event, {
   },
 
   /**
+   * @name ANIMATION_FRAME
+   * @return {string} [read-only]
+   * @memberOf Event
+   * @property
+   * @constant
+   * @static
+   */
+  'ANIMATION_FRAME': {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: "animationFrame"
+  },
+
+  /**
+   * This has been deprecated in favor of 'animationFrame' which stylistically is
+   * similar to the new browser implementation of window.requestAnimationFrame.
    * @name ENTER_FRAME
+   * @deprecated
    * @return {string} [read-only]
    * @memberOf Event
    * @property
@@ -93,7 +111,7 @@ Object.defineProperties(doodle.events.Event, {
     enumerable: true,
     writable: false,
     configurable: false,
-    value: "enterFrame"
+    value: "animationFrame"
   },
 
   /**
