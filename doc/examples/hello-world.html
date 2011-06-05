@@ -11,14 +11,13 @@
     <script src="../../build/doodle.js"></script>
     <script>
       doodle.ready(function () {
-        var display = doodle.createDisplay('#display', {width:400, height:400, frameRate:20}),
-            layer = display.createLayer(),
-            text = doodle.createText("Hello, World!").appendTo(layer);
+        var display = doodle.createDisplay('#display', {width:400, height:400}),
+            text = doodle.createText("Hello, World!").appendTo(display);
         //center text
         text.x = display.width / 2;
         text.y = display.height / 2;
         //game loop
-        display.on(doodle.events.Event.ENTER_FRAME, function () {
+        display.on('animationFrame', function () {
           text.rotation += 4;
         });
       });
