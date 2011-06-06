@@ -34,13 +34,20 @@ Or, ask me on Twitter: [http://twitter.com/billyist](http://twitter.com/billyist
 
 From [hello-world.html](./doodle-js/blob/master/doc/examples/hello-world.html):
 
+    <!doctype html>
     <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          #display { width: 400px; height: 400px; }
+        </style>
+      </head>
       <body>
         <div id="display"></div>
         <script src="./build/doodle.js"></script>
         <script>
           doodle.ready(function () {
-            var display = doodle.createDisplay('#display', {width:400, height:400}),
+            var display = doodle.createDisplay('#display'),
                 text = doodle.createText("Hello, World!").appendTo(display);
             //center text
             text.x = display.width / 2;
