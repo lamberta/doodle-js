@@ -6964,7 +6964,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.a', id:this.id});
-            range_check(window.isFinite(n), {label:'Matrix.a', id:this.id, message:"Parameter must be a finite number."});
+            //range_check(window.isFinite(n), {label:'Matrix.a', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             a = n;
           }
@@ -6985,7 +6985,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.b', id:this.id});
-            range_check(window.isFinite(n), {label:'Matrix.b', id:this.id, message:"Parameter must be a finite number."});
+            //range_check(window.isFinite(n), {label:'Matrix.b', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             b = n;
           }
@@ -7006,7 +7006,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.c', id:this.id});
-            range_check(window.isFinite(n), {label:'Matrix.c', id:this.id, message:"Parameter must be a finite number."});
+            //range_check(window.isFinite(n), {label:'Matrix.c', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             c = n;
           }
@@ -7027,7 +7027,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.d', id:this.id});
-            range_check(window.isFinite(n), {label:'Matrix.d', id:this.id, message:"Parameter must be a finite number."});
+            //range_check(window.isFinite(n), {label:'Matrix.d', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             d = n;
           }
@@ -7047,7 +7047,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.tx', id:this.id});
-            range_check(window.isFinite(n), {label:'Matrix.tx', id:this.id, message:"Parameter must be a finite number."});
+            //range_check(window.isFinite(n), {label:'Matrix.tx', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             tx = n;
           }
@@ -7067,7 +7067,7 @@ doodle.geom.Point.isPoint = function (pt) {
           set: function (n) {
             /*DEBUG*/
             type_check(n,'number', {label:'Matrix.ty', id:this.id});
-            range_check(window.isFinite(n), {label:'Matrix.ty', id:this.id, message:"Parameter must be a finite number."});
+            //range_check(window.isFinite(n), {label:'Matrix.ty', id:this.id, message:"Parameter must be a finite number."});
             /*END_DEBUG*/
             ty = n;
           }
@@ -7179,7 +7179,7 @@ doodle.geom.Point.isPoint = function (pt) {
       value: function (a, b, c, d, tx, ty) {
         /*DEBUG*/
         type_check(a,'number', b,'number', c,'number', d,'number', tx,'number', ty,'number', {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty']});
-        range_check(window.isFinite(a), window.isFinite(b), window.isFinite(c), window.isFinite(d), window.isFinite(tx), window.isFinite(ty), {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty'], message:"Parameters must be finite numbers."});
+        //range_check(window.isFinite(a), window.isFinite(b), window.isFinite(c), window.isFinite(d), window.isFinite(tx), window.isFinite(ty), {label:'Matrix.compose', id:this.id, params:['a','b','c','d','tx','ty'], message:"Parameters must be finite numbers."});
         /*END_DEBUG*/
         this.a  = a;
         this.b  = b;
@@ -9161,7 +9161,7 @@ doodle.Emitter.isEmitter = function (obj) {
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.x', id:this.id});
-        range_check(window.isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.tx = n;
       }
@@ -9179,7 +9179,7 @@ doodle.Emitter.isEmitter = function (obj) {
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.y', id:this.id});
-        range_check(window.isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.ty = n;
       }
@@ -9252,7 +9252,7 @@ doodle.Emitter.isEmitter = function (obj) {
       set: function (sx) {
         /*DEBUG*/
         type_check(sx, 'number', {label:'Node.scaleX', id:this.id});
-        range_check(window.isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.a = sx;
       }
@@ -9270,7 +9270,7 @@ doodle.Emitter.isEmitter = function (obj) {
       set: function (sy) {
         /*DEBUG*/
         type_check(sy, 'number', {label:'Node.scaleY', id:this.id});
-        range_check(window.isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.d = sy;
       }

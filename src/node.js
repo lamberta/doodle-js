@@ -283,7 +283,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.x', id:this.id});
-        range_check(window.isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(n), {label:'Node.x', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.tx = n;
       }
@@ -301,7 +301,7 @@
       set: function (n) {
         /*DEBUG*/
         type_check(n, 'number', {label:'Node.y', id:this.id});
-        range_check(window.isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(n), {label:'Node.y', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.ty = n;
       }
@@ -374,7 +374,7 @@
       set: function (sx) {
         /*DEBUG*/
         type_check(sx, 'number', {label:'Node.scaleX', id:this.id});
-        range_check(window.isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(sx), {label:'Node.scaleX', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.a = sx;
       }
@@ -392,7 +392,7 @@
       set: function (sy) {
         /*DEBUG*/
         type_check(sy, 'number', {label:'Node.scaleY', id:this.id});
-        range_check(window.isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
+        //range_check(window.isFinite(sy), {label:'Node.scaleY', id:this.id, message:"Parameter must be a finite number."});
         /*END_DEBUG*/
         this.transform.d = sy;
       }
