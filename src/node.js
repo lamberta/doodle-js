@@ -779,8 +779,8 @@
         /*DEBUG*/
         window.debug_len = children.length;
         type_check(index1,'number', index2,'number', {label:'Node.swapChildrenAt', params:['index1', 'index2'], id:this.id});
-        range_check(index1 >= -window.debug_len, index1 < window.debug_len, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
-        range_check(index2 >= -window.debug_len, index2 < window.debug_len, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
+        range_check(index1 >= -children.length, index1 < children.length, {label:'Node.setChildIndex', params:['*index1*', 'index2'], id:this.id, message:"Index out of range."});
+        range_check(index2 >= -children.length, index2 < children.length, {label:'Node.setChildIndex', params:['index1', '*index2*'], id:this.id, message:"Index out of range."});
         //asserts
         console.assert(doodle.Node.isNode(children[index1]), "Child is a Node.", children[index1]);
         console.assert(doodle.Node.isNode(children[index2]), "Child is a Node.", children[index2]);
@@ -817,17 +817,10 @@
       value: function (node1, node2) {
         var children = this.children;
         /*DEBUG*/
-        window.debug_len = children.length;
         type_check(node1, 'Node', node2, 'Node', {label:'Node.swapChildren', id:this.id, params:['node1', 'node2'], inherits:true});
         reference_check(node1.parent === this, node2.parent === this, {label:'Node.swapChildren', params:['child1','child2'], id:this.id, message:"Can not swap a Node that is not a child."});
         /*END_DEBUG*/
-
         this.swapChildrenAt(children.indexOf(node1), children.indexOf(node2));
-        
-        /*DEBUG*/
-        console.assert(window.debug_len === children.length, "Children array length is still the same.");
-        delete window.debug_len;
-        /*END_DEBUG*/
       }
     },
 
@@ -848,18 +841,10 @@
         /*DEBUG*/
         type_check(node, 'Node', {label:'Node.swapDepths', params:'node', id:this.id, inherits:true});
         reference_check(parent !== null, node.parent === parent, {label:'Node.swapDepths', params:'*node*', id:this.id, message:"Can not swap positions with a Node that has a different parent."});
-        //asserts
         console.assert(doodle.Node.isNode(parent), "parent is a Node", parent);
-        window.debug_len = parent.children.length;
         /*END_DEBUG*/
-        
         children = parent.children;
         parent.swapChildrenAt(children.indexOf(this), children.indexOf(node));
-        
-        /*DEBUG*/
-        console.assert(window.debug_len === children.length, "Children array length is still the same.");
-        delete window.debug_len;
-        /*END_DEBUG*/
       }
     },
 
@@ -875,22 +860,14 @@
       writable: false,
       configurable: false,
       value: function (index) {
-        var parent = this.parent;
         /*DEBUG*/
         type_check(index, 'number', {label:'Node.swapDepthAt', params:'index', id:this.id});
-        reference_check(parent !== null, {label:'Node.swapDepthAt', params:'*index*', id:this.id, message:"Node does not have a parent."});
+        reference_check(this.parent !== null, {label:'Node.swapDepthAt', params:'*index*', id:this.id, message:"Node does not have a parent."});
         
-        console.assert(doodle.Node.isNode(parent), "Node has parent Node.");
-        window.debug_len = parent.children.length;
-        range_check(index >= -window.debug_len, index < window.debug_len, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
+        console.assert(doodle.Node.isNode(this.parent), "Node has parent Node.");
+        range_check(index >= -this.parent.children.length, index < this.parent.children.length, {label:'Node.swapDepthAt', params:'*index1*', id:this.id, message:"Index out of range."});
         /*END_DEBUG*/
-
-        parent.swapChildrenAt(parent.children.indexOf(this), index);
-
-        /*DEBUG*/
-        console.assert(window.debug_len === parent.children.length, "Children array length is still the same length.");
-        delete window.debug_len;
-        /*END_DEBUG*/
+        this.parent.swapChildrenAt(this.parent.children.indexOf(this), index);
       }
     },
     
