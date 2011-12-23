@@ -1,3 +1,8 @@
+This project is currently *inactive*, but feel free to fork and contribute.  
+I continue to reference the code in this project a lot, and in fact Doodle.js lead directly to the book *Foundation HTML5 Animation with JavaScript*, the examples can be found here: https://github.com/lamberta/html5-animation
+The difference being that the book does not use any external libraries, just JavaScript and the Canvas API, while Doodle.js implements some of the ActionScript API since I came over from the Flash world. Personally, I now just add these methods as needed instead of importing the entire library, but your preference my differ.  
+In summary, while the code here can be useful, if you are just beginning to animate with the canvas, I'd suggest you take a look at the examples in the html5-animation repo, and buy the book to get a better understanding how they work ;)
+
 # Doodle-js
 __A JavaScript Animation Library for HTML5 Canvas.__
 
